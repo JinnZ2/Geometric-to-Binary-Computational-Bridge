@@ -43,4 +43,7 @@ Engine:
 	•	Python ≥ 3.8
 	•	Run engine/geometric_solver.py to simulate EM fields
 
+[🌀 Shape Input] —> [📐 Math Layer] —> [💾 Binary Module] —> [📊 Visualized Output]
+                         ↘ [Optimization Core: SIMD, Reduction, Topology]
 
+$ shapebridge --input triangle.gshape --optimize symmetry
