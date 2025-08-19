@@ -1,6 +1,7 @@
 # Geometric-to-Binary Computational Bridge
 
 This project demonstrates how **spatial intelligence** can be translated into **highly optimized binary code** using geometric decomposition, SIMD acceleration, and symmetry exploitation. 
+
 It supports human-intuitive design, massive parallelism, and paves the path toward post-binary computing.
 
 ---
@@ -10,20 +11,21 @@ It supports human-intuitive design, massive parallelism, and paves the path towa
 
 HUMAN SPATIAL INTELLIGENCE
 
-        ↓
+        
 GEOMETRIC OPERATIONS (Gestures, Fields, Patterns)
 
-        ↓
+        
 MATHEMATICAL ABSTRACTIONS (Vector calculus, linear algebra)
 
-        ↓
+        
 OPTIMIZED BINARY ALGORITHMS (SIMD, cache layout, symmetry)
 
-        ↓
+        
 HARDWARE EXECUTION (CPU/GPU/FPGA)
 
 
 Components
+
 	•	frontend/ — React + Three.js field visualizer and control UI
  
 	•	engine/ — Python core logic for solving EM fields with geometric optimization
@@ -31,9 +33,9 @@ Components
 	•	symbols/ — Plugin to translate symbolic intelligence into geometric operations
  
 	•	docs/ — Field manual, roadmap, transition strategy
- 
 
-⸻
+
+ 
 
  Features
 	•	Real-time field solving (SIMD, adaptive mesh, symmetry reduction)
@@ -45,7 +47,7 @@ Components
 	•	Post-binary migration strategy with symbolic interfaces
  
 
-⸻
+
 
  Getting Started
 
