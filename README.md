@@ -26,25 +26,25 @@ HARDWARE EXECUTION (CPU/GPU/FPGA)
 
 Components
 
-	•	frontend/ — React + Three.js field visualizer and control UI
+		frontend/ — React + Three.js field visualizer and control UI
  
-	•	engine/ — Python core logic for solving EM fields with geometric optimization
+		engine/ — Python core logic for solving EM fields with geometric optimization
  
-	•	symbols/ — Plugin to translate symbolic intelligence into geometric operations
+	    symbols/ — Plugin to translate symbolic intelligence into geometric operations
  
-	•	docs/ — Field manual, roadmap, transition strategy
+		docs/ — Field manual, roadmap, transition strategy
 
 
  
 
  Features
-	•	Real-time field solving (SIMD, adaptive mesh, symmetry reduction)
+		Real-time field solving (SIMD, adaptive mesh, symmetry reduction)
  
-	•	3D visual feedback for sources and field lines
+		3D visual feedback for sources and field lines
  
-	•	Full performance tracking and optimization report
+		Full performance tracking and optimization report
  
-	•	Post-binary migration strategy with symbolic interfaces
+		Post-binary migration strategy with symbolic interfaces
  
 
 
@@ -52,20 +52,20 @@ Components
  Getting Started
 
 Frontend:
-	•	React + @react-three/fiber 3D UI
+		React + @react-three/fiber 3D UI
  
-	•	Run with Vite, Next.js, or CRA
+		Run with Vite, Next.js, or CRA
 
 Engine:
 
-	•	Python ≥ 3.8
+		Python ≥ 3.8
  
-	•	Run engine/geometric_solver.py to simulate EM fields
+		Run engine/geometric_solver.py to simulate EM fields
  
 
 [🌀 Shape Input] —> [📐 Math Layer] —> [💾 Binary Module] —> [📊 Visualized Output]
                      
-						 ↘ [Optimization Core: SIMD, Reduction, Topology]
+						 [Optimization Core: SIMD, Reduction, Topology]
 
 
 $ shapebridge --input triangle.gshape --optimize symmetry
