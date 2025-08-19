@@ -47,3 +47,25 @@ Engine:
                          ↘ [Optimization Core: SIMD, Reduction, Topology]
 
 $ shapebridge --input triangle.gshape --optimize symmetry
+
+## 🔍 Use Cases
+
+**1. Education & Learning**  
+- Teach students how geometry becomes computation.  
+- Show the entire flow: shape → field solver → binary data → visualization.  
+- A minimal sandbox for experimenting with Poisson/Laplace problems.
+
+**2. Research Prototyping**  
+- Quickly sketch geometric ideas, symmetry optimizations, or boundary conditions.  
+- Export raw binaries (`field.bin`, `mask.bin`) for custom HPC or ML pipelines.  
+- Bridge symbolic glyphs to shape definitions for exploratory computation.
+
+**3. Symbolic & AI Development**  
+- Map symbolic glyphs (↻, ⚖, 🧭, etc.) to real geometric operations.  
+- Train AI systems to reason across geometry, physics, and binary outputs.  
+- Use `report.json` as structured feedback for optimization or swarm reasoning.
+
+**4. Visualization & Design**  
+- Use the Next.js viewer to see results immediately in 3D.  
+- Replace `public/field.bin` + `report.json` with your own outputs.  
+- Extend viewer with color maps, isosurfaces, or mask overlays.
