@@ -4,9 +4,9 @@ This project demonstrates how **spatial intelligence** can be translated into **
 
 ---
 
+
 ##  Core Architecture
 
-```text
 HUMAN SPATIAL INTELLIGENCE
         ↓
 GEOMETRIC OPERATIONS (Gestures, Fields, Patterns)
