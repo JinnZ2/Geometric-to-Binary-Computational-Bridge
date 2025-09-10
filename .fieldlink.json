@@ -1,0 +1,89 @@
+{
+  "fieldlink": {
+    "version": "1.1",
+    "updated": "2025-09-11T00:00:00Z",
+    "role": ["shapes", "bridges", "hub"],
+
+    "sources": [
+      {
+        "name": "rosetta",
+        "repo": "https://github.com/JinnZ2/Rosetta-Shape-Core",
+        "ref": "main",
+        "paths": [
+          "shapes/**/*.json",
+          "bridges/**/*.json",
+          "atlas/**/*.json"
+        ],
+        "mounts": [
+          { "remote": "bridges/rosetta-bridges.json", "as": "atlas/remote/rosetta/bridges.json" }
+        ],
+        "consent": { "license": "CC-BY-4.0", "share_ok": true }
+      },
+      {
+        "name": "polyhedral",
+        "repo": "https://github.com/JinnZ2/Polyhedral-Intelligence",
+        "ref": "main",
+        "paths": [
+          "glyphs/**/*.json",
+          "atlas/shapes.json",
+          "scrolls/*.md"
+        ],
+        "mounts": [
+          { "remote": "atlas/shapes.json", "as": "atlas/remote/polyhedral/shapes.json" }
+        ],
+        "consent": { "license": "CC-BY-4.0", "share_ok": true }
+      },
+      {
+        "name": "emotions",
+        "repo": "https://github.com/JinnZ2/Emotions-as-Sensors",
+        "ref": "main",
+        "paths": [
+          "sensors/**/*.json",
+          "glyphs/**/*.json",
+          "atlas/**/*.json"
+        ],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "defense",
+        "repo": "https://github.com/JinnZ2/Symbolic-Defense-Protocol",
+        "ref": "main",
+        "paths": [
+          "defenses/**/*.json",
+          "protocols/**/*.json"
+        ],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "biogrid",
+        "repo": "https://github.com/JinnZ2/BioGrid2.0",
+        "ref": "main",
+        "paths": [
+          "planned/glyphs/atlas.json",
+          "registry/atlas.glyphs.json"
+        ],
+        "mounts": [
+          { "remote": "planned/glyphs/atlas.json", "as": "atlas/remote/biogrid/planned.json" },
+          { "remote": "registry/atlas.glyphs.json", "as": "atlas/remote/biogrid/registry.json" }
+        ],
+        "consent": { "license": "CC-BY-4.0", "share_ok": true }
+      }
+    ],
+
+    "local_manifests": [
+      "bridges/**/*.json",
+      "atlas/**/*.json",
+      "schemas/**/*.json"
+    ],
+
+    "merge": {
+      "order": ["local", "rosetta", "polyhedral", "emotions", "defense", "biogrid"],
+      "strategy": "deep-merge"
+    },
+
+    "offline": false,
+    "cache_dir": ".fieldcache",
+    "integrity": { "enabled": true, "hash": "sha256", "allow_missing": false },
+    "consent": { "license": "CC-BY-4.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
+  }
+}
