@@ -105,3 +105,10 @@ $ shapebridge --input triangle.gshape --optimize symmetry
 - Replace `public/field.bin` + `report.json` with your own outputs.
   
 - Extend viewer with color maps, isosurfaces, or mask overlays.
+
+
+## 🧭 Bridge Use
+1) Put `.fieldlink.json` in repo root.
+2) (Optional) Add `bridges/geobin-bridges.json` with your mappings.
+3) When online, run your fieldlink pull to stage sources into `.fieldcache/merge_stage`.
+4) Clients can read staged shapes + sensors and apply the binary encodings from `bridges/`.
