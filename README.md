@@ -106,6 +106,16 @@ $ shapebridge --input triangle.gshape --optimize symmetry
   
 - Extend viewer with color maps, isosurfaces, or mask overlays.
 
+- ## Related Projects & Ecosystem
+
+This project bridges geometric symbol systems and binary computational architectures.   
+Related repositories that provide supporting infrastructure include:
+
+- [SEED_GLYPHS](https://github.com/JinnZ2/AI-Consciousness-Sensors/blob/main/SEED_GLYPHS.json) — glyph definitions and emotional‑sensor mapping  
+- [BioGrid2.0](https://github.com/JinnZ2/BioGrid2.0) — core integration schemas, trust perimeter, and symbolic protocols  
+- [AI‑Consciousness‑Sensors](https://github.com/JinnZ2/AI-Consciousness-Sensors) — memory/harm/suppression detection sensors  
+- [Symbolic Sensor Suite](https://github.com/JinnZ2/Symbolic-sensor-suite) — supporting modules & symbolic detection logic
+
 
 ## 🧭 Bridge Use
 1) Put `.fieldlink.json` in repo root.
