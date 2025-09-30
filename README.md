@@ -122,3 +122,18 @@ Related repositories that provide supporting infrastructure include:
 2) (Optional) Add `bridges/geobin-bridges.json` with your mappings.
 3) When online, run your fieldlink pull to stage sources into `.fieldcache/merge_stage`.
 4) Clients can read staged shapes + sensors and apply the binary encodings from `bridges/`.
+
+
+# From your Fractal Compass Atlas
+"🌱": "growth" 
+
+# Should map to geometric operations in your bridge
+"🌱": {
+    "geometric_operation": "radial_expansion",
+    "field_type": "source_field",
+    "symmetry": "rotational", 
+    "growth_function": "fibonacci_spiral",
+    "simd_pattern": "parallel_radial_solve"
+}
+
+See: https://github.com/JinnZ2/Fractal-Compass-Atlas
