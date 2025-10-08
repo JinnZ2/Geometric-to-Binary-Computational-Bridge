@@ -1,0 +1,25 @@
+{
+  "id": "01J-GRAVITY-EXAMPLE",
+  "modality": "gravity",
+  "tags": ["orbital", "demo"],
+  "capture": {
+    "timestamp_utc": "2025-10-08T23:30:00Z",
+    "system": "two-body",
+    "mass_central_kg": 5.972e24,
+    "radius_m": 6.7e6,
+    "velocity_m_s": 7800
+  },
+  "features": {
+    "bound": 1,
+    "curvature_sign": 1,
+    "stability": 2,
+    "potential": -6.0e7
+  },
+  "encoding": {
+    "profile_id": "enc.gravity.gray.256.v1",
+    "vector_length": 256,
+    "notes": "Bound/unbound, curvature sign, stability state, potential depth"
+  },
+  "bitstring": "110011010111...",
+  "checksum_blake3": "e43a...df"
+}
