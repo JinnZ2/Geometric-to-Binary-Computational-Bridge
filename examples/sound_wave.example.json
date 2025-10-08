@@ -1,0 +1,26 @@
+{
+  "id": "01J-SOUND-EXAMPLE",
+  "modality": "sound",
+  "tags": ["audio", "demo"],
+  "capture": {
+    "timestamp_utc": "2025-10-08T22:00:00Z",
+    "device": "simulated-waveform",
+    "profile_id": "capture.sound.v1",
+    "raw": {
+      "sample_rate": 44100,
+      "samples": ["... float array ..."]
+    }
+  },
+  "features": {
+    "band_energy": [0.01, 0.08, 0.13, "..."],
+    "phase": 1.0,
+    "rms_amplitude": 0.42
+  },
+  "encoding": {
+    "profile_id": "enc.sound.gray.256.v1",
+    "vector_length": 256,
+    "notes": "Gray bins per frequency band, RMS amplitude, phase bit"
+  },
+  "bitstring": "1100101011010...",
+  "checksum_blake3": "ab3c...9f"
+}
