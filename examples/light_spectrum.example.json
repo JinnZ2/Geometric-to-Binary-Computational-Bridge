@@ -1,0 +1,27 @@
+{
+  "id": "01J-LIGHT-EXAMPLE",
+  "modality": "light",
+  "tags": ["spectrum", "demo"],
+  "capture": {
+    "timestamp_utc": "2025-10-08T20:00:00Z",
+    "device": "simulated-spd",
+    "profile_id": "capture.light.v1",
+    "raw": {
+      "wavelength_nm": [380,385,390, "...", 780],
+      "power": ["... array of floats ..."]
+    }
+  },
+  "features": {
+    "bands": {"violet": 0.01, "blue": 0.08, "green": 0.20, "yellow": 0.15, "orange": 0.12, "red": 0.44},
+    "chromaticity_xy": [0.45, 0.41],
+    "peaks_nm": [612, 545],
+    "luminance_Y": 0.72
+  },
+  "encoding": {
+    "profile_id": "enc.light.gray.256.v1",
+    "vector_length": 256,
+    "notes": "Gray bins per band, 32×32 xy grid"
+  },
+  "bitstring": "1011010100110...",
+  "checksum_blake3": "c9d2...ab"
+}
