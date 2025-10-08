@@ -23,3 +23,16 @@ def encode(modality: str, features: dict, target_bits: int = 256) -> str:
     #     return geometry.encode_geometry_gray(features, target_bits)
     else:
         raise ValueError(f"Unsupported modality: {modality}")
+##Example usage
+#from bridge import light, encode_binary
+
+# Suppose you have SPD capture
+#wavelengths = list(range(380, 781, 5))
+#power = [0.0]*len(wavelengths)
+#power[20] = 1.0   # fake spike
+
+#features = light.light_features(wavelengths, power)
+#bitstring = encode_binary.encode("light", features, 256)
+
+#print("256-bit Light Encoding:", bitstring)
+
