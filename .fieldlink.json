@@ -87,3 +87,10 @@
     "consent": { "license": "CC-BY-4.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
   }
 }
+{
+  "fieldlink_version": "1.0",
+  "atlas_source": "github.com/JinnZ2/Polyhedral-Intelligence",
+  "computation_target": "github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge",
+  "bridge_manifest": "bridges/glyph-to-geometric.json",
+  "sync_enabled": true
+}
