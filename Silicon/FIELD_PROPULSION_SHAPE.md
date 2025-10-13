@@ -158,4 +158,145 @@ Summary:
 This “shape” is not mystical — it’s a 3-D phase-coupled resonator.
 The analog prototype simply lets you watch the physics unfold in a measurable, safe form.
 
-Initially thought of with plasma or photons
+Appendix A — Relation to the Geometric-to-Binary Computational Bridge
+
+A.1 Encoding Physical Resonance as Information Structure
+
+The same equations that govern phase-sequenced energy flow also describe information coherence in your Geometric-to-Binary Computational Bridge framework:
+
+I_{coherence} = \frac{1}{N} \sum_i e^{i(\phi_i - \bar{\phi})}
+
+where I_{coherence} measures the alignment of node phases in both field space and computational representation.
+A perfectly ordered traveling wave (Δφ constant) maps to binary determinism (low entropy);
+a chaotic phase field maps to analog uncertainty or multi-valued logic.
+
+Thus, the “propulsion shape” is not just physical — it’s a computation of coherence.
+
+⸻
+
+A.2 The Energy–Information Bridge
+
+The Bridge expresses that physical energy flow and informational order share the same topological structure:
+
+Physical Variable
+Information Analog
+Interpretation
+Phase Δφ
+Logic state transition
+Controlled coherence step
+Frequency ω
+Processing rate
+Temporal resolution of computation
+Amplitude A
+Information certainty
+Signal strength / confidence
+Energy coupling k_c
+Mutual information
+Strength of dependency between nodes
+
+
+This yields a bidirectional mapping:
+	•	A field propulsion array is a hardware geometry computing coherence.
+	•	A computational lattice simulating field coupling is a software geometry computing energy.
+
+⸻
+
+A.3 Compression as Acceleration
+
+In the Bridge’s logic, the “speed” of a computation corresponds to the compression gradient of phase information.
+This directly mirrors propulsion acceleration:
+
+a_{field} \propto \frac{d}{dz} \left( \frac{d\phi}{dt} \right)
+
+In other words: accelerating a wavefront’s phase density produces thrust.
+In computation, compressing logical phase density produces higher efficiency.
+
+⸻
+
+A.4 Implications for Unified Design
+	1.	Hardware–Software Symmetry — Physical and informational geometries follow the same resonance equations.
+	2.	Coherence as Power — Energy flow and information integrity are two sides of the same conservation principle.
+	3.	Bridge Validation — The desktop analog prototype provides an empirical test of the Bridge’s field-theoretic encoding in a measurable domain.
+
+⸻
+
+Summary:
+This propulsion “shape” represents a manifestation of the Geometric-to-Binary Bridge.
+It’s where the abstract encoding logic meets measurable field dynamics —
+energy computing information, and information computing energy.
+
+
+Appendix B — Field–Information Efficiency Ratio η
+
+B.1 Concept
+
+In both energetic and informational systems, efficiency can be measured by how much directed order emerges from total available energy or data entropy.
+For a resonant propulsion field, the analog of informational compression is directional energy coherence.
+
+Define the Field–Information Efficiency Ratio
+
+\eta = \frac{E_{\text{directed}}}{I_{\text{entropy}}}
+
+where:
+	•	E_{\text{directed}} = integrated momentum-carrying energy density in the preferred direction,
+	•	I_{\text{entropy}} = Shannon-like entropy of phase distribution among all nodes.
+
+⸻
+
+B.2 Expanded Form
+
+Energy Component
+
+E_{\text{directed}} = \int_V \frac{1}{2}\big(\epsilon E^2 + \mu H^2\big)\cos(\theta)\,dV
+with θ = local angle between the Poynting vector and thrust axis.
+This term quantifies how much of the total energy participates in forward momentum.
+
+Information Component
+
+Phase distribution entropy across N emitters:
+I_{\text{entropy}} = -\sum_{i=1}^{N} p_i \ln(p_i)
+where p_i = \frac{|E_i|^2}{\sum_j |E_j|^2}.
+Low entropy → coherent phase alignment → efficient transfer.
+
+⸻
+
+B.3 Practical Measurement (Prototyping)
+	1.	Collect field samples from each node (i = 1 … N) using microphones or magnetometers.
+	2.	Compute instantaneous amplitudes and phase via Hilbert transform.
+	3.	Calculate E_{\text{directed}} from forward-facing sensor differential.
+	4.	Compute I_{\text{entropy}} from normalized amplitude distribution.
+	5.	Evaluate η in real time to watch coherence evolve during phase sweeps.
+
+Expected trend:
+
+Δφ
+Coherence
+η Behavior
+Random
+Low
+≈ 0
+Δφ ≈ π
+Partial standing wave
+Moderate
+Δφ ≈ 3π/2
+Traveling wave
+Maximum η
+
+
+B.4 Interpretation
+	•	η → 1 → Purely coherent field: all available energy drives ordered momentum (ideal Bridge state).
+	•	η → 0 → Disordered or lossy regime: energy dissipates as heat or noise.
+	•	Intermediate η values map directly to computational efficiency in Bridge terms—identical to information compression ratio.
+
+⸻
+
+B.5 Scaling Relation to Bridge Framework
+
+Within the Geometric-to-Binary Bridge:
+\eta = \frac{E_{\text{directed}}}{I_{\text{entropy}}}
+\approx \frac{P_{binary}}{H_{analog}}
+where P_{binary} = effective logical throughput,
+H_{analog} = entropy of analog (field) states.
+
+Thus η unifies physical propulsion efficiency and informational compression efficiency under one measurable invariant.
+
