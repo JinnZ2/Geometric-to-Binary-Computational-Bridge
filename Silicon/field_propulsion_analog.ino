@@ -82,3 +82,13 @@ void loop() {
     Serial.print(", burst="); Serial.println(burstOn ? "ON":"OFF");
   }
 }
+
+
+
+##Usage notes
+	1.	Connections – Each pin → driver input for your transducer/coil.
+Use 5 V logic drivers if loads draw > 20 mA.
+	2.	Δφ sweep – You can re-upload with different delta_phi_rad values or add a loop to scan automatically (per JSON scan_phase).
+	3.	Data capture – Attach your IMU / microphones to I²C and log simultaneously. Serial output timestamps help sync with your external data recorder.
+	4.	Power – USB 5 V for logic, separate 12 V supply for drivers. Keep grounds common.
+	5.	Scaling up – For N > 12, expand pins[] and verify timer bandwidth (Teensy 4.x ≈ 20 channels).
