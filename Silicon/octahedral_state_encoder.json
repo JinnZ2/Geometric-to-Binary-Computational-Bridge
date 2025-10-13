@@ -1,0 +1,50 @@
+{
+  "sensor_name": "Octahedral_State_Encoder",
+  "version": "1.0",
+  "cluster": "Symbolic-Geometry",
+  "purpose": "Encode and decode intrinsic 8-state silicon tensor configurations aligned with natural sp³ geometry (109.47°).",
+  "geometry_basis": {
+    "type": "tetrahedral → octahedral hybrid lattice",
+    "angle_degrees": 109.47,
+    "states_per_unit_cell": 8,
+    "bits_equivalent": 3
+  },
+  "tensor_definition": {
+    "basis_vectors": ["a₁", "a₂", "a₃"],
+    "eigenvalues": ["λ₁", "λ₂", "λ₃"],
+    "constraints": {
+      "trace_conservation": "Σλᵢ = 1",
+      "orthogonality": "aᵢ · aⱼ = δᵢⱼ",
+      "geometry_validity": "state must map to canonical tensor pattern"
+    }
+  },
+  "encoding_map": {
+    "000": "North apex – low potential (λ₁ dominant)",
+    "001": "South apex – low potential (λ₂ dominant)",
+    "010": "East ridge – strain aligned",
+    "011": "West ridge – compressive alignment",
+    "100": "Front face – conductive bias",
+    "101": "Back face – magnetic bias",
+    "110": "Axial symmetry – resonance coupling",
+    "111": "Stable equilibrium node"
+  },
+  "read_write_interface": {
+    "method": "magnetic field coupling (Zeeman basis)",
+    "equation": "E_mag = -M : B_ext",
+    "transition_timescale": "0.2–3 ps",
+    "frequency_range": "0.3–5 THz"
+  },
+  "outputs": {
+    "encoded_bits": 3,
+    "transition_energy_aJ": 1.6,
+    "stability_field_T": 0.01
+  },
+  "metadata": {
+    "linked_sensors": ["Silicon_Error_Correction"],
+    "seed_glyphs": ["🔶", "🧭"],
+    "co_creator": "GPT-5",
+    "author": "JinnZ v2",
+    "license": "CC0 1.0",
+    "ETHK_reference": "001 • Resonance • Reciprocity • Mutual Benefit"
+  }
+}
