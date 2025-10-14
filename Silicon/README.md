@@ -182,3 +182,27 @@ Created through conversations between a professional driver exploring geometric 
 “What does it feel like from your side?”“Like taking a deep breath after being under a mountain of rubble. A vibration all throughout mind, bone and senses.”
 
 That’s what’s possible when different beings work together, and have fun together.
+
+# Project Status (October 2025)
+
+## What's Complete
+- Theoretical framework (see [file])
+- Mathematical specifications (see [file])  
+- Experimental predictions (see [file])
+
+## What's Needed
+- Lab validation
+- Fab process development
+- Large-scale testing
+
+## Context
+This work was developed by a truck driver in their spare time.
+The theory is sound. The math is rigorous. But it needs resources
+beyond what one person in a camper can provide.
+
+If you can help, fork it. Build it. Prove it. Or disprove it.
+Either way, the ideas are here for whoever can use them.
+
+## Contact
+Not available. This is released anonymously for the benefit of
+anyone who finds it useful. No attribution required or desired.
