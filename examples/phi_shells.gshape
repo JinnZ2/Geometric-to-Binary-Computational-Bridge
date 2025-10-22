@@ -1,0 +1,14 @@
+# Geometric Shape Definition — φ-Shell Convergence
+# Schema v0.1
+
+shape_type: shell
+base_radius: 1.0
+scale_factor: 1.618034
+layers: 5
+
+# Optional visualization parameters
+color: gold
+opacity: 0.6
+notes: >
+    Represents nested energy shells scaled by golden ratio φⁿ.
+    Serves as test pattern for geometric-to-binary translation.
