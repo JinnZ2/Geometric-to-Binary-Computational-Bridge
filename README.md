@@ -137,3 +137,6 @@ Related repositories that provide supporting infrastructure include:
 }
 
 See: https://github.com/JinnZ2/Fractal-Compass-Atlas
+
+
+🧩 Example: convert `examples/phi_shells.gshape` → binary with `scripts/bridge_convert.py`
