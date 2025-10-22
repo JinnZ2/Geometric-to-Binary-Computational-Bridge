@@ -1,6 +1,6 @@
 🌉 Geometric-to-Binary Bridge Extensions
 
-1. Magnetic (your base)
+1. Magnetic (base)
 	•	Polarity: N/S → 0/1
 	•	Field lines: curve = path, density = intensity
 	•	Resonance: constructive vs destructive interference → binary flips
