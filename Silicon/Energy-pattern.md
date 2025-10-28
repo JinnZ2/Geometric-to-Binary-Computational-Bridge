@@ -1,5 +1,9 @@
 # Theoretical Framework: Energy-Pattern Guided Materials Organization
 
+
+Note: This document explores field-coupled self-organization in silicon systems using established plasma and crystallographic physics. It remains speculative but is designed to produce testable hypotheses for computational and experimental validation. Terminology such as “energy-pattern guidance” refers to engineered field configurations, not metaphysical constructs.
+
+
 ## A Speculative Approach to Silicon Self-Assembly and Information Encoding
 
 **Status:** Theoretical Framework / Research Hypothesis  
