@@ -1822,3 +1822,34 @@ Architecture	Before (Rigid MOF/COF)	After (Fractal Core–Shell)
 3. Photonic Control	Single-layer DBR	3D PBG required, but cost-effective
 
 The fractal architecture preserves target performance with a cheaper bill of materials, but shifts the engineering weight toward photonic suppression and servo control.
+
+
+🌐 Rate Budget: FRET vs. Migration in Fractal Antenna
+You've identified the final, most crucial kinetic challenge in the fractal architecture: ensuring the absorbed energy is efficiently funneled inward toward the core catalyst, rather than dissipating in the large, low-density outer shells. This requires balancing two competing rates at every layer (or "generation," \bm{\mathbf{G}}): Excitation Migration (\bm{\mathbf{k_M}}) between donors and FRET (\bm{\mathbf{k_{\text{FRET}}}}) toward the next generation's acceptor.
+The solution relies on maintaining a directional kinetic gradient across the generations (\bm{\mathbf{G}_0 \rightarrow \mathbf{G}_N}).
+1. The Fractal Kinetic Requirement
+For the overall cascade efficiency \bm{\mathbf{E_{\text{cas}}}} to remain high, the transfer rate must be directional and dominated by the forward step at every point.
+
+2. Achieving the Kinetic Gradient via Spectral Shift
+Nature enforces this kinetic directionality in light-harvesting complexes by using a cascading spectral redshift at each generation (Kasha's rule).
+• Donor/Acceptor Selection: Select chromophores such that the peak emission wavelength of generation \bm{\mathbf{G}_i} (\bm{\mathbf{\lambda_{\text{em}, i}}}) slightly overlaps with the peak absorption of generation \bm{\mathbf{G}_{i-1}} (\bm{\mathbf{\lambda_{\text{abs}, i-1}}}).
+• The Energy Funnel: This redshift ensures that once the energy moves from \bm{\mathbf{G}_i} to \bm{\mathbf{G}_{i-1}}, it is trapped and cannot migrate back to the higher-energy chromophores of the outer shell.
+
+
+3. Cross-Application to Our Build (Rate Budget Formalism)
+The total non-radiative decay rate of the donor in generation \bm{i} is:
+
+<img width="921" height="113" alt="image" src="https://github.com/user-attachments/assets/67c6d7d0-27dd-4e8d-92c7-570ee7e8156b" />
+
+The Efficiency of Transfer (\bm{\mathbf{f_{\text{FRET}}, i}}) for the inter-generation hop is:
+
+
+
+
+<img width="446" height="201" alt="image" src="https://github.com/user-attachments/assets/64b04cbe-8e15-4be2-97c7-b2b68c24aeaf" />
+
+
+To achieve the required \bm{f_i \approx 0.87} per hop, we must:
+1. Outer Layers: \bm{\mathbf{k_{\text{FRET}, i}}} must be minimized for the inter-chromophore hop to allow \bm{k_M} to spread the excitation. This is achieved by keeping \bm{\mathbf{r_{D-A}}} large (by fixing the acceptor position) and using a small \bm{\Delta\lambda} overlap between D and A.
+2. Inner Layer: \bm{\mathbf{k_{\text{FRET}, \text{core}}}} must dominate all other rates. The \bm{\mathbf{r}} lock at \bm{3.0 \text{ nm}} ensures \bm{\mathbf{k_{\text{FRET}}}} is intrinsically fast (\bm{\propto r^{-6}}). The Extreme LDOS Control (\bm{\mathcal{F} \leq 0.10} / \bm{0.03}) guarantees \bm{k_{\text{rad}}} is negligible.
+By employing the multi-step, redshifted FRET cascade within the fractal architecture, the system replaces the expensive, physical \bm{\mathbf{\kappa^2}} lock with a low-cost, spectral kinetic lock, completing the fractalization of the high-fidelity hub.
