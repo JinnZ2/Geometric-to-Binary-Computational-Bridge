@@ -456,3 +456,169 @@ print("=" * 60)
 
 analyzer = generate_strain_scan_inputs(config)
 ```
+
+
+##extension:::##
+
+import numpy as np
+import matplotlib.pyplot as plt
+from dataclasses import dataclass
+from typing import List, Tuple
+import os
+import json
+
+# Physical constants
+K_B = 8.617333e-5  # eV/K
+HBAR = 6.582119e-16  # eV·s
+SI_LATTICE_CONST = 5.431  # Å
+M_ER = 167.259  # amu
+
+@dataclass
+class DFTConfig:
+    """Configuration for DFT calculations"""
+    supercell_size: Tuple[int, int, int] = (3, 3, 3)
+    strain_min: float = 0.0
+    strain_max: float = 2.5
+    strain_increment: float = 0.5
+    functional: str = "GGA+U"
+    hubbard_u_er: float = 6.0
+    energy_cutoff: float = 500.0
+    k_point_grid: Tuple[int, int, int] = (3, 3, 3)
+    force_convergence: float = 0.01
+    energy_convergence: float = 1e-6
+    temperature: float = 300.0
+    target_T2: float = 0.1
+
+@dataclass
+class FormationEnergyResult:
+    strain: float
+    site_type: str
+    formation_energy: float
+    relaxed_position: np.ndarray
+    displacement: float
+    total_energy: float
+    force_max: float
+
+class ErDFTAnalyzer:
+    """Analyzer for Er dopant DFT calculations in strained Si"""
+
+    def init(self, config: DFTConfig):
+        self.config = config
+        self.results_O: List[FormationEnergyResult] = []
+        self.results_T: List[FormationEnergyResult] = []
+
+    def calculate_lattice_constant(self, strain: float) -> float:
+        return SI_LATTICE_CONST * (1 + strain / 100.0)
+
+    def get_octahedral_position(self) -> np.ndarray:
+        return np.array([0.5, 0.5, 0.5])
+
+    def get_tetrahedral_position(self) -> np.ndarray:
+        return np.array([0.75, 0.75, 0.75])
+
+    def generate_supercell_positions(self, strain: float, site_type: str = 'O') -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        a = self.calculate_lattice_constant(strain)
+        nx, ny, nz = self.config.supercell_size
+
+        # Basis atoms for diamond cubic (8 atoms per conventional cell)
+        basis = np.array([
+            [0.0, 0.0, 0.0],
+            [0.5, 0.5, 0.0],
+            [0.5, 0.0, 0.5],
+            [0.0, 0.5, 0.5],
+            [0.25, 0.25, 0.25],
+            [0.75, 0.75, 0.25],
+            [0.75, 0.25, 0.75],
+            [0.25, 0.75, 0.75]
+        ])
+
+        positions = []
+        for i in range(nx):
+            for j in range(ny):
+                for k in range(nz):
+                    offset = np.array([i, j, k])
+                    for atom in basis:
+                        pos = (atom + offset) / np.array([nx, ny, nz])
+                        positions.append(pos)
+        positions = np.array(positions)
+
+        er_pos = self.get_octahedral_position() if site_type == 'O' else self.get_tetrahedral_position()
+        lattice_vectors = np.array([
+            [a * nx, 0, 0],
+            [0, a * ny, 0],
+            [0, 0, a * nz]
+        ])
+
+        positions_cart = positions @ lattice_vectors
+        er_pos_cart = er_pos @ lattice_vectors
+        return positions_cart, er_pos_cart, lattice_vectors
+
+    def generate_vasp_input(self, strain: float, site_type: str, output_dir: str):
+        os.makedirs(output_dir, exist_ok=True)
+        si_positions, er_position, lattice = self.generate_supercell_positions(strain, site_type)
+
+        # POSCAR
+        poscar_file = os.path.join(output_dir, 'POSCAR')
+        with open(poscar_file, 'w') as f:
+            f.write(f"Er in Si, strain={strain:.2f}%, site={site_type}\n")
+            f.write("1.0\n")
+            for vec in lattice:
+                f.write(f"  {vec[0]:16.10f} {vec[1]:16.10f} {vec[2]:16.10f}\n")
+            f.write("Si Er\n")
+            f.write(f"{len(si_positions)} 1\n")
+            f.write("Cartesian\n")
+            for pos in si_positions:
+                f.write(f"  {pos[0]:16.10f} {pos[1]:16.10f} {pos[2]:16.10f}\n")
+            f.write(f"  {er_position[0]:16.10f} {er_position[1]:16.10f} {er_position[2]:16.10f}\n")
+
+        # INCAR
+        incar_file = os.path.join(output_dir, 'INCAR')
+        with open(incar_file, 'w') as f:
+            f.write("# DFT+U calculation for Er in strained Si\n")
+            f.write(f"SYSTEM = Er_Si_strain_{strain:.2f}site{site_type}\n")
+            f.write(f"ENCUT = {self.config.energy_cutoff}\n")
+            f.write("PREC = Accurate\n")
+            f.write("LREAL = Auto\n")
+            f.write("EDIFF = 1E-6\n")
+            f.write("ISMEAR = 0; SIGMA = 0.05\n")
+            f.write("IBRION = 2; NSW = 100\n")
+            f.write("ISIF = 3\n")
+            f.write("LDAU = .TRUE.\n")
+            f.write("LDAUL = 3 -1\n")
+            f.write(f"LDAUU = {self.config.hubbard_u_er} 0\n")
+            f.write("LDAUJ = 0 0\n")
+            f.write("GGA = PE\n")
+
+        # KPOINTS
+        kpoints_file = os.path.join(output_dir, 'KPOINTS')
+        with open(kpoints_file, 'w') as f:
+            f.write("Automatic mesh\n0\nGamma\n")
+            f.write(f"{self.config.k_point_grid[0]} {self.config.k_point_grid[1]} {self.config.k_point_grid[2]}\n")
+            f.write("0 0 0\n")
+
+    def compute_energy_barrier(self) -> List[Tuple[float, float]]:
+        """Compute ΔE_barrier = E_f(T) - E_f(O) for each strain"""
+        barrier_list = []
+        for res_O, res_T in zip(self.results_O, self.results_T):
+            delta_E = res_T.formation_energy - res_O.formation_energy
+            barrier_list.append((res_O.strain, delta_E))
+        return barrier_list
+
+    def plot_energy_barrier(self):
+        data = self.compute_energy_barrier()
+        strains, barriers = zip(*data)
+        plt.figure(figsize=(6,4))
+        plt.plot(strains, barriers, marker='o')
+        plt.xlabel("Biaxial strain (%)")
+        plt.ylabel("ΔE_barrier (eV)")
+        plt.title("Er Dopant Site Energy Barrier vs Strain")
+        plt.grid(True)
+        plt.show()
+
+    def save_results(self, filename: str):
+        results_dict = {
+            "O_sites": [res.dict for res in self.results_O],
+            "T_sites": [res.dict for res in self.results_T]
+        }
+        with open(filename, 'w') as f:
+            json.dump(results_dict, f, indent=2)
