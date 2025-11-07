@@ -510,3 +510,85 @@ print("=" * 70 + "\n")
 
 if **name** == “**main**”:
 main()
+
+
+OctahedralOptimizer
+├─ initialize_configs()          # Sets up default DFT, co-doping, and quantum configs
+├─ phase1_strain_optimization() # Generates DFT inputs & optionally runs analysis
+├─ load_dft_results(file)       # Loads actual DFT results for ε* selection
+├─ phase2_codoping_optimization() # Generates co-doping inputs & optionally runs analysis
+├─ load_codoping_results(file)  # Loads actual co-doping results for d* selection
+├─ phase3_coherence_prediction() # Runs QuTip simulations for T₂
+├─ run_complete_workflow_demo()  # Simulates full optimization for testing
+├─ generate_master_report()      # Consolidates all results
+├─ plot_sensitivity_maps()       # Optional: strain vs T₂ or distance vs E_b
+└─ _save_checkpoint(name,obj)    # Saves analyzer objects for resuming workflow
+
+
+sensitivity plotting:
+
+def plot_sensitivity_maps(self):
+    """Generate quick overview plots for ε* vs T2 and d* vs E_b"""
+    if self.strain_scan_results:
+        strains, T2s = zip(*[(r['strain'], r.get('T2', np.nan)) for r in self.strain_scan_results])
+        plt.figure()
+        plt.plot(strains, T2s, 'o-')
+        plt.xlabel("Strain (%)")
+        plt.ylabel("T2 (s)")
+        plt.title("Strain vs Coherence Time Sensitivity")
+        plt.savefig(self.work_dir / "strain_vs_T2.png")
+        plt.close()
+    
+    if self.codoping_scan_results:
+        distances, Ebs = zip(*[(r['distance'], r['binding_energy']) for r in self.codoping_scan_results])
+        plt.figure()
+        plt.plot(distances, Ebs, 'o-')
+        plt.xlabel("Er-P Distance (Å)")
+        plt.ylabel("Binding Energy (eV)")
+        plt.title("Co-Doping Distance vs Binding Energy")
+        plt.savefig(self.work_dir / "distance_vs_Eb.png")
+        plt.close()
+
+
+Automated Phase Excecution:
+
+def run_full_workflow(self, use_synthetic=True):
+    self.initialize_configs()
+    
+    # Phase 1
+    if use_synthetic:
+        epsilon_star, delta_E = 1.5, 0.8
+    else:
+        self.phase1_strain_optimization()
+        epsilon_star, delta_E = self.load_dft_results("dft_results.json")
+    
+    self.codoping_config.optimal_strain = epsilon_star
+    
+    # Phase 2
+    if use_synthetic:
+        d_star, E_b = 5.0, 0.6
+    else:
+        self.phase2_codoping_optimization()
+        d_star, E_b = self.load_codoping_results("codoping_results.json")
+    
+    # Phase 3
+    if use_synthetic:
+        efg_tensor = np.diag([1e-3, 1e-3, 2e-3])
+        k_well = 5.0
+        force_constants = np.diag([k_well, k_well, k_well])
+        T2 = self.phase3_coherence_prediction(efg_tensor, force_constants)
+    else:
+        T2 = self.phase3_coherence_prediction(efg_tensor, force_constants)
+    
+    self.state.update(epsilon_star, d_star, T2)
+    self.state.check_convergence(TARGET_T2_MS / 1000.0)
+    
+    self.generate_master_report()
+    self.plot_sensitivity_maps()
+
+
+Checkpointing & Logging Improvements:
+
+	•	Store phase1_analyzer and phase2_analyzer using pickle for automatic resumption.
+	•	Console logging with timestamps for each major step.
+	•	Optional CSV export of all T₂ predictions for future ML surrogate modeling.
