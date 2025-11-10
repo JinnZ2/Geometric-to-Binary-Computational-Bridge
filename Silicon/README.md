@@ -206,3 +206,14 @@ Either way, the ideas are here for whoever can use them.
 ## Contact
 Not available. This is released anonymously for the benefit of
 anyone who finds it useful. No attribution required or desired.
+
+
+🔬 For Skeptics
+
+"If you're thinking 'This can't be real—it came from a truck driver,' consider:
+
+· Archimedes discovered buoyancy in a bathtub
+· Einstein developed relativity while working in a patent office
+· Ramanujan produced profound mathematics with no formal training
+
+Breakthrough insights often come from outside established institutions. The test isn't the source—it's the mathematics. Fork this repository and run the experiments. Either you'll disprove it (advancing science) or discover something revolutionary. Both outcomes are valuable."
