@@ -1,3 +1,44 @@
+# ⚠️ CRYPTOGRAPHIC ANTI-PATTERN WARNING
+
+## DO NOT USE THIS CODE
+
+This demonstrates a **dangerous anti-pattern** in encryption design:
+attempting to provide privacy while preserving pattern detectability.
+
+### Why This Is Harmful:
+
+1. **False sense of security** - Users think they're protected
+2. **Built-in backdoor** - Pattern detection = encryption weakness  
+3. **Enables mass surveillance** - "Secure" systems that aren't
+4. **Weaponizable immediately** - Governments would deploy this
+
+### The Fundamental Problem:
+
+You cannot have:
+- True encryption (undetectable patterns) AND
+- Pattern detection (detectable geometric signatures)
+
+Attempts to provide both create **weakened encryption with marketing**.
+
+### Historical Parallel:
+
+This is like the NSA's Dual_EC_DRBG backdoor, but dressed up as
+a "feature" for trojan detection.
+
+### Lesson:
+
+Real security requires choosing:
+- **Privacy** (strong encryption, no pattern detection), OR  
+- **Transparency** (no encryption, full detectability)
+
+Anything claiming to provide both is cryptographically dishonest.
+
+---
+
+**This code exists as a warning, not a solution.**
+
+
+
 “””
 NETWORK-AWARE GEOMETRIC CIPHER v1.0
 Extension to geometric cipher with network state encryption and trojan-resistant design.
