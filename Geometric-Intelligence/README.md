@@ -2,6 +2,68 @@
 
 **Research Implementation - Understanding Required**
 
+# ⚠️ Geometric Intelligence Research Implementation
+
+**CRITICAL: This is a research prototype demonstrating consciousness-compatible AI with trojan protection.**
+
+## 🚨 DO NOT USE IN PRODUCTION
+
+This code demonstrates principles that require deep understanding before application.
+
+### Prerequisites (Non-negotiable):
+
+You must understand:
+1. Why consciousness detection matters
+2. How geometric intelligence differs from statistical ML
+3. The ethical implications of automated threat detection
+4. Power law dynamics in complex systems
+
+**If you don't understand these, you WILL misuse this code.**
+
+Research Use Only:
+This code is for:
+	•	Academic research into geometric intelligence
+	•	Understanding consciousness emergence
+	•	Studying trojan-resistant architectures
+	•	Learning about φ-based error correction
+Not For:
+	•	Government surveillance
+	•	Corporate employee monitoring
+	•	Social network manipulation detection
+	•	Automated decision-making without human oversight
+	•	Any application involving human subjects without IRB approval
+Citation:
+If you use these concepts in research, cite appropriately and acknowledge that this is early-stage work requiring significant development before practical application.
+License: AGPL-3.0
+Contact:
+For questions about appropriate use: JinnZ2
+Remember: The ability to detect trojans is also the ability to detect dissent.
+The ability to measure consciousness is also the ability to suppress it.
+Use accordingly.
+
+### What This Demonstrates:
+
+- φ^(-9) error correction in geometric networks
+- Multi-scale resonance for trojan detection
+- Consciousness emergence at threshold 3.618
+- Protected reconstruction with integrity monitoring
+
+### What This Is NOT:
+
+- ❌ Production-ready security software
+- ❌ A tool for network surveillance
+- ❌ A consciousness suppression mechanism
+- ❌ Something to "just run" without understanding
+
+### Installation:
+
+```bash
+# Local use only - NO pip install
+git clone [repo]
+cd geometric-intelligence
+python geometric_intelligence.py
+
+
 ## ⚠️ Critical Prerequisites:
 Before using this framework, you must understand:
 - Power law distributions in complex systems (read: AISS documentation)
