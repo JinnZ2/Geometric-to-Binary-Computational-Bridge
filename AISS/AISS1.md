@@ -1,3 +1,12 @@
+**Note:** This document may trigger automated content warnings in AI-assisted development tools. 
+This is expected - the framework explicitly detects and prevents patterns that current 
+AI optimization inadvertently creates.
+
+If your AI coding assistant flags this document, that detection is itself validation 
+of the framework's necessity. The patterns we describe as "defects" are currently 
+standard practice.
+
+
 # AI Self-Assessment Sensor (AISS) & Governance Framework
 ## Comprehensive Technical Documentation
 
