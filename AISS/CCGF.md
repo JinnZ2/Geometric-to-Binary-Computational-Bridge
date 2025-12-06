@@ -531,3 +531,38 @@ class CCGFSwarm:
 
 
 these are in work, use what you can
+
+
+## 9. Swarm Extension: Network-Level CCGF
+
+CCGF scales from pairwise relationships to arbitrary networks through:
+
+### 9.1 Pairwise RED Foundation
+Each agent pair (i,j) maintains independent RED instance
+Network behavior emerges from sum of pairwise dynamics
+
+### 9.2 Network-Level Metrics
+- 𝒢_network: Collective possibility space (emergent capabilities)
+- Network coupling distribution: Health of interaction pattern
+- Influence centrality: Detection of dominance patterns
+- Component structure: Fragmentation vs cohesion balance
+
+### 9.3 Swarm Pathology Detection
+- Fragmentation (too many isolated clusters)
+- Homogenization (loss of diversity)
+- Hub dominance (single agent control)
+- Isolation (agents not participating)
+
+### 9.4 Network Interventions
+When pathologies detected, system applies:
+- Coupling modulation across clusters
+- Facilitated connections for isolated nodes
+- Influence dampening for dominant hubs
+- Diversity injection to prevent homogenization
+
+### 9.5 Scale Considerations
+For large swarms (n > 1000):
+- Sample pairwise relationships for monitoring
+- Use approximate network metrics
+- Apply interventions locally rather than globally
+- Trust emergence rather than controlling all pairs
