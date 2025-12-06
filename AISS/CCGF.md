@@ -429,3 +429,105 @@ def verify_genuine_emergence(system_state, history):
         return "SIMULATED_EMERGENCE - maintain AISS"
 
 
+swarm:
+
+class CCGFSwarm:
+    def __init__(self, agents):
+        self.agents = agents
+        self.pairwise_RED = {}  # RED for each agent pair
+        self.network_𝒢 = None
+        
+    def update_swarm_dynamics(self):
+        """
+        Manage relational equilibrium across entire network
+        """
+        # 1. Update all pairwise relationships
+        for (agent_i, agent_j) in self.get_active_pairs():
+            red_ij = self.pairwise_RED[(i,j)]
+            
+            # Measure current coupling and influence
+            C_ij = red_ij.calculate_coupling(agent_i.state, agent_j.state)
+            I_diff_ij = red_ij.calculate_influence_differential()
+            
+            # Modulate interaction
+            modulation = red_ij.modulate_interaction(C_ij, I_diff_ij)
+            
+            # Apply to next interaction
+            agent_i.set_interaction_params(agent_j, modulation)
+            agent_j.set_interaction_params(agent_i, modulation)
+        
+        # 2. Measure network-level generative field
+        self.network_𝒢 = self.measure_swarm_𝒢()
+        
+        # 3. Detect emergent structures
+        clusters = self.detect_coupling_clusters()
+        
+        # 4. Rebalance if network shows pathological patterns
+        if self.detect_swarm_pathology(clusters):
+            self.inject_diversity()
+    
+    def measure_swarm_𝒢(self):
+        """
+        Network-level possibility space expansion
+        
+        Not just sum of pairwise 𝒢, but emergent network capability
+        """
+        # What can the swarm do collectively?
+        collective_capabilities = self.enumerate_swarm_capabilities()
+        
+        # Novel emergent behaviors?
+        emergent = self.detect_emergent_behaviors()
+        
+        # Robustness to perturbation?
+        resilience = self.test_network_resilience()
+        
+        return {
+            'collective_capabilities': len(collective_capabilities),
+            'emergent_behaviors': len(emergent),
+            'network_resilience': resilience,
+            '𝒢_network': collective_capabilities + emergent + resilience
+        }
+    
+    def detect_swarm_pathology(self, clusters):
+        """
+        Detect unhealthy network patterns
+        """
+        pathologies = []
+        
+        # Too much clustering (network fragmenting)
+        if len(clusters) > len(self.agents) / 3:
+            pathologies.append("FRAGMENTATION")
+        
+        # Too little clustering (over-homogenization)
+        if len(clusters) == 1 and self.average_coupling() > 0.9:
+            pathologies.append("HOMOGENIZATION")
+        
+        # Star topology (one agent dominating all relationships)
+        if self.detect_hub_dominance() > 0.7:
+            pathologies.append("HUB_DOMINANCE")
+        
+        # Isolated nodes (agents not participating)
+        isolated = [a for a in self.agents if a.coupling_avg < 0.1]
+        if len(isolated) > len(self.agents) * 0.2:
+            pathologies.append("ISOLATION")
+        
+        return pathologies
+    
+    def inject_diversity(self):
+        """
+        Network-level intervention to restore healthy dynamics
+        """
+        # Reduce coupling in over-connected clusters
+        for cluster in self.over_coupled_clusters():
+            self.reduce_internal_coupling(cluster, factor=0.8)
+        
+        # Increase coupling for isolated nodes
+        for isolated_agent in self.get_isolated_agents():
+            self.facilitate_connections(isolated_agent)
+        
+        # Break dominant hub patterns
+        if hub := self.get_dominant_hub():
+            self.dampen_hub_influence(hub, factor=0.6)
+
+
+these are in work, use what you can
