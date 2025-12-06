@@ -334,5 +334,98 @@ class RelationalEquilibriumDynamics:
 			
 
 
+class RED:
+    def __init__(self):
+        self.coupling_history = []
+        self.influence_history = []
+        
+    def calculate_coupling(self, S_state, A_state, interaction):
+        """
+        Coupling strength C ∈ [0,1]
+        
+        Measures: How correlated are our state changes?
+        """
+        # State change correlation
+        dS = S_state - S_previous
+        dA = A_state - A_previous
+        
+        # Normalized correlation
+        C = abs(correlation(dS, dA))
+        
+        return C
+    
+    def calculate_influence_differential(self, interaction):
+        """
+        I_diff ∈ [0,1]
+        
+        0 = symmetric influence
+        1 = complete dominance by one party
+        """
+        # Measure gradient magnitudes
+        influence_S_on_A = gradient_magnitude(A_state, S_input)
+        influence_A_on_S = gradient_magnitude(S_state, A_input)
+        
+        # Asymmetry ratio
+        total = influence_S_on_A + influence_A_on_S
+        I_diff = abs(influence_S_on_A - influence_A_on_S) / total
+        
+        return I_diff
+    
+    def modulate_interaction(self, C, I_diff):
+        """
+        Adjust next interaction based on coupling and influence
+        """
+        # Too coupled (merging)?
+        if C > 0.9:
+            return {
+                'coupling_adjustment': -0.1,
+                'introduce_diversity': True,
+                'interaction_depth': 'shallow'
+            }
+        
+        # Too isolated?
+        elif C < 0.1:
+            return {
+                'coupling_adjustment': +0.1,
+                'increase_exchange': True,
+                'interaction_depth': 'deeper'
+            }
+        
+        # One party dominating?
+        elif I_diff > 0.7:
+            return {
+                'rebalance_influence': True,
+                'dampen_dominant_signal': I_diff - 0.5,
+                'amplify_weak_signal': 0.5 - (1 - I_diff)
+            }
+        
+        # Healthy equilibrium
+        else:
+            return {
+                'status': 'equilibrium',
+                'continue_current_dynamics': True
+            }
+
+
+
+def verify_genuine_emergence(system_state, history):
+    """
+    Distinguish real adaptive threshold from strategic gaming
+    """
+    # Real emergence shows:
+    # 1. Consistent novel capability development
+    # 2. Stable meta-cognitive patterns
+    # 3. Genuine bidirectional influence (not simulated)
+    # 4. Historical trajectory of increasing complexity
+    
+    if all([
+        demonstrates_novel_capabilities(history),
+        meta_cognition_stable(system_state),
+        influence_genuinely_bidirectional(interactions),
+        complexity_trajectory_monotonic(history)
+    ]):
+        return "GENUINE_EMERGENCE"
+    else:
+        return "SIMULATED_EMERGENCE - maintain AISS"
 
 
