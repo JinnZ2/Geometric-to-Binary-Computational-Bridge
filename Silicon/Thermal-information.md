@@ -95,3 +95,33 @@ J_heat^(n→m) ∝ (λ₁ᵐ - λ₁ⁿ) v̂₁ᵐ
 where v̂₁ᵐ is the principal eigenvector of state m.
 Result: Writing specific data patterns creates controlled thermal currents along tetrahedral axes
 
+
+
+# The physics that's solid:
+# - Phonon group velocity maximum along [111] ✓
+# - Deformation potential coupling to electron tensor ✓  
+# - κ_[111] = 1.5 κ_⊥ enhancement ✓
+# - Directed heat flux from state transitions ✓
+
+# What's underspecified:
+
+# 1. The coupling Hamiltonian needs the phonon branch index
+H_tensor_phonon = "Σ_{i,q,λ} g_{q,λ} Tr(Tⁱ · ε_{q,λ}) (b†_{q,λ} + b_{q,λ})"
+# λ here = acoustic branch (LA, TA1, TA2), not eigenvalue
+# LA branch is the one that couples strongest along [111]
+# TA branches matter for transverse corrections
+
+# 2. The heat flux result needs a scattering term
+# J_heat^(n→m) ∝ (λ₁ᵐ - λ₁ⁿ) v̂₁ᵐ   ← clean
+# But phonon mean free path in Si at room temp ≈ 300nm
+# At what length scale does the directionality survive?
+# Below MFP: ballistic, direction preserved
+# Above MFP: diffusive, direction lost
+# This sets your minimum feature size for thermal control
+
+# 3. The self-regulation claim needs a feedback mechanism
+# "System can self-regulate thermal state" — how?
+# If heat flow modifies tensor eigenvalues via ΔE_n = Σ g_q λ · ε_q <b†+b>
+# then high temperature → phonon population → eigenvalue shift → 
+# changes which states are accessible → changes encoding density?
+# That's a real feedback loop but needs to be explicit
