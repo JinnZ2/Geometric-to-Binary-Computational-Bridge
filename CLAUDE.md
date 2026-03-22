@@ -188,12 +188,12 @@ Core angle: **109.47°** (tetrahedral angle) — the project's foundational cons
 
 ### Engine & Optimization
 
-The `Engine/` module provides computational acceleration:
+The `Engine/` module provides computational acceleration. **Note: all four files are currently stubs** returning placeholder values. The class interfaces are defined but no real computation is implemented yet.
 
-- **`geometric_solver.py`** — Solves EM field equations with geometry-aware optimizations
-- **`simd_optimizer.py`** — Automatically vectorizes operations using SIMD instructions
-- **`symmetry_detector.py`** — Detects exploitable symmetries to reduce computation (100–1000x speedups)
-- **`spacial_grid.py`** — Spatial indexing structures for field calculations
+- **`geometric_solver.py`** — EM field solver (stub: returns hardcoded field data)
+- **`simd_optimizer.py`** — SIMD vectorization (stub: returns hardcoded values)
+- **`symmetry_detector.py`** — Symmetry detection (stub: always returns empty list)
+- **`spacial_grid.py`** — Spatial indexing (stub: no adaptive decomposition)
 
 ---
 
@@ -258,3 +258,22 @@ This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fi
 | Fractal-Compass-Atlas        | Directional navigation via fractals     |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
+
+---
+
+## Known Issues & Implementation Status
+
+### Functional
+- GEIS encoder/decoder — working, round-trips validated
+- Domain bridge encoders (magnetic, light, sound, gravity, electric) — working
+- Temporal and inflection bridge encoders — working
+- Bridge orchestrator — basic functionality works
+
+### Stubs (interfaces defined, no real logic)
+- `Engine/` — all four modules return hardcoded placeholder values
+
+### Needs Attention
+- **Test coverage**: ~22% in GEIS (4 of 18 public methods). No tests for bridge modules.
+- **Frontend**: Requires `package.json` with dependencies and a bundler (Vite/Webpack) to run. No React DOM mounting code (`createRoot`). `Engine/geometric_solver.py` is Python but imported as JS in `App.js`.
+- **Two bridge paradigms coexist**: `src/bridge/` uses procedural functions; `{domain}-bridge/` uses OOP classes inheriting from `BinaryBridgeEncoder`. These are not unified.
+- **No `requirements.txt`**: Python dependencies (`numpy`, `scipy`) are not formally declared.

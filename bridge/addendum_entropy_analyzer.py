@@ -74,23 +74,3 @@ class EntropyResonanceAnalyzer:
     def report(self):
         """Return results."""
         return self.results
-
-  ##Integration (optional)
-
-##You can activate this analyzer only when needed:
-
-from bridge.bridge_orchestrator import BridgeOrchestrator
-from bridge.addendum_entropy_analyzer import EntropyResonanceAnalyzer
-
-orchestrator = BridgeOrchestrator()
-# (register and run all encoders as usual...)
-
-# Optional addendum:
-analyzer = EntropyResonanceAnalyzer().attach_to(orchestrator)
-analysis = analyzer.full_analysis()
-
-print("Entropy (bits):", analysis["entropy_bits"])
-print("Φ-resonance index:", analysis["phi_resonance"])
-print("Cross-domain coherence matrix:")
-for row in analysis["coherence_matrix"]:
-    print(row)
