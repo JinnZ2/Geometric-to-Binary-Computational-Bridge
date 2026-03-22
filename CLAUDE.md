@@ -188,12 +188,12 @@ Core angle: **109.47°** (tetrahedral angle) — the project's foundational cons
 
 ### Engine & Optimization
 
-The `Engine/` module provides computational acceleration. **Note: all four files are currently stubs** returning placeholder values. The class interfaces are defined but no real computation is implemented yet.
+The `Engine/` module provides real electromagnetic field computation:
 
-- **`geometric_solver.py`** — EM field solver (stub: returns hardcoded field data)
-- **`simd_optimizer.py`** — SIMD vectorization (stub: returns hardcoded values)
-- **`symmetry_detector.py`** — Symmetry detection (stub: always returns empty list)
-- **`spacial_grid.py`** — Spatial indexing (stub: no adaptive decomposition)
+- **`geometric_solver.py`** — Orchestrates the full pipeline: symmetry detection, spatial decomposition, vectorized field computation. Entry point: `GeometricEMSolver.calculateElectromagneticField(sources, bounds, resolution)`. Includes `PerformanceTracker` for metrics.
+- **`simd_optimizer.py`** — Vectorized field computation using numpy broadcasting. Implements Coulomb's law (point charges) and Biot-Savart law (current elements). Processes chunks of points in batch.
+- **`symmetry_detector.py`** — Detects reflective (mirror plane) and rotational (2/3/4/6-fold) symmetries in source configurations using Rodrigues' rotation and permutation matching.
+- **`spacial_grid.py`** — Adaptive octree decomposition. Refines cells near sources, keeps distant regions coarse. Typically produces ~2000 evaluation points vs ~32,000 for a uniform grid (achieving ~15-30x speedup).
 
 ---
 
@@ -268,9 +268,6 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - Domain bridge encoders (magnetic, light, sound, gravity, electric) — working
 - Temporal and inflection bridge encoders — working
 - Bridge orchestrator — basic functionality works
-
-### Stubs (interfaces defined, no real logic)
-- `Engine/` — all four modules return hardcoded placeholder values
 
 ### Needs Attention
 - **Test coverage**: ~22% in GEIS (4 of 18 public methods). No tests for bridge modules.
