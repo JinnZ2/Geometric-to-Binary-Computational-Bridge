@@ -107,8 +107,8 @@ class StateTensor:
         # Find closest state to rotated position
         distances = [np.linalg.norm(rotated_pos - np.array(OctahedralState.POSITIONS[i])) 
                     for i in range(8)]
-        closest_idx = np.argmin(distances)
-        
+        closest_idx = int(np.argmin(distances))
+
         new_state = OctahedralState(closest_idx)
         result = StateTensor(new_state, self.weight)
         result.tensor = rotated_tensor

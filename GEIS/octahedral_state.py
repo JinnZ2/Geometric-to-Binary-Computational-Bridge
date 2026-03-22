@@ -8,7 +8,7 @@ Represents a single octahedral coordination state in silicon with:
 """
 
 import numpy as np
-from typing import Tuple, Optional
+from typing import Tuple
 
 
 class OctahedralState:

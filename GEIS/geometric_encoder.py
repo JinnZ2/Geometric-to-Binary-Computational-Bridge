@@ -26,9 +26,11 @@ class GeometricEncoder:
     OPERATOR_MAP = {
         '|': '1',   # Radial (toward center)
         '/': '0',   # Tangential
+        ':': '0',   # Colon (alias for tangential)
     }
     
-    REVERSE_OPERATOR_MAP = {v: k for k, v in OPERATOR_MAP.items()}
+    # Reverse map uses '/' as canonical form for bit '0' (not ':')
+    REVERSE_OPERATOR_MAP = {'1': '|', '0': '/'}
     
     def __init__(self, vertex_width: int = 3):
         """
@@ -60,13 +62,13 @@ class GeometricEncoder:
         else:
             # Find single operator
             operator_found = None
-            for op in ['|', '/']:
+            for op in ['|', '/', ':']:
                 if op in token:
                     operator_found = op
                     break
             
             if operator_found is None:
-                raise ValueError("Token must contain operator ('|' or '/')")
+                raise ValueError("Token must contain operator ('|', '/', or ':')")
             
             parts = token.split(operator_found, 1)
             vertex_bits = parts[0]
@@ -84,7 +86,9 @@ class GeometricEncoder:
             raise ValueError(f"Vertex bits must be valid binary: {vertex_bits}")
         
         # Map symbol to bits
-        symbol_bits = self.SYMBOL_MAP.get(symbol, '00')
+        if symbol not in self.SYMBOL_MAP:
+            raise ValueError(f"Unknown symbol '{symbol}'. Valid symbols: {list(self.SYMBOL_MAP.keys())}")
+        symbol_bits = self.SYMBOL_MAP[symbol]
         
         return vertex_bits + operator_bits + symbol_bits
     

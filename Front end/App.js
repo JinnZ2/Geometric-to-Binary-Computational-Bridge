@@ -1,11 +1,11 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text, GridHelper } from '@react-three/drei';
-import EMSource from './components/EMSource';
-import FieldVisualization from './components/FieldVisualization';
-import PerformancePanel from './components/PerformancePanel';
-import ControlInterface from './components/ControlInterface';
-import GeometricEMSolver from '../engine/geometric_solver';
+import EMSource from './Components/EMSource';
+import FieldVisualization from './Components/FieldVisualization';
+import PerformancePanel from './Components/PerformancePanel';
+import ControlInterface from './Components/ControlInterface';
+import GeometricEMSolver from './solver';
 
 export default function App() {
   const [solver] = React.useState(() => new GeometricEMSolver());

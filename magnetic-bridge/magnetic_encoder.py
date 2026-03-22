@@ -2,7 +2,6 @@
 # Polarity → binary, field curvature → binary, resonance → binary flips
 
 from bridge.abstract_encoder import BinaryBridgeEncoder
-import numpy as np
 
 class MagneticBridgeEncoder(BinaryBridgeEncoder):
     """
