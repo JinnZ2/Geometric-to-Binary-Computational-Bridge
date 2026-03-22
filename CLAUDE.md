@@ -25,8 +25,13 @@
 ### Commands
 
 ```bash
-# Run tests
-cd GEIS && python test_simple.py
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Run all tests
+cd GEIS && python test_simple.py        # GEIS (116 tests)
+python tests/test_bridges.py            # Bridge encoders (57 tests)
+python tests/test_engine.py             # Engine/solver (42 tests)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -34,22 +39,24 @@ python GEIS/demo.py
 # Bridge format conversion
 python scripts/bridge_convert.py
 
-# Frontend (requires npm dependencies)
-cd "Front end" && npm start
+# Frontend
+cd "Front end" && npm install && npm run dev
 ```
 
 ### Dependencies
 
-| Layer    | Language          | Key Libraries                                    |
-|----------|-------------------|--------------------------------------------------|
-| Backend  | Python            | `numpy`, `scipy`                                 |
-| Frontend | JavaScript/React  | `react`, `three`, `@react-three/fiber`, `@react-three/drei` |
-
-No `requirements.txt`, `pyproject.toml`, or `package.json` is currently committed.
+| Layer    | Language          | Key Libraries                                    | Declared In        |
+|----------|-------------------|--------------------------------------------------|--------------------|
+| Backend  | Python            | `numpy`, `scipy`                                 | `requirements.txt` |
+| Frontend | JavaScript/React  | `react`, `three`, `@react-three/fiber`, `@react-three/drei` | `Front end/package.json` |
 
 ### Testing
 
-Tests live in `GEIS/test_simple.py`. No formal test runner (pytest/unittest) is configured. Tests validate encoder/decoder round-trips, state vector calculations, and geometric operation correctness.
+| Suite | File | Tests | Covers |
+|-------|------|-------|--------|
+| GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
+| Bridges | `tests/test_bridges.py` | 57 | All 5 domain encoders + orchestrator |
+| Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 
 ### CI/CD & Linting
 
@@ -65,7 +72,7 @@ None currently configured.
 Engine/                         Core computational engine
 ├── geometric_solver.py           EM field solver with SIMD optimization
 ├── simd_optimizer.py             Auto-vectorization engine
-├── spacial_grid.py               Spatial data structures
+├── spatial_grid.py               Spatial data structures
 └── symmetry_detector.py          Symmetry detection for optimization
 
 GEIS/                           Geometric Information Encoding System
@@ -135,6 +142,7 @@ symbols/                        Symbolic-to-geometric mapping plugin
 docs/                           Architecture docs, roadmaps, field notes
 examples/                       Sample .gshape and .json files
 scripts/                        Utility scripts (bridge_convert.py)
+tests/                          Bridge and Engine test suites
 ```
 
 ---
@@ -193,7 +201,7 @@ The `Engine/` module provides real electromagnetic field computation:
 - **`geometric_solver.py`** — Orchestrates the full pipeline: symmetry detection, spatial decomposition, vectorized field computation. Entry point: `GeometricEMSolver.calculateElectromagneticField(sources, bounds, resolution)`. Includes `PerformanceTracker` for metrics.
 - **`simd_optimizer.py`** — Vectorized field computation using numpy broadcasting. Implements Coulomb's law (point charges) and Biot-Savart law (current elements). Processes chunks of points in batch.
 - **`symmetry_detector.py`** — Detects reflective (mirror plane) and rotational (2/3/4/6-fold) symmetries in source configurations using Rodrigues' rotation and permutation matching.
-- **`spacial_grid.py`** — Adaptive octree decomposition. Refines cells near sources, keeps distant regions coarse. Typically produces ~2000 evaluation points vs ~32,000 for a uniform grid (achieving ~15-30x speedup).
+- **`spatial_grid.py`** — Adaptive octree decomposition. Refines cells near sources, keeps distant regions coarse. Typically produces ~2000 evaluation points vs ~32,000 for a uniform grid (achieving ~15-30x speedup).
 
 ---
 
@@ -269,8 +277,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - Temporal and inflection bridge encoders — working
 - Bridge orchestrator — basic functionality works
 
-### Needs Attention
-- **Test coverage**: ~22% in GEIS (4 of 18 public methods). No tests for bridge modules.
-- **Frontend**: Requires `package.json` with dependencies and a bundler (Vite/Webpack) to run. No React DOM mounting code (`createRoot`). `Engine/geometric_solver.py` is Python but imported as JS in `App.js`.
-- **Two bridge paradigms coexist**: `src/bridge/` uses procedural functions; `{domain}-bridge/` uses OOP classes inheriting from `BinaryBridgeEncoder`. These are not unified.
-- **No `requirements.txt`**: Python dependencies (`numpy`, `scipy`) are not formally declared.
+### Remaining Items
+- **Two bridge paradigms coexist**: `src/bridge/` uses procedural functions (feature extraction + Gray-coded encoding); `{domain}-bridge/` uses OOP classes inheriting from `BinaryBridgeEncoder` (geometry-in, binary-out). These serve different roles but are not unified under a single interface.
+- **Frontend**: Has `package.json` and Vite config but hasn't been tested end-to-end with `npm install && npm run dev`. The JS solver (`Front end/solver.js`) mirrors the Python Engine but is a separate implementation.
+- **`src/bridge/light.py`**: `spd_to_xyY()` uses stub chromaticity approximations — should be replaced with proper CIE 1931 color matching functions.

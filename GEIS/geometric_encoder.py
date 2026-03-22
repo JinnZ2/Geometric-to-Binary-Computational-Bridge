@@ -29,7 +29,8 @@ class GeometricEncoder:
         ':': '0',   # Colon (alias for tangential)
     }
     
-    REVERSE_OPERATOR_MAP = {v: k for k, v in OPERATOR_MAP.items()}
+    # Reverse map uses '/' as canonical form for bit '0' (not ':')
+    REVERSE_OPERATOR_MAP = {'1': '|', '0': '/'}
     
     def __init__(self, vertex_width: int = 3):
         """

@@ -2,7 +2,6 @@
 # Direction, curvature, orbital stability, and binding threshold -> binary
 
 from bridge.abstract_encoder import BinaryBridgeEncoder
-import numpy as np
 
 class GravityBridgeEncoder(BinaryBridgeEncoder):
     """

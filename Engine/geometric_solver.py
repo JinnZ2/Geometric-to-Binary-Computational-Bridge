@@ -8,7 +8,7 @@ import time
 import numpy as np
 
 from Engine.symmetry_detector import SymmetryDetector
-from Engine.spacial_grid import SpatialGrid
+from Engine.spatial_grid import SpatialGrid
 from Engine.simd_optimizer import SIMDOptimizer
 
 

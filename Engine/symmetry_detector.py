@@ -110,8 +110,11 @@ class SymmetryDetector:
                 if matched[j]:
                     continue
                 dist = np.linalg.norm(pos_a[i] - pos_b[j])
+                # Use relative tolerance for magnitude comparison
+                mag_max = max(abs(str_a[i]), abs(str_b[j]), 1e-30)
+                mag_rel_diff = abs(str_a[i] - str_b[j]) / mag_max
                 if (dist < self.position_tol and
-                        abs(str_a[i] - str_b[j]) < self.magnitude_tol and
+                        mag_rel_diff < self.magnitude_tol and
                         types_a[i] == types_b[j]):
                     matched[j] = True
                     found = True

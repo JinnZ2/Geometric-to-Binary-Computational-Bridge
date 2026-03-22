@@ -2,7 +2,6 @@
 # Charge polarity, current flow, and potential threshold -> binary
 
 from bridge.abstract_encoder import BinaryBridgeEncoder
-import numpy as np
 
 class ElectricBridgeEncoder(BinaryBridgeEncoder):
     """

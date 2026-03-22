@@ -5,7 +5,7 @@ import EMSource from './Components/EMSource';
 import FieldVisualization from './Components/FieldVisualization';
 import PerformancePanel from './Components/PerformancePanel';
 import ControlInterface from './Components/ControlInterface';
-import GeometricEMSolver from '../Engine/geometric_solver';
+import GeometricEMSolver from './solver';
 
 export default function App() {
   const [solver] = React.useState(() => new GeometricEMSolver());
