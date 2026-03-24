@@ -1,7 +1,7 @@
 {
   "fieldlink": {
-    "version": "1.1",
-    "updated": "2025-09-11T00:00:00Z",
+    "version": "1.2",
+    "updated": "2026-03-24T00:00:00Z",
     "role": ["shapes", "bridges", "hub"],
 
     "sources": [
@@ -9,13 +9,29 @@
         "name": "rosetta",
         "repo": "https://github.com/JinnZ2/Rosetta-Shape-Core",
         "ref": "main",
+        "direction": "bidirectional",
         "paths": [
           "shapes/**/*.json",
           "bridges/**/*.json",
+          "data/**/*.json",
+          "ontology/**/*.json",
+          "schema/core.schema.json",
+          "schema/shape.schema.json",
           "atlas/**/*.json"
         ],
         "mounts": [
-          { "remote": "bridges/rosetta-bridges.json", "as": "atlas/remote/rosetta/bridges.json" }
+          { "remote": "bridges/rosetta-bridges.json", "as": "atlas/remote/rosetta/bridges.json" },
+          { "remote": "shapes/octahedron.json", "as": "atlas/remote/rosetta/shapes/octahedron.json" },
+          { "remote": "data/shape_ontology.json", "as": "atlas/remote/rosetta/shape_ontology.json" },
+          { "remote": "data/math_constants.json", "as": "atlas/remote/rosetta/math_constants.json" },
+          { "remote": "data/sacred_geometry.json", "as": "atlas/remote/rosetta/sacred_geometry.json" },
+          { "remote": "schema/core.schema.json", "as": "atlas/remote/rosetta/core.schema.json" }
+        ],
+        "exports": [
+          { "local": "bridges/geobin-bridges.json", "as": "bridges/geobin-bridges.json" },
+          { "local": "glyph_to_geometric_bridge.json", "as": "glyph_to_geometric_bridge.json" },
+          { "local": "Silicon/fabrication_pathway_schema.json", "as": "Silicon/fabrication_pathway_schema.json" },
+          { "local": "Silicon/octahedral_state_encoder.json", "as": "Silicon/octahedral_state_encoder.json" }
         ],
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
       },
@@ -86,11 +102,4 @@
     "integrity": { "enabled": true, "hash": "sha256", "allow_missing": false },
     "consent": { "license": "CC-BY-4.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
   }
-}
-{
-  "fieldlink_version": "1.0",
-  "atlas_source": "github.com/JinnZ2/Polyhedral-Intelligence",
-  "computation_target": "github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge",
-  "bridge_manifest": "bridges/glyph-to-geometric.json",
-  "sync_enabled": true
 }
