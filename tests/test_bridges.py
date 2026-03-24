@@ -38,17 +38,41 @@ def load_encoder(dir_name, module_name, class_name):
 
 
 # ─── Magnetic Bridge ────────────────────────────────────────────────
+# Bit layout per field line  : polarity(1) + curv_sign(1) + curv_mag_gray(3) + B_mag_gray(3) = 8
+# Bit layout per current elem: I_mag_gray(3) + B_biot_gray(3) + flow_sign(1)               = 7
+# Bit layout per resonance   : constructive(1) + res_mag_gray(3)                            = 4
+# Summary (when field_lines present): flux_sign(1) + flux_mag_gray(3) + pressure_gray(3)   = 7
 
 print("\n=== MagneticBridgeEncoder ===")
-MagneticBridgeEncoder = load_encoder("magnetic-bridge", "magnetic_encoder", "MagneticBridgeEncoder")
+
+import importlib.util as _ilu
+_mag_spec = _ilu.spec_from_file_location(
+    "magnetic_encoder",
+    os.path.join(ROOT, "magnetic-bridge", "magnetic_encoder.py")
+)
+_mag_mod = _ilu.module_from_spec(_mag_spec)
+_mag_spec.loader.exec_module(_mag_mod)
+MagneticBridgeEncoder      = _mag_mod.MagneticBridgeEncoder
+biot_savart_magnitude      = _mag_mod.biot_savart_magnitude
+magnetic_flux              = _mag_mod.magnetic_flux
+magnetic_pressure          = _mag_mod.magnetic_pressure
+larmor_frequency           = _mag_mod.larmor_frequency
+_gray_bits                 = _mag_mod._gray_bits
+_B_BANDS                   = _mag_mod._B_BANDS
+_KAPPA_BANDS               = _mag_mod._KAPPA_BANDS
+_PRESSURE_BANDS            = _mag_mod._PRESSURE_BANDS
+_FLUX_BANDS                = _mag_mod._FLUX_BANDS
+_RES_BANDS                 = _mag_mod._RES_BANDS
+MU_0                       = _mag_mod.MU_0
 
 enc = MagneticBridgeEncoder()
 check(enc.modality == "magnetic", "Modality is 'magnetic'")
 
-# Encode sample data
+# ── Test 1: field lines without explicit magnitude ─────────────────
+# 3 lines × 8 bits + 3 resonance × 4 bits + 7 summary = 43 bits
 data = {
     "field_lines": [
-        {"curvature": 0.2, "direction": "N"},
+        {"curvature": 0.2, "direction": "N"},   # magnitude defaults to 0.0
         {"curvature": -0.5, "direction": "S"},
         {"curvature": 0.8, "direction": "N"},
     ],
@@ -56,39 +80,157 @@ data = {
 }
 enc.from_geometry(data)
 bits = enc.to_binary()
-check(len(bits) == 9, f"Expected 9 bits (3+3+3), got {len(bits)}")
+check(len(bits) == 43, f"Expected 43 bits (3×8 + 3×4 + 7), got {len(bits)}")
 check(all(b in '01' for b in bits), "Output is valid binary string")
 
-# Polarity: N=1, S=0, N=1
-check(bits[0] == '1', "First field line N = 1")
-check(bits[1] == '0', "Second field line S = 0")
-check(bits[2] == '1', "Third field line N = 1")
+# Section 1 — polarity bits (index 0, 8, 16 of each 8-bit line)
+check(bits[0]  == '1', "Line 0 polarity N = 1")
+check(bits[8]  == '0', "Line 1 polarity S = 0")
+check(bits[16] == '1', "Line 2 polarity N = 1")
 
-# Curvature: 0.2>0=1, -0.5<0=0, 0.8>0=1
-check(bits[3] == '1', "Curvature 0.2 > 0 = 1")
-check(bits[4] == '0', "Curvature -0.5 < 0 = 0")
-check(bits[5] == '1', "Curvature 0.8 > 0 = 1")
+# Section 1 — curvature sign bits (index 1, 9, 17)
+check(bits[1]  == '1', "Line 0 curv_sign: 0.2 > 0 = 1")
+check(bits[9]  == '0', "Line 1 curv_sign: -0.5 < 0 = 0")
+check(bits[17] == '1', "Line 2 curv_sign: 0.8 > 0 = 1")
 
-# Resonance: 0.7>0=1, -0.3<0=0, 0.1>0=1
-check(bits[6] == '1', "Resonance 0.7 = 1")
-check(bits[7] == '0', "Resonance -0.3 = 0")
-check(bits[8] == '1', "Resonance 0.1 = 1")
+# Section 1 — curvature magnitude Gray bands (bits 2-4, 10-12, 18-20)
+# 0.2 m⁻¹ → κ band 2 → Gray(2)=3="011"
+check(bits[2:5]   == '011', "Line 0 curv_mag Gray(2)='011' for κ=0.2")
+# 0.5 m⁻¹ → κ band 3 → Gray(3)=2="010"
+check(bits[10:13] == '010', "Line 1 curv_mag Gray(3)='010' for κ=0.5")
+# 0.8 m⁻¹ → κ band 3 → Gray(3)=2="010"
+check(bits[18:21] == '010', "Line 2 curv_mag Gray(3)='010' for κ=0.8")
 
-# Report
+# Section 1 — B magnitude Gray bands (bits 5-7, 13-15, 21-23)
+# magnitude=0.0 (default) → B band 0 → Gray(0)=0="000"
+check(bits[5:8]   == '000', "Line 0 B_mag Gray(0)='000' for B=0.0T")
+check(bits[13:16] == '000', "Line 1 B_mag Gray(0)='000' for B=0.0T")
+check(bits[21:24] == '000', "Line 2 B_mag Gray(0)='000' for B=0.0T")
+
+# Section 3 — resonance (starts at bit 24, 4 bits each)
+check(bits[24] == '1', "Resonance 0.7 constructive = 1")
+check(bits[25:28] == '111', "Resonance |0.7| → band 5 → Gray(5)='111'")
+check(bits[28] == '0', "Resonance -0.3 destructive = 0")
+check(bits[29:32] == '011', "Resonance |0.3| → band 2 → Gray(2)='011'")
+check(bits[32] == '1', "Resonance 0.1 constructive = 1")
+check(bits[33:36] == '000', "Resonance |0.1| → band 0 → Gray(0)='000'")
+
+# Section 4 — summary (starts at bit 36; B_mean=0 → flux=0, pressure=0)
+check(bits[36]    == '1',   "Summary flux_sign: Φ=0.0 ≥ 0 = 1")
+check(bits[37:40] == '000', "Summary flux_mag Gray(0)='000' for Φ=0")
+check(bits[40:43] == '000', "Summary pressure Gray(0)='000' for P=0")
+
+# ── Test 2: with explicit magnitude + current element (Biot-Savart) ─
+# 1 line × 8 + 1 element × 7 + 1 resonance × 4 + 7 summary = 26 bits
+physics_data = {
+    "field_lines": [
+        {"direction": "N", "curvature": 1.5, "magnitude": 0.001},  # B = 1 mT
+    ],
+    "current_elements": [
+        # 1 A wire along +z at x=1m → Biot-Savart gives B=1e-7 T at origin
+        {"current": 1.0, "dl": [0.0, 0.0, 1.0], "position": [1.0, 0.0, 0.0]},
+    ],
+    "resonance_map": [0.6],
+}
+enc_p = MagneticBridgeEncoder()
+enc_p.from_geometry(physics_data)
+bits_p = enc_p.to_binary()
+check(len(bits_p) == 26, f"Physics test: expected 26 bits, got {len(bits_p)}")
+
+# Field line bits (0-7)
+check(bits_p[0]   == '1',   "Physics: polarity N = 1")
+check(bits_p[1]   == '1',   "Physics: curv_sign 1.5 > 0 = 1")
+check(bits_p[2:5] == '110', "Physics: κ=1.5 → band 4 → Gray(4)='110'")
+check(bits_p[5:8] == '010', "Physics: B=0.001T → band 3 → Gray(3)='010'")
+
+# Current element bits (8-14): I=1A → band 5 → Gray(5)=7="111"
+#   Biot-Savart: B = (μ₀/4π)·I/r² = 1e-7·1/1 = 1e-7 T → band 1 → Gray(1)="001"
+#   dl_z=1.0 > 0 → flow_sign=1
+check(bits_p[8:11]  == '111', "Physics: I=1A → I band 5 → Gray(5)='111'")
+check(bits_p[11:14] == '001', "Physics: Biot-Savart 1e-7T → B band 1 → Gray(1)='001'")
+check(bits_p[14]    == '1',   "Physics: dl_z=1.0 > 0 → flow_sign=1")
+
+# Resonance bits (15-18): 0.6 constructive, |0.6| → band 4 → Gray(4)=6="110"
+check(bits_p[15]    == '1',   "Physics: resonance 0.6 constructive = 1")
+check(bits_p[16:19] == '110', "Physics: |0.6| → band 4 → Gray(4)='110'")
+
+# Summary bits (19-25): B_mean=0.001T
+#   flux = 0.001·1.0·cos(0) = 0.001 Wb → band 4 → Gray(4)="110"
+#   pressure = (0.001)²/(2μ₀) ≈ 0.398 Pa → band 3 → Gray(3)="010"
+check(bits_p[19]    == '1',   "Physics summary: flux ≥ 0 = 1")
+check(bits_p[20:23] == '110', "Physics summary: Φ=0.001Wb → band 4 → Gray(4)='110'")
+check(bits_p[23:26] == '010', "Physics summary: P≈0.398Pa → band 3 → Gray(3)='010'")
+
+# ── Physics equation unit tests ──────────────────────────────────────
+import math as _math
+
+# Biot-Savart: wire along z at x=1m, current=1A
+#   r_vec = (-1,0,0), r² = 1, dl=(0,0,1), dl·r = 0, sin(α) = 1
+#   B = (μ₀/4π)·I/r² = 1e-7 T
+B_bs = biot_savart_magnitude(1.0, [0.0, 0.0, 1.0], [1.0, 0.0, 0.0])
+check(abs(B_bs - 1e-7) < 1e-15, f"Biot-Savart: 1A at 1m = 1e-7 T (got {B_bs:.3e})")
+
+# Biot-Savart: wire parallel to r → sin(α)=0 → B=0
+B_parallel = biot_savart_magnitude(10.0, [1.0, 0.0, 0.0], [2.0, 0.0, 0.0])
+check(abs(B_parallel) < 1e-20, "Biot-Savart: parallel dl and r → B = 0")
+
+# Biot-Savart: zero current → B = 0
+check(biot_savart_magnitude(0.0, [0,0,1], [1,0,0]) == 0.0, "Biot-Savart: I=0 → B=0")
+
+# Biot-Savart: element at origin → B = 0
+check(biot_savart_magnitude(5.0, [0,0,1], [0,0,0]) == 0.0, "Biot-Savart: r=0 → B=0")
+
+# Magnetic flux: Φ = B·A·cos(θ)
+check(abs(magnetic_flux(0.5, 2.0, 0.0)   - 1.0)        < 1e-10, "Flux: 0.5T, 2m², 0rad = 1.0 Wb")
+check(abs(magnetic_flux(1.0, 1.0, _math.pi/2)) < 1e-10, "Flux: B⊥normal (π/2) = 0 Wb")
+check(abs(magnetic_flux(2.0, 3.0, _math.pi/3) - 3.0)    < 1e-10, "Flux: 2T, 3m², π/3 = 3.0 Wb")
+
+# Magnetic pressure: P = B²/(2μ₀)
+P_1T = magnetic_pressure(1.0)
+expected_P = 1.0 / (2.0 * MU_0)
+check(abs(P_1T - expected_P) / expected_P < 1e-10, f"Pressure: B=1T → B²/2μ₀ = {expected_P:.2f} Pa")
+check(magnetic_pressure(0.0) == 0.0, "Pressure: B=0 → 0 Pa")
+
+# Larmor frequency: ω_L = eB/(2mₑ)
+import math as _m
+E = 1.602176634e-19
+Me = 9.1093837015e-31
+wL_expected = E * 0.5 / (2 * Me)
+check(abs(larmor_frequency(0.5) - wL_expected) / wL_expected < 1e-10,
+      f"Larmor: B=0.5T → ω_L = {wL_expected:.4e} rad/s")
+check(larmor_frequency(0.0) == 0.0, "Larmor: B=0 → ω_L=0")
+
+# ── Gray code property: adjacent bands differ by exactly 1 bit ───────
+def _hamming(a, b):
+    return sum(x != y for x, y in zip(a, b))
+
+all_gray_ok = True
+for bands, label in [(_B_BANDS, "B_BANDS"), (_KAPPA_BANDS, "KAPPA_BANDS"),
+                     (_PRESSURE_BANDS, "PRESSURE_BANDS")]:
+    for i in range(len(bands) - 1):
+        v_lo = (bands[i] + bands[i+1]) / 2 if i < len(bands)-1 else bands[i]
+        v_hi = (bands[i+1] + (bands[i+2] if i+2 < len(bands) else bands[i+1]*10)) / 2
+        b_lo = _gray_bits(v_lo, bands)
+        b_hi = _gray_bits(v_hi, bands)
+        if b_lo != b_hi and _hamming(b_lo, b_hi) != 1:
+            all_gray_ok = False
+check(all_gray_ok, "Gray code: adjacent bands all differ by exactly 1 bit")
+
+# ── Report and edge cases ─────────────────────────────────────────────
 report = enc.report()
 check(report["modality"] == "magnetic", "Report modality")
-check(report["bits"] == 9, "Report bit count")
+check(report["bits"] == 43, "Report bit count = 43")
 check(len(report["checksum"]) == 64, "Report has SHA256 checksum")
 
-# Empty data
-enc2 = MagneticBridgeEncoder()
-enc2.from_geometry({"field_lines": [], "resonance_map": []})
-check(enc2.to_binary() == "", "Empty data produces empty output")
+# Empty data → no sections → empty string
+enc_empty = MagneticBridgeEncoder()
+enc_empty.from_geometry({"field_lines": [], "resonance_map": []})
+check(enc_empty.to_binary() == "", "Empty data produces empty output")
 
-# No geometry raises
-enc3 = MagneticBridgeEncoder()
+# No geometry raises ValueError
+enc_none = MagneticBridgeEncoder()
 try:
-    enc3.to_binary()
+    enc_none.to_binary()
     check(False, "to_binary without geometry raises")
 except ValueError:
     check(True, "to_binary without geometry raises")
