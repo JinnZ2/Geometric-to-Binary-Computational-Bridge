@@ -1,5 +1,5 @@
 """
-tests/test_bridges.py — Unified test suite for all six BinaryBridgeEncoder subclasses.
+tests/test_bridges.py — Unified test suite for all nine BinaryBridgeEncoder subclasses.
 
 Covers:
   - Pure physics helper functions (return-value accuracy)
@@ -57,6 +57,43 @@ from bridges.gravity_encoder import (
     orbital_velocity,
     schwarzschild_radius,
     tidal_acceleration,
+)
+
+# ---------------------------------------------------------------------------
+# Thermal
+# ---------------------------------------------------------------------------
+from bridges.thermal_encoder import (
+    ThermalBridgeEncoder,
+    blackbody_peak_wavelength,
+    stefan_boltzmann_radiance,
+    heat_flux_fourier,
+    newton_cooling_rate,
+    johnson_nyquist_noise,
+)
+
+# ---------------------------------------------------------------------------
+# Pressure / Haptic
+# ---------------------------------------------------------------------------
+from bridges.pressure_encoder import (
+    PressureBridgeEncoder,
+    ATM,
+    hydrostatic_pressure,
+    elastic_stress,
+    bulk_compression,
+    acoustic_radiation_pressure,
+    piezoelectric_voltage,
+)
+
+# ---------------------------------------------------------------------------
+# Chemical
+# ---------------------------------------------------------------------------
+from bridges.chemical_encoder import (
+    ChemicalBridgeEncoder,
+    arrhenius_rate,
+    nernst_potential,
+    henry_concentration,
+    bond_energy_delta,
+    ph_from_concentration,
 )
 
 # ---------------------------------------------------------------------------
@@ -134,6 +171,38 @@ def _make_grv():
         "curvature": [1.1, -0.6],
         "orbital_stability": [0.8, 0.3],
         "potential_energy": [-5e7, 1e6],
+    })
+    return e
+
+
+def _make_thr():
+    e = ThermalBridgeEncoder(reference_R_ohm=1000.0, bandwidth_hz=1000.0)
+    e.from_geometry({
+        "temperatures_K": [77.0, 293.0, 5778.0],
+        "emissivity":     [0.95, 0.85, 1.0],
+        "heat_flux_W_m2": [500.0, -120.0],
+    })
+    return e
+
+
+def _make_prs():
+    e = PressureBridgeEncoder(yield_threshold=0.002)
+    e.from_geometry({
+        "pressures_Pa": [ATM, 5e5, 1e7],
+        "stresses_Pa":  [-2e6, 1.5e5, -8e7],
+        "strains":      [0.001, 0.003],
+    })
+    return e
+
+
+def _make_chem():
+    e = ChemicalBridgeEncoder(rate_threshold=1e-3)
+    e.from_geometry({
+        "rate_constants": [0.05, 1e-5, 2.3],
+        "ph_values":      [3.2, 7.4, 9.1],
+        "bond_deltas_kJ": [-309.0, 50.0],
+        "nernst_inputs":  [{"T_K": 298.15, "z": 2, "c_ox": 0.001, "c_red": 1.0}],
+        "henry_inputs":   [{"K_H": 1.3e-8, "P_pa": 21278.0}],
     })
     return e
 
@@ -743,7 +812,346 @@ class TestElectricEncoder(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 6. Wave (quantum)
+# 6. Thermal
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestThermalPhysics(unittest.TestCase):
+    # blackbody_peak_wavelength(T_K)
+    # stefan_boltzmann_radiance(T_K, emissivity=1.0)
+    # heat_flux_fourier(k, dT_dx)
+    # newton_cooling_rate(h, T_obj, T_env)
+    # johnson_nyquist_noise(T_K, R_ohm, bandwidth_hz)
+
+    def test_wien_sun(self):
+        # Sun ~5778 K → λ_max ≈ 502 nm
+        lam = blackbody_peak_wavelength(5778.0)
+        self.assertAlmostEqual(lam * 1e9, 501.5, delta=1.0)
+
+    def test_wien_body(self):
+        # Human body 310 K → λ_max ≈ 9.35 µm (infrared)
+        lam = blackbody_peak_wavelength(310.0)
+        self.assertAlmostEqual(lam * 1e6, 9.35, delta=0.05)
+
+    def test_wien_zero_T(self):
+        self.assertEqual(blackbody_peak_wavelength(0.0), float("inf"))
+
+    def test_wien_shorter_at_higher_T(self):
+        self.assertGreater(blackbody_peak_wavelength(300.0), blackbody_peak_wavelength(6000.0))
+
+    def test_stefan_boltzmann_positive(self):
+        self.assertGreater(stefan_boltzmann_radiance(300.0), 0)
+
+    def test_stefan_boltzmann_emissivity(self):
+        M1 = stefan_boltzmann_radiance(300.0, 1.0)
+        M_half = stefan_boltzmann_radiance(300.0, 0.5)
+        self.assertAlmostEqual(M_half, M1 / 2, places=6)
+
+    def test_stefan_boltzmann_T4(self):
+        M1 = stefan_boltzmann_radiance(100.0)
+        M2 = stefan_boltzmann_radiance(200.0)
+        self.assertAlmostEqual(M2 / M1, 16.0, places=6)
+
+    def test_fourier_direction(self):
+        # q = -k * dT/dx; negative gradient → positive flux
+        q = heat_flux_fourier(50.0, -100.0)
+        self.assertGreater(q, 0)
+
+    def test_fourier_zero_gradient(self):
+        self.assertEqual(heat_flux_fourier(50.0, 0.0), 0.0)
+
+    def test_newton_cooling_hot_object(self):
+        # Object hotter than environment → positive rate
+        rate = newton_cooling_rate(10.0, 360.0, 295.0)
+        self.assertGreater(rate, 0)
+
+    def test_newton_cooling_cold_object(self):
+        rate = newton_cooling_rate(10.0, 250.0, 295.0)
+        self.assertLess(rate, 0)
+
+    def test_johnson_nyquist_positive(self):
+        self.assertGreater(johnson_nyquist_noise(293.0, 1000.0, 1000.0), 0)
+
+    def test_johnson_nyquist_increases_with_T(self):
+        v1 = johnson_nyquist_noise(100.0, 1000.0, 1000.0)
+        v2 = johnson_nyquist_noise(400.0, 1000.0, 1000.0)
+        self.assertGreater(v2, v1)
+
+    def test_johnson_nyquist_zero_T(self):
+        self.assertEqual(johnson_nyquist_noise(0.0, 1000.0, 1000.0), 0.0)
+
+
+class TestThermalEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_thr().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_thr().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_thr().to_binary(),
+            "001111010110111111010010111001101101010",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_thr().to_binary(), _make_thr().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = ThermalBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_temperature_affects_bits(self):
+        def enc(temps):
+            e = ThermalBridgeEncoder()
+            e.from_geometry({"temperatures_K": temps, "heat_flux_W_m2": [100.0]})
+            return e.to_binary()
+        self.assertNotEqual(enc([50.0, 50.0, 50.0]), enc([3000.0, 3000.0, 3000.0]))
+
+    def test_heat_flux_sign_affects_bits(self):
+        def enc(fluxes):
+            e = ThermalBridgeEncoder()
+            e.from_geometry({"temperatures_K": [300.0], "heat_flux_W_m2": fluxes})
+            return e.to_binary()
+        self.assertNotEqual(enc([500.0]), enc([-500.0]))
+
+    def test_emissivity_affects_summary(self):
+        # At high temperature the radiance band is sensitive to emissivity
+        def enc(eps):
+            e = ThermalBridgeEncoder()
+            e.from_geometry({"temperatures_K": [2000.0, 2000.0, 2000.0],
+                             "emissivity": eps, "heat_flux_W_m2": [100.0]})
+            return e.to_binary()
+        self.assertNotEqual(enc([0.01, 0.01, 0.01]), enc([1.0, 1.0, 1.0]))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Pressure / Haptic
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestPressurePhysics(unittest.TestCase):
+    # hydrostatic_pressure(rho, depth_m)
+    # elastic_stress(E_pa, strain)
+    # bulk_compression(B_pa, delta_V_over_V)
+    # acoustic_radiation_pressure(intensity_W_m2)
+    # piezoelectric_voltage(g_constant, stress_pa, thickness_m)
+
+    def test_hydrostatic_at_10m(self):
+        # 10 m water → ~98,066 Pa ≈ 1 atm gauge
+        P = hydrostatic_pressure(1000.0, 10.0)
+        self.assertAlmostEqual(P, 98066.5, delta=1.0)
+
+    def test_hydrostatic_zero_depth(self):
+        self.assertEqual(hydrostatic_pressure(1000.0, 0.0), 0.0)
+
+    def test_hydrostatic_scales_with_depth(self):
+        P1 = hydrostatic_pressure(1000.0, 10.0)
+        P2 = hydrostatic_pressure(1000.0, 20.0)
+        self.assertAlmostEqual(P2, 2 * P1)
+
+    def test_elastic_stress_tension(self):
+        # σ = E * ε  — positive strain → positive (tensile) stress
+        sig = elastic_stress(200e9, 0.001)
+        self.assertAlmostEqual(sig, 200e6)
+
+    def test_elastic_stress_compression(self):
+        sig = elastic_stress(200e9, -0.001)
+        self.assertLess(sig, 0)
+
+    def test_bulk_compression_positive_dp(self):
+        # compression (negative ΔV/V) → positive ΔP
+        dP = bulk_compression(2.2e9, -0.001)
+        self.assertGreater(dP, 0)
+
+    def test_bulk_compression_zero(self):
+        self.assertEqual(bulk_compression(2.2e9, 0.0), 0.0)
+
+    def test_acoustic_radiation_positive(self):
+        self.assertGreater(acoustic_radiation_pressure(1e4), 0)
+
+    def test_acoustic_radiation_scales(self):
+        P1 = acoustic_radiation_pressure(1e4)
+        P2 = acoustic_radiation_pressure(2e4)
+        self.assertAlmostEqual(P2, 2 * P1)
+
+    def test_piezoelectric_voltage(self):
+        # V = g * σ * t = 0.025 * 1e6 * 1e-3 = 25 V
+        V = piezoelectric_voltage(0.025, 1e6, 1e-3)
+        self.assertAlmostEqual(V, 25.0)
+
+    def test_piezoelectric_zero_stress(self):
+        self.assertEqual(piezoelectric_voltage(0.025, 0.0, 1e-3), 0.0)
+
+
+class TestPressureEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_prs().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_prs().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_prs().to_binary(),
+            "011111101111001011011111000110011111100",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_prs().to_binary(), _make_prs().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = PressureBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_pressure_magnitude_affects_bits(self):
+        def enc(pressures):
+            e = PressureBridgeEncoder()
+            e.from_geometry({"pressures_Pa": pressures, "stresses_Pa": [0.0] * len(pressures), "strains": []})
+            return e.to_binary()
+        self.assertNotEqual(enc([1.0, 1.0, 1.0]), enc([1e8, 1e8, 1e8]))
+
+    def test_compressive_vs_tensile_affects_bits(self):
+        def enc(stresses):
+            e = PressureBridgeEncoder()
+            e.from_geometry({"pressures_Pa": [ATM] * len(stresses), "stresses_Pa": stresses, "strains": []})
+            return e.to_binary()
+        self.assertNotEqual(enc([-1e6, -1e6, -1e6]), enc([1e6, 1e6, 1e6]))
+
+    def test_yield_threshold_affects_bits(self):
+        def enc(thresh):
+            e = PressureBridgeEncoder(yield_threshold=thresh)
+            e.from_geometry({"pressures_Pa": [ATM], "stresses_Pa": [1e6], "strains": [0.003]})
+            return e.to_binary()
+        self.assertNotEqual(enc(0.001), enc(0.005))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Chemical
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestChemicalPhysics(unittest.TestCase):
+    # arrhenius_rate(A, Ea_J_mol, T_K)
+    # nernst_potential(T_K, z, c_oxidised, c_reduced)
+    # henry_concentration(K_H, partial_pressure_pa)
+    # bond_energy_delta(broken_kJ_mol, formed_kJ_mol)
+    # ph_from_concentration(H_conc_mol_L)
+
+    def test_arrhenius_increases_with_T(self):
+        k_low  = arrhenius_rate(1e12, 50e3, 300.0)
+        k_high = arrhenius_rate(1e12, 50e3, 400.0)
+        self.assertGreater(k_high, k_low)
+
+    def test_arrhenius_zero_T(self):
+        self.assertEqual(arrhenius_rate(1e12, 50e3, 0.0), 0.0)
+
+    def test_arrhenius_high_Ea_slow(self):
+        k_low_Ea  = arrhenius_rate(1e12, 10e3, 300.0)
+        k_high_Ea = arrhenius_rate(1e12, 200e3, 300.0)
+        self.assertGreater(k_low_Ea, k_high_Ea)
+
+    def test_nernst_equal_concentrations(self):
+        # [ox]=[red] → ln(1) = 0 → E = 0
+        E = nernst_potential(298.15, 1, 1.0, 1.0)
+        self.assertAlmostEqual(E, 0.0)
+
+    def test_nernst_dilute_negative(self):
+        # c_ox < c_red → negative potential
+        E = nernst_potential(298.15, 2, 0.001, 1.0)
+        self.assertLess(E, 0)
+        self.assertAlmostEqual(E * 1000, -88.73, delta=0.1)
+
+    def test_nernst_zero_concentration(self):
+        self.assertEqual(nernst_potential(298.15, 1, 0.0, 1.0), 0.0)
+
+    def test_henry_proportional_to_pressure(self):
+        C1 = henry_concentration(1.3e-8, 1e4)
+        C2 = henry_concentration(1.3e-8, 2e4)
+        self.assertAlmostEqual(C2, 2 * C1)
+
+    def test_henry_zero_pressure(self):
+        self.assertEqual(henry_concentration(1.3e-8, 0.0), 0.0)
+
+    def test_bond_exothermic(self):
+        # H₂ combustion: −309 kJ/mol
+        dH = bond_energy_delta([436.0, 249.0], [2 * 497.0])
+        self.assertAlmostEqual(dH, -309.0, delta=0.1)
+
+    def test_bond_endothermic_positive(self):
+        # breaking bonds with no formation
+        dH = bond_energy_delta([500.0], [0.0])
+        self.assertGreater(dH, 0)
+
+    def test_ph_neutral(self):
+        self.assertAlmostEqual(ph_from_concentration(1e-7), 7.0)
+
+    def test_ph_acid(self):
+        self.assertAlmostEqual(ph_from_concentration(0.1), 1.0)
+
+    def test_ph_base(self):
+        self.assertAlmostEqual(ph_from_concentration(1e-13), 13.0)
+
+
+class TestChemicalEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_chem().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_chem().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_chem().to_binary(),
+            "111010010010011011110111111000111110010",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_chem().to_binary(), _make_chem().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = ChemicalBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_rate_threshold_affects_bits(self):
+        def enc(thresh):
+            e = ChemicalBridgeEncoder(rate_threshold=thresh)
+            e.from_geometry({
+                "rate_constants": [0.01, 0.01, 0.01],
+                "ph_values":      [7.0, 7.0, 7.0],
+                "bond_deltas_kJ": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc(1e-4), enc(1.0))
+
+    def test_ph_affects_bits(self):
+        def enc(ph):
+            e = ChemicalBridgeEncoder()
+            e.from_geometry({
+                "rate_constants": [0.1],
+                "ph_values":      ph,
+                "bond_deltas_kJ": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([2.0]), enc([12.0]))
+
+    def test_bond_sign_affects_bits(self):
+        def enc(deltas):
+            e = ChemicalBridgeEncoder()
+            e.from_geometry({
+                "rate_constants": [0.1],
+                "ph_values":      [7.0],
+                "bond_deltas_kJ": deltas,
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([-400.0, -400.0]), enc([400.0, 400.0]))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 9. Wave (quantum)
 # ═══════════════════════════════════════════════════════════════════════════
 
 import math as _math_mod
@@ -903,11 +1311,11 @@ class TestWaveEncoder(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 7. Cross-encoder sanity
+# 10. Cross-encoder sanity
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestCrossEncoder(unittest.TestCase):
-    """Ensure all six encoders produce distinct, valid outputs."""
+    """Ensure all nine encoders produce distinct, valid outputs."""
 
     def setUp(self):
         self.encoders = {
@@ -917,6 +1325,9 @@ class TestCrossEncoder(unittest.TestCase):
             "gravity":  _make_grv(),
             "electric": _make_elc(),
             "wave":     _make_wav(),
+            "thermal":  _make_thr(),
+            "pressure": _make_prs(),
+            "chemical": _make_chem(),
         }
         self.bits = {name: e.to_binary() for name, e in self.encoders.items()}
 
@@ -942,6 +1353,9 @@ class TestCrossEncoder(unittest.TestCase):
         self.assertEqual(len(self.bits["gravity"]),  39)
         self.assertEqual(len(self.bits["electric"]), 39)
         self.assertEqual(len(self.bits["wave"]),     39)
+        self.assertEqual(len(self.bits["thermal"]),  39)
+        self.assertEqual(len(self.bits["pressure"]), 39)
+        self.assertEqual(len(self.bits["chemical"]), 39)
 
 
 if __name__ == "__main__":
