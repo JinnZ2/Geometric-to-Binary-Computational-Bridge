@@ -242,6 +242,33 @@ def simulate_lattice(n_cells: int = 2000,
     }
 
 
+# ── Temperature & enrichment sweeps ──────────────────────────────────────────
+
+def sweep_temperature(temps: np.ndarray,
+                      strain_pct: float = STRAIN_OPT,
+                      dist_ang: float = DIST_OPT,
+                      si29: float = 0.001) -> np.ndarray:
+    """T₂ (ms) vs temperature at fixed (ε*, d*).  Γ_phonon ∝ T."""
+    kw = k_well(strain_pct, dist_ang)
+    return np.array([
+        1000.0 / (gamma_phonon(kw, T) + gamma_bath(si29) + gamma_thermal())
+        for T in temps
+    ])
+
+
+def sweep_enrichment(si29_fracs: np.ndarray,
+                     strain_pct: float = STRAIN_OPT,
+                     dist_ang: float = DIST_OPT) -> np.ndarray:
+    """T₂ (ms) vs ²⁹Si isotopic fraction at fixed (ε*, d*, 300 K).  Γ_bath ∝ f."""
+    kw = k_well(strain_pct, dist_ang)
+    G_ph = gamma_phonon(kw)
+    G_th = gamma_thermal()
+    return np.array([
+        1000.0 / (G_ph + gamma_bath(f) + G_th)
+        for f in si29_fracs
+    ])
+
+
 # ── Main report ───────────────────────────────────────────────────────────────
 
 def main():
@@ -320,6 +347,41 @@ def main():
               f"yield = {lat['yield_pct']:.1f}%   "
               f"T₂ = {lat['T2_mean_ms']:.0f} ± {lat['T2_std_ms']:.0f} ms   "
               f"correction = {lat['correction_energy_aJ']:.0f} aJ")
+
+    # ── 7. Temperature sweep ──────────────────────────────────────────────────
+    print("\n[7]  T₂ vs Temperature   (ε = ε*, d = d*, f₂₉Si = 0.1%)\n")
+    temps = np.array([10, 30, 77, 150, 200, 250, 300, 350, 400, 450])
+    T2_temps = sweep_temperature(temps)
+    print(f"     {'T (K)':>6}  {'T₂ (ms)':>8}  {'vs 300K':>8}")
+    print(f"     {'------':>6}  {'--------':>8}  {'--------':>8}")
+    for T, T2v in zip(temps, T2_temps):
+        ratio = T2v / predict_T2(STRAIN_OPT, DIST_OPT)["T2_ms"]
+        bar_len = min(int(ratio * 10), 20)
+        bar = "█" * bar_len + "·" * (20 - bar_len)
+        mark = " ← 300 K" if T == 300 else ""
+        print(f"     {T:>6}  {T2v:>8.1f}  {ratio:>8.2f}×  {bar}{mark}")
+    phonon_limit = 1000.0 / (gamma_thermal() + gamma_bath())
+    print(f"\n     Phonon-free limit (T→0): {phonon_limit:.0f} ms  "
+          f"(bath + thermal floor)")
+
+    # ── 8. Isotopic enrichment sweep ──────────────────────────────────────────
+    print("\n[8]  T₂ vs ²⁹Si Fraction   (ε = ε*, d = d*, T = 300 K)\n")
+    si29_vals = np.array([0.0001, 0.0005, 0.001, 0.005, 0.01, 0.02, 0.047])
+    T2_enrich = sweep_enrichment(si29_vals)
+    natural_si = 0.047   # natural abundance ²⁹Si
+    print(f"     {'f₂₉Si':>8}  {'²⁸Si%':>7}  {'T₂ (ms)':>8}  label")
+    print(f"     {'-------':>8}  {'-------':>7}  {'--------':>8}  -----")
+    labels = {0.0001: "ultra-pure", 0.0005: "research",
+              0.001: "arch target", 0.005: "good", 0.01: "standard",
+              0.02: "moderate", 0.047: "natural"}
+    for f, T2v in zip(si29_vals, T2_enrich):
+        bar_len = min(int(T2v / T2_TARGET * 20), 20)
+        bar = "█" * bar_len + "·" * (20 - bar_len)
+        print(f"     {f:>8.4f}  {(1-f)*100:>6.2f}%  {T2v:>8.1f}  "
+              f"{labels.get(f,''):14}  {bar}")
+    phonon_floor = 1000.0 / (gamma_phonon(k_well(STRAIN_OPT, DIST_OPT)) + gamma_thermal())
+    print(f"\n     Bath-free limit (f→0): {phonon_floor:.0f} ms  "
+          f"(phonon + thermal floor)")
 
     print("\n" + "=" * W)
     print("  Simulation complete.".center(W))
