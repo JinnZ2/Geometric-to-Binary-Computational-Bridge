@@ -279,9 +279,15 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 
 ### Functional
 - GEIS encoder/decoder — working, round-trips validated
-- Domain bridge encoders (magnetic, light, sound, gravity, electric) in `bridges/` — working, 98 tests passing
+- Domain bridge encoders (all 11 domains) in `bridges/` — working, 231 tests passing
 - `bridges/abstract_encoder.py` — single unified base class for all domain encoders
+- `bridges/sensor_suite.py` + `bridges/sensor_suite.json` — 22-sensor parallel-field compositor
+- `bridges/field_adapter.py` — Engine → SensorSuite adapter (`field_to_suite()`)
+- `SoundBridgeEncoder.pitch_threshold` — wired into `_pitch_bands()` in `to_binary()`
+- **Frontend**: builds clean (`npm run build` ✓). Run with `npm install && npm run dev`.
+  Files are `.jsx`; `solver.js` mirrors the Python Engine as a standalone JS implementation.
+- `Silicon/crystalline_nn_sim.py` — phi-spaced octahedral NN, all Storage.md §X predictions verified
+- `Silicon/prototaxites_sim.py` — Prototaxites energy mimetics, all 4 framework predictions verified
 
 ### Remaining Items
-- **`SoundBridgeEncoder.pitch_threshold`** is stored but not yet wired into the frequency-band encoding logic.
-- **Frontend**: Has `package.json` and Vite config but hasn't been tested end-to-end with `npm install && npm run dev`. The JS solver (`Front end/solver.js`) mirrors the Python Engine but is a separate implementation.
+- Frontend not yet tested live in a browser against real user interaction (build passes, dev server untested in this environment).
