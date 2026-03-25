@@ -55,7 +55,7 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 57 | All 5 domain encoders + orchestrator |
+| Bridges | `tests/test_bridges.py` | 98 | All 5 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 
 ### CI/CD & Linting
@@ -86,24 +86,16 @@ GEIS/                           Geometric Information Encoding System
 ### Bridge Modules
 
 ```
-bridge/                         Orchestration layer
-├── bridge_orchestrator.py        Main coordinator
-├── abstract_encoder.py           Base class for all encoders
-└── addendum_entropy_analyzer.py  Entropy calculations
-
-src/bridge/                     Modular field encoders (unified)
-├── encode_binary.py              Unified entry point
-├── common.py                     Shared utilities (Gray codes)
-├── gravity.py                    Gravity field encoding
-├── light.py                      Light spectrum encoding
-└── sound.py                      Sound/vibration encoding
-
-magnetic-bridge/                Standalone domain bridges
-light-bridge/                     Each contains a {domain}_encoder.py
-sound-bridge/                     with domain-specific encoding logic
-gravity-bridge/
-electric-bridge/
+bridges/                        Unified OOP domain encoders
+├── abstract_encoder.py           BinaryBridgeEncoder base class
+├── magnetic_encoder.py           Magnetic field → binary (43 bits)
+├── light_encoder.py              Light/optics → binary (31 bits)
+├── sound_encoder.py              Acoustic → binary (31 bits)
+├── gravity_encoder.py            Gravity field → binary (39 bits)
+└── electric_encoder.py           Electric field → binary (39 bits)
 ```
+
+Each encoder exposes pure physics helper functions and a `BinaryBridgeEncoder` subclass with `from_geometry()` / `to_binary()`. All use Gray codes for stability between adjacent values.
 
 ### Frontend
 
@@ -164,17 +156,15 @@ Human Intuition
 
 Five modality encoders convert physical phenomena to binary. All use **Gray codes** for single-bit-change stability between adjacent values.
 
-| Bridge     | Input                     | Encoding Strategy          | Entry Point                      |
-|------------|---------------------------|----------------------------|----------------------------------|
-| Magnetic   | Polarity (N/S)            | Direct binary mapping      | `magnetic-bridge/magnetic_encoder.py` |
-| Light      | Wavelength + chromaticity | SPD → Gray-coded bands     | `light-bridge/light_encoder.py`  |
-| Sound      | Phase, pitch, amplitude   | Temporal pattern analysis  | `sound-bridge/sound_encoder.py`  |
-| Gravity    | Curvature, orbit params   | Stability curve mapping    | `gravity-bridge/gravity_encoder.py` |
-| Electric   | Charge, current flow      | Polarity + magnitude       | `electric-bridge/electric_encoder.py` |
+| Bridge     | Input                     | Output  | Entry Point                          |
+|------------|---------------------------|---------|--------------------------------------|
+| Magnetic   | Field lines, resonance    | 43 bits | `bridges/magnetic_encoder.py`        |
+| Light      | Wavelength, polarization  | 31 bits | `bridges/light_encoder.py`           |
+| Sound      | Phase, pitch, amplitude   | 31 bits | `bridges/sound_encoder.py`           |
+| Gravity    | Vectors, curvature, orbit | 39 bits | `bridges/gravity_encoder.py`         |
+| Electric   | Charge, current, voltage  | 39 bits | `bridges/electric_encoder.py`        |
 
-**Unified interface** (in `src/bridge/encode_binary.py`): `encode(modality, features, target_bits)`
-
-New bridges should inherit from `bridge/abstract_encoder.py`.
+New bridges should inherit from `bridges/abstract_encoder.py` (`BinaryBridgeEncoder`) and implement `from_geometry()` / `to_binary()`.
 
 ### GEIS (Geometric Information Encoding System)
 
@@ -227,8 +217,8 @@ The `Engine/` module provides real electromagnetic field computation:
 
 ### File & Directory Naming
 
-- Bridge directories: `{domain}-bridge/`
-- Encoder files: `{domain}_encoder.py`
+- Bridge directory: `bridges/`
+- Encoder files: `bridges/{domain}_encoder.py`
 - Geometric token format: `[vertex_bits][operator][symbol]`
 - State symbols: single letter + optional subscript (`O`, `I`, `X`, `Δ`)
 
@@ -273,11 +263,9 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 
 ### Functional
 - GEIS encoder/decoder — working, round-trips validated
-- Domain bridge encoders (magnetic, light, sound, gravity, electric) — working
-- Temporal and inflection bridge encoders — working
-- Bridge orchestrator — basic functionality works
+- Domain bridge encoders (magnetic, light, sound, gravity, electric) in `bridges/` — working, 98 tests passing
+- `bridges/abstract_encoder.py` — single unified base class for all domain encoders
 
 ### Remaining Items
-- **Two bridge paradigms coexist**: `src/bridge/` uses procedural functions (feature extraction + Gray-coded encoding); `{domain}-bridge/` uses OOP classes inheriting from `BinaryBridgeEncoder` (geometry-in, binary-out). These serve different roles but are not unified under a single interface.
+- **`SoundBridgeEncoder.pitch_threshold`** is stored but not yet wired into the frequency-band encoding logic.
 - **Frontend**: Has `package.json` and Vite config but hasn't been tested end-to-end with `npm install && npm run dev`. The JS solver (`Front end/solver.js`) mirrors the Python Engine but is a separate implementation.
-- **`src/bridge/light.py`**: `spd_to_xyY()` uses stub chromaticity approximations — should be replaced with proper CIE 1931 color matching functions.
