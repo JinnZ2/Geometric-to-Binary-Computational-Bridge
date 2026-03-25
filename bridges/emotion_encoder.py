@@ -229,6 +229,169 @@ class EmotionBridgeEncoder(BinaryBridgeEncoder):
         self.input_geometry = geometry_data
         return self
 
+    # ------------------------------------------------------------------
+    # SensorSuite integration
+    # ------------------------------------------------------------------
+
+    def to_suite(self, suite):
+        """
+        Map loaded PAD geometry into SensorSuite readings and run the
+        compositor.
+
+        Translates the three PAD dimensions plus derived scalars
+        (PAD intensity, valence-arousal coherence, surprise factor) into
+        per-sensor magnitude readings on the supplied SensorSuite, then
+        returns the compositor's CompositeOutput.
+
+        Only the 15 PAD-relevant sensors are written; all others retain
+        whatever state the caller has previously set.  Sensors with a
+        derived magnitude of 0 are reset to quiescent so stale readings
+        do not bleed into the compositor pass.
+
+        Parameters
+        ----------
+        suite : SensorSuite
+            A live SensorSuite instance.  Its state is modified in-place.
+
+        Returns
+        -------
+        CompositeOutput
+            Result of suite.compose() after applying PAD-derived readings.
+
+        Raises
+        ------
+        ValueError
+            If from_geometry() has not been called first.
+        """
+        if self.input_geometry is None:
+            raise ValueError(
+                "No geometry loaded. Call from_geometry(data) before to_suite()."
+            )
+
+        data       = self.input_geometry
+        v          = data.get("valence",          0.0)
+        a          = data.get("arousal",          0.0)
+        d          = data.get("dominance",        0.0)
+        prior_I    = data.get("prior_intensity",  0.0)
+        dt         = data.get("delta_t",          1.0)
+        bridge_grads = data.get("bridge_gradients", {})
+
+        # Derived scalars
+        I      = pad_intensity(v, a, d)
+        norm_I = I / math.sqrt(3.0)
+        C_VA   = valence_arousal_coherence(v, a)
+        S      = surprise_factor(I, prior_I, dt)
+        norm_S = min(S / 2.0, 1.0)
+
+        # Reset the 15 PAD-driven channels before re-mapping so previous
+        # calls don't bleed forward.
+        _PAD_CHANNELS = (
+            "coherence", "discordance", "fear", "anger", "grief", "pain",
+            "love", "trust", "pride", "shame", "dignity", "vigilance",
+            "curiosity", "pressure", "confusion",
+        )
+        for sid in _PAD_CHANNELS:
+            suite.reset(sid)
+
+        def _m(value: float, floor: float = 0.0) -> float:
+            """Clamp value to [0, 1]; return 0 if below floor."""
+            clamped = max(0.0, min(1.0, value))
+            return clamped if clamped > floor else 0.0
+
+        # Coherence: calm positive affect (v > 0, low |a|)
+        if v > 0:
+            suite.update("coherence",
+                         signal_vector=[v, -abs(a)],
+                         magnitude=_m(v * (1.0 - abs(a))))
+
+        # Discordance: circumplex incoherence when state is non-trivial
+        if norm_I > 0.1:
+            suite.update("discordance",
+                         signal_vector=[1.0 - C_VA],
+                         magnitude=_m(1.0 - C_VA, floor=0.2))
+
+        # Fear: negative valence + high arousal
+        if v < 0 and a > 0:
+            suite.update("fear",
+                         signal_vector=[abs(v), a],
+                         magnitude=_m((abs(v) + a) / 2.0))
+
+        # Anger: negative valence + high arousal + positive dominance
+        if v < 0 and a > 0 and d > 0:
+            suite.update("anger",
+                         signal_vector=[abs(v), a, d],
+                         magnitude=_m(abs(v) * a))
+
+        # Grief: negative valence + low arousal
+        if v < 0 and a < 0:
+            suite.update("grief",
+                         signal_vector=[abs(v), abs(a)],
+                         magnitude=_m((abs(v) + abs(a)) / 2.0))
+
+        # Pain: high negative affect regardless of arousal
+        if v < 0 and norm_I > 0.3:
+            suite.update("pain",
+                         signal_vector=[abs(v)],
+                         magnitude=_m(abs(v)))
+
+        # Love: positive valence + low or negative arousal
+        if v > 0 and a <= 0:
+            suite.update("love",
+                         signal_vector=[v, abs(d)],
+                         magnitude=_m(v))
+
+        # Trust: coherent positive valence (circumplex-consistent)
+        if v > 0 and C_VA > 0.5:
+            suite.update("trust",
+                         signal_vector=[v, C_VA],
+                         magnitude=_m(v * C_VA))
+
+        # Pride: positive valence + high arousal + positive dominance
+        if v > 0 and a > 0 and d > 0:
+            suite.update("pride",
+                         signal_vector=[v, a, d],
+                         magnitude=_m((v + a + d) / 3.0))
+
+        # Shame: negative valence + negative dominance
+        if v < 0 and d < 0:
+            suite.update("shame",
+                         signal_vector=[abs(v), abs(d)],
+                         magnitude=_m((abs(v) + abs(d)) / 2.0))
+
+        # Dignity: positive dominance regardless of valence
+        if d > 0:
+            suite.update("dignity",
+                         signal_vector=[d],
+                         magnitude=_m(d))
+
+        # Vigilance: high absolute arousal
+        if abs(a) > 0.3:
+            suite.update("vigilance",
+                         signal_vector=[abs(a)],
+                         magnitude=_m(abs(a)))
+
+        # Curiosity: rapid surprise (state changed quickly)
+        if norm_S > 0.15:
+            suite.update("curiosity",
+                         signal_vector=[norm_S],
+                         magnitude=_m(norm_S))
+
+        # Pressure: high overall PAD intensity
+        if norm_I > 0.5:
+            suite.update("pressure",
+                         signal_vector=[norm_I],
+                         magnitude=_m(norm_I))
+
+        # Confusion: low circumplex coherence when state is active
+        if C_VA < 0.4 and norm_I > 0.2:
+            suite.update("confusion",
+                         signal_vector=[1.0 - C_VA],
+                         magnitude=_m(1.0 - C_VA))
+
+        return suite.compose()
+
+    # ------------------------------------------------------------------
+
     def to_binary(self) -> str:
         """
         Convert loaded emotional state into a binary bitstring.
