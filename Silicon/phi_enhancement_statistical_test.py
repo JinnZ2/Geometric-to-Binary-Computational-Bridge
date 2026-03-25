@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 phi_enhancement_statistical_test.py
 
 Statistical Framework for Testing Phi-Enhancement Hypothesis
@@ -11,7 +14,7 @@ Primary Test: LHC-II pigment pair analysis
 Methods: t-test, permutation test, correlation, bootstrap CI
 
 MIT License
-“””
+"""
 
 import numpy as np
 from scipy import stats
@@ -34,26 +37,26 @@ R0_CHLOROPHYLL = 2.5e-9  # Förster radius for Chl-Chl (m)
 # =============================================================================
 
 class PigmentPair(NamedTuple):
-pair_id: str
-distance: float
-distance_normalized: float
-transfer_rate: float
-transfer_efficiency: float
-is_phi_distance: bool
-closest_phi_power: float
-phi_deviation: float
+    pair_id: str
+    distance: float
+    distance_normalized: float
+    transfer_rate: float
+    transfer_efficiency: float
+    is_phi_distance: bool
+    closest_phi_power: float
+    phi_deviation: float
 
 class StatisticalResult(NamedTuple):
-test_name: str
-n_phi_pairs: int
-n_control_pairs: int
-phi_mean: float
-control_mean: float
-effect_size: float
-p_value: float
-confidence_interval: Tuple[float, float]
-is_significant: bool
-power: float
+    test_name: str
+    n_phi_pairs: int
+    n_control_pairs: int
+    phi_mean: float
+    control_mean: float
+    effect_size: float
+    p_value: float
+    confidence_interval: Tuple[float, float]
+    is_significant: bool
+    power: float
 
 # =============================================================================
 
@@ -62,7 +65,7 @@ power: float
 # =============================================================================
 
 def classify_phi_distance(r_normalized: float, tolerance: float = 0.05) -> Tuple[bool, float, float]:
-“”“Classify if distance is close to phi-ratio.”””
+    """Classify if distance is close to phi-ratio."""
 deviations = [abs(r_normalized - phi_power) for phi_power in PHI_POWERS]
 min_deviation = min(deviations)
 closest_phi = PHI_POWERS[deviations.index(min_deviation)]
@@ -70,9 +73,9 @@ is_phi = min_deviation <= tolerance
 return is_phi, closest_phi, min_deviation
 
 def expected_classical_rate(r: float, R0: float, tau_D: float = 1e-9) -> float:
-“”“Classical FRET rate: k_T = (1/τ_D) × (R0/r)^6”””
+    """Classical FRET rate: k_T = (1/τ_D) × (R0/r)^6"""
 if r <= 0:
-return float(‘inf’)
+return float('inf')
 return (1.0 / tau_D) * (R0 / r) ** 6
 
 # =============================================================================
@@ -82,13 +85,12 @@ return (1.0 / tau_D) * (R0 / r) ** 6
 # =============================================================================
 
 def generate_lhcii_pigment_data(seed: int = 42, embed_signal: bool = True) -> List[PigmentPair]:
-“””
-Generate simulated LHC-II data.
-
-```
-Set embed_signal=True to test detection capability
-Set embed_signal=False to test null hypothesis
-"""
+    """
+    Generate simulated LHC-II data.
+    
+    Set embed_signal=True to test detection capability
+    Set embed_signal=False to test null hypothesis
+    """
 np.random.seed(seed)
 
 n_molecules = 14  # LHC-II has ~14 chlorophylls
@@ -129,8 +131,8 @@ return pairs
 
 # =============================================================================
 
-def perform_t_test(pairs: List[PigmentPair], metric: str = ‘transfer_rate’) -> StatisticalResult:
-“”“Primary t-test for phi-enhancement.”””
+def perform_t_test(pairs: List[PigmentPair], metric: str = 'transfer_rate') -> StatisticalResult:
+    """Primary t-test for phi-enhancement."""
 phi_pairs = [p for p in pairs if p.is_phi_distance]
 control_pairs = [p for p in pairs if not p.is_phi_distance]
 
@@ -179,7 +181,7 @@ return StatisticalResult(
 ```
 
 def perform_correlation_test(pairs: List[PigmentPair]) -> Dict:
-“”“Test correlation between phi-deviation and enhancement.”””
+    """Test correlation between phi-deviation and enhancement."""
 deviations = []
 enhancements = []
 
@@ -205,8 +207,8 @@ return {
 ```
 
 def perform_permutation_test(pairs: List[PigmentPair], n_permutations: int = 10000,
-metric: str = ‘transfer_rate’) -> Dict:
-“”“Non-parametric permutation test.”””
+metric: str = 'transfer_rate') -> Dict:
+"""Non-parametric permutation test."""
 phi_values = [getattr(p, metric) for p in pairs if p.is_phi_distance]
 control_values = [getattr(p, metric) for p in pairs if not p.is_phi_distance]
 
@@ -235,8 +237,8 @@ return {
 ```
 
 def perform_bootstrap(pairs: List[PigmentPair], n_bootstrap: int = 5000,
-metric: str = ‘transfer_rate’) -> Dict:
-“”“Bootstrap CI for effect size.”””
+metric: str = 'transfer_rate') -> Dict:
+"""Bootstrap CI for effect size."""
 phi_values = [getattr(p, metric) for p in pairs if p.is_phi_distance]
 control_values = [getattr(p, metric) for p in pairs if not p.is_phi_distance]
 
@@ -269,11 +271,11 @@ return {
 # =============================================================================
 
 def run_complete_analysis(pairs: List[PigmentPair]) -> Dict:
-“”“Run all statistical tests.”””
+    """Run all statistical tests."""
 results = {
-‘n_total’: len(pairs),
-‘n_phi’: sum(1 for p in pairs if p.is_phi_distance),
-‘n_control’: sum(1 for p in pairs if not p.is_phi_distance)
+'n_total': len(pairs),
+'n_phi': sum(1 for p in pairs if p.is_phi_distance),
+'n_control': sum(1 for p in pairs if not p.is_phi_distance)
 }
 
 ```
@@ -301,10 +303,10 @@ return results
 ```
 
 def print_report(results: Dict):
-“”“Print analysis report.”””
-print(”=” * 70)
-print(“PHI-ENHANCEMENT HYPOTHESIS: STATISTICAL ANALYSIS”)
-print(”=” * 70)
+    """Print analysis report."""
+print("=" * 70)
+print("PHI-ENHANCEMENT HYPOTHESIS: STATISTICAL ANALYSIS")
+print("=" * 70)
 
 ```
 print(f"\nDATA: {results['n_total']} pairs ({results['n_phi']} phi, {results['n_control']} control)")
@@ -346,8 +348,8 @@ print("=" * 70)
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(“Testing with embedded signal (should detect)…”)
+if **name** == "**main**":
+print("Testing with embedded signal (should detect)…")
 pairs_signal = generate_lhcii_pigment_data(seed=42, embed_signal=True)
 results_signal = run_complete_analysis(pairs_signal)
 print_report(results_signal)

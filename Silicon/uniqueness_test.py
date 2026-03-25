@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 uniqueness_test.py
 
 Global Uniqueness Validation for 8D Hyper-Octahedral Seed Expansion
@@ -21,7 +24,7 @@ the theoretical claims about reversibility and uniqueness are empirically
 verified across a wide range of seed configurations.
 
 MIT License - Use freely, build upon, no attribution required
-“””
+"""
 
 import numpy as np
 from typing import List, Dict, Tuple
@@ -47,17 +50,17 @@ recover_seed, verify_recovery, params_to_seed
 # =============================================================================
 
 DEFAULT_CONFIG = {
-‘num_seeds’: 40,
-‘steps_forward’: 5,
-‘rho’: 1.5,
-‘base_epsilon’: 0.6,
-‘coupling_alpha’: 0.1,
-‘sigma_scale’: 0.5,
-‘tol_seed’: 1e-4,
-‘tol_loss’: 1e-8,
-‘tol_collision’: 1e-10,
-‘use_dynamic’: True,
-‘random_seed’: 12345
+'num_seeds': 40,
+'steps_forward': 5,
+'rho': 1.5,
+'base_epsilon': 0.6,
+'coupling_alpha': 0.1,
+'sigma_scale': 0.5,
+'tol_seed': 1e-4,
+'tol_loss': 1e-8,
+'tol_collision': 1e-10,
+'use_dynamic': True,
+'random_seed': 12345
 }
 
 # =============================================================================
@@ -67,21 +70,20 @@ DEFAULT_CONFIG = {
 # =============================================================================
 
 def generate_random_seed_dirichlet(alpha: float = 0.8) -> np.ndarray:
-“””
-Generate random seed using Dirichlet distribution.
-
-```
-Lower alpha values produce more concentrated/sparse seeds.
-Higher alpha values produce more uniform seeds.
-"""
+    """
+    Generate random seed using Dirichlet distribution.
+    
+    Lower alpha values produce more concentrated/sparse seeds.
+    Higher alpha values produce more uniform seeds.
+    """
 return np.random.dirichlet(np.ones(N_VERTICES) * alpha)
 ```
 
 def generate_seed_batch(n_seeds: int, alpha: float = 0.8,
 seed: int = None) -> List[np.ndarray]:
-“””
+"""
 Generate batch of random seeds.
-“””
+"""
 if seed is not None:
 np.random.seed(seed)
 
@@ -96,12 +98,11 @@ return [generate_random_seed_dirichlet(alpha) for _ in range(n_seeds)]
 # =============================================================================
 
 def compute_pairwise_distances(fingerprints: List[np.ndarray]) -> np.ndarray:
-“””
-Compute pairwise L2 distances between fingerprints.
-
-```
-Returns upper triangular distance matrix.
-"""
+    """
+    Compute pairwise L2 distances between fingerprints.
+    
+    Returns upper triangular distance matrix.
+    """
 n = len(fingerprints)
 distances = np.zeros((n, n))
 
@@ -116,10 +117,9 @@ return distances
 
 def find_collisions(distances: np.ndarray,
 tol: float = 1e-10) -> List[Tuple[int, int, float]]:
-“””
+"""
 Find pairs of seeds with nearly identical fingerprints.
 
-```
 Returns list of (i, j, distance) tuples for collisions.
 """
 n = distances.shape[0]
@@ -140,17 +140,16 @@ return collisions
 # =============================================================================
 
 def run_uniqueness_test(config: Dict = None, verbose: bool = True) -> Dict:
-“””
-Run comprehensive uniqueness validation.
-
-```
-Args:
-    config: Test configuration (uses DEFAULT_CONFIG if None)
-    verbose: Print progress
+    """
+    Run comprehensive uniqueness validation.
     
-Returns:
-    Complete test results dictionary
-"""
+    Args:
+        config: Test configuration (uses DEFAULT_CONFIG if None)
+        verbose: Print progress
+        
+    Returns:
+        Complete test results dictionary
+    """
 if config is None:
     config = DEFAULT_CONFIG.copy()
 
@@ -380,24 +379,22 @@ summary = {
 
 if verbose:
     print(f"""
-```
 
 Recovery Success Rate: {n_success}/{num_seeds} ({100*n_success/num_seeds:.1f}%)
 
-Deviation: min={summary[‘deviation_stats’][‘min’]:.2e},
-max={summary[‘deviation_stats’][‘max’]:.2e},
-median={summary[‘deviation_stats’][‘median’]:.2e}
+Deviation: min={summary['deviation_stats']['min']:.2e},
+max={summary['deviation_stats']['max']:.2e},
+median={summary['deviation_stats']['median']:.2e}
 
-Loss: min={summary[‘loss_stats’][‘min’]:.2e},
-max={summary[‘loss_stats’][‘max’]:.2e},
-median={summary[‘loss_stats’][‘median’]:.2e}
+Loss: min={summary['loss_stats']['min']:.2e},
+max={summary['loss_stats']['max']:.2e},
+median={summary['loss_stats']['median']:.2e}
 
 Collisions: {len(collisions)}
 
-Total time: {summary[‘total_time’]:.2f}s
-“””)
+Total time: {summary['total_time']:.2f}s
+""")
 
-```
 # ==========================================================================
 # Final Results
 # ==========================================================================
@@ -423,13 +420,12 @@ results = {
 }
 
 return results
-```
 
 def save_results(results: Dict, filename: str = None):
-“”“Save results to JSON file.”””
+    """Save results to JSON file."""
 if filename is None:
 timestamp = int(time.time())
-filename = f”uniqueness_results_{timestamp}.json”
+filename = f"uniqueness_results_{timestamp}.json"
 
 ```
 with open(filename, 'w') as f:
@@ -447,10 +443,9 @@ return filename
 
 def quick_test(n_seeds: int = 10, steps: int = 5,
 use_dynamic: bool = True) -> bool:
-“””
+"""
 Quick validation test with minimal configuration.
 
-```
 Returns True if all seeds recovered successfully.
 """
 config = DEFAULT_CONFIG.copy()
@@ -469,15 +464,15 @@ return results['summary']['overall_success_rate'] == 1.0
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=” * 70)
-print(“8D SEED EXPANSION: UNIQUENESS VALIDATION”)
-print(”=” * 70)
+if **name** == "**main**":
+print("=" * 70)
+print("8D SEED EXPANSION: UNIQUENESS VALIDATION")
+print("=" * 70)
 print()
-print(“This test validates that:”)
-print(“1. Different seeds produce different structures (no collisions)”)
-print(“2. Original seeds can be recovered from structures (reversibility)”)
-print(“3. The mapping seed ↔ structure is bijective”)
+print("This test validates that:")
+print("1. Different seeds produce different structures (no collisions)")
+print("2. Original seeds can be recovered from structures (reversibility)")
+print("3. The mapping seed ↔ structure is bijective")
 print()
 
 ```
@@ -507,23 +502,18 @@ the entire expanded structure at any scale.
 
 This proves the compression is LOSSLESS and the encoding
 is MINIMAL for the information content.
-```
 
-“””)
+""")
 else:
-print(f”””
+print(f"""
 ⚠ SOME TESTS FAILED
 
-```
 Success rate: {100*success_rate:.1f}%
 Collisions: {collisions}
 
 Investigate failed cases for edge conditions.
-```
 
-“””)
+""")
 
-```
 # Optionally save results
 # save_results(results)
-```

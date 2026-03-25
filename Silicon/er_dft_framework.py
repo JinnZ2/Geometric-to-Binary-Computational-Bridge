@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 # #!/usr/bin/env python3
-“””
+"""
 DFT Framework for Erbium in Strained Silicon
 
 This module generates input files and analyzes output for DFT calculations
@@ -7,7 +10,7 @@ aimed at finding the optimal strain (ε*) for self-assembly of Er dopants
 into octahedral interstitial sites in silicon.
 
 Target: Maximize ΔE_barrier = E_f(Er, T) - E_f(Er, O)
-“””
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -25,7 +28,7 @@ AMU_TO_EV = 931.494e6 / (299792458**2 * 1e20)  # Conversion factor for mass
 
 @dataclass
 class DFTConfig:
-“”“Configuration for DFT calculations”””
+    """Configuration for DFT calculations"""
 # Supercell parameters
 supercell_size: Tuple[int, int, int] = (3, 3, 3)  # Multiple of conventional unit cells
 
@@ -54,9 +57,9 @@ target_T2: float = 0.1  # seconds (100 ms)
 
 @dataclass
 class FormationEnergyResult:
-“”“Results from formation energy calculation”””
+    """Results from formation energy calculation"""
 strain: float  # Applied biaxial strain (%)
-site_type: str  # ‘O’ (octahedral) or ‘T’ (tetrahedral)
+site_type: str  # 'O' (octahedral) or 'T' (tetrahedral)
 formation_energy: float  # eV
 relaxed_position: np.ndarray  # Final atomic position (fractional coordinates)
 displacement: float  # Displacement from ideal site (Å)
@@ -64,7 +67,7 @@ total_energy: float  # Total system energy (eV)
 force_max: float  # Maximum residual force (eV/Å)
 
 class ErDFTAnalyzer:
-“”“Analyzer for Er dopant DFT calculations in strained Si”””
+    """Analyzer for Er dopant DFT calculations in strained Si"""
 
 ```
 def __init__(self, config: DFTConfig):
@@ -392,15 +395,14 @@ def export_results(self, filepath: str):
     print(f"✓ Exported results to {filepath}")
 ```
 
-def generate_strain_scan_inputs(config: DFTConfig, base_dir: str = “./dft_inputs”):
-“””
-Generate all DFT input files for strain scan
-
-```
-Args:
-    config: DFT configuration
-    base_dir: Base directory for outputs
-"""
+def generate_strain_scan_inputs(config: DFTConfig, base_dir: str = "./dft_inputs"):
+    """
+    Generate all DFT input files for strain scan
+    
+    Args:
+        config: DFT configuration
+        base_dir: Base directory for outputs
+    """
 analyzer = ErDFTAnalyzer(config)
 
 strains = np.arange(
@@ -433,7 +435,7 @@ print(f"{'='*60}\n")
 return analyzer
 ```
 
-if **name** == “**main**”:
+if **name** == "**main**":
 # Example usage
 config = DFTConfig(
 supercell_size=(3, 3, 3),

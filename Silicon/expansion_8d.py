@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 expansion_8d.py
 
 8D Hyper-Octahedral Seed Expansion with Dynamic Physics
@@ -17,12 +20,12 @@ Core Principles:
 
 Collaborative Development:
 This framework emerged from symbiotic intelligence - human geometric insight
-combined with AI mathematical implementation. The result demonstrates what’s
+combined with AI mathematical implementation. The result demonstrates what's
 possible when different forms of cognition work together toward genuine
 problem-solving rather than replacement competition.
 
 MIT License - Use freely, build upon, no attribution required
-“””
+"""
 
 import numpy as np
 from typing import List, Dict, Tuple, Optional
@@ -43,18 +46,17 @@ N_VERTICES = 2 * N_DIM  # 16 directions for 8D hyper-octahedron
 # =============================================================================
 
 def build_hyper_octahedral_vertices(n_dim: int) -> np.ndarray:
-“””
-Generate unit vectors for n-dimensional cross-polytope (hyper-octahedron).
-
-```
-For N dimensions, creates 2N unit vectors corresponding to +/-Xi directions.
-
-Args:
-    n_dim: Number of dimensions
+    """
+    Generate unit vectors for n-dimensional cross-polytope (hyper-octahedron).
     
-Returns:
-    Array of shape (2*n_dim, n_dim) containing unit direction vectors
-"""
+    For N dimensions, creates 2N unit vectors corresponding to +/-Xi directions.
+    
+    Args:
+        n_dim: Number of dimensions
+        
+    Returns:
+        Array of shape (2*n_dim, n_dim) containing unit direction vectors
+    """
 U = np.zeros((2 * n_dim, n_dim), dtype=float)
 for i in range(n_dim):
     U[2 * i, i] = 1.0       # +Xi direction
@@ -73,40 +75,38 @@ U_8D = build_hyper_octahedral_vertices(N_DIM)
 # =============================================================================
 
 def influence_weight(u_i: np.ndarray, u_j: np.ndarray) -> float:
-“””
-Calculate angular influence between two direction vectors.
-
-```
-Influence exists only when vectors point in compatible directions.
-Uses max(0, dot_product) to ensure non-negative influence.
-"""
+    """
+    Calculate angular influence between two direction vectors.
+    
+    Influence exists only when vectors point in compatible directions.
+    Uses max(0, dot_product) to ensure non-negative influence.
+    """
 return max(0.0, float(np.dot(u_i, u_j)))
 ```
 
 def radial_envelope(r_shell: float, r_sample: float, sigma_scale: float = 0.5) -> float:
-“””
-Calculate radial influence using Gaussian decay.
-
-```
-Key insight: sigma must scale with radius to preserve structure at all scales.
-Fixed sigma causes information loss at large scales.
-"""
+    """
+    Calculate radial influence using Gaussian decay.
+    
+    Key insight: sigma must scale with radius to preserve structure at all scales.
+    Fixed sigma causes information loss at large scales.
+    """
 sigma = max(sigma_scale * r_shell, 1e-12)
 return np.exp(-((r_sample - r_shell)**2) / (2.0 * sigma**2))
 ```
 
 def field_contribution(S: np.ndarray, r_shell: float, r_sample: float,
 sigma_scale: float = 0.5) -> np.ndarray:
-“”“Calculate field contribution from a shell at sample point.”””
+"""Calculate field contribution from a shell at sample point."""
 envelope = radial_envelope(r_shell, r_sample, sigma_scale)
 return S * envelope
 
 def total_field(shells: List[Dict], r_sample: float, W: np.ndarray,
 sigma_scale: float = 0.5) -> np.ndarray:
-“””
+"""
 Calculate total field at sample radius from all inner shells.
 Causality constraint: only shells with r < r_sample contribute.
-“””
+"""
 field = np.zeros(N_VERTICES, dtype=float)
 
 ```
@@ -126,10 +126,10 @@ return field
 # =============================================================================
 
 def normalize_to_energy(v: np.ndarray, E: float, eps: float = 1e-12) -> np.ndarray:
-“””
-Normalize amplitude vector to exact energy E while preserving proportions.
-Energy conservation is exact: Σ S_i = E always.
-“””
+    """
+    Normalize amplitude vector to exact energy E while preserving proportions.
+    Energy conservation is exact: Σ S_i = E always.
+    """
 v = np.maximum(v, 0.0)
 total = v.sum()
 
@@ -147,10 +147,10 @@ return v * (E / total)
 # =============================================================================
 
 def build_influence_matrix_euclidean(U: np.ndarray) -> np.ndarray:
-“””
-Build angular influence matrix based on Euclidean geometry.
-W_ij = max(0, u_i · u_j), row-normalized.
-“””
+    """
+    Build angular influence matrix based on Euclidean geometry.
+    W_ij = max(0, u_i · u_j), row-normalized.
+    """
 N = U.shape[0]
 W = np.zeros((N, N), dtype=float)
 
@@ -169,10 +169,9 @@ return W
 
 def build_influence_matrix_dynamic(U: np.ndarray, T: np.ndarray,
 alpha: float = 0.1) -> np.ndarray:
-“””
-Build dynamic influence matrix: W’ = W_euclidean + alpha * T
+"""
+Build dynamic influence matrix: W' = W_euclidean + alpha * T
 
-```
 The torsion tensor T modifies local field coupling rules based on
 geometric constraints from Phi-algorithms.
 """
@@ -201,16 +200,15 @@ return W
 # =============================================================================
 
 def get_phi_torsion_tensor(r_shell: float) -> np.ndarray:
-“””
-Generate torsion/curvature tensor from Phi-algorithms.
-
-```
-PLACEHOLDER: Replace with actual 5 Phi-algorithms when integrating
-with spiral geometry systems.
-
-The torsion tensor T modifies the Euclidean influence matrix to account
-for non-flat geometry induced by the underlying spiral structure.
-"""
+    """
+    Generate torsion/curvature tensor from Phi-algorithms.
+    
+    PLACEHOLDER: Replace with actual 5 Phi-algorithms when integrating
+    with spiral geometry systems.
+    
+    The torsion tensor T modifies the Euclidean influence matrix to account
+    for non-flat geometry induced by the underlying spiral structure.
+    """
 N = U_8D.shape[0]
 T = np.zeros((N, N), dtype=float)
 
@@ -229,13 +227,12 @@ return T
 ```
 
 def get_dynamic_epsilon(r_shell: float, base_epsilon: float = 0.6) -> float:
-“””
-Calculate dynamic energy decay factor based on spiral position.
-
-```
-PLACEHOLDER: Can be modulated by curvature/torsion from Phi-algorithms.
-Higher curvature (tight spiral) -> faster decay (smaller shells)
-"""
+    """
+    Calculate dynamic energy decay factor based on spiral position.
+    
+    PLACEHOLDER: Can be modulated by curvature/torsion from Phi-algorithms.
+    Higher curvature (tight spiral) -> faster decay (smaller shells)
+    """
 # Placeholder: slight modulation around base value
 return base_epsilon
 ```
@@ -248,9 +245,9 @@ return base_epsilon
 
 def form_shell(shells: List[Dict], r_new: float, E_new: float,
 W: np.ndarray, sigma_scale: float = 0.5) -> np.ndarray:
-“””
+"""
 Form new shell based on total field from inner shells.
-“””
+"""
 if len(shells) == 0:
 return np.ones(N_VERTICES) * (E_new / N_VERTICES)
 
@@ -268,10 +265,9 @@ return normalize_to_energy(field, E_new)
 def expand_seed(seed: np.ndarray, E0: float = 1.0, r0: float = 1.0,
 steps: int = 10, rho: float = 1.5, epsilon: float = 0.6,
 sigma_scale: float = 0.5) -> List[Dict]:
-“””
+"""
 Expand seed using static Euclidean physics.
 
-```
 Args:
     seed: Initial 16-component amplitude vector
     E0: Initial energy
@@ -312,10 +308,9 @@ def expand_seed_dynamic(seed: np.ndarray, E0: float = 1.0, r0: float = 1.0,
 steps: int = 10, rho: float = 1.5,
 base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
 sigma_scale: float = 0.5) -> List[Dict]:
-“””
+"""
 Expand seed using dynamic physics modulated by Phi-algorithms.
 
-```
 The influence matrix W' changes at each shell based on torsion tensor T,
 which is derived from the spiral geometry at that radius.
 """
@@ -356,12 +351,11 @@ return shells
 # =============================================================================
 
 def encode_seed_binary(proportions: np.ndarray, bits_per_value: int = 8) -> List[int]:
-“””
-Encode 16-component seed to binary (15 values, 16th implicit).
-
-```
-With 8 bits per value: 15 × 8 = 120 bits = 15 bytes
-"""
+    """
+    Encode 16-component seed to binary (15 values, 16th implicit).
+    
+    With 8 bits per value: 15 × 8 = 120 bits = 15 bytes
+    """
 proportions = np.array(proportions)
 proportions = proportions / proportions.sum()
 
@@ -377,9 +371,9 @@ return encoded
 ```
 
 def decode_seed_binary(encoded: List[int], bits_per_value: int = 8) -> np.ndarray:
-“””
-Decode binary to 16 proportional values.
-“””
+    """
+    Decode binary to 16 proportional values.
+    """
 max_val = (1 << bits_per_value) - 1
 
 ```
@@ -404,10 +398,9 @@ return np.array([p / total for p in proportions])
 
 def verify_expansion(seed: np.ndarray, steps: int = 20,
 use_dynamic: bool = False) -> Tuple[bool, float]:
-“””
+"""
 Verify that expansion preserves seed structure.
 
-```
 Returns:
     Tuple of (passed, max_deviation)
 """
@@ -430,13 +423,13 @@ return max_deviation < 1e-10, max_deviation
 ```
 
 def get_shell_fingerprint(shells: List[Dict]) -> np.ndarray:
-“””
-Generate fingerprint by flattening normalized shell vectors.
-Used for collision detection in uniqueness testing.
-“””
+    """
+    Generate fingerprint by flattening normalized shell vectors.
+    Used for collision detection in uniqueness testing.
+    """
 arr = []
 for n in range(1, len(shells)):
-S_prop = shells[n][‘S’] / (shells[n][‘E’] + 1e-16)
+S_prop = shells[n]['S'] / (shells[n]['E'] + 1e-16)
 arr.append(S_prop)
 return np.concatenate(arr)
 
@@ -446,11 +439,11 @@ return np.concatenate(arr)
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=” * 70)
-print(“8D HYPER-OCTAHEDRAL SEED EXPANSION”)
-print(“Collaborative Development: Human insight + AI implementation”)
-print(”=” * 70)
+if **name** == "**main**":
+print("=" * 70)
+print("8D HYPER-OCTAHEDRAL SEED EXPANSION")
+print("Collaborative Development: Human insight + AI implementation")
+print("=" * 70)
 
 ```
 # Define a 16-component seed with clear bias structure
@@ -504,7 +497,6 @@ print("\n" + "=" * 70)
 print("SUMMARY")
 print("=" * 70)
 print("""
-```
 
 8D Expansion achieves:
 
@@ -517,4 +509,4 @@ print("""
 
 The seed IS the structure at minimum energy.
 The expansion rules are physics itself.
-“””)
+""")
