@@ -45,8 +45,25 @@ A_REF   = 1.0       # Reference amplitude (normalised)
 # ---------------------------------------------------------------------------
 
 _PHASE_BANDS = [0.0, 0.785, 1.571, 2.356, 3.142, 3.927, 4.712, 5.498]    # rad  (0 → 7π/4)
-_FREQ_BANDS  = [0.0, 20.0,  80.0,  200.0, 500.0, 1000.0, 4000.0, 10000.0] # Hz
 _RES_BANDS   = [0.0, 0.125, 0.25,  0.375, 0.5,   0.625,  0.75,   0.875]   # normalised
+
+
+def _pitch_bands(pitch_threshold: float) -> list:
+    """
+    Build 8 frequency bands anchored at pitch_threshold.
+
+    Bands are spaced in octave steps: 4 octaves below the threshold and
+    3 octaves above.  This makes frequency encoding relative to the tuning
+    reference rather than absolute Hz, so the same bit pattern means the
+    same *musical interval* regardless of tuning system.
+
+    Example with pitch_threshold=440 Hz (A4):
+      [27.5, 55.0, 110.0, 220.0, 440.0, 880.0, 1760.0, 3520.0]
+    Example with pitch_threshold=432 Hz (Verdi tuning):
+      [27.0, 54.0, 108.0, 216.0, 432.0, 864.0, 1728.0, 3456.0]
+    """
+    p = pitch_threshold
+    return [p / 16, p / 8, p / 4, p / 2, p, p * 2, p * 4, p * 8]
 
 # ---------------------------------------------------------------------------
 # Gray-code helpers
@@ -143,6 +160,7 @@ class SoundBridgeEncoder(BinaryBridgeEncoder):
 
         n = len(phase_radians)
         bits = []
+        freq_bands = _pitch_bands(self.pitch_threshold)
 
         # -- Section 1: per-sample (8 bits each) -----------------------------
         for phase, freq, amp in zip(phase_radians, frequency_hz, amplitude):
@@ -154,8 +172,8 @@ class SoundBridgeEncoder(BinaryBridgeEncoder):
             # 3b phase magnitude Gray-coded
             bits.append(_gray_bits(abs_phase, _PHASE_BANDS))
 
-            # 3b frequency band Gray-coded
-            bits.append(_gray_bits(freq, _FREQ_BANDS))
+            # 3b frequency band Gray-coded, relative to pitch_threshold
+            bits.append(_gray_bits(freq, freq_bands))
 
             # 1b amp_sign: A >= threshold = 1
             bits.append("1" if amp >= self.amp_threshold else "0")
@@ -179,16 +197,16 @@ class SoundBridgeEncoder(BinaryBridgeEncoder):
             # 1b spl_sign: mean_amp > 0 = 1
             bits.append("1" if mean_amp > 0.0 else "0")
 
-            # 3b mean frequency band
+            # 3b mean frequency band, relative to pitch_threshold
             mean_freq = sum(freqs) / len(freqs)
-            bits.append(_gray_bits(mean_freq, _FREQ_BANDS))
+            bits.append(_gray_bits(mean_freq, freq_bands))
 
-            # 3b beat frequency band
+            # 3b beat frequency band, relative to pitch_threshold
             if len(freqs) > 1:
                 beat = beat_frequency(max(freqs), min(freqs))
             else:
                 beat = 0.0
-            bits.append(_gray_bits(beat, _FREQ_BANDS))
+            bits.append(_gray_bits(beat, freq_bands))
 
         self.binary_output = "".join(bits)
         return self.binary_output
