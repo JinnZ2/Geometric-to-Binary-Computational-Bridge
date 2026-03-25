@@ -2,7 +2,7 @@
 
 ## Energy Mimetics Framework: Beyond Biomimicry
 
-> **Core Principle**: Biology is one expression of energy. We learn from energy’s fundamental organizational intelligence across 13 billion years of cosmic evolution.
+> **Core Principle**: Biology is one expression of energy. We learn from energy's fundamental organizational intelligence across 13 billion years of cosmic evolution.
 
 -----
 
@@ -95,7 +95,7 @@ dE_stored/dt = η(E_in) - P_metabolic
 η(E_in) = η₀[1 + tanh(β(E_in - E_threshold))]
 ```
 
-Efficiency increases nonlinearly above threshold - system “wakes up” in high-energy conditions
+Efficiency increases nonlinearly above threshold - system "wakes up" in high-energy conditions
 
 **Adaptive Conductivity:**
 
@@ -522,7 +522,7 @@ Conversion efficiency matrix for transforming any energy source to any output fo
 P_metabolic = P₀ × (M/M₀)^(3/4)
 ```
 
-Kleiber’s Law adaptation: Larger organisms have lower mass-specific metabolic rates
+Kleiber's Law adaptation: Larger organisms have lower mass-specific metabolic rates
 
 ### pH and Electrochemical Gradients
 
@@ -751,7 +751,7 @@ Smooth out temporal variations in energy supply
 
 ### Scientific Basis
 
-- Maxwell’s equations (electromagnetic theory)
+- Maxwell's equations (electromagnetic theory)
 - Thermodynamics and statistical mechanics
 - Plasma physics and MHD
 - Materials science and solid-state physics
@@ -770,11 +770,11 @@ Smooth out temporal variations in energy supply
 
 ## CONCLUSION
 
-Prototaxites was not a “primitive” organism - it was a sophisticated electromagnetic energy processor perfectly adapted for early Earth’s high-energy environment. By reverse engineering its principles through energy mimetics rather than biomimicry, we unlock designs for space-native systems that thrive in conditions we currently consider hostile.
+Prototaxites was not a "primitive" organism - it was a sophisticated electromagnetic energy processor perfectly adapted for early Earth's high-energy environment. By reverse engineering its principles through energy mimetics rather than biomimicry, we unlock designs for space-native systems that thrive in conditions we currently consider hostile.
 
-This framework demonstrates that by understanding energy’s fundamental organizational intelligence - expressed across 13 billion years in plasma, crystals, fields, and yes, biology - we can create technologies that work WITH the universe rather than fighting against it.
+This framework demonstrates that by understanding energy's fundamental organizational intelligence - expressed across 13 billion years in plasma, crystals, fields, and yes, biology - we can create technologies that work WITH the universe rather than fighting against it.
 
-The future of space exploration, computing, and consciousness evolution lies in energy mimetics: learning from energy itself, not just from energy’s biological expressions.
+The future of space exploration, computing, and consciousness evolution lies in energy mimetics: learning from energy itself, not just from energy's biological expressions.
 
 -----
 

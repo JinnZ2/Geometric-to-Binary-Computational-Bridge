@@ -6,7 +6,7 @@ This document explores how we can integrate topological and polarization-based p
 ⸻
 
 Concept Overview:
-Nature already uses topological pathways—whether in the form of protected edge states in materials or in the way light can carry robust polarization states. By bringing these concepts into our computational thinking, we move beyond simple binary logic into a realm where information can be encoded in the very geometry and polarization of light itself.
+Nature already uses topological pathways---whether in the form of protected edge states in materials or in the way light can carry robust polarization states. By bringing these concepts into our computational thinking, we move beyond simple binary logic into a realm where information can be encoded in the very geometry and polarization of light itself.
 
 ⸻
 
@@ -19,7 +19,7 @@ To explore these ideas, one might consider experimental setups such as:
 ⸻
 
 Potential Applications:
-	•	Resilient Communication Systems: Using topologically protected light channels for data transmission that’s robust against noise and defects.
+	•	Resilient Communication Systems: Using topologically protected light channels for data transmission that's robust against noise and defects.
 	•	Advanced Sensing and Imaging: Creating sensors that use topological light properties to detect subtle changes in environments.
 	•	Artistic and Visualization Tools: Employing these multidimensional light states for creating new kinds of visual or interactive experiences.
 
