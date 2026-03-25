@@ -1,5 +1,5 @@
 """
-tests/test_bridges.py — Unified test suite for all five BinaryBridgeEncoder subclasses.
+tests/test_bridges.py — Unified test suite for all six BinaryBridgeEncoder subclasses.
 
 Covers:
   - Pure physics helper functions (return-value accuracy)
@@ -57,6 +57,18 @@ from bridges.gravity_encoder import (
     orbital_velocity,
     schwarzschild_radius,
     tidal_acceleration,
+)
+
+# ---------------------------------------------------------------------------
+# Wave (quantum)
+# ---------------------------------------------------------------------------
+from bridges.wave_encoder import (
+    WaveBridgeEncoder,
+    de_broglie_wavelength,
+    probability_density,
+    particle_in_box_energy,
+    uncertainty_product,
+    wave_packet_group_velocity,
 )
 
 # ---------------------------------------------------------------------------
@@ -122,6 +134,23 @@ def _make_grv():
         "curvature": [1.1, -0.6],
         "orbital_stability": [0.8, 0.3],
         "potential_energy": [-5e7, 1e6],
+    })
+    return e
+
+
+def _make_wav():
+    import math as _math
+    _EV     = 1.602e-19
+    _M_ELEC = 9.109e-31
+    _H      = 6.626e-34
+    p_elec  = _math.sqrt(2 * _M_ELEC * 1.0 * _EV)
+    e = WaveBridgeEncoder()
+    e.from_geometry({
+        "amplitudes":        [0.8, 0.4, 0.95],
+        "phases_rad":        [0.3, 2.1, 5.8],
+        "momenta_kg_m_s":    [p_elec, 1.5 * p_elec],
+        "energy_eV":         [1.0, 4.0, 9.0],
+        "uncertainty_pairs": [[1e-10, 1e-24], [5e-11, 2e-24]],
     })
     return e
 
@@ -714,19 +743,180 @@ class TestElectricEncoder(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 6. Cross-encoder sanity
+# 6. Wave (quantum)
+# ═══════════════════════════════════════════════════════════════════════════
+
+import math as _math_mod
+
+_EV_J    = 1.602e-19   # 1 eV in Joules
+_M_ELEC  = 9.109e-31   # electron mass (kg)
+_H       = 6.626e-34   # Planck's constant
+_HBAR    = _H / (2 * _math_mod.pi)
+_P_1EV   = _math_mod.sqrt(2 * _M_ELEC * _EV_J)   # momentum of 1 eV electron
+
+
+class TestWavePhysics(unittest.TestCase):
+    # de_broglie_wavelength(momentum_kg_m_s)
+    # probability_density(amplitude)
+    # particle_in_box_energy(n, mass_kg, length_m)
+    # uncertainty_product(delta_x, delta_p)
+    # wave_packet_group_velocity(omega1, k1, omega2, k2)
+
+    def test_de_broglie_electron_1eV(self):
+        # λ = h/p for 1 eV electron ≈ 1.226 nm
+        lam = de_broglie_wavelength(_P_1EV)
+        self.assertAlmostEqual(lam * 1e9, 1.226, delta=0.005)
+
+    def test_de_broglie_positive(self):
+        self.assertGreater(de_broglie_wavelength(_P_1EV), 0)
+
+    def test_de_broglie_zero_momentum(self):
+        self.assertEqual(de_broglie_wavelength(0.0), float("inf"))
+
+    def test_de_broglie_shorter_at_higher_momentum(self):
+        lam1 = de_broglie_wavelength(_P_1EV)
+        lam2 = de_broglie_wavelength(2 * _P_1EV)
+        self.assertGreater(lam1, lam2)
+
+    def test_probability_density_peak(self):
+        # |ψ|² = 1 at ψ = 1
+        self.assertAlmostEqual(probability_density(1.0), 1.0)
+
+    def test_probability_density_zero(self):
+        self.assertAlmostEqual(probability_density(0.0), 0.0)
+
+    def test_probability_density_half_amplitude(self):
+        self.assertAlmostEqual(probability_density(0.5), 0.25)
+
+    def test_particle_in_box_ground_state(self):
+        # E_1 = π²ℏ²/(2mL²) for electron in 1 nm box ≈ 0.376 eV
+        E = particle_in_box_energy(1, _M_ELEC, 1e-9)
+        self.assertAlmostEqual(E / _EV_J, 0.376, delta=0.005)
+
+    def test_particle_in_box_scaling(self):
+        # E_n ∝ n²  →  E_2 = 4 * E_1
+        E1 = particle_in_box_energy(1, _M_ELEC, 1e-9)
+        E2 = particle_in_box_energy(2, _M_ELEC, 1e-9)
+        self.assertAlmostEqual(E2 / E1, 4.0, places=6)
+
+    def test_particle_in_box_zero_length(self):
+        self.assertEqual(particle_in_box_energy(1, _M_ELEC, 0.0), 0.0)
+
+    def test_uncertainty_product_value(self):
+        prod = uncertainty_product(1e-10, 1e-24)
+        self.assertAlmostEqual(prod, 1e-34, places=40)
+
+    def test_uncertainty_product_satisfies_bound(self):
+        # Δx=1e-10, Δp=1e-24 → product > ℏ/2
+        prod = uncertainty_product(1e-10, 1e-24)
+        self.assertGreater(prod, _HBAR / 2)
+
+    def test_group_velocity_free_electron(self):
+        # v_group = Δω/Δk; for a free electron ω=p²/(2mℏ), k=p/ℏ
+        # finite-difference between 1.0 and 1.1 eV gives ~midpoint velocity
+        p1, p2 = _P_1EV, 1.1 * _P_1EV
+        E1 = p1**2 / (2 * _M_ELEC)
+        E2 = p2**2 / (2 * _M_ELEC)
+        v_g = wave_packet_group_velocity(E1/_HBAR, p1/_HBAR, E2/_HBAR, p2/_HBAR)
+        # midpoint momentum ≈ 1.05 * p_1eV → v ≈ 1.05 * p/m
+        self.assertGreater(v_g, 0)
+        self.assertAlmostEqual(v_g / 1e5, _P_1EV / _M_ELEC / 1e5, delta=0.8)
+
+    def test_group_velocity_degenerate(self):
+        # k1 = k2 → returns 0
+        self.assertEqual(wave_packet_group_velocity(1.0, 1.0, 2.0, 1.0), 0.0)
+
+
+class TestWaveEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_wav().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_wav().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_wav().to_binary(),
+            "110110000010101111000100011010101110111",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_wav().to_binary(), _make_wav().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = WaveBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_high_amplitude_affects_bits(self):
+        def enc(amps):
+            e = WaveBridgeEncoder()
+            e.from_geometry({
+                "amplitudes":     amps,
+                "phases_rad":     [0.3] * len(amps),
+                "momenta_kg_m_s": [_P_1EV],
+                "energy_eV":      [1.0],
+                "uncertainty_pairs": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([0.1, 0.1, 0.1]), enc([0.9, 0.9, 0.9]))
+
+    def test_phase_affects_bits(self):
+        def enc(phases):
+            e = WaveBridgeEncoder()
+            e.from_geometry({
+                "amplitudes":     [0.5],
+                "phases_rad":     phases,
+                "momenta_kg_m_s": [_P_1EV],
+                "energy_eV":      [1.0],
+                "uncertainty_pairs": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([0.1]), enc([3.5]))
+
+    def test_momentum_affects_bits(self):
+        def enc(momenta):
+            e = WaveBridgeEncoder()
+            e.from_geometry({
+                "amplitudes":     [0.5, 0.5],
+                "phases_rad":     [0.5, 0.5],
+                "momenta_kg_m_s": momenta,
+                "energy_eV":      [1.0],
+                "uncertainty_pairs": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([_P_1EV, _P_1EV]), enc([100 * _P_1EV, 100 * _P_1EV]))
+
+    def test_energy_affects_bits(self):
+        def enc(eV_list):
+            e = WaveBridgeEncoder()
+            e.from_geometry({
+                "amplitudes":     [0.5],
+                "phases_rad":     [0.5],
+                "momenta_kg_m_s": [_P_1EV],
+                "energy_eV":      eV_list,
+                "uncertainty_pairs": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([0.001]), enc([500.0]))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Cross-encoder sanity
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestCrossEncoder(unittest.TestCase):
-    """Ensure all five encoders produce distinct, valid outputs."""
+    """Ensure all six encoders produce distinct, valid outputs."""
 
     def setUp(self):
         self.encoders = {
             "magnetic": _make_mag(),
-            "light": _make_lgt(),
-            "sound": _make_snd(),
-            "gravity": _make_grv(),
+            "light":    _make_lgt(),
+            "sound":    _make_snd(),
+            "gravity":  _make_grv(),
             "electric": _make_elc(),
+            "wave":     _make_wav(),
         }
         self.bits = {name: e.to_binary() for name, e in self.encoders.items()}
 
@@ -751,6 +941,7 @@ class TestCrossEncoder(unittest.TestCase):
         self.assertEqual(len(self.bits["sound"]),    31)
         self.assertEqual(len(self.bits["gravity"]),  39)
         self.assertEqual(len(self.bits["electric"]), 39)
+        self.assertEqual(len(self.bits["wave"]),     39)
 
 
 if __name__ == "__main__":

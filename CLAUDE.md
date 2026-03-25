@@ -55,7 +55,7 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 98 | All 5 domain encoders — physics helpers + encoder I/O |
+| Bridges | `tests/test_bridges.py` | 121 | All 6 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 
 ### CI/CD & Linting
@@ -92,7 +92,8 @@ bridges/                        Unified OOP domain encoders
 ├── light_encoder.py              Light/optics → binary (31 bits)
 ├── sound_encoder.py              Acoustic → binary (31 bits)
 ├── gravity_encoder.py            Gravity field → binary (39 bits)
-└── electric_encoder.py           Electric field → binary (39 bits)
+├── electric_encoder.py           Electric field → binary (39 bits)
+└── wave_encoder.py               Quantum wave function → binary (39 bits)
 ```
 
 Each encoder exposes pure physics helper functions and a `BinaryBridgeEncoder` subclass with `from_geometry()` / `to_binary()`. All use Gray codes for stability between adjacent values.
@@ -154,15 +155,16 @@ Human Intuition
 
 ### Bridge System
 
-Five modality encoders convert physical phenomena to binary. All use **Gray codes** for single-bit-change stability between adjacent values.
+Six modality encoders convert physical phenomena to binary. All use **Gray codes** for single-bit-change stability between adjacent values.
 
-| Bridge     | Input                     | Output  | Entry Point                          |
-|------------|---------------------------|---------|--------------------------------------|
-| Magnetic   | Field lines, resonance    | 43 bits | `bridges/magnetic_encoder.py`        |
-| Light      | Wavelength, polarization  | 31 bits | `bridges/light_encoder.py`           |
-| Sound      | Phase, pitch, amplitude   | 31 bits | `bridges/sound_encoder.py`           |
-| Gravity    | Vectors, curvature, orbit | 39 bits | `bridges/gravity_encoder.py`         |
-| Electric   | Charge, current, voltage  | 39 bits | `bridges/electric_encoder.py`        |
+| Bridge     | Input                                | Output  | Entry Point                          |
+|------------|--------------------------------------|---------|--------------------------------------|
+| Magnetic   | Field lines, resonance               | 43 bits | `bridges/magnetic_encoder.py`        |
+| Light      | Wavelength, polarization             | 31 bits | `bridges/light_encoder.py`           |
+| Sound      | Phase, pitch, amplitude              | 31 bits | `bridges/sound_encoder.py`           |
+| Gravity    | Vectors, curvature, orbit            | 39 bits | `bridges/gravity_encoder.py`         |
+| Electric   | Charge, current, voltage             | 39 bits | `bridges/electric_encoder.py`        |
+| Wave       | ψ amplitude, phase, momentum, energy | 39 bits | `bridges/wave_encoder.py`            |
 
 New bridges should inherit from `bridges/abstract_encoder.py` (`BinaryBridgeEncoder`) and implement `from_geometry()` / `to_binary()`.
 
