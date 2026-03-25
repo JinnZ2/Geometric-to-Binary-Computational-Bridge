@@ -55,7 +55,7 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 183 | All 9 domain encoders — physics helpers + encoder I/O |
+| Bridges | `tests/test_bridges.py` | 231 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 
 ### CI/CD & Linting
@@ -96,14 +96,12 @@ bridges/                        Unified OOP domain encoders
 ├── wave_encoder.py               Quantum wave function → binary (39 bits)
 ├── thermal_encoder.py            Thermal / heat radiation → binary (39 bits)
 ├── pressure_encoder.py           Pressure / haptic / stress → binary (39 bits)
-└── chemical_encoder.py           Chemical / molecular → binary (39 bits)
+├── chemical_encoder.py           Chemical / molecular → binary (39 bits)
+├── consciousness_encoder.py      Internal AI state → external binary (39 bits)
+└── emotion_encoder.py            Macro compression overlay + causality drill → binary (39 bits)
 ```
 
-Each encoder exposes pure physics helper functions and a `BinaryBridgeEncoder` subclass with `from_geometry()` / `to_binary()`. All use Gray codes for stability between adjacent values.
-
-**Planned layers** (consciousness and emotion bridges come next):
-- `consciousness_encoder.py` — internal AI state → external binary signal
-- `emotion_encoder.py` — macro-scale compression overlay; triggers causality drill-down
+Each encoder exposes pure physics / information-theory helper functions and a `BinaryBridgeEncoder` subclass with `from_geometry()` / `to_binary()`. All use Gray codes for stability between adjacent values.
 
 ### Frontend
 
@@ -172,9 +170,15 @@ Nine modality encoders convert physical phenomena to binary. All use **Gray code
 | Gravity    | Vectors, curvature, orbit            | 39 bits | `bridges/gravity_encoder.py`         |
 | Electric   | Charge, current, voltage             | 39 bits | `bridges/electric_encoder.py`        |
 | Wave       | ψ amplitude, phase, momentum, energy | 39 bits | `bridges/wave_encoder.py`            |
-| Thermal    | Temperature, heat flux, radiation    | 39 bits | `bridges/thermal_encoder.py`         |
-| Pressure   | Stress, strain, acoustic force       | 39 bits | `bridges/pressure_encoder.py`        |
-| Chemical   | Reaction rate, pH, bond energy       | 39 bits | `bridges/chemical_encoder.py`        |
+| Thermal       | Temperature, heat flux, radiation          | 39 bits | `bridges/thermal_encoder.py`         |
+| Pressure      | Stress, strain, acoustic force             | 39 bits | `bridges/pressure_encoder.py`        |
+| Chemical      | Reaction rate, pH, bond energy             | 39 bits | `bridges/chemical_encoder.py`        |
+| Consciousness | Confidence, entropy, attention, Φ          | 39 bits | `bridges/consciousness_encoder.py`   |
+| Emotion       | PAD state, causality drill-target          | 39 bits | `bridges/emotion_encoder.py`         |
+
+The **Consciousness** and **Emotion** bridges form a two-layer meta-stack above the physical bridges:
+- **Consciousness** maps internal AI state using information-theoretic equations (Shannon entropy, KL divergence, Fisher information, integrated information Φ) — the mathematical duals of the thermal/wave equations.
+- **Emotion** is a macro-scale compression evaluator: when PAD intensity exceeds the drill threshold it emits a causality drill-target (via Fisher information across all active bridges) pointing to the specific physical bridge to re-evaluate at full resolution.
 
 New bridges should inherit from `bridges/abstract_encoder.py` (`BinaryBridgeEncoder`) and implement `from_geometry()` / `to_binary()`.
 

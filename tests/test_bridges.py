@@ -1,5 +1,5 @@
 """
-tests/test_bridges.py — Unified test suite for all nine BinaryBridgeEncoder subclasses.
+tests/test_bridges.py — Unified test suite for all eleven BinaryBridgeEncoder subclasses.
 
 Covers:
   - Pure physics helper functions (return-value accuracy)
@@ -97,6 +97,30 @@ from bridges.chemical_encoder import (
 )
 
 # ---------------------------------------------------------------------------
+# Consciousness
+# ---------------------------------------------------------------------------
+from bridges.consciousness_encoder import (
+    ConsciousnessBridgeEncoder,
+    shannon_entropy,
+    kl_divergence,
+    mutual_information,
+    fisher_information,
+    integrated_information,
+)
+
+# ---------------------------------------------------------------------------
+# Emotion
+# ---------------------------------------------------------------------------
+from bridges.emotion_encoder import (
+    EmotionBridgeEncoder,
+    pad_intensity,
+    valence_arousal_coherence,
+    surprise_factor,
+    cross_bridge_resonance,
+    drill_target,
+)
+
+# ---------------------------------------------------------------------------
 # Wave (quantum)
 # ---------------------------------------------------------------------------
 from bridges.wave_encoder import (
@@ -171,6 +195,52 @@ def _make_grv():
         "curvature": [1.1, -0.6],
         "orbital_stability": [0.8, 0.3],
         "potential_energy": [-5e7, 1e6],
+    })
+    return e
+
+
+def _make_con():
+    e = ConsciousnessBridgeEncoder(
+        conf_threshold=0.7,
+        entropy_threshold=2.0,
+        focus_threshold=0.5,
+        awareness_threshold=0.5,
+    )
+    e.from_geometry({
+        "confidence_values": [0.3, 0.65, 0.91],
+        "entropy_distributions": [
+            [0.25, 0.25, 0.25, 0.25],
+            [0.5, 0.3, 0.15, 0.05],
+            [0.95, 0.03, 0.01, 0.01],
+        ],
+        "attention_vectors": [
+            [0.2, 0.2, 0.2, 0.2, 0.2],
+            [0.9, 0.05, 0.025, 0.025],
+        ],
+        "partition_entropies": [1.0, 0.8],
+        "whole_entropy": 2.5,
+    })
+    return e
+
+
+def _make_emo():
+    e = EmotionBridgeEncoder(drill_threshold=0.5, trigger_threshold=0.3)
+    e.from_geometry({
+        "valence":   0.4,
+        "arousal":   0.6,
+        "dominance": 0.2,
+        "prior_intensity": 0.1,
+        "delta_t": 1.0,
+        "trigger_signals": [
+            {"bridge_name": "thermal",  "intensity": 0.75},
+            {"bridge_name": "chemical", "intensity": 0.2},
+        ],
+        "bridge_gradients": {
+            "thermal":       [-1.8,  2.1, -2.3,  1.9],
+            "pressure":      [-0.1,  0.08, -0.09, 0.11],
+            "chemical":      [-0.05, 0.03, -0.02, 0.04],
+            "consciousness": [-0.3,  0.2, -0.25, 0.28],
+        },
     })
     return e
 
@@ -812,7 +882,295 @@ class TestElectricEncoder(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# 6. Thermal
+# 6. Consciousness
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestConsciousnessPhysics(unittest.TestCase):
+    # shannon_entropy, kl_divergence, mutual_information,
+    # fisher_information, integrated_information
+
+    def test_entropy_certain(self):
+        self.assertAlmostEqual(shannon_entropy([1.0, 0.0, 0.0]), 0.0)
+
+    def test_entropy_uniform_2(self):
+        self.assertAlmostEqual(shannon_entropy([0.5, 0.5]), 1.0)
+
+    def test_entropy_uniform_4(self):
+        self.assertAlmostEqual(shannon_entropy([0.25] * 4), 2.0)
+
+    def test_entropy_skips_zero(self):
+        # zero entries must not raise
+        self.assertAlmostEqual(shannon_entropy([1.0, 0.0]), 0.0)
+
+    def test_entropy_increases_with_spread(self):
+        h_biased  = shannon_entropy([0.7, 0.1, 0.1, 0.1])
+        h_uniform = shannon_entropy([0.25] * 4)
+        self.assertGreater(h_uniform, h_biased)
+
+    def test_kl_zero_when_identical(self):
+        p = [0.4, 0.3, 0.2, 0.1]
+        self.assertAlmostEqual(kl_divergence(p, p), 0.0, places=10)
+
+    def test_kl_positive_when_different(self):
+        p = [0.7, 0.1, 0.1, 0.1]
+        q = [0.25, 0.25, 0.25, 0.25]
+        self.assertGreater(kl_divergence(p, q), 0)
+
+    def test_kl_asymmetric(self):
+        p = [0.7, 0.1, 0.1, 0.1]
+        q = [0.25, 0.25, 0.25, 0.25]
+        self.assertNotAlmostEqual(kl_divergence(p, q), kl_divergence(q, p))
+
+    def test_mi_independent(self):
+        px = [0.5, 0.5]
+        py = [0.5, 0.5]
+        joint = [px[i] * py[j] for i in range(2) for j in range(2)]
+        self.assertAlmostEqual(mutual_information(joint, px, py), 0.0, places=10)
+
+    def test_mi_fully_correlated(self):
+        px = [0.5, 0.5]
+        py = [0.5, 0.5]
+        joint = [0.5, 0.0, 0.0, 0.5]
+        self.assertAlmostEqual(mutual_information(joint, px, py), 1.0, places=6)
+
+    def test_fisher_zero_gradients(self):
+        self.assertEqual(fisher_information([]), 0.0)
+
+    def test_fisher_larger_gradients_higher(self):
+        i_small = fisher_information([-0.05, 0.05, -0.05, 0.05])
+        i_large = fisher_information([-2.0, 2.0, -2.0, 2.0])
+        self.assertGreater(i_large, i_small)
+
+    def test_phi_integrated(self):
+        phi = integrated_information([1.0, 1.0], whole_entropy=2.5)
+        self.assertAlmostEqual(phi, 0.5)
+
+    def test_phi_independent_zero(self):
+        phi = integrated_information([1.0, 1.0], whole_entropy=2.0)
+        self.assertAlmostEqual(phi, 0.0)
+
+    def test_phi_clamped_nonneg(self):
+        phi = integrated_information([1.0, 1.0], whole_entropy=1.5)
+        self.assertEqual(phi, 0.0)
+
+
+class TestConsciousnessEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_con().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_con().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_con().to_binary(),
+            "001101100111001011000000000000101000111",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_con().to_binary(), _make_con().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = ConsciousnessBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_confidence_affects_bits(self):
+        def enc(confs):
+            e = ConsciousnessBridgeEncoder()
+            e.from_geometry({
+                "confidence_values": confs,
+                "entropy_distributions": [[0.25, 0.25, 0.25, 0.25]] * len(confs),
+                "attention_vectors": [],
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc([0.1, 0.1, 0.1]), enc([0.9, 0.9, 0.9]))
+
+    def test_entropy_affects_bits(self):
+        def enc(dists):
+            e = ConsciousnessBridgeEncoder()
+            e.from_geometry({
+                "confidence_values": [0.5] * len(dists),
+                "entropy_distributions": dists,
+                "attention_vectors": [],
+            })
+            return e.to_binary()
+        # certain vs uncertain distributions
+        self.assertNotEqual(
+            enc([[1.0, 0.0, 0.0, 0.0]] * 3),
+            enc([[0.25, 0.25, 0.25, 0.25]] * 3),
+        )
+
+    def test_attention_focus_affects_bits(self):
+        def enc(attn):
+            e = ConsciousnessBridgeEncoder()
+            e.from_geometry({
+                "confidence_values": [0.5],
+                "entropy_distributions": [[0.5, 0.5]],
+                "attention_vectors": attn,
+            })
+            return e.to_binary()
+        scattered = [[0.2, 0.2, 0.2, 0.2, 0.2]]
+        focused   = [[0.95, 0.02, 0.02, 0.01]]
+        self.assertNotEqual(enc(scattered), enc(focused))
+
+    def test_integrated_info_affects_summary(self):
+        def enc(whole_ent):
+            e = ConsciousnessBridgeEncoder()
+            e.from_geometry({
+                "confidence_values": [0.5],
+                "entropy_distributions": [[0.5, 0.5]],
+                "attention_vectors": [],
+                "partition_entropies": [0.5],
+                "whole_entropy": whole_ent,
+            })
+            return e.to_binary()
+        self.assertNotEqual(enc(0.6), enc(2.5))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 7. Emotion
+# ═══════════════════════════════════════════════════════════════════════════
+
+class TestEmotionPhysics(unittest.TestCase):
+    # pad_intensity, valence_arousal_coherence, surprise_factor,
+    # cross_bridge_resonance, drill_target
+
+    def test_pad_neutral(self):
+        self.assertAlmostEqual(pad_intensity(0.0, 0.0, 0.0), 0.0)
+
+    def test_pad_positive(self):
+        self.assertGreater(pad_intensity(0.8, 0.6, 0.5), 0.0)
+
+    def test_pad_symmetric(self):
+        # Sign of dimensions doesn't affect intensity
+        self.assertAlmostEqual(
+            pad_intensity(0.8, -0.6, 0.5),
+            pad_intensity(-0.8, 0.6, -0.5),
+        )
+
+    def test_pad_max(self):
+        # All at ±1 → I = √3
+        self.assertAlmostEqual(pad_intensity(1.0, 1.0, 1.0), math.sqrt(3.0))
+
+    def test_coherence_neutral_zero(self):
+        self.assertAlmostEqual(valence_arousal_coherence(0.0, 0.0), 0.0)
+
+    def test_coherence_unit_circle(self):
+        # On unit circle: C = 1
+        import math as _math
+        v = _math.cos(_math.pi / 4)
+        a = _math.sin(_math.pi / 4)
+        self.assertAlmostEqual(valence_arousal_coherence(v, a), 1.0, places=5)
+
+    def test_coherence_clamped(self):
+        # Should never return negative
+        self.assertGreaterEqual(valence_arousal_coherence(0.0, 0.0), 0.0)
+        self.assertGreaterEqual(valence_arousal_coherence(5.0, 5.0), 0.0)
+
+    def test_surprise_zero_no_change(self):
+        self.assertAlmostEqual(surprise_factor(0.5, 0.5), 0.0)
+
+    def test_surprise_proportional_to_delta(self):
+        s1 = surprise_factor(0.9, 0.1, delta_t=1.0)
+        s2 = surprise_factor(0.9, 0.1, delta_t=2.0)
+        self.assertAlmostEqual(s1, 2 * s2)
+
+    def test_surprise_zero_delta_t(self):
+        self.assertEqual(surprise_factor(0.9, 0.1, delta_t=0.0), 0.0)
+
+    def test_resonance_identical_high(self):
+        p = [0.5, 0.3, 0.15, 0.05]
+        R = cross_bridge_resonance(p, p)
+        self.assertGreater(R, 0.99)
+
+    def test_resonance_orthogonal_low(self):
+        p = [0.9, 0.07, 0.02, 0.01]
+        q = [0.01, 0.02, 0.07, 0.9]
+        R = cross_bridge_resonance(p, q)
+        self.assertLess(R, 0.6)
+
+    def test_resonance_aligned_greater_than_orthogonal(self):
+        ref   = [0.65, 0.25, 0.07, 0.03]
+        close = [0.60, 0.28, 0.08, 0.04]
+        far   = [0.03, 0.07, 0.25, 0.65]
+        self.assertGreater(cross_bridge_resonance(close, ref),
+                           cross_bridge_resonance(far,   ref))
+
+    def test_drill_target_selects_sharpest(self):
+        grads = {
+            "thermal":  [-0.05, 0.03],
+            "pressure": [-0.1,  0.08],
+            "chemical": [-2.0,  1.9],
+        }
+        self.assertEqual(drill_target(grads), "chemical")
+
+    def test_drill_target_empty_returns_none(self):
+        self.assertEqual(drill_target({}), "none")
+
+
+class TestEmotionEncoder(unittest.TestCase):
+
+    def test_output_is_binary_string(self):
+        self.assertTrue(_is_binary(_make_emo().to_binary()))
+
+    def test_output_length(self):
+        self.assertEqual(len(_make_emo().to_binary()), 39)
+
+    def test_canonical_bitstring(self):
+        self.assertEqual(
+            _make_emo().to_binary(),
+            "101011111110111110011110110000010011100",
+        )
+
+    def test_deterministic(self):
+        self.assertEqual(_make_emo().to_binary(), _make_emo().to_binary())
+
+    def test_no_geometry_raises(self):
+        e = EmotionBridgeEncoder()
+        with self.assertRaises((ValueError, TypeError, AttributeError)):
+            e.to_binary()
+
+    def test_valence_sign_affects_bits(self):
+        def enc(v):
+            e = EmotionBridgeEncoder()
+            e.from_geometry({"valence": v, "arousal": 0.5, "dominance": 0.3,
+                             "trigger_signals": [], "bridge_gradients": {}})
+            return e.to_binary()
+        self.assertNotEqual(enc(0.8), enc(-0.8))
+
+    def test_arousal_affects_bits(self):
+        def enc(a):
+            e = EmotionBridgeEncoder()
+            e.from_geometry({"valence": 0.5, "arousal": a, "dominance": 0.3,
+                             "trigger_signals": [], "bridge_gradients": {}})
+            return e.to_binary()
+        self.assertNotEqual(enc(0.1), enc(0.9))
+
+    def test_drill_threshold_gates_flag(self):
+        # High intensity (joy) should fire drill_now=1 with low threshold
+        def enc(threshold):
+            e = EmotionBridgeEncoder(drill_threshold=threshold)
+            e.from_geometry({"valence": 0.9, "arousal": 0.9, "dominance": 0.8,
+                             "prior_intensity": 0.0, "delta_t": 1.0,
+                             "trigger_signals": [], "bridge_gradients": {}})
+            return e.to_binary()
+        # High threshold → no drill; low threshold → drill fires
+        self.assertNotEqual(enc(0.99), enc(0.1))
+
+    def test_trigger_threshold_gates_flag(self):
+        def enc(thresh):
+            e = EmotionBridgeEncoder(trigger_threshold=thresh)
+            e.from_geometry({"valence": 0.5, "arousal": 0.5, "dominance": 0.2,
+                             "trigger_signals": [{"bridge_name": "thermal", "intensity": 0.5}],
+                             "bridge_gradients": {}})
+            return e.to_binary()
+        self.assertNotEqual(enc(0.1), enc(0.9))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 8. Thermal
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestThermalPhysics(unittest.TestCase):
@@ -1315,19 +1673,21 @@ class TestWaveEncoder(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════════
 
 class TestCrossEncoder(unittest.TestCase):
-    """Ensure all nine encoders produce distinct, valid outputs."""
+    """Ensure all eleven encoders produce distinct, valid outputs."""
 
     def setUp(self):
         self.encoders = {
-            "magnetic": _make_mag(),
-            "light":    _make_lgt(),
-            "sound":    _make_snd(),
-            "gravity":  _make_grv(),
-            "electric": _make_elc(),
-            "wave":     _make_wav(),
-            "thermal":  _make_thr(),
-            "pressure": _make_prs(),
-            "chemical": _make_chem(),
+            "magnetic":      _make_mag(),
+            "light":         _make_lgt(),
+            "sound":         _make_snd(),
+            "gravity":       _make_grv(),
+            "electric":      _make_elc(),
+            "wave":          _make_wav(),
+            "thermal":       _make_thr(),
+            "pressure":      _make_prs(),
+            "chemical":      _make_chem(),
+            "consciousness": _make_con(),
+            "emotion":       _make_emo(),
         }
         self.bits = {name: e.to_binary() for name, e in self.encoders.items()}
 
@@ -1347,15 +1707,17 @@ class TestCrossEncoder(unittest.TestCase):
         self.assertGreater(len(unique), 1)
 
     def test_expected_lengths(self):
-        self.assertEqual(len(self.bits["magnetic"]), 43)
-        self.assertEqual(len(self.bits["light"]),    31)
-        self.assertEqual(len(self.bits["sound"]),    31)
-        self.assertEqual(len(self.bits["gravity"]),  39)
-        self.assertEqual(len(self.bits["electric"]), 39)
-        self.assertEqual(len(self.bits["wave"]),     39)
-        self.assertEqual(len(self.bits["thermal"]),  39)
-        self.assertEqual(len(self.bits["pressure"]), 39)
-        self.assertEqual(len(self.bits["chemical"]), 39)
+        self.assertEqual(len(self.bits["magnetic"]),      43)
+        self.assertEqual(len(self.bits["light"]),         31)
+        self.assertEqual(len(self.bits["sound"]),         31)
+        self.assertEqual(len(self.bits["gravity"]),       39)
+        self.assertEqual(len(self.bits["electric"]),      39)
+        self.assertEqual(len(self.bits["wave"]),          39)
+        self.assertEqual(len(self.bits["thermal"]),       39)
+        self.assertEqual(len(self.bits["pressure"]),      39)
+        self.assertEqual(len(self.bits["chemical"]),      39)
+        self.assertEqual(len(self.bits["consciousness"]), 39)
+        self.assertEqual(len(self.bits["emotion"]),       39)
 
 
 if __name__ == "__main__":
