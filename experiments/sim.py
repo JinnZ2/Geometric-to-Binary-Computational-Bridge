@@ -144,3 +144,80 @@ sc = ax.scatter(positions[:,0], positions[:,1], positions[:,2], c=phases, cmap='
 plt.colorbar(sc, label='Phase (rad)')
 ax.set_title('Octahedral φ-Spaced Lattice - Node Phases')
 plt.show()
+
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+# ----------------------------
+# Simulation Parameters
+# ----------------------------
+phi = 1.618      # Golden ratio scaling for shells
+num_shells = 3   # Number of phi-scaled octahedral shells
+nodes_per_shell = 8  # Octahedral nodes per shell
+timesteps = 50
+learning_rate = 0.05  # Prototactic drift magnitude
+
+# Environment: a 3D gradient field (example: radiation intensity)
+def environment_field(pos):
+    # Simple radial gradient from origin
+    return np.exp(-np.linalg.norm(pos, axis=1)/5)
+
+# ----------------------------
+# Initialize Lattice Nodes
+# ----------------------------
+def init_phi_octahedral(phi, shells, nodes_per_shell):
+    positions = []
+    for n in range(shells):
+        r = phi**n
+        # Octahedral positions: ±x, ±y, ±z combinations
+        shell_nodes = [
+            [r,0,0], [-r,0,0],
+            [0,r,0], [0,-r,0],
+            [0,0,r], [0,0,-r]
+        ]
+        positions.extend(shell_nodes[:nodes_per_shell])
+    return np.array(positions, dtype=float)
+
+nodes = init_phi_octahedral(phi, num_shells, nodes_per_shell)
+phases = np.random.rand(len(nodes))*2*np.pi  # Node phase for computation
+velocities = np.zeros_like(nodes)
+
+# ----------------------------
+# Simulation Loop
+# ----------------------------
+for t in range(timesteps):
+    # Compute environmental forces (gradient of field)
+    field_values = environment_field(nodes)
+    grad = np.zeros_like(nodes)
+    delta = 1e-2
+    for i,pos in enumerate(nodes):
+        for j in range(3):
+            d_pos = pos.copy()
+            d_pos[j] += delta
+            grad[i,j] = (environment_field(d_pos.reshape(1,3)) - field_values[i])/delta
+
+    # Prototactic drift: move nodes along gradient weighted by phase (simple coupling)
+    drift = learning_rate * grad * (0.5 + 0.5*np.sin(phases))[:,None]
+    nodes += drift
+
+    # Optional: simple phase update based on neighboring nodes
+    # (nearest neighbors approximated by distance)
+    for i, pos in enumerate(nodes):
+        dists = np.linalg.norm(nodes - pos, axis=1)
+        neighbors = np.where((dists>0) & (dists<phi**2))[0]
+        if len(neighbors)>0:
+            phase_avg = np.mean(phases[neighbors])
+            phases[i] += 0.01*(phase_avg - phases[i])
+
+# ----------------------------
+# Visualization
+# ----------------------------
+fig = plt.figure(figsize=(7,7))
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(nodes[:,0], nodes[:,1], nodes[:,2], c=np.sin(phases), cmap='viridis', s=80)
+ax.set_xlabel('X'); ax.set_ylabel('Y'); ax.set_zlabel('Z')
+ax.set_title('Phi-Octahedral Prototactic Lattice after Simulation')
+plt.show()
