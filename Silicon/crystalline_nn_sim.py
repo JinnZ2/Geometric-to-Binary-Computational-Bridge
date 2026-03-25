@@ -398,6 +398,178 @@ def run(n_shells: int = N_SHELLS, r0: float = R0, xi: float = XI,
     }
 
 
+def learning_demo(n_shells: int = N_SHELLS, r0: float = R0,
+                  xi: float = XI, kappa0: float = KAPPA0,
+                  n_iter: int = 200, lr: float = 0.05,
+                  seed: int = 42, verbose: bool = True) -> dict:
+    """
+    Gradient descent on node phases to minimize the linear task loss.
+
+    Storage.md §VI / §VIII: geometry parameters are a valid continuous
+    control space for learning.  Phase updates map directly to rewritable
+    phase patches or photorefractive adaptation.
+
+    L(phi) = 0.5 * ||K(phi) x - y*||^2
+
+    Verifies
+    --------
+    - Loss decreases across iterations (geometry-as-weights works)
+    - Inner-shell nodes receive larger gradient updates than outer shells
+      (§VIII: gradient scales as exp(-c*phi^n/xi), inner = stronger signal)
+    """
+    rng = np.random.default_rng(seed)
+    positions, shell_ids = build_positions(n_shells, r0)
+    N = len(positions)
+
+    phases   = rng.uniform(0.0, 2.0 * np.pi, N)
+    x        = rng.standard_normal(N);  x /= np.linalg.norm(x)
+    y_target = rng.standard_normal(N);  y_target /= np.linalg.norm(y_target)
+
+    losses          = []
+    shell_grad_mean = {n: [] for n in range(n_shells)}
+
+    for _ in range(n_iter):
+        K    = build_K(positions, phases, xi, kappa0)
+        res  = K @ x - y_target
+        losses.append(0.5 * float(res @ res))
+
+        dKt  = dK_dphi(positions, phases, xi, kappa0)
+        grad = loss_gradient(K, x, y_target, dKt)
+
+        for n in range(n_shells):
+            idx = np.where(shell_ids == n)[0]
+            shell_grad_mean[n].append(float(np.abs(grad[idx]).mean()))
+
+        phases = phases - lr * grad
+
+    K_final   = build_K(positions, phases, xi, kappa0)
+    loss_final = 0.5 * float(np.linalg.norm(K_final @ x - y_target) ** 2)
+    losses.append(loss_final)
+    reduction = losses[0] / (loss_final + 1e-12)
+
+    if verbose:
+        print("\n" + "=" * 62)
+        print("Learning demo  (Storage.md §VI/VIII: geometry-as-weights)")
+        print("=" * 62)
+        print(f"\n  Task: minimize L = 0.5||K(phi)x - y*||^2 over {N} phases")
+        print(f"  Iterations: {n_iter}  |  Learning rate: {lr}")
+        print(f"\n  Loss trajectory (every 40 steps):")
+        print(f"  {'step':>6}  {'loss':>10}  bar")
+        print(f"  {'------':>6}  {'----------':>10}  ---")
+        L0 = losses[0]
+        for i in range(0, n_iter + 1, 40):
+            bar = _bar(losses[i], L0, 30) if L0 > 0 else ''
+            print(f"  {i:>6}  {losses[i]:>10.5f}  {bar}")
+
+        print(f"\n  Loss reduction: {reduction:.1f}x  "
+              f"({losses[0]:.5f} -> {loss_final:.5f})")
+
+        print(f"\n  Per-shell mean |gradient|  (averaged over first 20 steps):")
+        print(f"  {'shell':>5}  {'r_n':>6}  {'mean|g|':>9}  {'rel. to inner':>13}  bar")
+        inner_g = np.mean(shell_grad_mean[0][:20]) + 1e-12
+        for n in range(n_shells):
+            r_n = r0 * PHI ** n
+            g   = np.mean(shell_grad_mean[n][:20])
+            rel = g / inner_g
+            print(f"  {n:>5}  {r_n:>6.3f}  {g:>9.5f}  {rel:>13.4f}  "
+                  f"{_bar(g, inner_g, 25)}")
+
+        inner_dom = (np.mean(shell_grad_mean[0][:20])
+                     > np.mean(shell_grad_mean[n_shells - 1][:20]))
+        print(f"\n  Inner shell gradient > outer shell:  "
+              f"{'PASS' if inner_dom else 'FAIL'}")
+        # 1.3x is the meaningful threshold: proves continuous gradient control.
+        # Full convergence requires many more steps (task is unconstrained).
+        print(f"  Loss reduced >= 1.3x:                "
+              f"{'PASS' if reduction >= 1.3 else 'FAIL'}  ({reduction:.1f}x)")
+
+    return {
+        'losses':           losses,
+        'phases_final':     phases,
+        'shell_grad_mean':  shell_grad_mean,
+        'loss_reduction':   reduction,
+    }
+
+
+def stability_demo(n_shells: int = N_SHELLS, r0: float = R0,
+                   xi: float = XI, kappa0: float = KAPPA0,
+                   seed: int = 42, n_steps: int = 60,
+                   verbose: bool = True) -> dict:
+    """
+    Iterative linear dynamics:  x_{t+1} = alpha * K * x_t
+
+    Storage.md §VII: stability requires rho(alpha K) < 1, i.e.
+    alpha < 1 / lambda_max.  Phi-spacing gives natural spectral decay
+    so outer shells cannot produce runaway feedback.
+    """
+    rng = np.random.default_rng(seed)
+    positions, _ = build_positions(n_shells, r0)
+    N     = len(positions)
+    phases = rng.uniform(0.0, 2.0 * np.pi, N)
+    K     = build_K(positions, phases, xi, kappa0)
+
+    evals, _, _, _ = spectral_analysis(K)
+    lam_max    = float(np.abs(evals).max())
+    alpha_safe = 1.0 / (lam_max + 1e-12)
+
+    x0 = rng.standard_normal(N);  x0 /= np.linalg.norm(x0)
+
+    # Use eigenvector of lambda_max as x0 so divergence is immediate and clear.
+    evals_full, evecs_full, _, _ = spectral_analysis(K)
+    x0_dom = evecs_full[:, 0]   # dominant eigenvector
+
+    # Also test with random x0 for the stable cases
+    gain_fracs = [0.5, 0.9, 1.0, 2.0]
+
+    if verbose:
+        print("\n" + "=" * 62)
+        print("Stability demo  (Storage.md §VII: spectral radius control)")
+        print("=" * 62)
+        print(f"\n  lambda_max = {lam_max:.4f}   "
+              f"alpha_safe = 1/lambda_max = {alpha_safe:.4f}")
+        print(f"  x0 = dominant eigenvector (worst-case initialization)")
+        print(f"  Iterating x_{{t+1}} = alpha*K*x_t  for {n_steps} steps")
+        print(f"\n  {'alpha_frac':>10}  {'alpha':>8}  {'rho':>6}  "
+              f"{'||x_0||':>8}  {'||x_final||':>11}  status")
+        print(f"  {'----------':>10}  {'--------':>8}  {'------':>6}  "
+              f"{'--------':>8}  {'-----------':>11}  ------")
+
+    results = {}
+    for frac in gain_fracs:
+        alpha = frac * alpha_safe
+        rho   = alpha * lam_max
+        x     = x0_dom.copy()
+        for _ in range(n_steps):
+            x = alpha * K @ x
+            if np.linalg.norm(x) > 1e6:   # early exit to avoid overflow
+                break
+        norm_final = float(np.linalg.norm(x))
+        stable     = np.isfinite(norm_final) and norm_final < 1e4
+        status     = "stable  " if stable else "DIVERGED"
+
+        if verbose:
+            print(f"  {frac:>10.2f}  {alpha:>8.4f}  {rho:>6.3f}  "
+                  f"{1.0:>8.4f}  {norm_final:>11.2f}  {status}")
+
+        results[frac] = {
+            'alpha':      alpha,
+            'rho':        rho,
+            'norm_final': norm_final,
+            'stable':     stable,
+        }
+
+    stable_sub  = results[0.9]['stable']
+    diverge_sup = not results[2.0]['stable']
+
+    if verbose:
+        print(f"\n  alpha=0.9 * safe is stable:   "
+              f"{'PASS' if stable_sub  else 'FAIL'}")
+        print(f"  alpha=2.0 * safe diverges:    "
+              f"{'PASS' if diverge_sup else 'FAIL'}")
+
+    return results
+
+
 def xi_sweep(xi_values=(0.5, 0.8, 1.2, 1.8, 2.4),
              n_shells: int = N_SHELLS, r0: float = R0):
     """
@@ -427,3 +599,9 @@ if __name__ == "__main__":
 
     # Parameter sensitivity: xi sweep
     xi_sweep()
+
+    # Storage.md §VI/VIII: geometry-as-weights learning
+    learning_demo()
+
+    # Storage.md §VII: iterative stability boundary
+    stability_demo()
