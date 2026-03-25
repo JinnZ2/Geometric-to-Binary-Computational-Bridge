@@ -14,6 +14,7 @@ This folder organises that mapping honestly — separating what is grounded from
 | [`02-bloom-engine.md`](02-bloom-engine.md) | Radial expansion architecture, topological attention connection | **Design** |
 | [`03-theoretical.md`](03-theoretical.md) | P=NP via relaxation, consciousness Φ, physical constants — with honest caveats | **Speculative** |
 | [`04-roadmap.md`](04-roadmap.md) | Implementation phases, updated code examples matching actual repo | **Aspirational** |
+| [`05-physics-connections.md`](05-physics-connections.md) | Real physics unifying all layers: MH↔KT, FRET↔Coulomb, Berry phase↔winding, qudit-octit | **Physics** |
 
 ---
 

@@ -6,6 +6,31 @@
 
     "sources": [
       {
+        "name": "mandala",
+        "repo": "https://github.com/JinnZ2/Mandala-Computing",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "computation_engine",
+        "paths": [
+          "atlas/shapes.json",
+          "atlas/glyphs/mandala.json",
+          "sensors/multi_layer.json",
+          "protocols/connect.json"
+        ],
+        "mounts": [
+          { "remote": "atlas/shapes.json",        "as": "atlas/remote/mandala/shapes.json" },
+          { "remote": "atlas/glyphs/mandala.json", "as": "atlas/remote/mandala/glyphs.json" },
+          { "remote": "sensors/multi_layer.json",  "as": "atlas/remote/mandala/sensors.json" }
+        ],
+        "exports": [
+          { "local": "mappings/octahedral_state_encoding.json", "as": "mappings/octahedral_state_encoding.json" },
+          { "local": "Silicon/octahedral_state_encoder.json",   "as": "Silicon/octahedral_state_encoder.json" }
+        ],
+        "entities_consumed": ["SHAPE.OCTA", "CONST.PHI", "CAP.SEED_EXPANSION", "PROTO.MANDALA_COMPUTE"],
+        "entities_exported": ["GEIS.ENCODING", "BRIDGE.BINARY", "TOPO.VORTEX_MEMORY"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
         "name": "rosetta",
         "repo": "https://github.com/JinnZ2/Rosetta-Shape-Core",
         "ref": "main",
@@ -93,7 +118,7 @@
     ],
 
     "merge": {
-      "order": ["local", "rosetta", "polyhedral", "emotions", "defense", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "biogrid"],
       "strategy": "deep-merge"
     },
 
