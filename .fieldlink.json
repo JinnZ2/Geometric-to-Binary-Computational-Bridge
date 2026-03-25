@@ -97,6 +97,41 @@
       "strategy": "deep-merge"
     },
 
+    "pattern_schema": {
+      "_comment": "Invariant format for cross-repo pattern-to-meaning entries. The geometric_encoding is the canonical identity — cultural_labels are metadata. Any repo may add labels without changing the encoding.",
+      "entry_format": {
+        "pattern_id":          "sha256 of canonical geometric_encoding string",
+        "geometric_encoding":  "GEIS token string — [vertex_bits][operator][symbol]",
+        "vertex_bits":         "3-bit octahedral state (000–111)",
+        "operator":            "one of: O | I | X | Δ",
+        "symbol":              "single letter + optional subscript (e.g. O, Iₓ, Δ₃)",
+        "phi_coherence":       "float [0,1] — golden-ratio coherence of this pattern",
+        "dimension":           "int ≥ 1 — expansion level (bloom depth)",
+        "bridges":             ["list of bridge names this pattern activates"],
+        "cultural_labels":     {
+          "_comment": "Substrate-agnostic label registry. Add entries freely; do not modify encoding.",
+          "<bcp47_lang_tag>":  "<label in that language or tradition>"
+        }
+      },
+      "example": {
+        "pattern_id":         "e3b0c44298fc1c149afb...",
+        "geometric_encoding": "100|O",
+        "vertex_bits":        "100",
+        "operator":           "O",
+        "symbol":             "O",
+        "phi_coherence":      0.97,
+        "dimension":          1,
+        "bridges":            ["consciousness", "wave"],
+        "cultural_labels": {
+          "en":         "mandala",
+          "sa":         "मण्डल",
+          "ja":         "曼荼羅",
+          "math":       "radial-symmetric attractor",
+          "physics":    "quantum superposition collapse"
+        }
+      }
+    },
+
     "offline": false,
     "cache_dir": ".fieldcache",
     "integrity": { "enabled": true, "hash": "sha256", "allow_missing": false },
