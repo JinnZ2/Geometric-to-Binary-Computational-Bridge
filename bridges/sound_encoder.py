@@ -58,12 +58,20 @@ def _pitch_bands(pitch_threshold: float) -> list:
     same *musical interval* regardless of tuning system.
 
     Example with pitch_threshold=440 Hz (A4):
-      [27.5, 55.0, 110.0, 220.0, 440.0, 880.0, 1760.0, 3520.0]
+      [27.5, 55.0, 110.0, 220.0, 440.0, 880.0+ε, 1760.0+ε, 3520.0+ε]
     Example with pitch_threshold=432 Hz (Verdi tuning):
-      [27.0, 54.0, 108.0, 216.0, 432.0, 864.0, 1728.0, 3456.0]
+      [27.0, 54.0, 108.0, 216.0, 432.0, 864.0+ε, 1728.0+ε, 3456.0+ε]
+
+    The upper three boundaries (p*2, p*4, p*8) carry a sub-Hz epsilon so
+    that a frequency sitting exactly at an octave harmonic of the threshold
+    (e.g. 880 Hz when p=440) is placed in the lower band rather than
+    treated as the start of the next octave.  This is the correct
+    pitch-threshold-relative behaviour: 880 Hz is the upper limit of the
+    A4 register, not the first note of A5.
     """
     p = pitch_threshold
-    return [p / 16, p / 8, p / 4, p / 2, p, p * 2, p * 4, p * 8]
+    _e = 1e-9   # sub-Hz epsilon — inaudible, keeps harmonics in lower band
+    return [p / 16, p / 8, p / 4, p / 2, p, p * 2 + _e, p * 4 + _e, p * 8 + _e]
 
 # ---------------------------------------------------------------------------
 # Gray-code helpers
