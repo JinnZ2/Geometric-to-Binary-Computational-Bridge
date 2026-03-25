@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 substrate_fret_coupling.py
 
 Mathematical Framework for Substrate-Independent Organization + FRET Coupling
@@ -11,7 +14,7 @@ geometric configurations achieving higher efficiency than classical predictions.
 
 Collaborative Development Framework
 MIT License
-“””
+"""
 
 import numpy as np
 from typing import Tuple, List, Dict
@@ -47,34 +50,31 @@ U_3D = np.array([
 # =============================================================================
 
 def fret_efficiency_classical(r: float, R0: float) -> float:
-“””
-Classical FRET efficiency.
-
-```
-E = 1 / (1 + (r/R0)^6)
-"""
+    """
+    Classical FRET efficiency.
+    
+    E = 1 / (1 + (r/R0)^6)
+    """
 return 1.0 / (1.0 + (r / R0)**6)
 ```
 
 def fret_rate(r: float, R0: float, tau_D: float) -> float:
-“””
-FRET rate constant k_T.
-
-```
-k_T = (1/τ_D) × (R0/r)^6
-"""
+    """
+    FRET rate constant k_T.
+    
+    k_T = (1/τ_D) × (R0/r)^6
+    """
 return (1.0 / tau_D) * (R0 / r)**6
 ```
 
 def forster_radius(kappa2: float, Q_D: float, J: float, n: float) -> float:
-“””
-Calculate Förster radius from molecular parameters.
-
-```
-R0^6 = (9 × ln(10) × κ² × Q_D × J) / (128 × π^5 × n^4 × N_A)
-
-Simplified form assuming standard conditions.
-"""
+    """
+    Calculate Förster radius from molecular parameters.
+    
+    R0^6 = (9 × ln(10) × κ² × Q_D × J) / (128 × π^5 × n^4 × N_A)
+    
+    Simplified form assuming standard conditions.
+    """
 # Simplified calculation
 return (8.79e-5 * kappa2 * Q_D * J / (n**4))**(1/6) * 1e-9
 ```
@@ -86,13 +86,12 @@ return (8.79e-5 * kappa2 * Q_D * J / (n**4))**(1/6) * 1e-9
 # =============================================================================
 
 def phi_resonance_factor(r: float, R0: float) -> float:
-“””
-Phi-geometric resonance enhancement.
-
-```
-At phi-ratio distances, constructive interference
-may reduce effective energy loss.
-"""
+    """
+    Phi-geometric resonance enhancement.
+    
+    At phi-ratio distances, constructive interference
+    may reduce effective energy loss.
+    """
 ratio = r / R0
 
 # Sum over phi harmonics
@@ -108,13 +107,12 @@ return 1.0 + enhancement
 ```
 
 def fret_efficiency_phi_enhanced(r: float, R0: float) -> float:
-“””
-FRET efficiency with phi-geometric enhancement.
-
-```
-Challenge to conventional model: specific geometric
-configurations may exceed classical efficiency limits.
-"""
+    """
+    FRET efficiency with phi-geometric enhancement.
+    
+    Challenge to conventional model: specific geometric
+    configurations may exceed classical efficiency limits.
+    """
 classical = fret_efficiency_classical(r, R0)
 phi_factor = phi_resonance_factor(r, R0)
 
@@ -124,12 +122,11 @@ return min(enhanced, 1.0)
 ```
 
 def phi_optimal_distance(R0: float, order: int = 1) -> float:
-“””
-Calculate phi-optimal spacing for FRET coupling.
-
-```
-r_opt = R0 × φ^n
-"""
+    """
+    Calculate phi-optimal spacing for FRET coupling.
+    
+    r_opt = R0 × φ^n
+    """
 return R0 * (PHI ** order)
 ```
 
@@ -141,19 +138,18 @@ return R0 * (PHI ** order)
 
 def impedance_factor(eps_A: float, eps_B: float,
 mu_A: float = 1.0, mu_B: float = 1.0) -> float:
-“””
+"""
 Electromagnetic impedance matching between substrates.
-“””
+"""
 Z_A = np.sqrt(mu_A / eps_A)
 Z_B = np.sqrt(mu_B / eps_B)
 return 2 * Z_B / (Z_A + Z_B)
 
 def substrate_coupling_matrix(substrate_A: Dict, substrate_B: Dict,
 phi_coupling: float = PHI) -> np.ndarray:
-“””
+"""
 6×6 coupling matrix for organizational pattern transfer.
 
-```
 M_ij determines how amplitude in direction i of substrate A
 couples to direction j of substrate B.
 """
@@ -197,10 +193,9 @@ return M
 def transfer_dynamics(t: float, state: np.ndarray,
 M: np.ndarray, gamma_A: float, gamma_B: float,
 k_transfer: float) -> np.ndarray:
-“””
+"""
 Coupled differential equations for substrate transfer.
 
-```
 dS_A/dt = -γ_A × S_A - k_T × M × S_A
 dS_B/dt = -γ_B × S_B + k_T × M × S_A
 """
@@ -222,9 +217,9 @@ substrate_A: Dict, substrate_B: Dict,
 t_span: Tuple[float, float],
 k_transfer: float = 1.0,
 n_points: int = 500) -> Dict:
-“””
+"""
 Simulate organizational pattern transfer between substrates.
-“””
+"""
 # Normalize initial state
 S_A0 = S_initial / S_initial.sum()
 S_B0 = np.zeros(6)
@@ -278,17 +273,17 @@ return {
 # =============================================================================
 
 def energy_loss_classical(r: float, R0: float) -> float:
-“”“Classical energy loss = 1 - efficiency.”””
+    """Classical energy loss = 1 - efficiency."""
 return 1.0 - fret_efficiency_classical(r, R0)
 
 def energy_loss_phi_enhanced(r: float, R0: float) -> float:
-“”“Phi-enhanced energy loss.”””
+    """Phi-enhanced energy loss."""
 return 1.0 - fret_efficiency_phi_enhanced(r, R0)
 
 def loss_improvement(r: float, R0: float) -> float:
-“””
-Percentage improvement in energy retention with phi-enhancement.
-“””
+    """
+    Percentage improvement in energy retention with phi-enhancement.
+    """
 classical = energy_loss_classical(r, R0)
 enhanced = energy_loss_phi_enhanced(r, R0)
 
@@ -301,9 +296,9 @@ return (classical - enhanced) / classical * 100
 
 def scan_loss_vs_distance(R0: float, r_min: float, r_max: float,
 n_points: int = 200) -> Dict:
-“””
+"""
 Scan energy loss as function of distance.
-“””
+"""
 r_values = np.linspace(r_min, r_max, n_points)
 
 ```
@@ -329,13 +324,12 @@ return results
 # =============================================================================
 
 def octahedral_network_coupling(R0: float, scale: float = 1.0) -> np.ndarray:
-“””
-Calculate FRET coupling matrix for octahedral node arrangement.
-
-```
-Nodes placed at octahedral vertices, coupling based on
-inter-node distances and phi-enhanced FRET.
-"""
+    """
+    Calculate FRET coupling matrix for octahedral node arrangement.
+    
+    Nodes placed at octahedral vertices, coupling based on
+    inter-node distances and phi-enhanced FRET.
+    """
 # Optimal shell radius
 r_shell = phi_optimal_distance(R0, 1) * scale
 
@@ -358,10 +352,9 @@ return C
 
 def network_transfer_efficiency(S_in: np.ndarray, C: np.ndarray,
 n_hops: int = 1) -> Tuple[np.ndarray, float]:
-“””
+"""
 Calculate pattern transfer through octahedral network.
 
-```
 Returns final pattern and total efficiency.
 """
 S = S_in.copy()
@@ -385,9 +378,9 @@ return S, efficiency
 
 def find_resonant_configuration(R0: float, substrate_A: Dict, substrate_B: Dict,
 S_seed: np.ndarray) -> Dict:
-“””
+"""
 Search for geometric configuration that maximizes transfer efficiency.
-“””
+"""
 def objective(params):
 scale, phi_coupling, k_transfer = params
 
@@ -426,11 +419,11 @@ return {
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=” * 70)
-print(“SUBSTRATE-FRET COUPLING FRAMEWORK”)
-print(“Pattern Transfer Between Substrates via Phi-Enhanced FRET”)
-print(”=” * 70)
+if **name** == "**main**":
+print("=" * 70)
+print("SUBSTRATE-FRET COUPLING FRAMEWORK")
+print("Pattern Transfer Between Substrates via Phi-Enhanced FRET")
+print("=" * 70)
 
 ```
 # Test seed
@@ -493,7 +486,6 @@ print("\n" + "=" * 70)
 print("KEY EQUATIONS")
 print("=" * 70)
 print("""
-```
 
 FRET Efficiency (Classical):
 E = 1 / (1 + (r/R₀)⁶)
@@ -502,7 +494,7 @@ Phi Resonance Enhancement:
 F(r) = 1 + Σₙ exp(-(r/R₀ - φⁿ)² / 2σₙ²) / n
 
 Phi-Enhanced Efficiency:
-E’ = min(E × F(r), 1.0)
+E' = min(E × F(r), 1.0)
 
 Phi-Optimal Distance:
 r_opt = R₀ × φⁿ
@@ -513,10 +505,8 @@ dS_B/dt = -γ_B × S_B + k_T × M × S_A
 
 Pattern Fidelity:
 F = (S_original · S_transferred) / (|S_original| × |S_transferred|)
-“””)
+""")
 
-```
 print("=" * 70)
 print("Ready for simulation exploration.")
 print("=" * 70)
-```

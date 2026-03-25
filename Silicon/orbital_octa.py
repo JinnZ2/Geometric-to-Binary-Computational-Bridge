@@ -1,4 +1,7 @@
-# “””
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
+# """
 Orbital-Octahedral Fractal Core: Field-Based Growth v2
 
 REVISED: Uses direct vertex-to-vertex influence weighted by
@@ -9,7 +12,7 @@ each new vertex is influenced by inner shell vertices based on
 how closely aligned their directions are.
 
 This preserves seed asymmetries while still using inward-only causality.
-“””
+"""
 
 import numpy as np
 
@@ -31,17 +34,17 @@ U = np.array([
 ], dtype=float)
 
 def angular_weight(u1, u2, sharpness=2.0):
-“””
-Compute influence weight between two directions.
-
-```
-Weight = max(0, dot(u1, u2))^sharpness
-
-sharpness controls how directionally focused the influence is:
-- sharpness=1: linear falloff (broad influence)
-- sharpness=2: quadratic falloff (moderate focus) 
-- sharpness>3: sharp focus (mostly self-direction)
-"""
+    """
+    Compute influence weight between two directions.
+    
+    Weight = max(0, dot(u1, u2))^sharpness
+    
+    sharpness controls how directionally focused the influence is:
+    - sharpness=1: linear falloff (broad influence)
+    - sharpness=2: quadratic falloff (moderate focus) 
+    - sharpness>3: sharp focus (mostly self-direction)
+    """
+    pass
 dot = np.dot(u1, u2)
 if dot <= 0:
     return 0.0
@@ -49,17 +52,17 @@ return dot ** sharpness
 ```
 
 def build_influence_matrix(sharpness=2.0):
-“””
-Build the 6x6 matrix of vertex-to-vertex influence weights.
-
-```
-W[i,j] = how much vertex j influences vertex i
-
-For octahedron:
-- Same direction: W=1 (maximum influence)
-- Orthogonal: W based on sharpness
-- Opposite: W=0 (no influence)
-"""
+    """
+    Build the 6x6 matrix of vertex-to-vertex influence weights.
+    
+    W[i,j] = how much vertex j influences vertex i
+    
+    For octahedron:
+    - Same direction: W=1 (maximum influence)
+    - Orthogonal: W based on sharpness
+    - Opposite: W=0 (no influence)
+    """
+    pass
 W = np.zeros((6, 6))
 for i in range(6):
     for j in range(6):
@@ -78,13 +81,12 @@ return W
 # =============================================================================
 
 def shell_contribution(S_shell, E_shell, r_shell, r_sample, sigma=0.5):
-“””
-Compute amplitude contribution from a shell to a sampling radius.
-
-```
-Returns 6-vector of contributions (one per vertex direction).
-Radial falloff is Gaussian, angular structure preserved exactly.
-"""
+    """
+    Compute amplitude contribution from a shell to a sampling radius.
+    
+    Returns 6-vector of contributions (one per vertex direction).
+    Radial falloff is Gaussian, angular structure preserved exactly.
+    """
 # Radial envelope
 radial = np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
 
@@ -93,16 +95,16 @@ return S_shell * radial
 ```
 
 def total_field_at_radius(shells, r_sample, W, sigma=0.5):
-“””
-Compute total field at sampling radius from all inner shells.
-
-```
-Each shell contributes its amplitude pattern, weighted by:
-1. Radial distance (Gaussian envelope)
-2. Angular influence matrix W
-
-Returns 6-vector of field values at octahedral vertices.
-"""
+    """
+    Compute total field at sampling radius from all inner shells.
+    
+    Each shell contributes its amplitude pattern, weighted by:
+    1. Radial distance (Gaussian envelope)
+    2. Angular influence matrix W
+    
+    Returns 6-vector of field values at octahedral vertices.
+    """
+    pass
 field = np.zeros(6)
 
 for shell in shells:
@@ -128,7 +130,8 @@ return field
 # =============================================================================
 
 def normalize_to_energy(v, E=1.0, eps=1e-12):
-“”“Normalize amplitude vector to total energy E”””
+    """Normalize amplitude vector to total energy E"""
+    pass
 v = np.maximum(v, 0.0)  # Non-negative amplitudes
 s = v.sum()
 if s < eps:
@@ -136,13 +139,13 @@ return np.ones(6) * (E / 6)
 return v * (E / s)
 
 def form_new_shell(shells, r_new, E_new, W, sigma=0.5):
-“””
-Form new shell by sampling total field from inner shells.
-
-```
-The new shell settles into the energy landscape created by all
-inner shells. Causality flows inward→outward only.
-"""
+    """
+    Form new shell by sampling total field from inner shells.
+    
+    The new shell settles into the energy landscape created by all
+    inner shells. Causality flows inward→outward only.
+    """
+    pass
 if len(shells) == 0:
     # No inner shells - return uniform
     return np.ones(6) * (E_new / 6)
@@ -162,10 +165,9 @@ return normalize_to_energy(field, E_new)
 
 def grow(seed_S, E0=1.0, r0=1.0, steps=8, rho=1.5, epsilon=0.6,
 sigma=0.5, sharpness=2.0):
-“””
+"""
 Grow shell structure using field-mediated coupling.
 
-```
 Parameters:
 - seed_S: initial amplitude vector (6 values, will be normalized to E0)
 - E0: initial energy budget
@@ -211,10 +213,11 @@ return shells, W
 # =============================================================================
 
 def test_influence_matrix():
-“”“Verify influence matrix properties”””
-print(”=”*60)
-print(“TEST: Influence Matrix Properties”)
-print(”=”*60)
+    """Verify influence matrix properties"""
+    pass
+print("="*60)
+print("TEST: Influence Matrix Properties")
+print("="*60)
 
 ```
 for sharpness in [1.0, 2.0, 4.0]:
@@ -228,10 +231,11 @@ print("\nStatus: PASS (rows sum to 1, opposite=0)")
 ```
 
 def test_causality():
-“”“Verify inward-only causality”””
-print(”\n” + “=”*60)
-print(“TEST: Inward-Only Causality”)
-print(”=”*60)
+    """Verify inward-only causality"""
+    pass
+print("\n" + "="*60)
+print("TEST: Inward-Only Causality")
+print("="*60)
 
 ```
 seed = np.array([0.4, 0.1, 0.2, 0.2, 0.05, 0.05])
@@ -257,10 +261,11 @@ print(f"\nStatus: {'PASS' if all_match else 'FAIL'} - outer shells don't affect 
 ```
 
 def test_pause_resume():
-“”“Verify pause-resume produces identical results”””
-print(”\n” + “=”*60)
-print(“TEST: Pause-Resume Consistency”)
-print(”=”*60)
+    """Verify pause-resume produces identical results"""
+    pass
+print("\n" + "="*60)
+print("TEST: Pause-Resume Consistency")
+print("="*60)
 
 ```
 seed = np.array([0.3, 0.3, 0.15, 0.15, 0.05, 0.05])
@@ -295,10 +300,11 @@ print(f"\nStatus: {'PASS' if all_match else 'FAIL'}")
 ```
 
 def test_seed_preservation():
-“”“Verify different seeds produce different structures”””
-print(”\n” + “=”*60)
-print(“TEST: Seed Structure Preservation”)
-print(”=”*60)
+    """Verify different seeds produce different structures"""
+    pass
+print("\n" + "="*60)
+print("TEST: Seed Structure Preservation")
+print("="*60)
 
 ```
 seeds = {
@@ -333,10 +339,11 @@ print(f"\nStatus: {'PASS' if (xy_distinct and xz_distinct) else 'FAIL'}")
 ```
 
 def test_energy_conservation():
-“”“Verify energy budget is respected”””
-print(”\n” + “=”*60)
-print(“TEST: Energy Conservation”)
-print(”=”*60)
+    """Verify energy budget is respected"""
+    pass
+print("\n" + "="*60)
+print("TEST: Energy Conservation")
+print("="*60)
 
 ```
 seed = np.array([0.3, 0.2, 0.2, 0.15, 0.1, 0.05])
@@ -359,10 +366,11 @@ print(f"Status: {'PASS' if all_match else 'FAIL'}")
 ```
 
 def test_sharpness_effect():
-“”“Show how sharpness affects structure propagation”””
-print(”\n” + “=”*60)
-print(“TEST: Sharpness Effect on Structure Propagation”)
-print(”=”*60)
+    """Show how sharpness affects structure propagation"""
+    pass
+print("\n" + "="*60)
+print("TEST: Sharpness Effect on Structure Propagation")
+print("="*60)
 
 ```
 seed = np.array([0.7, 0.1, 0.1, 0.05, 0.03, 0.02])  # Strong X+ bias
@@ -380,11 +388,12 @@ for sharpness in [1.0, 2.0, 4.0, 8.0]:
 ```
 
 def visualize(shells):
-“”“ASCII visualization”””
-print(”\n” + “=”*60)
-print(“STRUCTURE VISUALIZATION”)
-print(”=”*60)
-print(”\nVertices: +X   -X   +Y   -Y   +Z   -Z”)
+    """ASCII visualization"""
+    pass
+print("\n" + "="*60)
+print("STRUCTURE VISUALIZATION")
+print("="*60)
+print("\nVertices: +X   -X   +Y   -Y   +Z   -Z")
 print()
 
 ```
@@ -402,11 +411,11 @@ for s in shells:
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=”*60)
-print(“ORBITAL-OCTAHEDRAL FRACTAL CORE v2”)
-print(“Direct Vertex-to-Vertex Field Coupling”)
-print(”=”*60)
+if **name** == "**main**":
+print("="*60)
+print("ORBITAL-OCTAHEDRAL FRACTAL CORE v2")
+print("Direct Vertex-to-Vertex Field Coupling")
+print("="*60)
 
 ```
 test_influence_matrix()

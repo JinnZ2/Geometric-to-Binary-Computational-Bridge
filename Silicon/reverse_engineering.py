@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 reverse_engineering.py
 
 Reverse Engineering Module for 8D Seed Expansion
@@ -23,7 +26,7 @@ human geometric insight identifying the need for bidirectional proof,
 combined with AI mathematical optimization implementation.
 
 MIT License - Use freely, build upon, no attribution required
-“””
+"""
 
 import numpy as np
 from scipy.optimize import minimize, differential_evolution
@@ -45,19 +48,18 @@ normalize_to_energy, get_shell_fingerprint
 # =============================================================================
 
 def params_to_seed(params15: np.ndarray) -> np.ndarray:
-“””
-Reconstruct 16-component seed from 15 independent parameters.
-
-```
-The 16th component is implicit: p_16 = 1 - Σ p_1..15
-This ensures the seed always sums to 1 (energy conservation).
-
-Args:
-    params15: Array of 15 proportional values
+    """
+    Reconstruct 16-component seed from 15 independent parameters.
     
-Returns:
-    Normalized 16-component seed vector
-"""
+    The 16th component is implicit: p_16 = 1 - Σ p_1..15
+    This ensures the seed always sums to 1 (energy conservation).
+    
+    Args:
+        params15: Array of 15 proportional values
+        
+    Returns:
+        Normalized 16-component seed vector
+    """
 p = np.maximum(params15, 0.0)
 p_sum = p.sum()
 
@@ -74,16 +76,15 @@ return v16 / v16.sum()
 ```
 
 def seed_to_params(seed16: np.ndarray) -> np.ndarray:
-“””
-Extract 15 independent parameters from 16-component seed.
-
-```
-Args:
-    seed16: Normalized 16-component seed
+    """
+    Extract 15 independent parameters from 16-component seed.
     
-Returns:
-    First 15 proportional values
-"""
+    Args:
+        seed16: Normalized 16-component seed
+        
+    Returns:
+        First 15 proportional values
+    """
 seed_norm = seed16 / seed16.sum()
 return seed_norm[:15]
 ```
@@ -97,10 +98,9 @@ return seed_norm[:15]
 def calculate_loss_static(params15: np.ndarray, target_shells: List[Dict],
 num_steps: int, rho: float = 1.5,
 epsilon: float = 0.6, sigma_scale: float = 0.5) -> float:
-“””
+"""
 Loss function for static (Euclidean) expansion.
 
-```
 Measures L2 distance between simulated shell proportions and target.
 """
 hypo_seed = params_to_seed(params15)
@@ -124,9 +124,9 @@ def calculate_loss_dynamic(params15: np.ndarray, target_shells: List[Dict],
 num_steps: int, rho: float = 1.5,
 base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
 sigma_scale: float = 0.5) -> float:
-“””
+"""
 Loss function for dynamic (Phi-modulated) expansion.
-“””
+"""
 hypo_seed = params_to_seed(params15)
 
 ```
@@ -157,10 +157,9 @@ return total_loss
 def recover_seed_lbfgs(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, maxiter: int = 500,
 **expansion_params) -> Dict:
-“””
+"""
 Recover seed using L-BFGS-B optimization (gradient-based, local).
 
-```
 Fast but may get stuck in local minima for complex structures.
 
 Args:
@@ -214,10 +213,9 @@ return {
 def recover_seed_de(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, maxiter: int = 200,
 popsize: int = 15, **expansion_params) -> Dict:
-“””
+"""
 Recover seed using Differential Evolution (global optimizer).
 
-```
 More robust than L-BFGS-B but slower. Use for difficult cases
 or when local methods fail.
 
@@ -272,10 +270,9 @@ return {
 def recover_seed_multistart(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, n_starts: int = 5,
 maxiter: int = 300, **expansion_params) -> Dict:
-“””
+"""
 Recover seed using multiple random starting points with L-BFGS-B.
 
-```
 Balance between speed of local optimization and robustness of
 multiple starting points.
 
@@ -348,12 +345,11 @@ return {
 # =============================================================================
 
 def recover_seed(target_shells: List[Dict], num_steps: int = None,
-use_dynamic: bool = False, method: str = ‘auto’,
+use_dynamic: bool = False, method: str = 'auto',
 **expansion_params) -> Dict:
-“””
+"""
 High-level interface for seed recovery.
 
-```
 Args:
     target_shells: Target structure (list of shell dicts)
     num_steps: Number of shells (auto-detected if None)
@@ -399,10 +395,9 @@ return result
 
 def verify_recovery(true_seed: np.ndarray, recovered_seed: np.ndarray,
 tol: float = 1e-4) -> Tuple[bool, float]:
-“””
+"""
 Verify that recovered seed matches original.
 
-```
 Args:
     true_seed: Original seed (normalized)
     recovered_seed: Recovered seed (normalized)
@@ -422,10 +417,9 @@ return max_dev <= tol, max_dev
 def round_trip_test(seed: np.ndarray, steps: int = 5,
 use_dynamic: bool = False, verbose: bool = True,
 **expansion_params) -> Dict:
-“””
+"""
 Complete round-trip test: seed → structure → recovered seed
 
-```
 Args:
     seed: Original seed
     steps: Number of shells to expand
@@ -483,11 +477,11 @@ return {
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=” * 70)
-print(“REVERSE ENGINEERING: Seed Recovery from Expanded Structure”)
-print(“Proving bidirectional (bijective) mapping”)
-print(”=” * 70)
+if **name** == "**main**":
+print("=" * 70)
+print("REVERSE ENGINEERING: Seed Recovery from Expanded Structure")
+print("Proving bidirectional (bijective) mapping")
+print("=" * 70)
 
 ```
 # Test seed with clear structure
@@ -532,19 +526,18 @@ print("=" * 70)
 all_passed = result1['success'] and result2['success'] and result3['success']
 
 print(f"""
-```
 
 Reverse Engineering Results:
 
-Test 1 (Static):  {‘PASS’ if result1[‘success’] else ‘FAIL’} (dev: {result1[‘max_deviation’]:.2e})
-Test 2 (Dynamic): {‘PASS’ if result2[‘success’] else ‘FAIL’} (dev: {result2[‘max_deviation’]:.2e})
-Test 3 (Random):  {‘PASS’ if result3[‘success’] else ‘FAIL’} (dev: {result3[‘max_deviation’]:.2e})
+Test 1 (Static):  {'PASS' if result1['success'] else 'FAIL'} (dev: {result1['max_deviation']:.2e})
+Test 2 (Dynamic): {'PASS' if result2['success'] else 'FAIL'} (dev: {result2['max_deviation']:.2e})
+Test 3 (Random):  {'PASS' if result3['success'] else 'FAIL'} (dev: {result3['max_deviation']:.2e})
 
-Overall: {‘ALL TESTS PASSED’ if all_passed else ‘SOME TESTS FAILED’}
+Overall: {'ALL TESTS PASSED' if all_passed else 'SOME TESTS FAILED'}
 
 This proves the bidirectional mapping:
 seed → structure → recovered_seed (identical to original)
 
 The 8D hyper-octahedral expansion is REVERSIBLE.
 The minimal 120-bit seed uniquely determines the structure.
-“””)
+""")

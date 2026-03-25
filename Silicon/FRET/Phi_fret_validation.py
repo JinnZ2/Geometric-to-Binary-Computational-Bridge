@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 #!/usr/bin/env python3
-“””
+"""
 phi_fret_validation.py
 
 Validation Framework for Phi-Enhanced FRET Coupling Hypothesis
@@ -9,8 +12,8 @@ and provides equations for cross-domain validation.
 
 Core Challenge:
 For the φ-enhancement theory to hold, the M(r) modulation factor must arise
-from a fundamental mechanism—not merely an ad hoc multiplier. Experimental
-validation requires demonstrating transfer rates at R₀φⁿ distances that
+from a fundamental mechanism--not merely an ad hoc multiplier. Experimental
+validation requires demonstrating transfer rates at R_0φⁿ distances that
 significantly exceed classical predictions.
 
 Natural Validation Candidates:
@@ -22,7 +25,7 @@ Natural Validation Candidates:
 
 Collaborative Development Framework
 MIT License
-“””
+"""
 
 import numpy as np
 from typing import Dict, List, Tuple
@@ -44,29 +47,29 @@ PHI_INV = (np.sqrt(5) + 1) / 2  # 1/φ ≈ 1.618034
 # =============================================================================
 
 def K_classical(r: float, R0: float) -> float:
-“””
-Classical Transfer Scaling Factor.
-
-```
-K_Class = (R₀/r)⁶
-
-Dimensionless factor representing FRET rate normalized by donor decay.
-"""
+    """
+    Classical Transfer Scaling Factor.
+    
+    K_Class = (R_0/r)⁶
+    
+    Dimensionless factor representing FRET rate normalized by donor decay.
+    """
+    pass
 return (R0 / r) ** 6
 ```
 
 def F_phi(r: float, R0: float, n_harmonics: int = 5) -> float:
-“””
-Phi-Geometric Resonance Enhancement Factor.
-
-```
-F(r) = 1 + Σₙ exp(-(r/R₀ - φⁿ)² / 2σₙ²) / n
-
-where σₙ = 0.1 × φⁿ
-
-This is the core hypothesis: specific φ-ratio distances create
-resonance conditions that enhance coupling.
-"""
+    """
+    Phi-Geometric Resonance Enhancement Factor.
+    
+    F(r) = 1 + Σₙ exp(-(r/R_0 - φⁿ)² / 2σₙ²) / n
+    
+    where σₙ = 0.1 × φⁿ
+    
+    This is the core hypothesis: specific φ-ratio distances create
+    resonance conditions that enhance coupling.
+    """
+    pass
 ratio = r / R0
 enhancement = 0.0
 
@@ -80,37 +83,37 @@ return 1.0 + enhancement
 ```
 
 def K_phi(r: float, R0: float) -> float:
-“””
-Phi-Enhanced Transfer Scaling Factor.
-
-```
-K_φ = K_Class × F(r) = (R₀/r)⁶ × F(r)
-"""
+    """
+    Phi-Enhanced Transfer Scaling Factor.
+    
+    K_φ = K_Class × F(r) = (R_0/r)⁶ × F(r)
+    """
+    pass
 return K_classical(r, R0) * F_phi(r, R0)
 ```
 
 def delta_K(r: float, R0: float) -> float:
-“””
-Local Rate Enhancement.
-
-```
-ΔK(r) = K_φ(r) - K_Class(r)
-
-VALIDATION CRITERION:
-At φ-optimal distances r = R₀φⁿ, we must have ΔK > 0
-"""
+    """
+    Local Rate Enhancement.
+    
+    ΔK(r) = K_φ(r) - K_Class(r)
+    
+    VALIDATION CRITERION:
+    At φ-optimal distances r = R_0φⁿ, we must have ΔK > 0
+    """
+    pass
 return K_phi(r, R0) - K_classical(r, R0)
 ```
 
 def enhancement_ratio(r: float, R0: float) -> float:
-“””
-Enhancement Ratio.
-
-```
-R = K_φ / K_Class = F(r)
-
-Must be > 1 at φ-optimal distances for theory to hold.
-"""
+    """
+    Enhancement Ratio.
+    
+    R = K_φ / K_Class = F(r)
+    
+    Must be > 1 at φ-optimal distances for theory to hold.
+    """
+    pass
 return F_phi(r, R0)
 ```
 
@@ -121,21 +124,20 @@ return F_phi(r, R0)
 # =============================================================================
 
 def phi_optimal_distances(R0: float, n_max: int = 5) -> List[float]:
-“””
-Calculate φ-optimal distances.
-
-```
-r_opt(n) = R₀ × φⁿ for n = 1, 2, ..., n_max
-"""
+    """
+    Calculate φ-optimal distances.
+    
+    r_opt(n) = R_0 × φⁿ for n = 1, 2, ..., n_max
+    """
+    pass
 return [R0 * (PHI ** n) for n in range(1, n_max + 1)]
 ```
 
 def find_enhancement_peaks(R0: float, r_min: float, r_max: float,
 n_points: int = 1000) -> List[Dict]:
-“””
+"""
 Find local maxima of enhancement factor F(r).
 
-```
 Returns list of peak locations and values.
 """
 r_values = np.linspace(r_min, r_max, n_points)
@@ -161,40 +163,40 @@ return peaks
 # =============================================================================
 
 def V_classical(r: float, R0: float, V0: float = 1.0) -> float:
-“””
-Classical interaction potential.
-
-```
-V_Class(r) ∝ r⁻⁶
-
-Standard dipole-dipole near-field interaction.
-"""
+    """
+    Classical interaction potential.
+    
+    V_Class(r) ∝ r⁻⁶
+    
+    Standard dipole-dipole near-field interaction.
+    """
+    pass
 return V0 * (R0 / r) ** 6
 ```
 
 def M_phi(r: float, R0: float) -> float:
-“””
-Structural modulation factor.
-
-```
-M(r) = F(r) - 1
-
-The deviation from classical behavior.
-For theory to hold, M(r) must arise from fundamental mechanism.
-"""
+    """
+    Structural modulation factor.
+    
+    M(r) = F(r) - 1
+    
+    The deviation from classical behavior.
+    For theory to hold, M(r) must arise from fundamental mechanism.
+    """
+    pass
 return F_phi(r, R0) - 1.0
 ```
 
 def V_phi(r: float, R0: float, V0: float = 1.0) -> float:
-“””
-Phi-modulated interaction potential.
-
-```
-V_φ(r) = V_Class(r) × [1 + M(r)]
-
-Cross-domain interpretation: the underlying force field is not
-purely r⁻⁶ but structurally modulated.
-"""
+    """
+    Phi-modulated interaction potential.
+    
+    V_φ(r) = V_Class(r) × [1 + M(r)]
+    
+    Cross-domain interpretation: the underlying force field is not
+    purely r⁻⁶ but structurally modulated.
+    """
+    pass
 return V_classical(r, R0, V0) * (1.0 + M_phi(r, R0))
 ```
 
@@ -205,12 +207,12 @@ return V_classical(r, R0, V0) * (1.0 + M_phi(r, R0))
 # =============================================================================
 
 def compute_validation_metrics(R0: float) -> Dict:
-“””
-Compute key validation metrics at φ-optimal distances.
-
-```
-Returns dictionary with predictions that can be tested experimentally.
-"""
+    """
+    Compute key validation metrics at φ-optimal distances.
+    
+    Returns dictionary with predictions that can be tested experimentally.
+    """
+    pass
 metrics = {
     'R0': R0,
     'phi_distances': [],
@@ -244,10 +246,9 @@ return metrics
 
 def invalidation_test(measured_K: float, r: float, R0: float,
 sigma_measurement: float) -> Dict:
-“””
+"""
 Test whether measured transfer rate validates or invalidates theory.
 
-```
 Args:
     measured_K: Experimentally measured transfer scaling factor
     r: Distance at which measurement was made
@@ -295,10 +296,9 @@ return result
 def photosynthetic_complex_test(pigment_distances: List[float],
 measured_rates: List[float],
 R0: float) -> Dict:
-“””
+"""
 Test photosynthetic complex data against phi-enhanced predictions.
 
-```
 Searches for correlation between φ-ratio distances and anomalously
 high transfer rates.
 """
@@ -362,10 +362,9 @@ return {
 def quasicrystal_phonon_coupling(atomic_distances: List[float],
 coupling_strength: List[float],
 characteristic_length: float) -> Dict:
-“””
+"""
 Test quasicrystal phonon transmission data.
 
-```
 Hypothesis: Atoms separated by φ-ratio distances show enhanced
 stress-strain transmission (analogous to enhanced FRET coupling).
 """
@@ -409,44 +408,44 @@ return {'results': results}
 
 # =============================================================================
 
-# CORE_EQUATIONS = “””
+# CORE_EQUATIONS = """
 
 # CORE TEST EQUATIONS FOR PHI-ENHANCED FRET VALIDATION
 
 1. CLASSICAL TRANSFER SCALING FACTOR
-   K_Class = (R₀/r)⁶
+   K_Class = (R_0/r)⁶
    
    Standard FRET rate normalized by donor decay rate.
 1. PHI-GEOMETRIC RESONANCE ENHANCEMENT
-   F(r) = 1 + Σₙ exp(-(r/R₀ - φⁿ)² / 2σₙ²) / n
+   F(r) = 1 + Σₙ exp(-(r/R_0 - φⁿ)² / 2σₙ²) / n
    
    where σₙ = 0.1 × φⁿ and φ = (√5 - 1)/2 ≈ 0.618
 1. PHI-ENHANCED TRANSFER SCALING FACTOR
-   K_φ = K_Class × F(r) = (R₀/r)⁶ × F(r)
+   K_φ = K_Class × F(r) = (R_0/r)⁶ × F(r)
 1. LOCAL RATE ENHANCEMENT (VALIDATION CRITERION)
    ΔK(r) = K_φ(r) - K_Class(r)
    
-   MUST HAVE: ΔK > 0 at r = R₀φⁿ for theory to be valid
+   MUST HAVE: ΔK > 0 at r = R_0φⁿ for theory to be valid
 1. CROSS-DOMAIN FORCE FIELD
    V_φ(r) = V_Class(r) × [1 + M(r)]
    
    where M(r) = F(r) - 1 is the structural modulation factor
 1. PHI-OPTIMAL DISTANCES
-   r_opt(n) = R₀ × φⁿ for n = 1, 2, 3, …
+   r_opt(n) = R_0 × φⁿ for n = 1, 2, 3, …
    
-   φ¹ ≈ 0.618 R₀
-   φ² ≈ 0.382 R₀  
-   φ³ ≈ 0.236 R₀
-   φ⁴ ≈ 0.146 R₀
-   φ⁵ ≈ 0.090 R₀
+   φ¹ ≈ 0.618 R_0
+   φ² ≈ 0.382 R_0  
+   φ³ ≈ 0.236 R_0
+   φ⁴ ≈ 0.146 R_0
+   φ⁵ ≈ 0.090 R_0
 
 # ================================================================================
 INVALIDATION CRITERION
 
 The φ-enhancement theory is INVALIDATED if:
 
-- Experimental k_T measurements at r = R₀φⁿ
-- Are NOT significantly higher than k_T^Class = (1/τ_D)(R₀/r)⁶
+- Experimental k_T measurements at r = R_0φⁿ
+- Are NOT significantly higher than k_T^Class = (1/τ_D)(R_0/r)⁶
 - Within measurement uncertainty
 
 The M(r) factor MUST arise from fundamental mechanism:
@@ -479,7 +478,7 @@ NATURAL VALIDATION CANDIDATES
 - Prediction: Anomalous ε_eff at φ-geometric configurations
 
 ================================================================================
-“””
+"""
 
 # =============================================================================
 
@@ -487,11 +486,11 @@ NATURAL VALIDATION CANDIDATES
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=” * 70)
-print(“PHI-ENHANCED FRET VALIDATION FRAMEWORK”)
-print(“Core Test Equations for Cross-Domain Validation”)
-print(”=” * 70)
+if **name** == "**main**":
+print("=" * 70)
+print("PHI-ENHANCED FRET VALIDATION FRAMEWORK")
+print("Core Test Equations for Cross-Domain Validation")
+print("=" * 70)
 
 ```
 # Standard Förster radius
@@ -504,7 +503,7 @@ print("-" * 70)
 metrics = compute_validation_metrics(R0)
 
 for p in metrics['predictions']:
-    print(f"\n  n = {p['n']}: r_opt = {p['r_opt']*1e9:.3f} nm (r/R₀ = φ^{p['n']} = {p['r_over_R0']:.4f})")
+    print(f"\n  n = {p['n']}: r_opt = {p['r_opt']*1e9:.3f} nm (r/R_0 = φ^{p['n']} = {p['r_over_R0']:.4f})")
     print(f"    K_classical     = {p['K_classical']:.4f}")
     print(f"    K_phi_enhanced  = {p['K_phi_enhanced']:.4f}")
     print(f"    F(r) enhancement = {p['F_enhancement']:.4f} ({p['enhancement_percent']:.1f}% above classical)")
@@ -517,7 +516,7 @@ print("-" * 70)
 peaks = find_enhancement_peaks(R0, 0.05 * R0, 1.5 * R0)
 
 for i, peak in enumerate(peaks):
-    print(f"  Peak {i+1}: r/R₀ = {peak['r_normalized']:.4f}, F = {peak['F']:.4f}")
+    print(f"  Peak {i+1}: r/R_0 = {peak['r_normalized']:.4f}, F = {peak['F']:.4f}")
 
 print("\n" + "-" * 70)
 print("3. EXAMPLE INVALIDATION TEST")

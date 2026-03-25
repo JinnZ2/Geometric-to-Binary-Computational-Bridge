@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 # #!/usr/bin/env python3
-“””
+"""
 Octahedral Encoding Optimization Master Pipeline
 
 This script orchestrates the complete computational workflow:
@@ -10,7 +13,7 @@ This script orchestrates the complete computational workflow:
 1. Autonomous optimization loop
 
 Goal: Find (ε*, d*) that achieves T₂ ≥ 100 ms at 300 K
-“””
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -40,7 +43,7 @@ TARGET_T2_MS = 100.0  # ms (target coherence time)
 
 @dataclass
 class OptimizationState:
-“”“Track optimization progress”””
+"""Track optimization progress"""
 iteration: int = 0
 current_strain: float = 0.0
 current_distance: float = 0.0
@@ -70,7 +73,7 @@ def check_convergence(self, target_T2: float) -> bool:
 ```
 
 class OctahedralOptimizer:
-“”“Master optimizer for octahedral encoding architecture”””
+"""Master optimizer for octahedral encoding architecture"""
 
 ```
 def __init__(self, work_dir: str = "./optimization_workspace"):
@@ -484,8 +487,8 @@ def run_complete_workflow_demo(self):
 ```
 
 def main():
-“”“Main entry point”””
-optimizer = OctahedralOptimizer(work_dir=”./optimization_workspace”)
+"""Main entry point"""
+optimizer = OctahedralOptimizer(work_dir="./optimization_workspace")
 
 ```
 # For demonstration, run with synthetic data
@@ -508,21 +511,21 @@ print("optimizer.generate_master_report()")
 print("=" * 70 + "\n")
 ```
 
-if **name** == “**main**”:
+if **name** == "**main**":
 main()
 
 
 OctahedralOptimizer
-├─ initialize_configs()          # Sets up default DFT, co-doping, and quantum configs
-├─ phase1_strain_optimization() # Generates DFT inputs & optionally runs analysis
-├─ load_dft_results(file)       # Loads actual DFT results for ε* selection
-├─ phase2_codoping_optimization() # Generates co-doping inputs & optionally runs analysis
-├─ load_codoping_results(file)  # Loads actual co-doping results for d* selection
-├─ phase3_coherence_prediction() # Runs QuTip simulations for T₂
-├─ run_complete_workflow_demo()  # Simulates full optimization for testing
-├─ generate_master_report()      # Consolidates all results
-├─ plot_sensitivity_maps()       # Optional: strain vs T₂ or distance vs E_b
-└─ _save_checkpoint(name,obj)    # Saves analyzer objects for resuming workflow
++- initialize_configs()          # Sets up default DFT, co-doping, and quantum configs
++- phase1_strain_optimization() # Generates DFT inputs & optionally runs analysis
++- load_dft_results(file)       # Loads actual DFT results for ε* selection
++- phase2_codoping_optimization() # Generates co-doping inputs & optionally runs analysis
++- load_codoping_results(file)  # Loads actual co-doping results for d* selection
++- phase3_coherence_prediction() # Runs QuTip simulations for T₂
++- run_complete_workflow_demo()  # Simulates full optimization for testing
++- generate_master_report()      # Consolidates all results
++- plot_sensitivity_maps()       # Optional: strain vs T₂ or distance vs E_b
+\- _save_checkpoint(name,obj)    # Saves analyzer objects for resuming workflow
 
 
 sensitivity plotting:

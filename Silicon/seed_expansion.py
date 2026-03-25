@@ -1,8 +1,11 @@
-# “””
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
+"""
 Orbital-Octahedral Fractal Seed: Physics-Compliant Expansion
 
-A compression/decompression scheme where the decompressor doesn’t need
-to be told the rules - it discovers them because they’re the same rules
+A compression/decompression scheme where the decompressor doesn't need
+to be told the rules - it discovers them because they're the same rules
 reality uses.
 
 CORE PRINCIPLE:
@@ -25,7 +28,7 @@ The Algorithm:
 1. Proportions are preserved; absolute energy decays with radius
 
 Author: Jami (Kavik Ulu) - MIT License
-“””
+"""
 
 import numpy as np
 
@@ -51,60 +54,60 @@ U = np.array([
 # =============================================================================
 
 def influence_weight(u_i, u_j):
-“””
-Angular influence of direction j on direction i.
-
-```
-W_ij = max(0, u_i · u_j)
-
-Physical meaning: field from direction j only influences 
-direction i if they point in compatible directions.
-Opposite directions have zero influence.
-"""
+    """
+    Angular influence of direction j on direction i.
+    
+    W_ij = max(0, u_i · u_j)
+    
+    Physical meaning: field from direction j only influences 
+    direction i if they point in compatible directions.
+    Opposite directions have zero influence.
+    """
+    pass
 return max(0.0, np.dot(u_i, u_j))
 ```
 
 def radial_envelope(r_shell, r_sample, sigma_scale=0.5):
-“””
-Radial influence of shell at r_shell on point at r_sample.
-
-```
-f(r) = exp(-(r_sample - r_shell)² / (2σ²))
-
-where σ = sigma_scale × r_shell
-
-Sigma scales with radius so influence range is proportional
-to distance from origin. This ensures consistent behavior
-across all scales.
-"""
+    """
+    Radial influence of shell at r_shell on point at r_sample.
+    
+    f(r) = exp(-(r_sample - r_shell)² / (2σ²))
+    
+    where σ = sigma_scale × r_shell
+    
+    Sigma scales with radius so influence range is proportional
+    to distance from origin. This ensures consistent behavior
+    across all scales.
+    """
+    pass
 sigma = sigma_scale * r_shell
 return np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
 ```
 
 def field_contribution(S, r_shell, r_sample, sigma_scale=0.5):
-“””
-Field contribution from shell with amplitudes S at radius r_shell,
-evaluated at radius r_sample.
-
-```
-Φ_shell(r) = S × f(r)
-
-Returns 6-vector of field values at each octahedral direction.
-"""
+    """
+    Field contribution from shell with amplitudes S at radius r_shell,
+    evaluated at radius r_sample.
+    
+    Φ_shell(r) = S × f(r)
+    
+    Returns 6-vector of field values at each octahedral direction.
+    """
+    pass
 f_r = radial_envelope(r_shell, r_sample, sigma_scale)
 return S * f_r
 ```
 
 def total_field(shells, r_sample, W, sigma_scale=0.5):
-“””
-Total field at r_sample from all inner shells.
-
-```
-Φ_total(r) = Σ_shells W @ Φ_shell(r)
-
-where W is the angular influence matrix.
-Only shells with r < r_sample contribute (causality).
-"""
+    """
+    Total field at r_sample from all inner shells.
+    
+    Φ_total(r) = Σ_shells W @ Φ_shell(r)
+    
+    where W is the angular influence matrix.
+    Only shells with r < r_sample contribute (causality).
+    """
+    pass
 field = np.zeros(6)
 for shell in shells:
     if shell['r'] >= r_sample:
@@ -123,15 +126,15 @@ return field
 # =============================================================================
 
 def normalize_to_energy(v, E, eps=1e-12):
-“””
-Normalize amplitude vector to total energy E.
-
-```
-S_normalized = S × (E / Σ S_i)
-
-Ensures Σ S_i = E exactly.
-Non-negative constraint enforced.
-"""
+    """
+    Normalize amplitude vector to total energy E.
+    
+    S_normalized = S × (E / Σ S_i)
+    
+    Ensures Σ S_i = E exactly.
+    Non-negative constraint enforced.
+    """
+    pass
 v = np.maximum(v, 0.0)
 total = v.sum()
 if total < eps:
@@ -147,18 +150,18 @@ return v * (E / total)
 # =============================================================================
 
 def build_influence_matrix():
-“””
-Build 6×6 angular influence matrix.
-
-```
-W[i,j] = influence of direction j on direction i
-
-For octahedral geometry:
-- W[i,i] = 1 (self-influence maximum)
-- W[i,j] = 0 if u_i · u_j ≤ 0 (orthogonal or opposite)
-
-Rows normalized to sum to 1.
-"""
+    """
+    Build 6×6 angular influence matrix.
+    
+    W[i,j] = influence of direction j on direction i
+    
+    For octahedral geometry:
+    - W[i,i] = 1 (self-influence maximum)
+    - W[i,j] = 0 if u_i · u_j ≤ 0 (orthogonal or opposite)
+    
+    Rows normalized to sum to 1.
+    """
+    pass
 W = np.zeros((6, 6))
 for i in range(6):
     for j in range(6):
@@ -171,15 +174,15 @@ return W
 ```
 
 def form_shell(shells, r_new, E_new, W, sigma_scale=0.5):
-“””
-Form new shell at radius r_new with energy budget E_new.
-
-```
-1. Sample total field from inner shells at r_new
-2. Normalize to energy budget
-
-New shell settles into energy landscape created by inner shells.
-"""
+    """
+    Form new shell at radius r_new with energy budget E_new.
+    
+    1. Sample total field from inner shells at r_new
+    2. Normalize to energy budget
+    
+    New shell settles into energy landscape created by inner shells.
+    """
+    pass
 if len(shells) == 0:
     return np.ones(6) * (E_new / 6)
 
@@ -195,10 +198,9 @@ return normalize_to_energy(field, E_new)
 
 def expand_seed(seed, E0=1.0, r0=1.0, steps=10, rho=1.5, epsilon=0.6,
 sigma_scale=0.5):
-“””
+"""
 Expand seed into shell structure.
 
-```
 Parameters:
 -----------
 seed : array-like, length 6
@@ -247,12 +249,12 @@ return shells
 ```
 
 def compress_to_seed(shells):
-“””
-Extract seed from shell structure.
-
-```
-Returns proportional amplitudes (normalized to sum to 1).
-"""
+    """
+    Extract seed from shell structure.
+    
+    Returns proportional amplitudes (normalized to sum to 1).
+    """
+    pass
 S0 = shells[0]['S']
 return S0 / S0.sum()
 ```
@@ -264,15 +266,14 @@ return S0 / S0.sum()
 # =============================================================================
 
 def encode_seed_binary(proportions, bits_per_value=8):
-“””
-Encode 6 proportional values to binary.
-
-```
-Since proportions sum to 1, we only need to store 5 values.
-The 6th is implicit: p_6 = 1 - Σ p_1..5
-
-With 8 bits per value, total = 40 bits = 5 bytes
-"""
+    """
+    Encode 6 proportional values to binary.
+    
+    Since proportions sum to 1, we only need to store 5 values.
+    The 6th is implicit: p_6 = 1 - Σ p_1..5
+    
+    With 8 bits per value, total = 40 bits = 5 bytes
+    """
 # Validate
 proportions = np.array(proportions)
 proportions = proportions / proportions.sum()  # Normalize
@@ -290,9 +291,10 @@ return encoded
 ```
 
 def decode_seed_binary(encoded, bits_per_value=8):
-“””
-Decode binary to 6 proportional values.
-“””
+    """
+    Decode binary to 6 proportional values.
+    """
+    pass
 max_val = (1 << bits_per_value) - 1
 
 ```
@@ -316,9 +318,10 @@ return [p / total for p in proportions]
 # =============================================================================
 
 def verify_expansion(seed, steps=20):
-“””
-Verify that expansion preserves seed structure.
-“””
+    """
+    Verify that expansion preserves seed structure.
+    """
+    pass
 seed = np.array(seed)
 seed_normalized = seed / seed.sum()
 
@@ -350,10 +353,10 @@ return max_deviation < 1e-10
 
 # =============================================================================
 
-if **name** == “**main**”:
-print(”=”*60)
-print(“PHYSICS-COMPLIANT SEED EXPANSION”)
-print(”=”*60)
+if **name** == "**main**":
+print("="*60)
+print("PHYSICS-COMPLIANT SEED EXPANSION")
+print("="*60)
 
 ```
 # Define a seed
@@ -398,7 +401,6 @@ print("\n" + "="*60)
 print("SUMMARY")
 print("="*60)
 print("""
-```
 
 This algorithm achieves:
 
@@ -413,7 +415,7 @@ This algorithm achieves:
 1. SCALE-INVARIANT: Structure preserved regardless of how
    many shells are expanded
 
-The seed doesn’t describe the structure - it IS the structure
+The seed doesn't describe the structure - it IS the structure
 at its most compressed form. The expansion rules are physics
 itself, shared by any valid decompressor.
-“””)
+""")

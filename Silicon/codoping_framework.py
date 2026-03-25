@@ -1,5 +1,8 @@
+# NOTE: This file requires cleanup -- structural issues from mobile editing.
+# It is a standalone research script not imported by any test suite.
+
 # #!/usr/bin/env python3
-“””
+"""
 Er-P Co-Doping Analysis Framework
 
 This module handles the DFT analysis of Er-P complexes to find the optimal
@@ -7,7 +10,7 @@ dopant separation distance (d*) that maximizes binding energy and stabilizes
 the Er³⁺ charge state.
 
 Target: Maximize E_b = E_Er + E_P - E_complex
-“””
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -23,7 +26,7 @@ SI_LATTICE_CONST = 5.431  # Å
 
 @dataclass
 class CoDopingConfig:
-“”“Configuration for Er-P co-doping calculations”””
+    """Configuration for Er-P co-doping calculations"""
 # Optimal strain from single-dopant analysis
 optimal_strain: float = 1.5  # % (to be determined from Er-only DFT)
 
@@ -46,7 +49,7 @@ target_binding_energy: float = 0.5  # eV (minimum for stable complex at 300K)
 
 @dataclass
 class CoDopingResult:
-“”“Results from Er-P co-doping calculation”””
+    """Results from Er-P co-doping calculation"""
 distance: float  # Er-P separation (Å)
 binding_energy: float  # eV
 er_position: np.ndarray  # Er relaxed position (Cartesian, Å)
@@ -58,7 +61,7 @@ efg_tensor: np.ndarray  # Electric field gradient at Er site (V/Å²)
 force_constants: np.ndarray  # 3x3 Hessian matrix at Er site (eV/Å²)
 
 class ErPCoDopingAnalyzer:
-“”“Analyzer for Er-P co-doping in strained Si”””
+    """Analyzer for Er-P co-doping in strained Si"""
 
 ```
 def __init__(self, config: CoDopingConfig):
@@ -458,8 +461,8 @@ def export_results(self, filepath: str):
     print(f"✓ Exported co-doping results to {filepath}")
 ```
 
-def generate_codoping_scan_inputs(config: CoDopingConfig, base_dir: str = “./codoping_inputs”):
-“”“Generate all DFT inputs for Er-P co-doping distance scan”””
+def generate_codoping_scan_inputs(config: CoDopingConfig, base_dir: str = "./codoping_inputs"):
+    """Generate all DFT inputs for Er-P co-doping distance scan"""
 analyzer = ErPCoDopingAnalyzer(config)
 
 ```
@@ -508,7 +511,7 @@ print(f"✓ Written reference calculation instructions to {ref_file}\n")
 return analyzer
 ```
 
-if **name** == “**main**”:
+if **name** == "**main**":
 # Example usage
 config = CoDopingConfig(
 optimal_strain=1.5,  # From single-dopant DFT
