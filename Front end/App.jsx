@@ -1,6 +1,6 @@
 import React from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Text, GridHelper } from '@react-three/drei';
+import { OrbitControls, Text } from '@react-three/drei';
 import EMSource from './Components/EMSource';
 import FieldVisualization from './Components/FieldVisualization';
 import PerformancePanel from './Components/PerformancePanel';
@@ -42,7 +42,7 @@ export default function App() {
         {/* Fields */}
         <FieldVisualization fieldData={fieldData} />
 
-        <GridHelper args={[20, 20]} />
+        <gridHelper args={[20, 20]} />
         <OrbitControls enablePan enableZoom enableRotate />
       </Canvas>
 
