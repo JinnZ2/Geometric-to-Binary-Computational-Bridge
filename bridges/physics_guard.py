@@ -196,22 +196,55 @@ class PhysicsGuard:
         Returns
         -------
         Base validate_drill() dict extended with:
-          entropy_check         dict — Shannon entropy result
-          golden_ratio_check    dict — φ/π/e alignment result
-          self_similarity_check dict — fractal scale-invariance result
-          natural_pattern       bool — True iff all three advisory checks pass
+          entropy_check            dict — Shannon entropy result (advisory)
+          golden_ratio_check       dict — φ/π/e alignment result (advisory)
+          self_similarity_check    dict — fractal scale-invariance result (advisory)
+          natural_pattern_advisory bool — True iff all three advisory checks pass
+          physics_anomaly          bool — True iff any hard anomaly threshold breached
+          anomaly_action           str  — 'alert' | 'pass'
+          anomaly_reasons          list — which hard checks triggered the alert
         """
         base = self.validate_drill(bridge_gradients, layer_order)
         all_values: list = []
         for grads in bridge_gradients.values():
             all_values.extend(grads)
+
+        # Advisory soft-gate (loose thresholds — informational only)
         ent  = check_entropy(all_values)
         gra  = check_golden_ratio_alignment(all_values, self.phi_tolerance)
         sim  = check_self_similarity(all_values)
         base["entropy_check"]         = ent
         base["golden_ratio_check"]    = gra
         base["self_similarity_check"] = sim
-        base["natural_pattern"] = ent["passed"] and gra["passed"] and sim["passed"]
+        base["natural_pattern_advisory"] = (
+            ent["passed"] and gra["passed"] and sim["passed"]
+        )
+
+        # Hard anomaly gate (tight thresholds — protective)
+        # Entropy outside 0.45–0.75: signal is either suspiciously flat or pure noise.
+        # GR alignment < 0.50: fewer than half of consecutive ratios near a natural constant.
+        # Self-similarity ratio > 0.20: CV changes sharply across scales (injection marker).
+        anomaly_reasons: list = []
+        ent_hard = check_entropy(all_values, natural_lo=0.45, natural_hi=0.75)
+        if not ent_hard["passed"]:
+            anomaly_reasons.append(
+                f"entropy {ent_hard['entropy']:.3f} outside hard band [0.45, 0.75]"
+            )
+        gra_hard = check_golden_ratio_alignment(all_values, phi_tolerance=self.phi_tolerance)
+        if gra_hard.get("alignment", 1.0) < 0.50:
+            anomaly_reasons.append(
+                f"GR alignment {gra_hard.get('alignment', 0):.3f} < 0.50"
+            )
+        sim_hard = check_self_similarity(all_values, tol=0.20)
+        if not sim_hard["passed"]:
+            anomaly_reasons.append(
+                f"self-similarity ratio {1.0 - sim_hard['similarity']:.3f} > 0.20"
+            )
+
+        physics_anomaly = len(anomaly_reasons) > 0
+        base["physics_anomaly"] = physics_anomaly
+        base["anomaly_action"]  = "alert" if physics_anomaly else "pass"
+        base["anomaly_reasons"] = anomaly_reasons
         return base
 
     def validate_drill(self, bridge_gradients: dict,

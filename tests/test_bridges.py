@@ -2314,7 +2314,8 @@ class TestPhysicsGuardComprehensive(unittest.TestCase):
         guard = PhysicsGuard()
         result = guard.validate_comprehensive(self._VALID)
         for k in ("entropy_check", "golden_ratio_check",
-                  "self_similarity_check", "natural_pattern"):
+                  "self_similarity_check", "natural_pattern_advisory",
+                  "physics_anomaly", "anomaly_action", "anomaly_reasons"):
             self.assertIn(k, result)
 
     def test_comprehensive_base_still_present(self):
@@ -2323,10 +2324,34 @@ class TestPhysicsGuardComprehensive(unittest.TestCase):
         for k in ("passed", "action", "stack_valid", "coherence"):
             self.assertIn(k, result)
 
-    def test_comprehensive_natural_pattern_bool(self):
+    def test_comprehensive_natural_pattern_advisory_bool(self):
         guard = PhysicsGuard()
         result = guard.validate_comprehensive(self._VALID)
-        self.assertIsInstance(result["natural_pattern"], bool)
+        self.assertIsInstance(result["natural_pattern_advisory"], bool)
+
+    def test_comprehensive_physics_anomaly_bool(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        self.assertIsInstance(result["physics_anomaly"], bool)
+
+    def test_comprehensive_anomaly_action_values(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        self.assertIn(result["anomaly_action"], ("alert", "pass"))
+
+    def test_comprehensive_anomaly_reasons_list(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        self.assertIsInstance(result["anomaly_reasons"], list)
+
+    def test_comprehensive_flat_signal_triggers_anomaly(self):
+        # Constant signal → entropy=0.0, well outside [0.45, 0.75] hard band
+        flat = {"thermal": [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]}
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(flat)
+        self.assertTrue(result["physics_anomaly"])
+        self.assertEqual(result["anomaly_action"], "alert")
+        self.assertGreater(len(result["anomaly_reasons"]), 0)
 
     def test_comprehensive_valid_stack_passes(self):
         guard = PhysicsGuard()

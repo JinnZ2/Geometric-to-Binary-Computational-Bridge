@@ -81,7 +81,7 @@ def _load_fieldlink_data() -> Tuple[
         with open(_FIELDLINK_PAD_BIOLOGY, encoding="utf-8") as f:
             raw = f.read()
         # JSON does not allow leading '+' on numbers; strip them
-        raw = _re.sub(r'(?<!["\w])([+])(\d)', r'\2', raw)
+        raw = _re.sub(r'([:,\[]\s*)\+(\d)', r'\1\2', raw)
         data = json.loads(raw)
 
         # Extract centroids from sensors section

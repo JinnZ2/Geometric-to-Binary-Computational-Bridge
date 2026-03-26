@@ -425,7 +425,10 @@ def _get_dl_params() -> Tuple[int, int, int, int]:
         p = 2 * q + 1
         if _miller_rabin(p):
             break
-    G = 4 % p  # QR: order = q for any safe prime p > 5
+    # G = 2² mod p.  For any safe prime p = 2q+1 with q odd prime > 3,
+    # p ≡ 3 mod 4, so 2 has even order and 4 = 2² is a quadratic residue
+    # with order exactly q — a valid prime-order subgroup generator.
+    G = 4 % p
     H_seed = int(hashlib.sha256(b"geobin_pedersen_H_generator_v1").hexdigest(), 16) % p
     H = pow(H_seed, 2, p)
     if H in (0, 1):
