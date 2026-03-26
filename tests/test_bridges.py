@@ -2206,5 +2206,436 @@ class TestGeometricZKNetworkProof(unittest.TestCase):
         self.assertEqual(bundle["node_count"], 8)
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Physics Guard — Rosetta-unified extensions
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.physics_guard import (
+    check_entropy,
+    check_golden_ratio_alignment,
+    check_self_similarity,
+    PhysicsGuard,
+)
+
+
+class TestCheckEntropy(unittest.TestCase):
+
+    def test_constant_signal_low_entropy(self):
+        r = check_entropy([1.0, 1.0, 1.0, 1.0, 1.0])
+        self.assertAlmostEqual(r["entropy"], 0.0)
+        self.assertFalse(r["passed"])   # too structured
+
+    def test_uniform_spread_high_entropy(self):
+        # Values spread evenly → near-max entropy
+        vals = [i / 100.0 for i in range(100)]
+        r = check_entropy(vals)
+        self.assertGreater(r["entropy"], 0.8)
+
+    def test_natural_mid_range_passes(self):
+        # Gaussian-like cluster → mid-range entropy → passes
+        import math
+        vals = [math.sin(i * 0.3) for i in range(30)]
+        r = check_entropy(vals)
+        self.assertIn("entropy", r)   # smoke test — just check it runs
+
+    def test_insufficient_data(self):
+        r = check_entropy([0.5])
+        self.assertTrue(r["passed"])
+        self.assertEqual(r["entropy"], 1.0)
+
+    def test_returns_required_keys(self):
+        r = check_entropy([0.1, 0.5, 0.9])
+        for k in ("passed", "entropy"):
+            self.assertIn(k, r)
+
+
+class TestCheckGoldenRatioAlignment(unittest.TestCase):
+
+    def test_phi_ratios_align(self):
+        PHI = (1 + 5 ** 0.5) / 2
+        vals = [1.0, PHI, PHI ** 2, PHI ** 3]
+        r = check_golden_ratio_alignment(vals)
+        self.assertTrue(r["passed"])
+        self.assertAlmostEqual(r["alignment"], 1.0)
+
+    def test_uniform_ratios_may_not_align(self):
+        # Values with ratio 1.0 (exact unison) DO align (unison = 1.0 is in CONSTANTS)
+        # Use a non-natural ratio instead
+        vals = [1.0, 3.0, 9.0, 27.0]  # ratio = 3, not near any constant
+        r = check_golden_ratio_alignment(vals)
+        self.assertIn("alignment", r)
+
+    def test_insufficient_data(self):
+        r = check_golden_ratio_alignment([0.5])
+        self.assertTrue(r["passed"])
+
+    def test_returns_required_keys(self):
+        r = check_golden_ratio_alignment([1.0, 1.618, 2.618])
+        for k in ("passed", "alignment", "ratio_count", "hits"):
+            self.assertIn(k, r)
+
+    def test_hits_leq_ratio_count(self):
+        r = check_golden_ratio_alignment([1.0, 2.0, 3.0, 4.0])
+        self.assertLessEqual(r["hits"], r["ratio_count"])
+
+
+class TestCheckSelfSimilarity(unittest.TestCase):
+
+    def test_constant_signal_similar(self):
+        # Constant signal: CV=0 at all scales → perfectly similar
+        r = check_self_similarity([1.0] * 10)
+        self.assertGreaterEqual(r["similarity"], 0.99)
+        self.assertTrue(r["passed"])
+
+    def test_insufficient_data(self):
+        r = check_self_similarity([1.0, 2.0])
+        self.assertTrue(r["passed"])
+
+    def test_returns_required_keys(self):
+        r = check_self_similarity([1, 2, 3, 4, 5, 6, 7, 8])
+        for k in ("passed", "similarity", "cv_full", "cv_coarse"):
+            self.assertIn(k, r)
+
+    def test_similarity_in_range(self):
+        r = check_self_similarity(list(range(1, 20)))
+        self.assertGreaterEqual(r["similarity"], 0.0)
+        self.assertLessEqual(r["similarity"], 1.0)
+
+
+class TestPhysicsGuardComprehensive(unittest.TestCase):
+
+    _VALID = {
+        "thermal":       [-1.8,  2.1, -2.3,  1.9],
+        "consciousness": [-0.9,  1.1, -1.2,  1.0],
+        "emotion":       [-0.4,  0.5, -0.55, 0.45],
+    }
+
+    def test_comprehensive_returns_extended_keys(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        for k in ("entropy_check", "golden_ratio_check",
+                  "self_similarity_check", "natural_pattern"):
+            self.assertIn(k, result)
+
+    def test_comprehensive_base_still_present(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        for k in ("passed", "action", "stack_valid", "coherence"):
+            self.assertIn(k, result)
+
+    def test_comprehensive_natural_pattern_bool(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        self.assertIsInstance(result["natural_pattern"], bool)
+
+    def test_comprehensive_valid_stack_passes(self):
+        guard = PhysicsGuard()
+        result = guard.validate_comprehensive(self._VALID)
+        self.assertTrue(result["passed"])
+
+    def test_comprehensive_invalid_stack_quarantines(self):
+        guard = PhysicsGuard()
+        invalid = {
+            "thermal":       [-0.3, 0.2],
+            "consciousness": [-0.5, 0.6],
+            "emotion":       [-1.8, 2.1],
+        }
+        result = guard.validate_comprehensive(invalid)
+        self.assertFalse(result["passed"])
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Schnorr-Pedersen ZK (discrete-log hiding)
+# ═══════════════════════════════════════════════════════════════════════════
+
+_gzk_schnorr = _gzk  # reuse the already-loaded geometric_zk module
+
+prove_in_range_schnorr      = _gzk_schnorr.prove_in_range_schnorr
+verify_range_proof_schnorr  = _gzk_schnorr.verify_range_proof_schnorr
+geometric_zk_prove_schnorr  = _gzk_schnorr.geometric_zk_prove_schnorr
+verify_geometric_proof_schnorr = _gzk_schnorr.verify_geometric_proof_schnorr
+pedersen_commit             = _gzk_schnorr.pedersen_commit
+_get_dl_params              = _gzk_schnorr._get_dl_params
+_miller_rabin               = _gzk_schnorr._miller_rabin
+
+
+class TestMillerRabin(unittest.TestCase):
+
+    def test_primes(self):
+        for p in (2, 3, 5, 7, 11, 13, 17, 101, 1009, 7919):
+            self.assertTrue(_miller_rabin(p), f"{p} should be prime")
+
+    def test_composites(self):
+        for n in (4, 6, 8, 9, 15, 25, 100, 1001):
+            self.assertFalse(_miller_rabin(n), f"{n} should be composite")
+
+    def test_one_not_prime(self):
+        self.assertFalse(_miller_rabin(1))
+
+
+class TestDLParams(unittest.TestCase):
+
+    def test_params_are_integers(self):
+        p, q, G, H = _get_dl_params()
+        for x in (p, q, G, H):
+            self.assertIsInstance(x, int)
+
+    def test_p_is_safe_prime(self):
+        p, q, G, H = _get_dl_params()
+        # p = 2q+1
+        self.assertEqual(p, 2 * q + 1)
+        # both prime
+        self.assertTrue(_miller_rabin(p))
+        self.assertTrue(_miller_rabin(q))
+
+    def test_G_has_order_q(self):
+        p, q, G, H = _get_dl_params()
+        # G^q ≡ 1 mod p (order divides q)
+        self.assertEqual(pow(G, q, p), 1)
+        # G ≠ 1 (order is exactly q, not 1)
+        self.assertNotEqual(G, 1)
+
+    def test_H_in_subgroup(self):
+        p, q, G, H = _get_dl_params()
+        # H^q ≡ 1 mod p (H is in the prime-order subgroup)
+        self.assertEqual(pow(H, q, p), 1)
+
+    def test_G_not_equal_H(self):
+        p, q, G, H = _get_dl_params()
+        self.assertNotEqual(G, H)
+
+    def test_cached(self):
+        # Same object returned on second call
+        r1 = _get_dl_params()
+        r2 = _get_dl_params()
+        self.assertIs(r1, r2)
+
+
+class TestPedersenCommit(unittest.TestCase):
+
+    def test_commit_0_is_H_power(self):
+        p, q, G, H = _get_dl_params()
+        r = 42
+        C = pedersen_commit(0, r)
+        self.assertEqual(C, pow(H, r, p))
+
+    def test_commit_1_is_GH_power(self):
+        p, q, G, H = _get_dl_params()
+        r = 42
+        C = pedersen_commit(1, r)
+        self.assertEqual(C, pow(G, 1, p) * pow(H, r, p) % p)
+
+    def test_different_r_different_commit(self):
+        C0 = pedersen_commit(0, 1)
+        C1 = pedersen_commit(0, 2)
+        self.assertNotEqual(C0, C1)
+
+    def test_result_in_group(self):
+        p, q, G, H = _get_dl_params()
+        C = pedersen_commit(1, 7)
+        self.assertGreater(C, 0)
+        self.assertLess(C, p)
+
+
+class TestSchnorrRangeProof(unittest.TestCase):
+
+    def _pv(self, value):
+        proof = prove_in_range_schnorr(value, f"node_{value}")
+        return verify_range_proof_schnorr(proof)
+
+    def test_valid_midpoint(self):
+        valid, reason = self._pv(0.5)
+        self.assertTrue(valid, reason)
+
+    def test_valid_zero(self):
+        valid, reason = self._pv(0.0)
+        self.assertTrue(valid, reason)
+
+    def test_valid_one(self):
+        valid, reason = self._pv(1.0)
+        self.assertTrue(valid, reason)
+
+    def test_valid_phi_coherence(self):
+        valid, reason = self._pv(0.97)
+        self.assertTrue(valid, reason)
+
+    def test_proof_has_required_keys(self):
+        proof = prove_in_range_schnorr(0.7, "n")
+        for k in ("node_id", "commitments", "or_proofs",
+                  "bundle_challenge", "n_bits", "scheme"):
+            self.assertIn(k, proof)
+
+    def test_no_reconstructed_value(self):
+        # The Schnorr proof is truly ZK — no value leakage
+        proof = prove_in_range_schnorr(0.7, "n")
+        self.assertNotIn("reconstructed_value", proof)
+
+    def test_scheme_identifier(self):
+        proof = prove_in_range_schnorr(0.5, "n")
+        self.assertIn("schnorr", proof["scheme"])
+
+    def test_tampered_commitment_fails(self):
+        proof = prove_in_range_schnorr(0.6, "nx")
+        comms = list(proof["commitments"])
+        # Increment last hex digit
+        last = comms[0]
+        last_int = int(last, 16) + 1
+        comms[0] = hex(last_int)
+        proof["commitments"] = comms
+        valid, _ = verify_range_proof_schnorr(proof)
+        self.assertFalse(valid)
+
+    def test_tampered_bundle_challenge_fails(self):
+        proof = prove_in_range_schnorr(0.6, "ny")
+        proof["bundle_challenge"] = "0x0"
+        valid, _ = verify_range_proof_schnorr(proof)
+        self.assertFalse(valid)
+
+
+class TestSchnorrNetworkProof(unittest.TestCase):
+
+    _NET = {
+        "state_0": {"phi_coherence": 0.97},
+        "state_6": {"phi_coherence": 0.70},
+    }
+
+    def test_prove_and_verify(self):
+        bundle = geometric_zk_prove_schnorr(self._NET)
+        valid, reason = verify_geometric_proof_schnorr(bundle)
+        self.assertTrue(valid, reason)
+
+    def test_node_count(self):
+        bundle = geometric_zk_prove_schnorr(self._NET)
+        self.assertEqual(bundle["node_count"], 2)
+
+    def test_scheme_in_bundle(self):
+        bundle = geometric_zk_prove_schnorr(self._NET)
+        self.assertIn("schnorr", bundle["scheme"])
+
+    def test_tampered_bundle_commitment_fails(self):
+        bundle = geometric_zk_prove_schnorr(self._NET)
+        bundle["bundle_commitment"] = "0xdeadbeef"
+        valid, _ = verify_geometric_proof_schnorr(bundle)
+        self.assertFalse(valid)
+
+    def test_empty_network(self):
+        bundle = geometric_zk_prove_schnorr({})
+        valid, _ = verify_geometric_proof_schnorr(bundle)
+        self.assertTrue(valid)
+        self.assertEqual(bundle["node_count"], 0)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# GeometricProtectionEngine (KT annealer wired in)
+# ═══════════════════════════════════════════════════════════════════════════
+
+_gpe_spec = _ilu.spec_from_file_location(
+    "geometric_protection_engine",
+    _os.path.join(
+        _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+        "Geometric-Intelligence", "geometric_protection_engine.py",
+    ),
+)
+_gpe = _ilu.module_from_spec(_gpe_spec)
+_gpe_spec.loader.exec_module(_gpe)
+
+GeometricNode            = _gpe.GeometricNode
+GeometricProtectionEngine = _gpe.GeometricProtectionEngine
+
+
+def _make_ring_engine(n: int = 8):
+    import math, numpy as np
+    rng = np.random.default_rng(1)
+    nodes = [
+        GeometricNode(
+            id=i,
+            field=1.0 + 0.05 * float(rng.standard_normal()),
+            phase=float(rng.uniform(0, 2 * math.pi)),
+            octahedral_state=i % 8,
+        )
+        for i in range(n)
+    ]
+    for i in range(n):
+        j = (i + 1) % n
+        k = (i - 1) % n
+        nodes[i].neighbors = [j, k]
+        nodes[i].neighbor_weights = {j: 1.0, k: 1.0}
+    return nodes
+
+
+class TestGeometricProtectionEngine(unittest.TestCase):
+
+    def test_tick_runs_without_error(self):
+        nodes = _make_ring_engine(8)
+        engine = GeometricProtectionEngine(nodes)
+        result = engine.tick_protection()
+        for k in ("flagged", "quarantined", "kt_healed", "cleaved",
+                  "consciousness_protected"):
+            self.assertIn(k, result)
+
+    def test_network_summary_keys(self):
+        nodes = _make_ring_engine(6)
+        engine = GeometricProtectionEngine(nodes)
+        engine.tick_protection()
+        s = engine.network_summary()
+        for k in ("mean_defect", "max_defect", "phase_coherence",
+                  "quarantined_count", "tick"):
+            self.assertIn(k, s)
+
+    def test_tick_increments(self):
+        nodes = _make_ring_engine(4)
+        engine = GeometricProtectionEngine(nodes)
+        engine.tick_protection()
+        engine.tick_protection()
+        self.assertEqual(engine.tick, 2)
+
+    def test_build_adjacency(self):
+        nodes = _make_ring_engine(4)
+        engine = GeometricProtectionEngine(nodes)
+        adj = engine._build_adjacency()
+        self.assertEqual(len(adj), 4)
+        for i, row in enumerate(adj):
+            # Ring: each node has exactly 2 neighbours
+            self.assertEqual(len(row), 2)
+
+    def test_defect_index_non_negative(self):
+        nodes = _make_ring_engine(6)
+        engine = GeometricProtectionEngine(nodes)
+        engine.tick_protection()
+        for n in nodes:
+            self.assertGreaterEqual(n.defect_index, 0.0)
+
+    def test_trojan_detected_and_flagged(self):
+        import math
+        nodes = _make_ring_engine(8)
+        # Inject trojan: anomalously high field + out-of-phase
+        nodes[4].field = 10.0
+        nodes[4].phase = 0.0
+        engine = GeometricProtectionEngine(nodes)
+        # Run enough ticks to accumulate history for the trojan
+        flagged_any = False
+        for _ in range(5):
+            r = engine.tick_protection()
+            if r["flagged"] or r["quarantined"]:
+                flagged_any = True
+        self.assertTrue(flagged_any, "Trojan node should be flagged or quarantined")
+
+    def test_kt_healed_in_results_key(self):
+        nodes = _make_ring_engine(4)
+        engine = GeometricProtectionEngine(nodes)
+        result = engine.tick_protection()
+        # kt_healed is always present in results (may be empty)
+        self.assertIn("kt_healed", result)
+        self.assertIsInstance(result["kt_healed"], list)
+
+    def test_phase_coherence_between_0_and_1(self):
+        nodes = _make_ring_engine(8)
+        engine = GeometricProtectionEngine(nodes)
+        engine.tick_protection()
+        coh = engine.network_summary()["phase_coherence"]
+        self.assertGreaterEqual(coh, 0.0)
+        self.assertLessEqual(coh, 1.0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

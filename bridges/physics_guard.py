@@ -175,6 +175,45 @@ class PhysicsGuard:
         self.epsilon             = epsilon
         self.tol                 = tol
 
+    def validate_comprehensive(self, bridge_gradients: dict,
+                               layer_order: list = None) -> dict:
+        """
+        Run all five Seed-physics constraints plus the three Rosetta-unified checks.
+
+        Extends validate_drill() with:
+          - entropy check        (natural information density)
+          - golden-ratio alignment (φ/π/e structure detection)
+          - self-similarity      (fractal scale-invariance)
+
+        These mirror Rosetta-Shape-Core/physics_grounded_protection.py's
+        thermodynamic_validation, golden_ratio_alignment, and fractal_dimension
+        checks, unified into the Seed-physics validation framework.
+
+        The three Rosetta checks are advisory soft-gates — they set the
+        ``natural_pattern`` flag but do NOT override the hard physics gate
+        (matching how TrojanEngine uses phi-coherence as a weighted factor).
+
+        Returns
+        -------
+        Base validate_drill() dict extended with:
+          entropy_check         dict — Shannon entropy result
+          golden_ratio_check    dict — φ/π/e alignment result
+          self_similarity_check dict — fractal scale-invariance result
+          natural_pattern       bool — True iff all three advisory checks pass
+        """
+        base = self.validate_drill(bridge_gradients, layer_order)
+        all_values: list = []
+        for grads in bridge_gradients.values():
+            all_values.extend(grads)
+        ent  = check_entropy(all_values)
+        gra  = check_golden_ratio_alignment(all_values, self.phi_tolerance)
+        sim  = check_self_similarity(all_values)
+        base["entropy_check"]         = ent
+        base["golden_ratio_check"]    = gra
+        base["self_similarity_check"] = sim
+        base["natural_pattern"] = ent["passed"] and gra["passed"] and sim["passed"]
+        return base
+
     def validate_drill(self, bridge_gradients: dict,
                        layer_order: list = None) -> dict:
         """
@@ -287,3 +326,108 @@ if __name__ == "__main__":
     golden = [1.0, 1.618, 2.618, 4.236, 6.854]   # phi-scaled
     print(f"   Chaotic sequence   phi_coherence = {phi_coherence(noisy):.4f}")
     print(f"   Phi-scaled sequence phi_coherence = {phi_coherence(golden):.4f}")
+
+
+# ---------------------------------------------------------------------------
+# Rosetta-unified extensions
+# Mirrors checks from Rosetta-Shape-Core/physics_grounded_protection.py:
+#   check_entropy        ↔  thermodynamic_validation (information density)
+#   check_golden_ratio_alignment ↔  golden_ratio_alignment
+#   check_self_similarity        ↔  fractal_dimension check
+# These three are advisory soft-gates exposed via PhysicsGuard.validate_comprehensive().
+# ---------------------------------------------------------------------------
+
+def check_entropy(values: list,
+                  natural_lo: float = 0.30,
+                  natural_hi: float = 0.85,
+                  n_bins: int = 10) -> dict:
+    """
+    Shannon entropy check (Rosetta thermodynamic analogue).
+
+    Natural signals occupy a mid-range entropy band:
+      too low  → over-structured / artificially flat
+      too high → pure noise, no information
+      mid-range → natural information density
+
+    Entropy is computed on a normalised histogram of ``values``.
+    Returns normalised H ∈ [0, 1] and whether it falls in [natural_lo, natural_hi].
+    """
+    if len(values) < 2:
+        return {"passed": True, "entropy": 1.0, "note": "insufficient data"}
+    lo, hi = min(values), max(values)
+    span = hi - lo
+    if span < 1e-12:
+        return {"passed": natural_lo <= 0.0 <= natural_hi,
+                "entropy": 0.0, "note": "constant signal"}
+    bins = [0] * n_bins
+    for v in values:
+        idx = min(n_bins - 1, int((v - lo) / span * n_bins))
+        bins[idx] += 1
+    n = len(values)
+    H = -sum((b / n) * math.log2(b / n) for b in bins if b > 0)
+    H_norm = H / math.log2(n_bins)  # normalise to [0, 1]
+    return {"passed": natural_lo <= H_norm <= natural_hi,
+            "entropy": H_norm,
+            "natural_lo": natural_lo, "natural_hi": natural_hi}
+
+
+def check_golden_ratio_alignment(values: list,
+                                  phi_tolerance: float = 0.12) -> dict:
+    """
+    Golden-ratio alignment (Rosetta golden_ratio_alignment analogue).
+
+    Natural growth signals embed φ, 1/φ, φ², π, e, √2, √3 ratios in their
+    consecutive value ratios.  Computes |v_i / v_{i-1}| for all adjacent pairs
+    and measures what fraction falls near a natural constant.
+
+    Returns alignment ∈ [0, 1] and whether it exceeds 0.3 (natural threshold).
+    """
+    if len(values) < 2:
+        return {"passed": True, "alignment": 1.0, "note": "insufficient data"}
+    CONSTANTS = [
+        PHI, PHI_INV, PHI ** 2, PHI_INV ** 2,
+        math.pi, math.e, math.sqrt(2), math.sqrt(3),
+    ]
+    ratios = [
+        abs(values[i] / values[i - 1])
+        for i in range(1, len(values))
+        if abs(values[i - 1]) > 1e-12
+    ]
+    if not ratios:
+        return {"passed": True, "alignment": 1.0}
+    hits = sum(1 for r in ratios
+               if any(abs(r - c) < phi_tolerance for c in CONSTANTS))
+    alignment = hits / len(ratios)
+    return {"passed": alignment >= 0.3, "alignment": alignment,
+            "ratio_count": len(ratios), "hits": hits}
+
+
+def check_self_similarity(values: list,
+                           scale: int = 2,
+                           tol: float = 0.35) -> dict:
+    """
+    Self-similarity / fractal check (Rosetta fractal_dimension analogue).
+
+    Natural signals have consistent statistical structure at different scales.
+    Compares the coefficient of variation (CV = std/mean) at full resolution
+    vs at down-sampled resolution (every ``scale``-th sample).
+    Natural signals: |CV_full - CV_coarse| / CV_full ≤ tol.
+    Artificial injections: CV changes sharply across scales.
+    """
+    if len(values) < scale * 2:
+        return {"passed": True, "similarity": 1.0, "note": "insufficient data"}
+
+    def _cv(v: list) -> float:
+        mean = sum(v) / len(v)
+        if abs(mean) < 1e-12:
+            return 0.0
+        std = math.sqrt(sum((x - mean) ** 2 for x in v) / len(v))
+        return std / abs(mean)
+
+    coarse   = values[::scale]
+    cv_full   = _cv(values)
+    cv_coarse = _cv(coarse)
+    ratio = abs(cv_full - cv_coarse) / max(cv_full, 1e-12)
+    return {"passed": ratio <= tol,
+            "similarity": max(0.0, 1.0 - ratio),
+            "cv_full": cv_full, "cv_coarse": cv_coarse}
