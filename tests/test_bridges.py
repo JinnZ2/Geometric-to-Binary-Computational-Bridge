@@ -942,15 +942,18 @@ class TestConsciousnessPhysics(unittest.TestCase):
         self.assertGreater(i_large, i_small)
 
     def test_phi_integrated(self):
-        phi = integrated_information([1.0, 1.0], whole_entropy=2.5)
+        # Correlated system: H(whole) < Σ H(parts) → Φ = Σ H(parts) - H(whole) > 0
+        phi = integrated_information([1.0, 1.0], whole_entropy=1.5)
         self.assertAlmostEqual(phi, 0.5)
 
     def test_phi_independent_zero(self):
+        # Independent system: H(whole) = Σ H(parts) → Φ = 0
         phi = integrated_information([1.0, 1.0], whole_entropy=2.0)
         self.assertAlmostEqual(phi, 0.0)
 
     def test_phi_clamped_nonneg(self):
-        phi = integrated_information([1.0, 1.0], whole_entropy=1.5)
+        # Superadditive (physically impossible): H(whole) > Σ H(parts) → clamped to 0
+        phi = integrated_information([1.0, 1.0], whole_entropy=2.5)
         self.assertEqual(phi, 0.0)
 
 
@@ -965,7 +968,7 @@ class TestConsciousnessEncoder(unittest.TestCase):
     def test_canonical_bitstring(self):
         self.assertEqual(
             _make_con().to_binary(),
-            "001101100111001011000000000000101000111",
+            "001101100111001011000000000000101000000",
         )
 
     def test_deterministic(self):
@@ -1026,7 +1029,9 @@ class TestConsciousnessEncoder(unittest.TestCase):
                 "whole_entropy": whole_ent,
             })
             return e.to_binary()
-        self.assertNotEqual(enc(0.6), enc(2.5))
+        # whole=0.3 < partition_sum=0.5 → Φ=0.2 (correlated, non-zero)
+        # whole=0.6 > partition_sum=0.5 → Φ=0   (superadditive, clamped)
+        self.assertNotEqual(enc(0.3), enc(0.6))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
