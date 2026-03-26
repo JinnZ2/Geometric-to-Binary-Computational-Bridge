@@ -90,7 +90,8 @@
   ],
   "performance_targets": {
     "switching_frequency_THz": [0.3, 5.0],
-    "energy_per_bit_aJ": 1.6,
+    "energy_per_bit_aJ": 6.626e-4,
+    "energy_per_bit_note": "h × 1 THz = 4.14 meV. Consistent with frequency_range in octahedral_state_encoder.json. Prior value 1.6 aJ = 10 eV was UV-scale — wrong for this Zeeman/phonon system.",
     "fault_recovery_rate_%": 99.9
   },
   "environmental_considerations": {
