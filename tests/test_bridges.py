@@ -1975,5 +1975,236 @@ class TestPADTrendLabel(unittest.TestCase):
         self.assertEqual(trend_label(states), "volatile")
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Fieldlink wiring: EMOTION_CENTROIDS loaded from atlas/remote/rosetta/
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.pad_resonance import _FIELDLINK_PAD_BIOLOGY, _fl_centroids, _fl_coherence
+
+
+class TestFieldlinkPADBiology(unittest.TestCase):
+    """Verify that pad_biology.json fieldlink mount loads correctly."""
+
+    def test_mount_file_exists(self):
+        import os
+        self.assertTrue(
+            os.path.exists(_FIELDLINK_PAD_BIOLOGY),
+            f"Fieldlink mount missing: {_FIELDLINK_PAD_BIOLOGY}",
+        )
+
+    def test_centroids_loaded_from_mount(self):
+        # If mount exists, _fl_centroids must be non-empty
+        import os
+        if os.path.exists(_FIELDLINK_PAD_BIOLOGY):
+            self.assertIsNotNone(_fl_centroids)
+            self.assertGreater(len(_fl_centroids), 0)
+
+    def test_coherence_loaded_from_mount(self):
+        import os
+        if os.path.exists(_FIELDLINK_PAD_BIOLOGY):
+            self.assertIsNotNone(_fl_coherence)
+            self.assertEqual(len(_fl_coherence), 8)
+
+    def test_fieldlink_centroids_match_fallback(self):
+        # Values from the mount must match the hardcoded fallback
+        from bridges.pad_resonance import _EMOTION_CENTROIDS_FALLBACK
+        import os
+        if not os.path.exists(_FIELDLINK_PAD_BIOLOGY) or _fl_centroids is None:
+            self.skipTest("fieldlink mount not available")
+        for name, expected in _EMOTION_CENTROIDS_FALLBACK.items():
+            self.assertIn(name, _fl_centroids, f"emotion '{name}' missing from mount")
+            loaded = _fl_centroids[name]
+            for axis_idx, (exp_val, got_val) in enumerate(zip(expected, loaded)):
+                self.assertAlmostEqual(
+                    exp_val, got_val, places=2,
+                    msg=f"{name} axis {axis_idx}: expected {exp_val}, got {got_val}",
+                )
+
+    def test_fieldlink_coherence_matches_fallback(self):
+        from bridges.pad_resonance import _OCTA_PHI_COHERENCE_FALLBACK
+        import os
+        if not os.path.exists(_FIELDLINK_PAD_BIOLOGY) or _fl_coherence is None:
+            self.skipTest("fieldlink mount not available")
+        for i, (exp, got) in enumerate(zip(_OCTA_PHI_COHERENCE_FALLBACK, _fl_coherence)):
+            self.assertAlmostEqual(exp, got, places=2, msg=f"state {i} coherence mismatch")
+
+    def test_emotion_centroids_keys(self):
+        expected_keys = {
+            "fear", "anger", "grief", "curiosity", "joy",
+            "love", "shame", "trust", "confusion", "fatigue", "intuition",
+        }
+        self.assertEqual(set(EMOTION_CENTROIDS.keys()), expected_keys)
+
+    def test_octa_phi_coherence_length(self):
+        self.assertEqual(len(OCTA_PHI_COHERENCE), 8)
+
+    def test_ground_state_highest_coherence_fieldlink(self):
+        self.assertEqual(OCTA_PHI_COHERENCE[0], max(OCTA_PHI_COHERENCE))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Geometric ZK-Proof tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import importlib.util as _ilu
+import os as _os
+
+_gzk_path = _os.path.join(
+    _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+    "Geometric-Intelligence", "geometric_zk.py",
+)
+_gzk_spec = _ilu.spec_from_file_location("geometric_zk", _gzk_path)
+_gzk = _ilu.module_from_spec(_gzk_spec)
+_gzk_spec.loader.exec_module(_gzk)
+
+commit           = _gzk.commit
+prove_in_range   = _gzk.prove_in_range
+verify_range_proof = _gzk.verify_range_proof
+geometric_zk_prove = _gzk.geometric_zk_prove
+verify_geometric_proof = _gzk.verify_geometric_proof
+proof_to_json    = _gzk.proof_to_json
+proof_from_json  = _gzk.proof_from_json
+
+
+class TestGeometricZKCommit(unittest.TestCase):
+    """Low-level commitment primitives."""
+
+    def test_commitment_is_hex_string(self):
+        c = commit("node0", 0, "nonce123", 1)
+        self.assertIsInstance(c, str)
+        self.assertEqual(len(c), 64)  # SHA-256 hex
+
+    def test_same_inputs_same_commitment(self):
+        c1 = commit("n", 3, "abc", 0)
+        c2 = commit("n", 3, "abc", 0)
+        self.assertEqual(c1, c2)
+
+    def test_different_bits_different_commitment(self):
+        c0 = commit("n", 0, "nonce", 0)
+        c1 = commit("n", 0, "nonce", 1)
+        self.assertNotEqual(c0, c1)
+
+    def test_different_nonce_different_commitment(self):
+        c1 = commit("n", 0, "nonce1", 1)
+        c2 = commit("n", 0, "nonce2", 1)
+        self.assertNotEqual(c1, c2)
+
+
+class TestGeometricZKRangeProof(unittest.TestCase):
+    """prove_in_range + verify_range_proof."""
+
+    def _prove_verify(self, value):
+        proof = prove_in_range(value, f"node_{value}")
+        valid, reason = verify_range_proof(proof)
+        return valid, reason, proof
+
+    def test_valid_midpoint(self):
+        valid, reason, _ = self._prove_verify(0.5)
+        self.assertTrue(valid, reason)
+
+    def test_valid_zero(self):
+        valid, reason, _ = self._prove_verify(0.0)
+        self.assertTrue(valid, reason)
+
+    def test_valid_one(self):
+        valid, reason, _ = self._prove_verify(1.0)
+        self.assertTrue(valid, reason)
+
+    def test_valid_phi_coherence(self):
+        # Typical φ-coherence value
+        valid, reason, _ = self._prove_verify(0.97)
+        self.assertTrue(valid, reason)
+
+    def test_reconstructed_close_to_input(self):
+        _, _, proof = self._prove_verify(0.75)
+        self.assertAlmostEqual(proof["reconstructed_value"], 0.75, delta=0.01)
+
+    def test_proof_has_required_keys(self):
+        proof = prove_in_range(0.5, "test")
+        for key in ("node_id", "commitments", "challenge", "openings", "n_bits", "reconstructed_value"):
+            self.assertIn(key, proof)
+
+    def test_tampered_commitment_fails(self):
+        proof = prove_in_range(0.6, "node_x")
+        # Flip last char of first commitment
+        c = list(proof["commitments"])
+        c[0] = c[0][:-1] + ("0" if c[0][-1] != "0" else "1")
+        proof["commitments"] = c
+        valid, _ = verify_range_proof(proof)
+        self.assertFalse(valid)
+
+    def test_tampered_challenge_fails(self):
+        proof = prove_in_range(0.6, "node_y")
+        proof["challenge"] = "0" * 64
+        valid, _ = verify_range_proof(proof)
+        self.assertFalse(valid)
+
+    def test_bad_bit_fails(self):
+        proof = prove_in_range(0.5, "node_z")
+        proof["openings"][0] = (2, proof["openings"][0][1])  # bit=2 not in {0,1}
+        valid, reason = verify_range_proof(proof)
+        self.assertFalse(valid)
+        self.assertIn("not in", reason)
+
+
+class TestGeometricZKNetworkProof(unittest.TestCase):
+    """geometric_zk_prove + verify_geometric_proof."""
+
+    _NETWORK = {
+        "state_0": {"phi_coherence": 0.97},
+        "state_3": {"phi_coherence": 0.85},
+        "state_6": {"phi_coherence": 0.70},
+    }
+
+    def test_prove_and_verify(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        valid, reason = verify_geometric_proof(bundle)
+        self.assertTrue(valid, reason)
+
+    def test_bundle_keys(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        for key in ("per_node_proofs", "bundle_commitment", "node_count", "verified"):
+            self.assertIn(key, bundle)
+
+    def test_node_count(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        self.assertEqual(bundle["node_count"], 3)
+
+    def test_avg_phi_in_range(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        avg = bundle["avg_reconstructed_phi"]
+        self.assertGreater(avg, 0.0)
+        self.assertLessEqual(avg, 1.0)
+
+    def test_json_round_trip(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        restored = proof_from_json(proof_to_json(bundle))
+        valid, reason = verify_geometric_proof(restored)
+        self.assertTrue(valid, reason)
+
+    def test_tampered_bundle_commitment_fails(self):
+        bundle = geometric_zk_prove(self._NETWORK)
+        bundle["bundle_commitment"] = "deadbeef" * 8
+        valid, _ = verify_geometric_proof(bundle)
+        self.assertFalse(valid)
+
+    def test_empty_network(self):
+        bundle = geometric_zk_prove({})
+        self.assertEqual(bundle["node_count"], 0)
+        valid, _ = verify_geometric_proof(bundle)
+        self.assertTrue(valid)
+
+    def test_octa_coherence_network(self):
+        # Use all 8 octahedral states as node IDs
+        network = {
+            str(i): {"phi_coherence": OCTA_PHI_COHERENCE[i]}
+            for i in range(8)
+        }
+        bundle = geometric_zk_prove(network)
+        valid, reason = verify_geometric_proof(bundle)
+        self.assertTrue(valid, reason)
+        self.assertEqual(bundle["node_count"], 8)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
