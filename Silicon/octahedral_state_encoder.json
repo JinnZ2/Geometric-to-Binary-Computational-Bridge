@@ -36,7 +36,8 @@
   },
   "outputs": {
     "encoded_bits": 3,
-    "transition_energy_aJ": 1.6,
+    "transition_energy_aJ": 6.626e-4,
+    "transition_energy_note": "h × 1 THz = 4.14 meV. Authoritative source: frequency_range 0.3–5 THz (Zeeman/phonon scale). Prior value 1.6 aJ = 10 eV was UV-scale — wrong for this solid-state system.",
     "stability_field_T": 0.01
   },
   "metadata": {

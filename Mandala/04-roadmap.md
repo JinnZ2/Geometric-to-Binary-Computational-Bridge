@@ -34,6 +34,34 @@ Silicon/
 
 ---
 
+## Phase 0.5 — KT Annealing Wire-in (Cross-repo, Mandala-Computing)
+
+**Status**: Schedule implemented in `Silicon/kt_annealing.py`. Not yet wired into `mandala_computer.py`.
+
+**Problem**: `mandala_computer.py` uses fixed `T=1.0`, which is `1.12 × T_KT` — worst-case critical slowing down.
+
+**How to wire in** (changes needed in Mandala-Computing repo):
+
+```python
+# In mandala_computer.py — replace fixed-T MH loop with:
+from kt_annealing import schedule_log, T_KT_NUMERICAL  # copy or symlink Silicon/kt_annealing.py
+
+def solve(self, n_steps: int = 2000):
+    T_kt = T_KT_NUMERICAL * self.coupling_strength
+    for step in range(n_steps):
+        T = schedule_log(step, n_steps,
+                         T_init=4.0 * T_kt,
+                         T_kt=T_kt,
+                         T_final=0.05 * T_kt)
+        self._mh_step(T)
+```
+
+**Expected gain**: ~3× fewer residual vortices vs linear schedule; asymptotically better for large grids.
+
+**Reference**: `Silicon/kt_annealing.py` — full derivation, three schedule comparison, simulation results.
+
+---
+
 ## Phase 1 — OctahedralSubstrate + Bloom Engine (Near-term)
 
 **Goal:** Make the bloom engine runnable in software.

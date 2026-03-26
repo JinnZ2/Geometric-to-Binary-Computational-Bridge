@@ -238,7 +238,7 @@ def simulate_lattice(n_cells: int = 2000,
         "T2_std_ms":   float(T2_cells.std()),
         "T2_min_ms":   float(T2_cells.min()),
         "T2_max_ms":   float(T2_cells.max()),
-        "correction_energy_aJ": n_fault * 1.2,  # 1.2 aJ per correction op
+        "correction_energy_aJ": n_fault * 6.626e-4,  # h×1THz per correction op (4.14 meV)
     }
 
 
@@ -346,7 +346,7 @@ def main():
         print(f"     Process noise {noise*100:.0f}%:  "
               f"yield = {lat['yield_pct']:.1f}%   "
               f"T₂ = {lat['T2_mean_ms']:.0f} ± {lat['T2_std_ms']:.0f} ms   "
-              f"correction = {lat['correction_energy_aJ']:.0f} aJ")
+              f"correction = {lat['correction_energy_aJ'] * 6241.5:.0f} meV")
 
     # ── 7. Temperature sweep ──────────────────────────────────────────────────
     print("\n[7]  T₂ vs Temperature   (ε = ε*, d = d*, f₂₉Si = 0.1%)\n")

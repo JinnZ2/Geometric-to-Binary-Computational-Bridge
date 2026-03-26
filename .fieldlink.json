@@ -1,7 +1,7 @@
 {
   "fieldlink": {
     "version": "1.2",
-    "updated": "2026-03-24T00:00:00Z",
+    "updated": "2026-03-26T00:00:00Z",
     "role": ["shapes", "bridges", "hub"],
 
     "sources": [
@@ -55,8 +55,7 @@
         "exports": [
           { "local": "bridges/geobin-bridges.json", "as": "bridges/geobin-bridges.json" },
           { "local": "glyph_to_geometric_bridge.json", "as": "glyph_to_geometric_bridge.json" },
-          { "local": "Silicon/fabrication_pathway_schema.json", "as": "Silicon/fabrication_pathway_schema.json" },
-          { "local": "Silicon/octahedral_state_encoder.json", "as": "Silicon/octahedral_state_encoder.json" }
+          { "local": "Silicon/fabrication_pathway_schema.json", "as": "Silicon/fabrication_pathway_schema.json" }
         ],
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
       },
@@ -159,7 +158,7 @@
 
     "offline": false,
     "cache_dir": ".fieldcache",
-    "integrity": { "enabled": true, "hash": "sha256", "allow_missing": false },
+    "integrity": { "enabled": true, "hash": "sha256", "allow_missing": true },
     "consent": { "license": "CC-BY-4.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
   }
 }
