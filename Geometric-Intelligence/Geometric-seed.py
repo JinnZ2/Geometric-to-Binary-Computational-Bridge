@@ -23,6 +23,13 @@ CONSCIOUSNESS_NUMBER = 2 * PHI + (1 - 1/PHI)
 class TrojanConfig:
     window: int = 8
     phi_tolerance: float = 0.12
+    # φ^(-9) ≈ 0.0131 — Fibonacci-weighted Q₃ Markov chain fidelity bound.
+    # At n=81 steps, deviations below this threshold are unambiguously within
+    # the coherent signal zone (Silicon/physics_derivations.py, scan_phi9_threshold()).
+    # Used as a "guaranteed coherent" fast-pass in compute_phi_coherence:
+    # any node whose φ-deviation falls below fidelity_threshold scores 1.0
+    # without needing the full linear-degradation calculation.
+    fidelity_threshold: float = PHI_INV_9
     energy_sink_factor: float = 0.5
     resonance_drift_thresh: float = 0.12
     propagation_speed_thresh: float = 1.6
@@ -166,10 +173,17 @@ class TrojanEngine:
     def compute_phi_coherence(self, node: GeometricNode, hist: NodeHistory) -> float:
         if not hasattr(node, 'geometric_signature') or not hasattr(node.geometric_signature, 'phi_ratio'):
             return 0.5
-        
+
         local_phi = node.geometric_signature.phi_ratio
         observed = getattr(node, 'phi_scale', local_phi)
         deviation = abs(observed - local_phi) / max(1e-6, local_phi)
+
+        # High-fidelity fast-pass: deviation below φ^(-9) ≈ 1.31% is
+        # unambiguously within the coherent signal zone (81-step Markov bound).
+        if deviation < self.config.fidelity_threshold:
+            return 1.0
+
+        # Normal tolerance zone: linear degradation from phi_tolerance.
         score = max(0, 1 - (deviation / self.config.phi_tolerance))
         return min(1, score)
     

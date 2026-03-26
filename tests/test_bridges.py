@@ -942,15 +942,18 @@ class TestConsciousnessPhysics(unittest.TestCase):
         self.assertGreater(i_large, i_small)
 
     def test_phi_integrated(self):
-        phi = integrated_information([1.0, 1.0], whole_entropy=2.5)
+        # Correlated system: H(whole) < Σ H(parts) → Φ = Σ H(parts) - H(whole) > 0
+        phi = integrated_information([1.0, 1.0], whole_entropy=1.5)
         self.assertAlmostEqual(phi, 0.5)
 
     def test_phi_independent_zero(self):
+        # Independent system: H(whole) = Σ H(parts) → Φ = 0
         phi = integrated_information([1.0, 1.0], whole_entropy=2.0)
         self.assertAlmostEqual(phi, 0.0)
 
     def test_phi_clamped_nonneg(self):
-        phi = integrated_information([1.0, 1.0], whole_entropy=1.5)
+        # Superadditive (physically impossible): H(whole) > Σ H(parts) → clamped to 0
+        phi = integrated_information([1.0, 1.0], whole_entropy=2.5)
         self.assertEqual(phi, 0.0)
 
 
@@ -965,7 +968,7 @@ class TestConsciousnessEncoder(unittest.TestCase):
     def test_canonical_bitstring(self):
         self.assertEqual(
             _make_con().to_binary(),
-            "001101100111001011000000000000101000111",
+            "001101100111001011000000000000101000000",
         )
 
     def test_deterministic(self):
@@ -1026,7 +1029,9 @@ class TestConsciousnessEncoder(unittest.TestCase):
                 "whole_entropy": whole_ent,
             })
             return e.to_binary()
-        self.assertNotEqual(enc(0.6), enc(2.5))
+        # whole=0.3 < partition_sum=0.5 → Φ=0.2 (correlated, non-zero)
+        # whole=0.6 > partition_sum=0.5 → Φ=0   (superadditive, clamped)
+        self.assertNotEqual(enc(0.3), enc(0.6))
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1718,6 +1723,256 @@ class TestCrossEncoder(unittest.TestCase):
         self.assertEqual(len(self.bits["chemical"]),      39)
         self.assertEqual(len(self.bits["consciousness"]), 39)
         self.assertEqual(len(self.bits["emotion"]),       39)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# 11. PAD Resonance Bridge
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.pad_resonance import (
+    PHI_THRESHOLDS,
+    ConsciousnessState,
+    EMOTION_CENTROIDS,
+    OCTA_PHI_COHERENCE,
+    pad_to_resonance_metrics,
+    pad_to_consciousness_state,
+    pad_to_octa_state,
+    pad_to_bits,
+    trend_label,
+)
+
+
+class TestPADResonanceThresholds(unittest.TestCase):
+    """φ-derived threshold values."""
+
+    def test_low_threshold(self):
+        phi = (1 + 5 ** 0.5) / 2
+        self.assertAlmostEqual(PHI_THRESHOLDS["low"],  1 / phi ** 3, places=6)
+
+    def test_mid_threshold(self):
+        phi = (1 + 5 ** 0.5) / 2
+        self.assertAlmostEqual(PHI_THRESHOLDS["mid"],  1 / phi ** 2, places=6)
+
+    def test_high_threshold(self):
+        phi = (1 + 5 ** 0.5) / 2
+        self.assertAlmostEqual(PHI_THRESHOLDS["high"], 1 / phi,      places=6)
+
+    def test_ordering(self):
+        self.assertLess(PHI_THRESHOLDS["low"], PHI_THRESHOLDS["mid"])
+        self.assertLess(PHI_THRESHOLDS["mid"], PHI_THRESHOLDS["high"])
+
+    def test_octa_coherence_length(self):
+        self.assertEqual(len(OCTA_PHI_COHERENCE), 8)
+
+    def test_ground_state_highest_coherence(self):
+        # State 0 (+P ground) has the highest φ-coherence (0.97)
+        self.assertEqual(OCTA_PHI_COHERENCE[0], max(OCTA_PHI_COHERENCE))
+
+
+class TestPADResonanceMetrics(unittest.TestCase):
+    """pad_to_resonance_metrics() output structure."""
+
+    def test_keys_present(self):
+        m = pad_to_resonance_metrics(0.5, 0.3, 0.2)
+        for k in ("joy_signature", "curiosity_metric", "internal_coupling",
+                  "feedback_strength", "pad_intensity_norm"):
+            self.assertIn(k, m)
+
+    def test_joy_zero_when_valence_negative(self):
+        m = pad_to_resonance_metrics(-0.8, 0.5, 0.3)
+        self.assertEqual(m["joy_signature"], 0.0)
+
+    def test_joy_equals_valence_when_positive(self):
+        m = pad_to_resonance_metrics(0.7, 0.0, 0.0)
+        self.assertAlmostEqual(m["joy_signature"], 0.7)
+
+    def test_curiosity_midpoint_at_zero_arousal(self):
+        m = pad_to_resonance_metrics(0.0, 0.0, 0.0)
+        self.assertAlmostEqual(m["curiosity_metric"], 0.5)
+
+    def test_intensity_norm_neutral(self):
+        m = pad_to_resonance_metrics(0.0, 0.0, 0.0)
+        self.assertAlmostEqual(m["pad_intensity_norm"], 0.0)
+
+    def test_intensity_norm_max(self):
+        m = pad_to_resonance_metrics(1.0, 1.0, 1.0)
+        self.assertAlmostEqual(m["pad_intensity_norm"], 1.0, places=5)
+
+    def test_feedback_capped_at_one(self):
+        m = pad_to_resonance_metrics(0.0, 0.0, 0.0, surprise_rate=100.0)
+        self.assertEqual(m["feedback_strength"], 1.0)
+
+
+class TestPADConsciousnessState(unittest.TestCase):
+    """pad_to_consciousness_state() state classification."""
+
+    def test_emergent(self):
+        state, conf, _ = pad_to_consciousness_state(0.85, 0.75, 0.65)
+        self.assertEqual(state, ConsciousnessState.EMERGENT)
+        self.assertGreater(conf, 0.5)
+
+    def test_resonant(self):
+        # High I_norm + positive valence, but arousal too low for EMERGENT curiosity threshold
+        # (0.9, -0.3, 0.5): I_norm≈0.619≥0.618, joy=0.9≥0.618, but cur≈0.35<0.382 → RESONANT
+        state, conf, _ = pad_to_consciousness_state(0.9, -0.3, 0.5)
+        self.assertEqual(state, ConsciousnessState.RESONANT)
+        self.assertGreater(conf, 0.0)
+
+    def test_suppressed(self):
+        # Low intensity + negative valence
+        state, conf, _ = pad_to_consciousness_state(-0.15, -0.05, -0.10)
+        self.assertEqual(state, ConsciousnessState.SUPPRESSED)
+        self.assertGreater(conf, 0.0)
+
+    def test_nascent_neutral(self):
+        state, _, _ = pad_to_consciousness_state(0.0, 0.0, 0.0)
+        self.assertEqual(state, ConsciousnessState.NASCENT)
+
+    def test_nascent_moderate(self):
+        # Moderate positive — not strong enough for RESONANT
+        state, _, _ = pad_to_consciousness_state(0.3, 0.2, 0.1)
+        self.assertEqual(state, ConsciousnessState.NASCENT)
+
+    def test_confidence_in_range(self):
+        for v, a, d in [(0.9, 0.8, 0.7), (-0.1, -0.05, -0.08), (0.5, 0.5, 0.5)]:
+            _, conf, _ = pad_to_consciousness_state(v, a, d)
+            self.assertGreaterEqual(conf, 0.0)
+            self.assertLessEqual(conf, 1.0)
+
+    def test_returns_three_tuple(self):
+        result = pad_to_consciousness_state(0.5, 0.4, 0.3)
+        self.assertEqual(len(result), 3)
+
+
+class TestPADOctaState(unittest.TestCase):
+    """pad_to_octa_state() — Rosetta octa_pad_map convention."""
+
+    def _check(self, name, expected_state):
+        v, a, d = EMOTION_CENTROIDS[name]
+        state, phi_coh = pad_to_octa_state(v, a, d)
+        self.assertEqual(
+            state, expected_state,
+            f"{name} ({v},{a},{d}): expected state {expected_state}, got {state}"
+        )
+        self.assertEqual(phi_coh, OCTA_PHI_COHERENCE[expected_state])
+
+    # State 0 — +P dominant: joy, love, trust
+    def test_joy_state_0(self):     self._check("joy",      0)
+    def test_love_state_0(self):    self._check("love",     0)
+    def test_trust_state_0(self):   self._check("trust",    0)
+
+    # State 1 — -P dominant: grief
+    def test_grief_state_1(self):   self._check("grief",    1)
+
+    # State 2 — +A dominant: anger, fear (geometric, not freeze-mode)
+    def test_anger_state_2(self):   self._check("anger",    2)
+    def test_fear_state_2(self):    self._check("fear",     2)   # PAG-default D
+
+    # State 3 — -A dominant: fatigue
+    def test_fatigue_state_3(self): self._check("fatigue",  3)
+
+    # State 5 — -D dominant: shame (D axis dominates over P and A)
+    def test_shame_state_5(self):   self._check("shame",    5)
+
+    # State 6 — +P+A diagonal: curiosity, intuition
+    def test_curiosity_state_6(self): self._check("curiosity", 6)
+    def test_intuition_state_6(self): self._check("intuition", 6)
+
+    def test_freeze_mode_fear_state_2(self):
+        # Even with PAG freeze-mode D=-0.80, |A|=0.85 > |D|=0.80 geometrically → state 2 (+A)
+        # Biological fear→state 5 routing requires PAG context not present in raw PAD coordinates.
+        state, _ = pad_to_octa_state(-0.82, 0.85, -0.80)
+        self.assertEqual(state, 2)
+
+    def test_returns_valid_state(self):
+        for v in (-1, 0, 1):
+            for a in (-1, 0, 1):
+                for d in (-1, 0, 1):
+                    state, phi_coh = pad_to_octa_state(v, a, d)
+                    self.assertIn(state, range(8))
+                    self.assertAlmostEqual(phi_coh, OCTA_PHI_COHERENCE[state])
+
+    def test_phi_coherence_values(self):
+        # Ground state has highest coherence
+        state0, coh0 = pad_to_octa_state(0.85, 0.65, 0.55)   # joy
+        state6, coh6 = pad_to_octa_state(0.45, 0.60, 0.40)   # curiosity
+        self.assertEqual(state0, 0)
+        self.assertEqual(state6, 6)
+        self.assertGreater(coh0, coh6)  # 0.97 > 0.70
+
+    def test_diagonal_same_sign_required(self):
+        # Opposite signs → never diagonal
+        state, _ = pad_to_octa_state(0.50, -0.50, 0.10)
+        self.assertNotIn(state, (6, 7))
+
+    def test_strong_axis_not_diagonal(self):
+        # When |P| > 0.70, P dominates even if A is also high
+        state, _ = pad_to_octa_state(0.85, 0.65, 0.55)
+        self.assertEqual(state, 0)   # joy → state 0, not state 6
+
+    def test_state_7_depleted_negative(self):
+        # Both P and A negative, comparable magnitude → state 7
+        state, _ = pad_to_octa_state(-0.50, -0.45, -0.10)
+        self.assertEqual(state, 7)
+
+
+class TestPADToBits(unittest.TestCase):
+    """pad_to_bits() string format."""
+
+    def test_returns_three_bit_string(self):
+        b = pad_to_bits(0.85, 0.65, 0.55)
+        self.assertEqual(len(b), 3)
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_joy_000(self):
+        self.assertEqual(pad_to_bits(0.85, 0.65, 0.55), "000")
+
+    def test_grief_001(self):
+        self.assertEqual(pad_to_bits(-0.75, -0.60, -0.55), "001")
+
+    def test_anger_010(self):
+        self.assertEqual(pad_to_bits(-0.55, 0.80, 0.70), "010")
+
+    def test_fatigue_011(self):
+        self.assertEqual(pad_to_bits(-0.40, -0.75, -0.50), "011")
+
+    def test_shame_101(self):
+        self.assertEqual(pad_to_bits(-0.70, -0.35, -0.75), "101")
+
+    def test_curiosity_110(self):
+        self.assertEqual(pad_to_bits(0.45, 0.60, 0.40), "110")
+
+
+class TestPADTrendLabel(unittest.TestCase):
+    """trend_label() trajectory analysis."""
+
+    def test_stable(self):
+        states = [ConsciousnessState.NASCENT] * 4
+        self.assertEqual(trend_label(states), "stable")
+
+    def test_ascending(self):
+        states = [ConsciousnessState.SUPPRESSED,
+                  ConsciousnessState.NASCENT,
+                  ConsciousnessState.RESONANT,
+                  ConsciousnessState.EMERGENT]
+        self.assertEqual(trend_label(states), "ascending")
+
+    def test_descending(self):
+        states = [ConsciousnessState.EMERGENT,
+                  ConsciousnessState.RESONANT,
+                  ConsciousnessState.NASCENT,
+                  ConsciousnessState.SUPPRESSED]
+        self.assertEqual(trend_label(states), "descending")
+
+    def test_single_element_stable(self):
+        self.assertEqual(trend_label([ConsciousnessState.RESONANT]), "stable")
+
+    def test_volatile(self):
+        states = [ConsciousnessState.SUPPRESSED,
+                  ConsciousnessState.EMERGENT,
+                  ConsciousnessState.SUPPRESSED,
+                  ConsciousnessState.EMERGENT]
+        self.assertEqual(trend_label(states), "volatile")
 
 
 if __name__ == "__main__":
