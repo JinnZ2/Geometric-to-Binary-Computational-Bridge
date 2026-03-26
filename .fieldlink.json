@@ -50,7 +50,8 @@
           { "remote": "data/shape_ontology.json", "as": "atlas/remote/rosetta/shape_ontology.json" },
           { "remote": "data/math_constants.json", "as": "atlas/remote/rosetta/math_constants.json" },
           { "remote": "data/sacred_geometry.json", "as": "atlas/remote/rosetta/sacred_geometry.json" },
-          { "remote": "schema/core.schema.json", "as": "atlas/remote/rosetta/core.schema.json" }
+          { "remote": "schema/core.schema.json", "as": "atlas/remote/rosetta/core.schema.json" },
+          { "remote": "data/training/pad_biology.json", "as": "atlas/remote/rosetta/pad_biology.json" }
         ],
         "exports": [
           { "local": "bridges/geobin-bridges.json", "as": "bridges/geobin-bridges.json" },

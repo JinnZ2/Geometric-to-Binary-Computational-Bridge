@@ -222,6 +222,92 @@ check(has_nonzero_B, "Current source produces nonzero B-fields")
 check(solver.performanceMetrics.totalSolutions >= 2, "Multiple solutions tracked")
 
 
+# ─── KT Annealer ────────────────────────────────────────────────────
+
+import math
+from Engine.kt_annealer import KTAnnealer, KTConfig, anneal_network_phases
+
+print("\n── KTAnnealer ──────────────────────────────────────────────")
+
+PHI_TEST = (1 + 5 ** 0.5) / 2
+
+# T_KT formula
+cfg_default = KTConfig()
+check(
+    abs(cfg_default.T_KT - math.pi * PHI_TEST / 2) < 1e-9,
+    f"T_KT = π·φ/2 ≈ {cfg_default.T_KT:.4f}",
+)
+
+# Custom J
+cfg_j2 = KTConfig(J=2.0)
+check(abs(cfg_j2.T_KT - math.pi) < 1e-9, "T_KT(J=2) = π")
+
+# Triangle: 3 nodes fully connected
+triangle_adj = [[1, 2], [0, 2], [0, 1]]
+phases_aligned = np.array([0.0, 0.0, 0.0])
+ann = KTAnnealer(phases_aligned, triangle_adj, KTConfig(n_steps=10, seed=0))
+E_aligned = ann._edge_energy(phases_aligned)
+check(abs(E_aligned - (-3.0 * PHI_TEST)) < 1e-9, "Aligned triangle energy = -3J")
+
+# Worst-case energy (fully misaligned 120° spacing)
+phases_120 = np.array([0.0, 2 * math.pi / 3, 4 * math.pi / 3])
+E_120 = ann._edge_energy(phases_120)
+check(abs(E_120 - (1.5 * PHI_TEST)) < 1e-6, "120°-spaced triangle energy = +3J/2")
+
+# Phase coherence
+coh_aligned = ann._phase_coherence(phases_aligned)
+check(abs(coh_aligned - 1.0) < 1e-9, "Aligned phases → coherence = 1.0")
+
+coh_uniform = ann._phase_coherence(phases_120)
+check(coh_uniform < 0.05, f"120°-spaced phases → coherence ≈ 0 (got {coh_uniform:.4f})")
+
+# Vortex count — aligned triangle has no vortex
+v_aligned = ann._count_vortices(phases_aligned)
+check(v_aligned == 0, "Aligned triangle: 0 vortices")
+
+# Annealing reduces energy on random 4×4 torus
+rng = np.random.default_rng(7)
+N = 16
+adj_torus = []
+for row in range(4):
+    for col in range(4):
+        adj_torus.append([
+            row * 4 + (col + 1) % 4,
+            row * 4 + (col - 1) % 4,
+            ((row + 1) % 4) * 4 + col,
+            ((row - 1) % 4) * 4 + col,
+        ])
+phases_rand = rng.uniform(0, 2 * math.pi, N)
+cfg_anneal = KTConfig(J=PHI_TEST, T_start=5.0, T_final=0.3, n_steps=300, seed=42)
+ann2 = KTAnnealer(phases_rand.copy(), adj_torus, cfg_anneal)
+optimized = ann2.anneal()
+E_init = ann2.history[0].energy
+E_final = ann2.history[-1].energy
+check(E_final < E_init, f"Annealing reduces energy: {E_init:.2f} → {E_final:.2f}")
+
+coh_init  = ann2.history[0].phase_coherence
+coh_final = ann2.history[-1].phase_coherence
+check(coh_final > coh_init, f"Annealing improves coherence: {coh_init:.3f} → {coh_final:.3f}")
+
+# History populated
+check(len(ann2.history) == 300, "History has one entry per step")
+
+# Summary dict has expected keys
+s = ann2.summary()
+for key in ("T_KT", "energy_final", "coherence_final", "vortices_final"):
+    check(key in s, f"summary has '{key}'")
+
+# anneal_network_phases convenience wrapper
+phases_conv = rng.uniform(0, 2 * math.pi, 4)
+adj_square = [[1, 3], [0, 2], [1, 3], [0, 2]]
+opt2, s2 = anneal_network_phases(
+    phases_conv, adj_square,
+    KTConfig(n_steps=50, seed=1),
+)
+check(len(opt2) == 4, "anneal_network_phases returns correct length")
+check("coherence_final" in s2, "anneal_network_phases summary is populated")
+
+
 # ─── Summary ────────────────────────────────────────────────────────
 
 print(f"\n{'='*50}")

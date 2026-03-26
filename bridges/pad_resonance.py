@@ -44,11 +44,87 @@ Wiring
   )
 """
 
+import json
 import math
+import os
 from enum import Enum
 from typing import Tuple, Dict
 
 PHI = (1.0 + math.sqrt(5.0)) / 2.0
+
+# ─── Fieldlink mount loader ───────────────────────────────────────────────────
+# Canonical source: atlas/remote/rosetta/pad_biology.json
+# Synced from Rosetta-Shape-Core/data/training/pad_biology.json via .fieldlink.json
+#
+# At import time we try to load biological centroids and octa_pad_map from the
+# fieldlink mount.  If the file is absent (offline / not yet synced) we fall
+# back to the hardcoded values defined later in this module.
+
+_FIELDLINK_PAD_BIOLOGY = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "atlas", "remote", "rosetta", "pad_biology.json",
+)
+
+
+def _load_fieldlink_data() -> Tuple[
+        Dict[str, Tuple[float, float, float]],
+        Tuple[float, ...],
+]:
+    """
+    Load EMOTION_CENTROIDS and OCTA_PHI_COHERENCE from the fieldlink mount.
+
+    Returns (centroids_dict, coherence_tuple) on success, or (None, None)
+    if the mount is absent or malformed.
+    """
+    try:
+        import re as _re
+        with open(_FIELDLINK_PAD_BIOLOGY, encoding="utf-8") as f:
+            raw = f.read()
+        # JSON does not allow leading '+' on numbers; strip them
+        raw = _re.sub(r'([:,\[]\s*)\+(\d)', r'\1\2', raw)
+        data = json.loads(raw)
+
+        # Extract centroids from sensors section
+        centroids: Dict[str, Tuple[float, float, float]] = {}
+        for name, sensor in data.get("sensors", {}).items():
+            p = sensor.get("P")
+            a = sensor.get("A")
+            d = sensor.get("D_default") if "D_default" in sensor else sensor.get("D")
+            if p is not None and a is not None and d is not None:
+                try:
+                    centroids[name] = (float(p), float(a), float(d))
+                except (TypeError, ValueError):
+                    pass  # D may be string "variable" for fear — skip
+
+        # Fallback for fear using D_default explicitly
+        if "fear" not in centroids:
+            fear = data["sensors"].get("fear", {})
+            try:
+                centroids["fear"] = (
+                    float(fear["P"]),
+                    float(fear["A"]),
+                    float(fear.get("D_default", -0.65)),
+                )
+            except (KeyError, TypeError, ValueError):
+                pass
+
+        # Extract per-state φ-coherence from octa_pad_map
+        octa_states = data.get("octa_pad_map", {}).get("states", [])
+        if len(octa_states) == 8:
+            coherence = tuple(float(s["phi_coherence"]) for s in octa_states)
+        else:
+            coherence = None
+
+        if centroids and coherence:
+            return centroids, coherence
+
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        pass
+
+    return None, None
+
+
+_fl_centroids, _fl_coherence = _load_fieldlink_data()
 
 # ─── φ-derived thresholds ────────────────────────────────────────────────────
 # 1/φ³, 1/φ², 1/φ  — the three Fibonacci cut-points in [0, 1]
@@ -238,9 +314,13 @@ def trend_label(states: list) -> str:
 #
 # Biological emotion centroids from Rosetta-Shape-Core/data/training/pad_biology.json
 # (neuroscience-grounded; culture-independent P and A axes, PAG-grounded D axis).
-# Reference only — not used in the algorithm below, but useful for validation.
 #
-EMOTION_CENTROIDS: Dict[str, Tuple[float, float, float]] = {
+# Loaded at import time from the fieldlink mount:
+#   atlas/remote/rosetta/pad_biology.json
+# Declared in .fieldlink.json under sources[rosetta].mounts.
+# Falls back to hardcoded values when the mount is absent (offline / not synced).
+#
+_EMOTION_CENTROIDS_FALLBACK: Dict[str, Tuple[float, float, float]] = {
     "fear":      (-0.82,  0.85, -0.65),  # D_default=-0.65; freeze mode D=-0.80
     "anger":     (-0.55,  0.80,  0.70),
     "grief":     (-0.75, -0.60, -0.55),
@@ -253,10 +333,13 @@ EMOTION_CENTROIDS: Dict[str, Tuple[float, float, float]] = {
     "fatigue":   (-0.40, -0.75, -0.50),
     "intuition": ( 0.50,  0.35,  0.55),
 }
+EMOTION_CENTROIDS: Dict[str, Tuple[float, float, float]] = (
+    _fl_centroids if _fl_centroids else _EMOTION_CENTROIDS_FALLBACK
+)
 
 # φ-coherence per octahedral state (from Rosetta octa_pad_map).
 # Higher coherence = more stable, more "ground-truth" encoding.
-OCTA_PHI_COHERENCE: Tuple[float, ...] = (
+_OCTA_PHI_COHERENCE_FALLBACK: Tuple[float, ...] = (
     0.97,  # state 0  +P ground state — most stable
     0.82,  # state 1  -P collapsed
     0.82,  # state 2  +A high activation
@@ -265,6 +348,9 @@ OCTA_PHI_COHERENCE: Tuple[float, ...] = (
     0.78,  # state 5  -D low agency / freeze
     0.70,  # state 6  +P+A diagonal — exploratory
     0.72,  # state 7  -P-A diagonal — depleted
+)
+OCTA_PHI_COHERENCE: Tuple[float, ...] = (
+    _fl_coherence if _fl_coherence else _OCTA_PHI_COHERENCE_FALLBACK
 )
 
 # Axis-intensity threshold above which an emotion is "strongly" single-axis
