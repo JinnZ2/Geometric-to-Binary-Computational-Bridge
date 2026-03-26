@@ -124,16 +124,17 @@ def fisher_information(log_likelihood_gradients: list) -> float:
 def integrated_information(partition_entropies: list,
                             whole_entropy: float) -> float:
     """
-    Φ = H(whole) − Σ H(partitions)  — integrated information (Tononi Φ, simplified).
+    Φ = Σ H(partitions) − H(whole)  — integrated information (Tononi Φ, simplified).
 
-    Positive Φ means the whole carries more information than the sum of its
-    independent parts — the hallmark of integrated / conscious processing.
-    Negative values clamped to 0 (no integration is just 0, not anti-information).
+    Equals the mutual information between partitions: I(A;B) = H(A)+H(B)−H(A,B).
+    Always ≥ 0 by the chain rule: joint entropy ≤ sum of marginal entropies.
+    Positive Φ means the parts share information — the hallmark of integrated
+    processing.  Φ = 0 when parts are fully independent.
 
     partition_entropies : list of Shannon entropies for each independent partition
     whole_entropy       : Shannon entropy of the full joint system
     """
-    return max(0.0, whole_entropy - sum(partition_entropies))
+    return max(0.0, sum(partition_entropies) - whole_entropy)
 
 
 # ---------------------------------------------------------------------------

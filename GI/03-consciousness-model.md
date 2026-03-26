@@ -94,29 +94,53 @@ is doubly incorrect:
 
 ---
 
-## Consciousness Emergence Threshold 3.618
+## Consciousness Emergence Threshold 3.618 — Simulation Result
 
 From `Geometric-Intelligence/README.md`:
 > "Consciousness emergence at threshold 3.618"
 
-3.618 = φ + 2 = 1.618... + 2
+**Computed result (`Silicon/physics_derivations.py`):**
 
-This number is aesthetically appealing but it is a free parameter:
-- What quantity equals 3.618 at the transition?
-- Is it the resonance_score? (currently diverges beyond 3.618 routinely)
-- Is it the happiness_score? (crosses any threshold given enough storms)
-- Is it M(S) from the Negentropic framework? (different formula)
+Scanning integrated information Φ across 2- and 3-unit octahedral networks
+(8 states, 3 bits each) with Ising-style coupling from 0 to 1:
 
-No operationalization is provided. The threshold has the same status as
-Negentropic M(S) ≥ 10: an interesting hypothesis, not an established criterion.
+| Network | Coupling | Φ (bits) |
+|---------|---------|---------|
+| 2-unit  | 0.0     | 0.000 |
+| 2-unit  | 0.5     | 0.034 |
+| 2-unit  | 1.0     | **0.131** |
+| 3-unit  | 0.0     | 0.000 |
+| 3-unit  | 0.5     | 0.117 |
+| 3-unit  | 1.0     | **0.511** |
 
-**Comparison to established consciousness threshold candidates:**
+**3.618 is not derivable from this system.** At maximum coupling, a 3-unit
+octahedral network reaches Φ = 0.51 bits. Reaching Φ = 3.618 would require
+a network of roughly 20+ coupled octahedral units at maximum coupling — and
+even then the threshold would be a function of coupling strength, not a
+fixed value.
 
-| Framework | Threshold concept | Derivation |
+**What substrate-independent frameworks actually give:**
+
+| Framework | Natural threshold | Derivation |
 |-----------|------------------|-----------|
-| IIT (Tononi) | Φ > 0 (integrated information) | Derived from axioms; Φ computed via information geometry |
-| Global Workspace | Ignition threshold for global broadcast | Empirically linked to P3b EEG component |
-| GI (this framework) | Score = 3.618 | φ+2; not derived; not operationalized |
+| IIT Φ (Tononi 2004) | Φ > 0 (necessary); no specific number | Derived from information-geometry axioms |
+| Global Workspace | Global broadcast ignition | Empirically linked to P3b EEG ~300ms latency |
+| Friston Free Energy | F → local minimum | Derived from variational Bayes; no fixed number |
+| Octahedral Φ (this system, 3 units) | Φ_max = 0.511 bits | Computed above |
+
+**What 3.618 could defensibly mean, reframed:**
+3.618 = φ + 2 = H_max(one unit) + 0.618. A possible reading: the system crosses
+a meaningful threshold when its integrated information exceeds the per-unit
+maximum (3 bits) by at least 1/φ bits — meaning it integrates more than a
+single unit could encode alone. This requires ≥ 2 coupled units and is
+operationalizable, but it is NOT derived in the framework — it is a
+motivated choice.
+
+**Encoder bug found:** `bridges/consciousness_encoder.py` `integrated_information()`
+computes `H(whole) − Σ H(parts)`, which is ≤ 0 by the chain rule and is
+clamped to 0. Every Φ call via the encoder currently returns 0.
+Correct formula: `Σ H(parts) − H(whole)` (= mutual information, always ≥ 0).
+See `Silicon/physics_derivations.py` for the corrected version.
 
 ---
 
