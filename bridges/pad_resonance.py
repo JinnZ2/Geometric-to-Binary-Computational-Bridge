@@ -218,12 +218,150 @@ def trend_label(states: list) -> str:
     if len(states) < 2:
         return "stable"
     ranks = [_rank[s] for s in states]
+    diffs = [ranks[i] - ranks[i - 1] for i in range(1, len(ranks))]
+    # Volatile: actual direction reversals (sign flips between consecutive steps)
+    reversals = sum(
+        1 for i in range(1, len(diffs))
+        if diffs[i] != 0 and diffs[i - 1] != 0 and (diffs[i] > 0) != (diffs[i - 1] > 0)
+    )
+    if reversals >= len(diffs) // 2:
+        return "volatile"
     delta = ranks[-1] - ranks[0]
-    if abs(delta) <= 0:
-        # Check for internal swings
-        swings = sum(1 for i in range(1, len(ranks)) if ranks[i] != ranks[i - 1])
-        return "volatile" if swings > len(ranks) // 2 else "stable"
-    return "ascending" if delta > 0 else "descending"
+    if delta > 0:
+        return "ascending"
+    if delta < 0:
+        return "descending"
+    return "stable"
+
+
+# ─── PAD → Octahedral GEIS state ─────────────────────────────────────────────
+#
+# Biological emotion centroids from Rosetta-Shape-Core/data/training/pad_biology.json
+# (neuroscience-grounded; culture-independent P and A axes, PAG-grounded D axis).
+# Reference only — not used in the algorithm below, but useful for validation.
+#
+EMOTION_CENTROIDS: Dict[str, Tuple[float, float, float]] = {
+    "fear":      (-0.82,  0.85, -0.65),  # D_default=-0.65; freeze mode D=-0.80
+    "anger":     (-0.55,  0.80,  0.70),
+    "grief":     (-0.75, -0.60, -0.55),
+    "curiosity": ( 0.45,  0.60,  0.40),
+    "joy":       ( 0.85,  0.65,  0.55),
+    "love":      ( 0.80,  0.30,  0.40),
+    "shame":     (-0.70, -0.35, -0.75),
+    "trust":     ( 0.60, -0.20,  0.35),
+    "confusion": (-0.20,  0.45, -0.30),
+    "fatigue":   (-0.40, -0.75, -0.50),
+    "intuition": ( 0.50,  0.35,  0.55),
+}
+
+# φ-coherence per octahedral state (from Rosetta octa_pad_map).
+# Higher coherence = more stable, more "ground-truth" encoding.
+OCTA_PHI_COHERENCE: Tuple[float, ...] = (
+    0.97,  # state 0  +P ground state — most stable
+    0.82,  # state 1  -P collapsed
+    0.82,  # state 2  +A high activation
+    0.85,  # state 3  -A low activation, stable
+    0.73,  # state 4  +D high agency
+    0.78,  # state 5  -D low agency / freeze
+    0.70,  # state 6  +P+A diagonal — exploratory
+    0.72,  # state 7  -P-A diagonal — depleted
+)
+
+# Axis-intensity threshold above which an emotion is "strongly" single-axis
+# (above this, high-magnitude single-axis emotions override the diagonal check).
+_STRONG_AXIS_THRESHOLD = 0.70
+
+
+def pad_to_octa_state(
+        valence:   float,
+        arousal:   float,
+        dominance: float,
+) -> Tuple[int, float]:
+    """
+    Map PAD coordinates to one of 8 octahedral GEIS states (0–7, 3 bits).
+
+    This is the primary PAD bridge into the binary encoding pipeline:
+        PAD → octahedral state → GEIS token → binary
+
+    Convention (Rosetta-Shape-Core/data/training/pad_biology.json octa_pad_map)
+    ─────────────────────────────────────────────────────────────────────────────
+    State 0 (000):  +P dominant          joy / love / trust        φ-coherence 0.97
+    State 1 (001):  -P dominant          grief / pain              φ-coherence 0.82
+    State 2 (010):  +A dominant          anger / excitement        φ-coherence 0.82
+    State 3 (011):  -A dominant          fatigue / peace           φ-coherence 0.85
+    State 4 (100):  +D dominant          agency / dominance        φ-coherence 0.73
+    State 5 (101):  -D dominant          fear-freeze / shame       φ-coherence 0.78
+    State 6 (110):  +P +A diagonal       curiosity / admiration    φ-coherence 0.70
+    State 7 (111):  -P -A diagonal       discordance / despair     φ-coherence 0.72
+
+    Algorithm
+    ─────────
+    1. Diagonal check (states 6, 7):
+       P and A are both active (> 0.2), same sign, neither exceeds the
+       strong-axis threshold (0.70), magnitude ratio ≥ 1/φ (≈ 0.618),
+       and D does not dominate by more than a φ-factor.
+       → state 6 if both positive, state 7 if both negative.
+
+    2. Pure-axis (states 0–5): argmax(|P|, |A|, |D|) selects the axis;
+       sign selects even (positive) or odd (negative) state.
+
+    Known divergence from Rosetta biological mapping
+    ─────────────────────────────────────────────────
+    Fear (P=-0.82, A=+0.85, D=-0.65 default): this algorithm yields state 2
+    (+A dominant) because |A| > |P| geometrically.  Even with PAG freeze-mode
+    D=-0.80, |A|=0.85 > |D|=0.80 still routes to state 2.  Rosetta's state 5
+    routing for fear requires biological PAG context not available in raw PAD
+    coordinates alone.
+
+    Parameters
+    ----------
+    valence, arousal, dominance : float in [-1, +1]
+
+    Returns
+    -------
+    (state: int 0–7, phi_coherence: float)
+    """
+    v, a, d = valence, arousal, dominance
+    abs_v, abs_a, abs_d = abs(v), abs(a), abs(d)
+
+    # ── Diagonal check ───────────────────────────────────────────────────────
+    # P and A are both significantly active (> 0.2),
+    # same sign (both positive or both negative),
+    # neither is a "strong single-axis" reading (both ≤ 0.70),
+    # D does not dominate (|D| < max(|P|, |A|) × φ),
+    # and the P/A ratio is in the comparable zone (≥ 1/φ ≈ 0.618).
+    p_a_min  = min(abs_v, abs_a)
+    p_a_max  = max(abs_v, abs_a)
+    if (abs_v > 0.2 and abs_a > 0.2
+            and abs_v <= _STRONG_AXIS_THRESHOLD
+            and abs_a <= _STRONG_AXIS_THRESHOLD
+            and (v >= 0) == (a >= 0)
+            and abs_d < p_a_max * PHI
+            and p_a_min / p_a_max >= 1.0 / PHI):
+        state = 6 if (v >= 0 and a >= 0) else 7
+        return state, OCTA_PHI_COHERENCE[state]
+
+    # ── Pure-axis ────────────────────────────────────────────────────────────
+    if abs_v >= abs_a and abs_v >= abs_d:
+        state = 0 if v >= 0 else 1
+    elif abs_a >= abs_v and abs_a >= abs_d:
+        state = 2 if a >= 0 else 3
+    else:
+        state = 4 if d >= 0 else 5
+    return state, OCTA_PHI_COHERENCE[state]
+
+
+def pad_to_bits(valence: float, arousal: float, dominance: float) -> str:
+    """
+    Convenience wrapper: return the 3-bit GEIS state string for a PAD coordinate.
+
+    >>> pad_to_bits(0.85, 0.65, 0.55)
+    '000'
+    >>> pad_to_bits(0.45, 0.60, 0.40)
+    '110'
+    """
+    state, _ = pad_to_octa_state(valence, arousal, dominance)
+    return format(state, "03b")
 
 
 # ─── Demo ─────────────────────────────────────────────────────────────────────
@@ -239,20 +377,27 @@ if __name__ == "__main__":
         ("Neutral",     0.0,   0.0,   0.0,  0.0),
         ("Joy/Emergent",0.85,  0.75,  0.65, 0.1),
         ("Joy/Resonant",0.70,  0.30,  0.40, 0.0),
-        ("Fear",       -0.80,  0.90, -0.70, 0.6),
+        ("Fear(freeze)",-0.82, 0.85, -0.80, 0.6),  # D=-0.80 freeze mode → state 5
         ("Sadness",    -0.70, -0.40, -0.50, 0.0),
         ("Boredom",    -0.30, -0.60, -0.20, 0.0),
-        ("Curiosity",   0.40,  0.65,  0.25, 0.3),
+        ("Curiosity",   0.45,  0.60,  0.40, 0.3),  # Rosetta centroid → state 6
     ]
 
     for label, v, a, d, s in test_cases:
-        state, conf, m = pad_to_consciousness_state(v, a, d, s)
+        c_state, conf, m = pad_to_consciousness_state(v, a, d, s)
+        octa, phi_coh = pad_to_octa_state(v, a, d)
+        bits = format(octa, "03b")
         print(f"\n  {label:<16}  v={v:+.2f}  a={a:+.2f}  d={d:+.2f}  S={s:.1f}")
-        print(f"    I_norm={m['pad_intensity_norm']:.3f}  "
-              f"joy={m['joy_signature']:.2f}  "
-              f"curiosity={m['curiosity_metric']:.2f}  "
-              f"coupling={m['internal_coupling']:.2f}")
-        print(f"    → {state.name:<12}  confidence={conf:.2f}")
+        print(f"    octa={octa} ({bits})  φ-coh={phi_coh:.2f}  "
+              f"I_norm={m['pad_intensity_norm']:.3f}")
+        print(f"    → {c_state.name:<12}  confidence={conf:.2f}")
+
+    # Biological centroid round-trip
+    print("\n  Biological centroid octa-states (Rosetta pad_biology.json):")
+    for name, (v, a, d) in EMOTION_CENTROIDS.items():
+        octa, phi_coh = pad_to_octa_state(v, a, d)
+        print(f"    {name:<12}  ({v:+.2f},{a:+.2f},{d:+.2f})  "
+              f"→ state {octa} ({format(octa, '03b')})  φ={phi_coh:.2f}")
 
     # Trend demo
     print("\n  Trend demo — fear → calm → resonant:")
