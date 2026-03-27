@@ -4,38 +4,75 @@ Magnetic Bridge Encoder
 Encodes magnetic field geometry into binary using physics equations
 and Gray-coded magnitude bands for all continuous quantities.
 
-Equations implemented
----------------------
+Dual-mode operation
+-------------------
+  mode="geometric"  (default) — encodes macroscopic field-line geometry.
+  mode="magnonic"             — encodes spin-wave physics from
+                                Engine.magnonic_sublayer.magnonic_coupling_state().
+
+  Select mode at construction time:
+      enc = MagneticBridgeEncoder(mode="magnonic")
+
+Geometric mode — equations
+--------------------------
   Biot-Savart Law   :  dB = (μ₀ / 4π) · I · |dl × r̂| / r²
-                        = (μ₀ / 4π) · I · |dl| · sin(α) / r²
-                        where α is the angle between dl and r̂
   Magnetic flux     :  Φ = B · A · cos(θ)
-                        A defaults to 1 m² if not supplied; θ defaults to 0
   Magnetic pressure :  P_mag = B² / (2μ₀)
-  Larmor frequency  :  ω_L = eB / (2mₑ)   [rad/s, electron precession]
-  Field curvature   :  κ = |curvature|  (m⁻¹ — inverse radius of curvature)
+  Larmor frequency  :  ω_L = eB / (2mₑ)   [rad/s]
+  Field curvature   :  κ = |curvature|  (m⁻¹)
 
-Bit layout
-----------
-Per field line  (8 bits each):
-  [polarity    1b]      N=1 / S=0
-  [curv_sign   1b]      curvature > 0 (convex) = 1
-  [curv_mag    3b Gray] |curvature| across 8 log bands (m⁻¹)
-  [B_mag       3b Gray] field magnitude across 8 log Tesla bands
+Geometric mode — bit layout (variable length)
+---------------------------------------------
+  Per field line  (8 bits):  polarity(1) + curv_sign(1) + curv_mag(3) + B_mag(3)
+  Per current elm (7 bits):  I_mag(3) + B_biot(3) + I_sign(1)
+  Per resonance   (4 bits):  constructive(1) + res_mag(3)
+  Summary         (7 bits):  flux_sign(1) + flux_mag(3) + P_mag(3)  [if field_lines]
 
-Per current element  (7 bits each, Biot-Savart result):
-  [I_mag       3b Gray] current magnitude (8 log Ampere bands)
-  [B_biot      3b Gray] B at origin from Biot-Savart (8 log Tesla bands)
-  [I_sign      1b]      dl_z > 0 = 1 (current flow direction)
+Magnonic mode — input geometry dict
+------------------------------------
+  Accepts a material preset name OR explicit material parameters:
+    material     : str   — preset key from Engine.magnonic_sublayer.MATERIALS
+                           ("YIG", "Permalloy", "CoFeB", "Magnetite",
+                            "Quartz_Fe_defect")
+    H0           : float — applied field (T),          default 0.1
+    M_s          : float — saturation magnetization (A/m)
+    A_ex         : float — exchange stiffness (J/m)
+    alpha        : float — Gilbert damping constant
+    T            : float — temperature (K),            default 300.0
+    theta_deg    : float — propagation angle (degrees), default 90.0
+    conductivity : float — electrical conductivity (S/m)
+    thickness    : float — film thickness (m)
+    c_sound      : float — speed of sound (m/s)
+    n_e          : float — plasma electron density (m⁻³), default 0
 
-Per resonance value  (4 bits each):
-  [constructive 1b]     value > 0 = constructive = 1
-  [res_mag     3b Gray] |resonance| across 8 linear bands [0, 1]
+Magnonic mode — fixed 43-bit output
+-------------------------------------
+  Section A — effective field (12 bits)
+    [H_bottom  3b Gray] ω_bottom / γ → Tesla
+    [H_dipolar 3b Gray] ω_dipolar / γ → Tesla
+    [H_exchange 3b Gray] ω_exchange / γ → Tesla
+    [H_deep    3b Gray] ω_deep_exchange / γ → Tesla
 
-Summary  (7 bits — appended when field_lines are present):
-  [flux_sign   1b]      mean Φ ≥ 0 = 1
-  [flux_mag    3b Gray] mean |Φ| across 8 log Weber bands
-  [P_mag       3b Gray] mean magnetic pressure across 8 log Pascal bands
+  Section B — transport (10 bits)
+    [vg_sign   1b]      group velocity sign at dipolar k (1=forward)
+    [vg_dipolar 3b Gray] |v_g| dipolar (m/s)
+    [vg_exchange 3b Gray] |v_g| exchange (m/s)
+    [l_prop    3b Gray] propagation length exchange (m)
+
+  Section C — damping (7 bits)
+    [alpha_gilbert 3b Gray] Gilbert damping
+    [alpha_eddy    3b Gray] eddy-current damping enhancement
+    [eddy_dominant 1b]      alpha_eddy > alpha_gilbert
+
+  Section D — thermal (8 bits)
+    [thermal_regime 2b] quantum=00 / crossover=01 / classical=10 / gapless=11
+    [n_thermal  3b Gray] Bose-Einstein occupation (exchange k)
+    [c_magnon   3b Gray] specific heat contribution (J/K)
+
+  Section E — coupling (6 bits)
+    [mp_regime  2b] magnon-phonon: no_coupling=00 / weak=01 / hybridized=10
+    [plasma_below 1b] magnon freq < plasma freq (0 if no plasma)
+    [plasma_ratio 3b Gray] magnon/plasma frequency ratio
 """
 
 import math
@@ -57,6 +94,21 @@ _I_BANDS        = [0.0, 1e-6, 1e-4, 1e-2, 0.1,  1.0,  10.0, 100.0]  # Amperes
 _FLUX_BANDS     = [0.0, 1e-12,1e-9, 1e-6, 1e-3, 0.01, 0.1,  1.0  ]  # Weber
 _PRESSURE_BANDS = [0.0, 1e-3, 0.01, 0.1,  1.0,  10.0, 100.0,1e4  ]  # Pascal
 _RES_BANDS      = [0.0, 0.125,0.25, 0.375,0.5,  0.625,0.75, 0.875]  # normalised
+
+# ── Magnonic-mode band edges ───────────────────────────────────────────────────
+_VG_BANDS      = [0.0, 0.01, 0.1,  1.0,  10.0, 100.0, 1e3,  1e4  ]  # m/s
+_ALPHA_BANDS   = [0.0, 1e-5, 1e-4, 1e-3, 0.01, 0.05,  0.1,  0.5  ]  # dimensionless
+_N_THERM_BANDS = [0.0, 1.0,  10.0, 1e2,  1e3,  1e4,   1e5,  1e6  ]  # occupation
+_L_PROP_BANDS  = [0.0, 1e-9, 1e-7, 1e-5, 1e-3, 0.01,  0.1,  1.0  ]  # metres
+_CMAG_BANDS    = [0.0, 1e-28,1e-26,1e-24,1e-22,1e-21, 1e-20,1e-19 ]  # J/K
+_PRAT_BANDS    = [0.0, 0.01, 0.1,  0.5,  1.0,  2.0,   5.0,  10.0 ]  # ratio
+
+# Gyromagnetic ratio — converts ω (rad/s) → B_eff (T) via B = ω/γ
+_GAMMA = 1.7608597e11  # rad/s/T
+
+# 2-bit encodings for categorical magnonic quantities
+_THERMAL_REGIME_BITS = {"quantum": "00", "crossover": "01", "classical": "10", "gapless": "11"}
+_MP_REGIME_BITS      = {"no coupling": "00", "weak": "01", "hybridized": "10"}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -189,8 +241,19 @@ class MagneticBridgeEncoder(BinaryBridgeEncoder):
         Positive = constructive interference; negative = destructive.
     """
 
-    def __init__(self):
+    def __init__(self, mode: str = "geometric"):
+        """
+        Parameters
+        ----------
+        mode : "geometric" (default) or "magnonic"
+            "geometric" — encode macroscopic field-line / current geometry.
+            "magnonic"  — encode spin-wave physics from magnonic_sublayer;
+                          geometry dict supplies material parameters.
+        """
+        if mode not in ("geometric", "magnonic"):
+            raise ValueError(f"mode must be 'geometric' or 'magnonic', got {mode!r}")
         super().__init__("magnetic")
+        self.mode = mode
 
     def from_geometry(self, geometry_data: dict):
         """Load geometry data.  Returns self for chaining."""
@@ -201,14 +264,20 @@ class MagneticBridgeEncoder(BinaryBridgeEncoder):
         """
         Encode loaded geometry to a binary string.
 
-        Sections (in order):
+        Geometric mode sections (in order):
           1. Field lines    — 8 bits each
           2. Current elements (Biot-Savart) — 7 bits each
           3. Resonance values — 4 bits each
           4. Summary (flux + pressure) — 7 bits (only when field_lines present)
+
+        Magnonic mode: fixed 43-bit output — see module docstring for layout.
         """
         if self.input_geometry is None:
             raise ValueError("Geometry data not loaded. Call from_geometry() first.")
+
+        if self.mode == "magnonic":
+            self.binary_output = self._encode_magnonic()
+            return self.binary_output
 
         bits: list[str] = []
         field_lines      = self.input_geometry.get("field_lines", [])
@@ -268,6 +337,86 @@ class MagneticBridgeEncoder(BinaryBridgeEncoder):
 
         self.binary_output = "".join(bits)
         return self.binary_output
+
+    def _encode_magnonic(self) -> str:
+        """
+        Fixed 43-bit magnonic encoding.  Called by to_binary() when mode="magnonic".
+
+        Resolves material parameters from preset name or explicit dict keys,
+        calls magnonic_coupling_state(), then maps the output dict to the
+        5-section bit layout defined in the module docstring.
+        """
+        from Engine.magnonic_sublayer import magnonic_coupling_state, MATERIALS
+
+        geo = self.input_geometry
+
+        # Resolve material parameters — preset takes priority, then explicit keys
+        if "material" in geo:
+            p = MATERIALS[geo["material"]]
+            M_s          = p["M_s"]
+            A_ex         = p["A_ex"]
+            alpha        = p["alpha"]
+            conductivity = p["conductivity"]
+            c_sound      = p["c_sound"]
+        else:
+            M_s          = float(geo.get("M_s",          1.4e5))
+            A_ex         = float(geo.get("A_ex",         3.65e-12))
+            alpha        = float(geo.get("alpha",        3e-5))
+            conductivity = float(geo.get("conductivity", 0.0))
+            c_sound      = float(geo.get("c_sound",      5000.0))
+
+        H0        = float(geo.get("H0",        0.1))
+        T         = float(geo.get("T",         300.0))
+        theta_deg = float(geo.get("theta_deg", 90.0))
+        thickness = float(geo.get("thickness", 1e-6))
+        n_e       = float(geo.get("n_e",       0.0))
+
+        s = magnonic_coupling_state(
+            H0=H0, M_s=M_s, A_ex=A_ex, alpha=alpha, T=T,
+            theta_deg=theta_deg, conductivity=conductivity,
+            thickness=thickness, c_sound=c_sound, n_e=n_e,
+        )
+
+        TWO_PI = 2 * math.pi
+
+        # Helper: frequency (Hz) → effective B field (T) via B = ω/γ = 2πf/γ
+        def _freq_to_B(f_hz):
+            return (TWO_PI * f_hz) / _GAMMA
+
+        bits: list[str] = []
+
+        # ── Section A: effective field (12 bits) ─────────────────────────────
+        bits.append(_gray_bits(_freq_to_B(s["magnon_band_bottom_Hz"]),       _B_BANDS))
+        bits.append(_gray_bits(_freq_to_B(s["magnon_freq_dipolar_Hz"]),      _B_BANDS))
+        bits.append(_gray_bits(_freq_to_B(s["magnon_freq_exchange_Hz"]),     _B_BANDS))
+        bits.append(_gray_bits(_freq_to_B(s["magnon_freq_deep_exchange_Hz"]),_B_BANDS))
+
+        # ── Section B: transport (10 bits) ───────────────────────────────────
+        vg_dip = s["magnon_vg_dipolar_m_s"]
+        bits.append("1" if vg_dip >= 0 else "0")                             # sign
+        bits.append(_gray_bits(abs(vg_dip),               _VG_BANDS))
+        bits.append(_gray_bits(abs(s["magnon_vg_exchange_m_s"]), _VG_BANDS))
+        bits.append(_gray_bits(abs(s["magnon_prop_length_exchange_m"]), _L_PROP_BANDS))
+
+        # ── Section C: damping (7 bits) ──────────────────────────────────────
+        alpha_g = s["alpha_gilbert"]
+        alpha_e = s["alpha_eddy_current"]
+        bits.append(_gray_bits(alpha_g, _ALPHA_BANDS))
+        bits.append(_gray_bits(alpha_e, _ALPHA_BANDS))
+        bits.append("1" if alpha_e > alpha_g else "0")                       # eddy dominant
+
+        # ── Section D: thermal (8 bits) ──────────────────────────────────────
+        bits.append(_THERMAL_REGIME_BITS.get(s["thermal_regime"], "10"))
+        bits.append(_gray_bits(s["thermal_occupation_exchange"], _N_THERM_BANDS))
+        bits.append(_gray_bits(abs(s["magnon_specific_heat_J_K"]),  _CMAG_BANDS))
+
+        # ── Section E: coupling (6 bits) ─────────────────────────────────────
+        bits.append(_MP_REGIME_BITS.get(s["magnon_phonon_regime"], "01"))
+        plasma_below = s["magnon_below_plasma"]
+        bits.append("1" if plasma_below is True else "0")
+        bits.append(_gray_bits(s["magnon_plasma_freq_ratio"], _PRAT_BANDS))
+
+        return "".join(bits)
 
 
 # ── Demo ──────────────────────────────────────────────────────────────────────

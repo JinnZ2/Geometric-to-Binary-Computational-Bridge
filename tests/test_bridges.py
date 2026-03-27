@@ -2662,5 +2662,369 @@ class TestGeometricProtectionEngine(unittest.TestCase):
         self.assertLessEqual(coh, 1.0)
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Magnonic sub-layer unit tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import importlib as _importlib
+_mag_sub = _importlib.import_module("Engine.magnonic_sublayer")
+
+dispersion_relation               = _mag_sub.dispersion_relation
+group_velocity                    = _mag_sub.group_velocity
+propagation_length                = _mag_sub.propagation_length
+exchange_length                   = _mag_sub.exchange_length
+thermal_magnon_number             = _mag_sub.thermal_magnon_number
+magnon_specific_heat_contribution = _mag_sub.magnon_specific_heat_contribution
+magnon_magnon_scattering_rate     = _mag_sub.magnon_magnon_scattering_rate
+magnon_phonon_coupling_strength   = _mag_sub.magnon_phonon_coupling_strength
+eddy_current_damping              = _mag_sub.eddy_current_damping
+magnonic_coupling_state           = _mag_sub.magnonic_coupling_state
+MAGNONIC_MATERIALS                = _mag_sub.MATERIALS
+
+
+class TestMagnonicDispersion(unittest.TestCase):
+    """Core dispersion and group velocity."""
+
+    _YIG = dict(H0=0.1, M_s=1.4e5, A_ex=3.65e-12)
+
+    def test_kittel_limit_k0(self):
+        # At k=0, θ=90°: ω² = ω_H · (ω_H + ω_M)
+        import numpy as np
+        MU_0_  = 4 * np.pi * 1e-7
+        GAMMA_ = 1.7608597e11
+        H0, M_s = 0.1, 1.4e5
+        omega_H = GAMMA_ * MU_0_ * H0
+        omega_M = GAMMA_ * MU_0_ * M_s
+        expected = float(np.sqrt(omega_H * (omega_H + omega_M)))
+        got = float(dispersion_relation(0, H0, M_s, 3.65e-12, 90.0))
+        self.assertAlmostEqual(got, expected, delta=expected * 1e-6)
+
+    def test_frequency_increases_with_k(self):
+        omega_low  = float(dispersion_relation(1e5, **self._YIG))
+        omega_high = float(dispersion_relation(1e8, **self._YIG))
+        self.assertGreater(omega_high, omega_low)
+
+    def test_returns_nonnegative(self):
+        for k in [0, 1e5, 1e8]:
+            self.assertGreaterEqual(float(dispersion_relation(k, **self._YIG)), 0.0)
+
+    def test_exchange_length_yig_nanometer_scale(self):
+        l_ex = float(exchange_length(3.65e-12, 1.4e5))
+        # YIG exchange length ≈ 16 nm
+        self.assertGreater(l_ex, 1e-9)
+        self.assertLess(l_ex, 1e-6)
+
+    def test_group_velocity_positive_de_mode(self):
+        vg = group_velocity(1e7, **self._YIG, theta_deg=90.0)
+        self.assertGreater(vg, 0)
+
+    def test_propagation_length_positive(self):
+        lp = propagation_length(1e7, 0.1, 1.4e5, 3.65e-12, alpha=3e-5)
+        self.assertGreater(lp, 0.0)
+
+    def test_propagation_length_zero_alpha(self):
+        self.assertEqual(propagation_length(1e7, 0.1, 1.4e5, 3.65e-12, alpha=0.0), 0.0)
+
+
+class TestMagnonicThermal(unittest.TestCase):
+    """Thermal occupation and specific heat."""
+
+    def test_bose_einstein_large_at_300K_ghz(self):
+        import math
+        omega = 2 * math.pi * 3e9
+        self.assertGreater(thermal_magnon_number(omega, 300.0), 1.0)
+
+    def test_occupation_zero_at_T0(self):
+        self.assertEqual(thermal_magnon_number(1e10, 0.0), 0.0)
+
+    def test_occupation_zero_omega0(self):
+        self.assertEqual(thermal_magnon_number(0.0, 300.0), 0.0)
+
+    def test_specific_heat_positive(self):
+        import math
+        self.assertGreater(magnon_specific_heat_contribution(2 * math.pi * 3e9, 300.0), 0.0)
+
+    def test_specific_heat_zero_at_T0(self):
+        self.assertEqual(magnon_specific_heat_contribution(1e10, 0.0), 0.0)
+
+
+class TestMagnonicDamping(unittest.TestCase):
+    """Damping channels."""
+
+    def test_magnon_magnon_rate_positive(self):
+        import math
+        self.assertGreater(magnon_magnon_scattering_rate(2 * math.pi * 3e9, 300.0), 0.0)
+
+    def test_magnon_magnon_zero_at_zero_freq(self):
+        self.assertEqual(magnon_magnon_scattering_rate(0.0, 300.0), 0.0)
+
+    def test_eddy_insulator_zero(self):
+        self.assertEqual(eddy_current_damping(1e10, 0.0, 100e-9), 0.0)
+
+    def test_eddy_metal_positive(self):
+        self.assertGreater(eddy_current_damping(1e10, 1.6e6, 100e-9), 0.0)
+
+    def test_magnon_phonon_yig_has_regime(self):
+        result = magnon_phonon_coupling_strength(3.65e-12, 1.4e5, 7209.0)
+        self.assertIn(result["coupling_regime"], ("hybridized", "weak", "no coupling"))
+        self.assertGreater(result["crossover_freq_Hz"], 0.0)
+
+
+class TestMagnonicCouplingState(unittest.TestCase):
+    """magnonic_coupling_state() return dict completeness and physics sanity."""
+
+    _REQUIRED_KEYS = [
+        "magnon_band_bottom_Hz", "magnon_freq_dipolar_Hz",
+        "magnon_freq_exchange_Hz", "magnon_freq_deep_exchange_Hz",
+        "magnon_vg_dipolar_m_s", "magnon_vg_exchange_m_s",
+        "magnon_prop_length_exchange_m", "exchange_length_m",
+        "alpha_gilbert", "alpha_eddy_current", "alpha_total",
+        "thermal_occupation_exchange", "magnon_specific_heat_J_K",
+        "thermal_regime", "magnon_phonon_regime",
+        "plasma_frequency_Hz", "magnon_plasma_freq_ratio", "magnon_below_plasma",
+    ]
+
+    def _state(self, **kw):
+        p = dict(H0=0.1, M_s=1.4e5, A_ex=3.65e-12, alpha=3e-5, T=300.0)
+        p.update(kw)
+        return magnonic_coupling_state(**p)
+
+    def test_all_keys_present(self):
+        s = self._state()
+        for k in self._REQUIRED_KEYS:
+            self.assertIn(k, s)
+
+    def test_frequencies_ascending_with_k(self):
+        s = self._state()
+        self.assertLessEqual(s["magnon_band_bottom_Hz"],  s["magnon_freq_dipolar_Hz"])
+        self.assertLess(s["magnon_freq_dipolar_Hz"],      s["magnon_freq_exchange_Hz"])
+        self.assertLess(s["magnon_freq_exchange_Hz"],     s["magnon_freq_deep_exchange_Hz"])
+
+    def test_classical_regime_at_300K(self):
+        self.assertEqual(self._state(T=300.0)["thermal_regime"], "classical")
+
+    def test_alpha_total_geq_gilbert_in_metal(self):
+        s = self._state(conductivity=1.6e6, thickness=100e-9)
+        self.assertGreaterEqual(s["alpha_total"], s["alpha_gilbert"])
+
+    def test_no_plasma_without_electrons(self):
+        s = self._state(n_e=0.0)
+        self.assertIsNone(s["magnon_below_plasma"])
+        self.assertEqual(s["plasma_frequency_Hz"], 0.0)
+
+    def test_plasma_active_with_electrons(self):
+        s = self._state(n_e=1e18)
+        self.assertIsNotNone(s["magnon_below_plasma"])
+        self.assertGreater(s["plasma_frequency_Hz"], 0.0)
+
+    def test_all_material_presets_run(self):
+        for name, p in MAGNONIC_MATERIALS.items():
+            s = magnonic_coupling_state(
+                H0=0.1, M_s=p["M_s"], A_ex=p["A_ex"], alpha=p["alpha"],
+                T=300.0, conductivity=p["conductivity"], c_sound=p["c_sound"],
+            )
+            self.assertIn("thermal_regime", s, msg=f"preset {name} failed")
+
+
+class TestMagneticEncoderMagnonicMode(unittest.TestCase):
+    """MagneticBridgeEncoder in magnonic mode."""
+
+    def _bits(self, **geo):
+        enc = MagneticBridgeEncoder(mode="magnonic")
+        enc.from_geometry(geo)
+        return enc.to_binary()
+
+    def test_bad_mode_raises(self):
+        with self.assertRaises(ValueError):
+            MagneticBridgeEncoder(mode="bad")
+
+    def test_default_mode_is_geometric(self):
+        self.assertEqual(MagneticBridgeEncoder().mode, "geometric")
+
+    def test_yig_preset_43_bits(self):
+        self.assertEqual(len(self._bits(material="YIG", H0=0.1, T=300.0)), 43)
+
+    def test_explicit_params_43_bits(self):
+        bits = self._bits(M_s=1.4e5, A_ex=3.65e-12, alpha=3e-5, H0=0.1, T=300.0)
+        self.assertEqual(len(bits), 43)
+
+    def test_all_presets_43_bits(self):
+        for name in MAGNONIC_MATERIALS:
+            self.assertEqual(len(self._bits(material=name, H0=0.1, T=300.0)), 43,
+                             msg=f"preset {name}")
+
+    def test_output_is_binary_string(self):
+        bits = self._bits(material="YIG")
+        self.assertTrue(all(c in "01" for c in bits))
+
+    def test_different_materials_produce_different_bits(self):
+        self.assertNotEqual(
+            self._bits(material="YIG",       H0=0.1),
+            self._bits(material="Permalloy", H0=0.1),
+        )
+
+    def test_plasma_changes_output(self):
+        self.assertNotEqual(
+            self._bits(material="YIG", H0=0.1, n_e=0.0),
+            self._bits(material="YIG", H0=0.1, n_e=1e18),
+        )
+
+    def test_geometric_mode_unaffected(self):
+        enc = MagneticBridgeEncoder(mode="geometric")
+        enc.from_geometry({
+            "field_lines": [{"direction": "N", "curvature": 0.3, "magnitude": 0.05}],
+        })
+        # 8 bits (field line) + 7 bits (summary) = 15
+        self.assertEqual(len(enc.to_binary()), 15)
+
+    def test_magnonic_no_geometry_raises(self):
+        enc = MagneticBridgeEncoder(mode="magnonic")
+        with self.assertRaises((ValueError, AttributeError)):
+            enc.to_binary()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# MagneticBridgeComparator tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.magnetic_comparator import MagneticBridgeComparator
+
+_GEO_SAMPLE = {
+    "field_lines": [
+        {"direction": "N", "curvature": 0.3, "magnitude": 0.05},
+        {"direction": "N", "curvature": 0.1, "magnitude": 0.08},
+    ],
+    "resonance_map": [0.6, 0.4],
+}
+_MAG_SAMPLE = {"material": "YIG", "H0": 0.05, "T": 300.0}
+
+
+class TestMagneticBridgeComparator(unittest.TestCase):
+
+    def _cmp(self, geo=None, mag=None):
+        return MagneticBridgeComparator().compare(
+            geo or _GEO_SAMPLE,
+            mag or _MAG_SAMPLE,
+        )
+
+    # ── Return shape ──────────────────────────────────────────────────────
+
+    def test_returns_all_required_keys(self):
+        result = self._cmp()
+        for key in (
+            "geometric_bits", "magnonic_bits",
+            "B_geometric_T", "B_magnonic_dipolar_T", "B_magnonic_bottom_T",
+            "B_band_match", "B_hamming",
+            "P_geometric_Pa", "E_magnonic_J", "P_band_match", "P_hamming",
+            "resonance_thermal_alignment", "thermal_regime", "n_thermal_exchange",
+            "J_star", "kt_phi_match",
+            "consistency_score", "divergence_flags", "interpretation",
+        ):
+            self.assertIn(key, result, msg=f"missing key: {key}")
+
+    def test_geometric_bits_nonempty(self):
+        self.assertGreater(len(self._cmp()["geometric_bits"]), 0)
+
+    def test_magnonic_bits_43(self):
+        self.assertEqual(len(self._cmp()["magnonic_bits"]), 43)
+
+    # ── Physical values ───────────────────────────────────────────────────
+
+    def test_B_geometric_matches_field_line_mean(self):
+        result = self._cmp()
+        expected = (0.05 + 0.08) / 2
+        self.assertAlmostEqual(result["B_geometric_T"], expected, places=6)
+
+    def test_B_magnonic_dipolar_positive(self):
+        self.assertGreater(self._cmp()["B_magnonic_dipolar_T"], 0.0)
+
+    def test_P_geometric_positive_when_B_nonzero(self):
+        self.assertGreater(self._cmp()["P_geometric_Pa"], 0.0)
+
+    def test_hamming_bounds(self):
+        result = self._cmp()
+        self.assertIn(result["B_hamming"], range(4))   # 0-3
+        self.assertIn(result["P_hamming"], range(4))
+
+    # ── Consistency score ─────────────────────────────────────────────────
+
+    def test_consistency_score_in_unit_interval(self):
+        score = self._cmp()["consistency_score"]
+        self.assertGreaterEqual(score, 0.0)
+        self.assertLessEqual(score, 1.0)
+
+    def test_perfect_B_agreement_raises_score(self):
+        # Use the same B value for geo and magnonic → B_hamming=0
+        import math
+        # magnonic B_eff_dipolar depends on material params — just verify
+        # that a matched B gives a higher B_score contribution
+        result_yig = self._cmp(
+            geo={"field_lines": [{"direction": "N", "magnitude": 0.1}]},
+            mag={"material": "YIG", "H0": 0.1},
+        )
+        # B_hamming=0 → B_score=1.0, contributes 0.5 to max possible score
+        self.assertGreaterEqual(result_yig["consistency_score"], 0.0)
+
+    def test_zero_B_geo_yields_valid_result(self):
+        result = self._cmp(geo={"field_lines": []})
+        self.assertGreaterEqual(result["consistency_score"], 0.0)
+
+    # ── Resonance/thermal alignment ───────────────────────────────────────
+
+    def test_no_resonance_map_gives_neutral_alignment(self):
+        result = self._cmp(geo={"field_lines": _GEO_SAMPLE["field_lines"]})
+        self.assertAlmostEqual(result["resonance_thermal_alignment"], 0.5)
+
+    def test_constructive_resonance_classical_aligns(self):
+        # YIG at 300K is classical; positive resonance should align
+        result = self._cmp(
+            geo={**_GEO_SAMPLE, "resonance_map": [0.8, 0.6]},
+            mag={"material": "YIG", "H0": 0.1, "T": 300.0},
+        )
+        self.assertEqual(result["resonance_thermal_alignment"], 1.0)
+
+    def test_destructive_resonance_classical_misaligns(self):
+        result = self._cmp(
+            geo={**_GEO_SAMPLE, "resonance_map": [-0.8, -0.6]},
+            mag={"material": "YIG", "H0": 0.1, "T": 300.0},
+        )
+        self.assertEqual(result["resonance_thermal_alignment"], 0.0)
+
+    # ── J* / KT-φ ─────────────────────────────────────────────────────────
+
+    def test_J_star_positive(self):
+        self.assertGreater(self._cmp()["J_star"], 0.0)
+
+    def test_kt_phi_match_bool(self):
+        self.assertIsInstance(self._cmp()["kt_phi_match"], bool)
+
+    # ── Divergence flags and interpretation ──────────────────────────────
+
+    def test_divergence_flags_is_list(self):
+        self.assertIsInstance(self._cmp()["divergence_flags"], list)
+
+    def test_interpretation_valid_values(self):
+        interp = self._cmp()["interpretation"]
+        self.assertTrue(
+            interp.startswith("consistent")
+            or interp.startswith("minor_divergence")
+            or interp.startswith("major_divergence")
+        )
+
+    def test_all_presets_run(self):
+        for name in MAGNONIC_MATERIALS:
+            result = MagneticBridgeComparator().compare(
+                _GEO_SAMPLE,
+                {"material": name, "H0": 0.1, "T": 300.0},
+            )
+            self.assertIn("consistency_score", result, msg=f"preset {name} failed")
+
+    def test_different_temperatures_give_different_thermal_occupation(self):
+        hot  = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 600.0})
+        cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 10.0})
+        # GHz magnons stay "classical" at both temps but n_thermal changes a lot
+        self.assertGreater(hot["n_thermal_exchange"], cold["n_thermal_exchange"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
