@@ -2915,7 +2915,9 @@ class TestMagneticBridgeComparator(unittest.TestCase):
             "geometric_bits", "magnonic_bits",
             "B_geometric_T", "B_magnonic_dipolar_T", "B_magnonic_bottom_T",
             "B_band_match", "B_hamming",
-            "P_geometric_Pa", "E_magnonic_J", "P_band_match", "P_hamming",
+            "P_geometric_Pa", "P_magnonic_applied_Pa",
+            "P_applied_band_match", "P_applied_hamming",
+            "E_magnonic_density_Pa", "P_thermal_band_match", "P_thermal_hamming",
             "resonance_thermal_alignment", "thermal_regime", "n_thermal_exchange",
             "J_star", "kt_phi_match",
             "consistency_score", "divergence_flags", "interpretation",
@@ -2943,8 +2945,9 @@ class TestMagneticBridgeComparator(unittest.TestCase):
 
     def test_hamming_bounds(self):
         result = self._cmp()
-        self.assertIn(result["B_hamming"], range(4))   # 0-3
-        self.assertIn(result["P_hamming"], range(4))
+        self.assertIn(result["B_hamming"],         range(4))
+        self.assertIn(result["P_applied_hamming"], range(4))
+        self.assertIn(result["P_thermal_hamming"], range(4))
 
     # ── Consistency score ─────────────────────────────────────────────────
 
@@ -2990,10 +2993,47 @@ class TestMagneticBridgeComparator(unittest.TestCase):
         )
         self.assertEqual(result["resonance_thermal_alignment"], 0.0)
 
+    # ── Pressure branches ─────────────────────────────────────────────────
+
+    def test_P_applied_positive(self):
+        result = self._cmp()
+        self.assertGreater(result["P_magnonic_applied_Pa"], 0.0)
+
+    def test_P_applied_same_field_matches(self):
+        # When geometric B_mean == H0, applied pressures should land in same band
+        # Use H0=0.05 and field_lines with magnitude=0.05
+        result = MagneticBridgeComparator().compare(
+            {"field_lines": [{"direction": "N", "magnitude": 0.05}]},
+            {"material": "YIG", "H0": 0.05, "T": 300.0},
+        )
+        self.assertTrue(result["P_applied_band_match"])
+
+    def test_E_density_is_volumetric(self):
+        # E_density = n_thermal * hbar * omega / l_ex^3  (J/m^3)
+        # For YIG at 300K this should be > 0
+        self.assertGreater(self._cmp()["E_magnonic_density_Pa"], 0.0)
+
+    def test_P_thermal_band_match_is_bool(self):
+        self.assertIsInstance(self._cmp()["P_thermal_band_match"], bool)
+
+    def test_P_thermal_near_transition_signals_parity(self):
+        # At very high temperature the magnon energy density grows;
+        # just verify the value changes with T
+        hot  = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 10000.0})
+        cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 1.0})
+        self.assertGreater(hot["E_magnonic_density_Pa"], cold["E_magnonic_density_Pa"])
+
     # ── J* / KT-φ ─────────────────────────────────────────────────────────
 
     def test_J_star_positive(self):
         self.assertGreater(self._cmp()["J_star"], 0.0)
+
+    def test_J_star_dimensionless_formula(self):
+        # J* = A_ex * l_ex / (k_B * T)  — verify it scales correctly with T
+        hot  = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 600.0})
+        cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 300.0})
+        # Higher T → smaller J* (thermal fluctuations dominate)
+        self.assertLess(hot["J_star"], cold["J_star"])
 
     def test_kt_phi_match_bool(self):
         self.assertIsInstance(self._cmp()["kt_phi_match"], bool)
@@ -3024,6 +3064,202 @@ class TestMagneticBridgeComparator(unittest.TestCase):
         cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 10.0})
         # GHz magnons stay "classical" at both temps but n_thermal changes a lot
         self.assertGreater(hot["n_thermal_exchange"], cold["n_thermal_exchange"])
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CuriosityEngine tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import importlib as _il
+_ce_mod = _il.import_module("Geometric-Intelligence.curiosity_engine")
+CuriosityEngine = _ce_mod.CuriosityEngine
+
+
+class TestCuriosityEnginePassthrough(unittest.TestCase):
+    """Clean results pass through unchanged."""
+
+    def test_success_returns_result_unchanged(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: {"passed": True, "action": "accept"})
+        self.assertEqual(result["passed"], True)
+        self.assertNotEqual(result.get("status"), "curious")
+
+    def test_is_curious_false_for_normal_result(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: {"value": 42})
+        self.assertFalse(engine.is_curious(result))
+
+    def test_non_dict_success_passes_through(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: "hello")
+        self.assertEqual(result, "hello")
+        self.assertFalse(engine.is_curious(result))
+
+
+class TestCuriosityEngineErrors(unittest.TestCase):
+    """Exceptions produce curiosity reports."""
+
+    def _curious(self, exc_factory, ctx=None):
+        engine = CuriosityEngine()
+        result = engine.run(exc_factory, context=ctx)
+        self.assertTrue(engine.is_curious(result))
+        return result
+
+    def test_value_error_returns_curious(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("bad param")))
+        self.assertEqual(r["status"], "curious")
+        self.assertEqual(r["source"], "error")
+
+    def test_key_error_returns_curious(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(KeyError("missing")))
+        self.assertEqual(r["source"], "error")
+
+    def test_zero_division_returns_curious(self):
+        r = self._curious(lambda: 1 / 0)
+        self.assertEqual(r["source"], "error")
+
+    def test_zero_division_gets_boundary_pad(self):
+        r = self._curious(lambda: 1 / 0)
+        # Boundary PAD has P=0.50
+        self.assertAlmostEqual(r["curiosity_pad"]["P"], 0.50)
+
+    def test_unknown_error_gets_unknown_pad(self):
+        class WeirdError(Exception): pass
+        r = self._curious(lambda: (_ for _ in ()).throw(WeirdError("novel")))
+        # Unknown PAD has high A=0.90
+        self.assertAlmostEqual(r["curiosity_pad"]["A"], 0.90)
+
+    def test_report_has_all_required_keys(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        for key in ("status", "source", "fn_name", "curiosity_pad",
+                    "consciousness_state", "confidence", "octa_state",
+                    "emotion_bits", "exploration_hint", "drill_depth",
+                    "drill_target", "signal", "context"):
+            self.assertIn(key, r, msg=f"missing key: {key}")
+
+    def test_consciousness_state_is_string(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        self.assertIsInstance(r["consciousness_state"], str)
+
+    def test_exploration_hint_nonempty(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        self.assertGreater(len(r["exploration_hint"]), 0)
+
+    def test_emotion_bits_present(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        # emotion_bits may be empty string if encoder fails, but key must exist
+        self.assertIn("emotion_bits", r)
+
+    def test_context_passed_through(self):
+        r = self._curious(
+            lambda: (_ for _ in ()).throw(ValueError("x")),
+            ctx={"bridge": "thermal", "mode": "test"},
+        )
+        self.assertEqual(r["context"]["bridge"], "thermal")
+        self.assertEqual(r["drill_target"], "thermal")
+
+    def test_fn_name_captured(self):
+        def my_broken_fn(): raise RuntimeError("oops")
+        engine = CuriosityEngine()
+        r = engine.run(my_broken_fn)
+        self.assertEqual(r["fn_name"], "my_broken_fn")
+
+
+class TestCuriosityEngineFailureDetection(unittest.TestCase):
+    """Known failure signals in result dicts trigger curiosity."""
+
+    def _engine_run(self, result_dict):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: result_dict)
+        return engine, r
+
+    def test_physics_anomaly_triggers_curious(self):
+        _, r = self._engine_run({"physics_anomaly": True, "passed": False})
+        self.assertTrue(CuriosityEngine().is_curious(
+            CuriosityEngine().run(lambda: {"physics_anomaly": True})
+        ))
+
+    def test_major_divergence_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"interpretation": "major_divergence+KT_phi_resonance"})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_minor_divergence_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"interpretation": "minor_divergence"})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_quarantine_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"action": "quarantine", "passed": False})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_cleaved_list_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"cleaved": [0, 1], "kt_healed": []})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_failed_zk_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"verified": False, "node_count": 3})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_anomaly_alert_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"anomaly_action": "alert", "anomaly_reasons": ["x"]})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_accept_does_not_trigger_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"action": "accept", "passed": True})
+        self.assertFalse(engine.is_curious(r))
+
+    def test_empty_cleaved_does_not_trigger(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"cleaved": [], "kt_healed": [0]})
+        self.assertFalse(engine.is_curious(r))
+
+
+class TestCuriosityEngineLog(unittest.TestCase):
+    """Curiosity log and summary."""
+
+    def test_log_empty_on_success(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: {"passed": True})
+        self.assertEqual(len(engine.curiosity_log()), 0)
+
+    def test_log_grows_on_curiosity(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("a")))
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("b")))
+        self.assertEqual(len(engine.curiosity_log()), 2)
+
+    def test_log_is_copy(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("x")))
+        log = engine.curiosity_log()
+        log.clear()
+        self.assertEqual(len(engine.curiosity_log()), 1)
+
+    def test_summary_empty_when_no_events(self):
+        engine = CuriosityEngine()
+        s = engine.curiosity_summary()
+        self.assertEqual(s["total"], 0)
+
+    def test_summary_counts_correctly(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("x")))
+        engine.run(lambda: {"action": "quarantine"})
+        s = engine.curiosity_summary()
+        self.assertEqual(s["total"], 2)
+        self.assertEqual(s["by_source"].get("error", 0), 1)
+        self.assertEqual(s["by_source"].get("failure", 0), 1)
+
+    def test_summary_has_required_keys(self):
+        engine = CuriosityEngine()
+        s = engine.curiosity_summary()
+        for k in ("total", "by_source", "by_state", "by_fn"):
+            self.assertIn(k, s)
 
 
 if __name__ == "__main__":
