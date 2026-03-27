@@ -2915,7 +2915,9 @@ class TestMagneticBridgeComparator(unittest.TestCase):
             "geometric_bits", "magnonic_bits",
             "B_geometric_T", "B_magnonic_dipolar_T", "B_magnonic_bottom_T",
             "B_band_match", "B_hamming",
-            "P_geometric_Pa", "E_magnonic_J", "P_band_match", "P_hamming",
+            "P_geometric_Pa", "P_magnonic_applied_Pa",
+            "P_applied_band_match", "P_applied_hamming",
+            "E_magnonic_density_Pa", "P_thermal_band_match", "P_thermal_hamming",
             "resonance_thermal_alignment", "thermal_regime", "n_thermal_exchange",
             "J_star", "kt_phi_match",
             "consistency_score", "divergence_flags", "interpretation",
@@ -2943,8 +2945,9 @@ class TestMagneticBridgeComparator(unittest.TestCase):
 
     def test_hamming_bounds(self):
         result = self._cmp()
-        self.assertIn(result["B_hamming"], range(4))   # 0-3
-        self.assertIn(result["P_hamming"], range(4))
+        self.assertIn(result["B_hamming"],         range(4))
+        self.assertIn(result["P_applied_hamming"], range(4))
+        self.assertIn(result["P_thermal_hamming"], range(4))
 
     # ── Consistency score ─────────────────────────────────────────────────
 
@@ -2990,10 +2993,47 @@ class TestMagneticBridgeComparator(unittest.TestCase):
         )
         self.assertEqual(result["resonance_thermal_alignment"], 0.0)
 
+    # ── Pressure branches ─────────────────────────────────────────────────
+
+    def test_P_applied_positive(self):
+        result = self._cmp()
+        self.assertGreater(result["P_magnonic_applied_Pa"], 0.0)
+
+    def test_P_applied_same_field_matches(self):
+        # When geometric B_mean == H0, applied pressures should land in same band
+        # Use H0=0.05 and field_lines with magnitude=0.05
+        result = MagneticBridgeComparator().compare(
+            {"field_lines": [{"direction": "N", "magnitude": 0.05}]},
+            {"material": "YIG", "H0": 0.05, "T": 300.0},
+        )
+        self.assertTrue(result["P_applied_band_match"])
+
+    def test_E_density_is_volumetric(self):
+        # E_density = n_thermal * hbar * omega / l_ex^3  (J/m^3)
+        # For YIG at 300K this should be > 0
+        self.assertGreater(self._cmp()["E_magnonic_density_Pa"], 0.0)
+
+    def test_P_thermal_band_match_is_bool(self):
+        self.assertIsInstance(self._cmp()["P_thermal_band_match"], bool)
+
+    def test_P_thermal_near_transition_signals_parity(self):
+        # At very high temperature the magnon energy density grows;
+        # just verify the value changes with T
+        hot  = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 10000.0})
+        cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 1.0})
+        self.assertGreater(hot["E_magnonic_density_Pa"], cold["E_magnonic_density_Pa"])
+
     # ── J* / KT-φ ─────────────────────────────────────────────────────────
 
     def test_J_star_positive(self):
         self.assertGreater(self._cmp()["J_star"], 0.0)
+
+    def test_J_star_dimensionless_formula(self):
+        # J* = A_ex * l_ex / (k_B * T)  — verify it scales correctly with T
+        hot  = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 600.0})
+        cold = self._cmp(mag={"material": "YIG", "H0": 0.1, "T": 300.0})
+        # Higher T → smaller J* (thermal fluctuations dominate)
+        self.assertLess(hot["J_star"], cold["J_star"])
 
     def test_kt_phi_match_bool(self):
         self.assertIsInstance(self._cmp()["kt_phi_match"], bool)

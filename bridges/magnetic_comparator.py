@@ -31,11 +31,29 @@ Compared dimensions
                           → expect constructive resonance; quantum (few)
                           → expect destructive.  Neutral 0.5 if no resonance_map.
 
+Pressure section — two branches
+--------------------------------
+  P_applied branch  — compare geometric B_mean pressure vs magnonic H0 pressure.
+    Both use P = B²/2μ₀ with their respective B values.  Direct apples-to-apples
+    check: did the geometric field-line encoder see the same applied field that
+    drove the magnonic mode?
+
+  E_density branch  — compare geometric pressure vs volumetric magnon energy
+    density E_density = n_thermal · ℏω / l_ex³  (J/m³ = Pa).
+    Normalising by 1/l_ex³ converts "energy per mode" to "energy per unit volume"
+    using the exchange length as the natural mode volume scale.
+    This branch asks: is the thermal magnon energy density significant relative
+    to the field energy density?  Near a phase transition / KT crossing it will
+    be; deep in the ordered phase it will be many orders of magnitude smaller.
+    A P_thermal_band_match=True is therefore a proximity-to-transition signal.
+
 KT / φ flag
 -----------
-When the dimensionless exchange ratio J* = A_ex / (k_B · T · l_ex) is within
+When the dimensionless exchange ratio J* = A_ex · l_ex / (k_B · T) is within
 15 % of φ ≈ 1.618 the system sits near the golden-ratio KT resonance point —
 the same attractor that the KT annealer in Engine/kt_annealer.py stabilises.
+For typical materials this only occurs near the Curie temperature, so kt_phi_match
+is a proximity-to-phase-transition indicator, not a room-temperature signal.
 This flag is reported but does not alter the consistency score.
 
 Usage
@@ -136,15 +154,18 @@ class MagneticBridgeComparator:
           B_magnonic_bottom_T        float — B_eff at band bottom (ω₀/γ)
           B_band_match               bool  — same _B_BANDS Gray band
           B_hamming                  int   — 0–3 bit difference on B encoding
-          P_geometric_Pa             float — magnetic pressure (B²/2μ₀)
-          E_magnonic_J               float — magnon energy density (n·ℏω)
-          P_band_match               bool  — same _PRESSURE_BANDS Gray band
-          P_hamming                  int   — 0–3 bit difference on P encoding
+          P_geometric_Pa             float — magnetic pressure B_geo²/2μ₀
+          P_magnonic_applied_Pa      float — magnetic pressure H0²/2μ₀ (applied field)
+          E_magnonic_density_Pa      float — volumetric magnon energy n·ℏω/l_ex³  (J/m³)
+          P_applied_band_match       bool  — P_geo vs P_H0 in same _PRESSURE_BANDS band
+          P_applied_hamming          int   — 0–3 bit difference (applied field check)
+          P_thermal_band_match       bool  — P_geo vs E_density in same band
+          P_thermal_hamming          int   — 0–3 bit difference (thermal energy check)
           resonance_thermal_alignment float — [0,1]; 0.5 if no resonance_map
           thermal_regime             str   — quantum/crossover/classical/gapless
           n_thermal_exchange         float — Bose-Einstein occupation (exchange k)
-          J_star                     float — dimensionless exchange ratio A_ex/(k_B·T·l_ex)
-          kt_phi_match               bool  — |J* - φ| / φ < 0.15
+          J_star                     float — dimensionless A_ex·l_ex/(k_B·T)
+          kt_phi_match               bool  — |J* - φ| / φ < 0.15  (near Curie point)
           consistency_score          float — weighted [0,1]
           divergence_flags           list  — human-readable divergence descriptions
           interpretation             str   — consistent / minor_divergence / major_divergence
@@ -188,15 +209,30 @@ class MagneticBridgeComparator:
             _band_index(B_geo, _B_BANDS) == _band_index(B_mag_dipolar, _B_BANDS)
         )
 
-        # ── Pressure / energy-density comparison ──────────────────────────
-        P_geo = magnetic_pressure(B_geo)
-        E_mag = state["magnon_energy_density_J"]   # n_thermal · ℏω  (J/mode)
+        # ── Pressure section — two branches ──────────────────────────────
+        H0   = params["H0"]
+        l_ex = state["exchange_length_m"]
 
-        geo_P_bits = _gray_bits(P_geo, _PRESSURE_BANDS)
-        mag_P_bits = _gray_bits(E_mag, _PRESSURE_BANDS)
-        hamming_P  = _hamming(geo_P_bits, mag_P_bits)
-        P_band_match = (
-            _band_index(P_geo, _PRESSURE_BANDS) == _band_index(E_mag, _PRESSURE_BANDS)
+        # Branch 1: applied field pressure — direct apples-to-apples
+        # Both sides use P = B²/2μ₀; compares geometric B_mean vs driven H0
+        P_geo           = magnetic_pressure(B_geo)
+        P_mag_applied   = magnetic_pressure(H0)
+
+        geo_P_bits       = _gray_bits(P_geo,         _PRESSURE_BANDS)
+        mag_Pa_bits      = _gray_bits(P_mag_applied, _PRESSURE_BANDS)
+        hamming_P_applied = _hamming(geo_P_bits, mag_Pa_bits)
+        P_applied_band_match = (
+            _band_index(P_geo, _PRESSURE_BANDS) == _band_index(P_mag_applied, _PRESSURE_BANDS)
+        )
+
+        # Branch 2: volumetric magnon energy density — proximity-to-transition signal
+        # E_density = n_thermal · ℏω / l_ex³  (J/m³ = Pa)
+        # Near KT/Curie crossing this approaches P_geo; deep in ordered phase it is tiny
+        E_density = state["magnon_energy_density_J"] / max(l_ex ** 3, 1e-30)
+        mag_Pe_bits      = _gray_bits(E_density, _PRESSURE_BANDS)
+        hamming_P_thermal = _hamming(geo_P_bits, mag_Pe_bits)
+        P_thermal_band_match = (
+            _band_index(P_geo, _PRESSURE_BANDS) == _band_index(E_density, _PRESSURE_BANDS)
         )
 
         # ── Resonance / thermal alignment ─────────────────────────────────
@@ -215,21 +251,30 @@ class MagneticBridgeComparator:
             resonance_thermal_alignment = 0.5   # no data — neutral
 
         # ── J* / KT-φ connection ──────────────────────────────────────────
-        # Dimensionless exchange ratio: J* = A_ex / (k_B · T · l_ex)
-        # When J* ≈ φ the system sits near the golden-ratio KT resonance point.
-        l_ex   = state["exchange_length_m"]
+        # Dimensionless exchange ratio: J* = A_ex · l_ex / (k_B · T)
+        # Units: (J/m · m) / J = dimensionless ✓
+        # J* ≈ φ signals proximity to the golden-ratio KT resonance point;
+        # for typical materials this occurs near the Curie temperature.
         if l_ex > 0 and T > 0:
-            J_star = A_ex / (_K_B * T * l_ex)
+            J_star = (A_ex * l_ex) / (_K_B * T)
         else:
             J_star = 0.0
         kt_phi_match = (J_star > 0 and abs(J_star - _PHI) / _PHI < 0.15)
 
         # ── Consistency score (weighted sum) ─────────────────────────────
-        B_score  = (3 - hamming_B) / 3.0
-        P_score  = (3 - hamming_P) / 3.0
-        RT_score = resonance_thermal_alignment
+        # B (0.40): primary physical signal
+        # P_applied (0.30): applied-field consistency
+        # P_thermal (0.10): thermal energy proximity (bonus signal, lower weight)
+        # RT (0.20): resonance/thermal alignment
+        B_score       = (3 - hamming_B)         / 3.0
+        P_app_score   = (3 - hamming_P_applied)  / 3.0
+        P_therm_score = (3 - hamming_P_thermal)  / 3.0
+        RT_score      = resonance_thermal_alignment
 
-        consistency_score = 0.5 * B_score + 0.3 * P_score + 0.2 * RT_score
+        consistency_score = (0.40 * B_score
+                             + 0.30 * P_app_score
+                             + 0.10 * P_therm_score
+                             + 0.20 * RT_score)
 
         # ── Divergence flags ──────────────────────────────────────────────
         divergence_flags = []
@@ -237,9 +282,15 @@ class MagneticBridgeComparator:
             divergence_flags.append(
                 f"B field: geometric {B_geo:.3e} T vs magnonic {B_mag_dipolar:.3e} T"
             )
-        if not P_band_match:
+        if not P_applied_band_match:
             divergence_flags.append(
-                f"pressure/energy: geometric {P_geo:.3e} Pa vs magnonic {E_mag:.3e} J"
+                f"applied pressure: geometric {P_geo:.3e} Pa vs H0-driven {P_mag_applied:.3e} Pa"
+            )
+        if P_thermal_band_match:
+            # This is the phase-transition signal — thermal energy ≈ field energy
+            divergence_flags.append(
+                f"thermal/field parity: E_density {E_density:.3e} Pa ≈ P_geo {P_geo:.3e} Pa"
+                f" (near transition)"
             )
         if resonance_map and resonance_thermal_alignment < 0.5:
             divergence_flags.append(
@@ -269,11 +320,15 @@ class MagneticBridgeComparator:
             "B_magnonic_bottom_T":     B_mag_bottom,
             "B_band_match":            B_band_match,
             "B_hamming":               hamming_B,
-            # Pressure / energy
+            # Pressure — branch 1: applied field (apples-to-apples)
             "P_geometric_Pa":          P_geo,
-            "E_magnonic_J":            E_mag,
-            "P_band_match":            P_band_match,
-            "P_hamming":               hamming_P,
+            "P_magnonic_applied_Pa":   P_mag_applied,
+            "P_applied_band_match":    P_applied_band_match,
+            "P_applied_hamming":       hamming_P_applied,
+            # Pressure — branch 2: volumetric magnon energy density (transition signal)
+            "E_magnonic_density_Pa":   E_density,
+            "P_thermal_band_match":    P_thermal_band_match,
+            "P_thermal_hamming":       hamming_P_thermal,
             # Resonance / thermal
             "resonance_thermal_alignment": resonance_thermal_alignment,
             "thermal_regime":          t_regime,
