@@ -3066,5 +3066,201 @@ class TestMagneticBridgeComparator(unittest.TestCase):
         self.assertGreater(hot["n_thermal_exchange"], cold["n_thermal_exchange"])
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# CuriosityEngine tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+import importlib as _il
+_ce_mod = _il.import_module("Geometric-Intelligence.curiosity_engine")
+CuriosityEngine = _ce_mod.CuriosityEngine
+
+
+class TestCuriosityEnginePassthrough(unittest.TestCase):
+    """Clean results pass through unchanged."""
+
+    def test_success_returns_result_unchanged(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: {"passed": True, "action": "accept"})
+        self.assertEqual(result["passed"], True)
+        self.assertNotEqual(result.get("status"), "curious")
+
+    def test_is_curious_false_for_normal_result(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: {"value": 42})
+        self.assertFalse(engine.is_curious(result))
+
+    def test_non_dict_success_passes_through(self):
+        engine = CuriosityEngine()
+        result = engine.run(lambda: "hello")
+        self.assertEqual(result, "hello")
+        self.assertFalse(engine.is_curious(result))
+
+
+class TestCuriosityEngineErrors(unittest.TestCase):
+    """Exceptions produce curiosity reports."""
+
+    def _curious(self, exc_factory, ctx=None):
+        engine = CuriosityEngine()
+        result = engine.run(exc_factory, context=ctx)
+        self.assertTrue(engine.is_curious(result))
+        return result
+
+    def test_value_error_returns_curious(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("bad param")))
+        self.assertEqual(r["status"], "curious")
+        self.assertEqual(r["source"], "error")
+
+    def test_key_error_returns_curious(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(KeyError("missing")))
+        self.assertEqual(r["source"], "error")
+
+    def test_zero_division_returns_curious(self):
+        r = self._curious(lambda: 1 / 0)
+        self.assertEqual(r["source"], "error")
+
+    def test_zero_division_gets_boundary_pad(self):
+        r = self._curious(lambda: 1 / 0)
+        # Boundary PAD has P=0.50
+        self.assertAlmostEqual(r["curiosity_pad"]["P"], 0.50)
+
+    def test_unknown_error_gets_unknown_pad(self):
+        class WeirdError(Exception): pass
+        r = self._curious(lambda: (_ for _ in ()).throw(WeirdError("novel")))
+        # Unknown PAD has high A=0.90
+        self.assertAlmostEqual(r["curiosity_pad"]["A"], 0.90)
+
+    def test_report_has_all_required_keys(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        for key in ("status", "source", "fn_name", "curiosity_pad",
+                    "consciousness_state", "confidence", "octa_state",
+                    "emotion_bits", "exploration_hint", "drill_depth",
+                    "drill_target", "signal", "context"):
+            self.assertIn(key, r, msg=f"missing key: {key}")
+
+    def test_consciousness_state_is_string(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        self.assertIsInstance(r["consciousness_state"], str)
+
+    def test_exploration_hint_nonempty(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        self.assertGreater(len(r["exploration_hint"]), 0)
+
+    def test_emotion_bits_present(self):
+        r = self._curious(lambda: (_ for _ in ()).throw(ValueError("x")))
+        # emotion_bits may be empty string if encoder fails, but key must exist
+        self.assertIn("emotion_bits", r)
+
+    def test_context_passed_through(self):
+        r = self._curious(
+            lambda: (_ for _ in ()).throw(ValueError("x")),
+            ctx={"bridge": "thermal", "mode": "test"},
+        )
+        self.assertEqual(r["context"]["bridge"], "thermal")
+        self.assertEqual(r["drill_target"], "thermal")
+
+    def test_fn_name_captured(self):
+        def my_broken_fn(): raise RuntimeError("oops")
+        engine = CuriosityEngine()
+        r = engine.run(my_broken_fn)
+        self.assertEqual(r["fn_name"], "my_broken_fn")
+
+
+class TestCuriosityEngineFailureDetection(unittest.TestCase):
+    """Known failure signals in result dicts trigger curiosity."""
+
+    def _engine_run(self, result_dict):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: result_dict)
+        return engine, r
+
+    def test_physics_anomaly_triggers_curious(self):
+        _, r = self._engine_run({"physics_anomaly": True, "passed": False})
+        self.assertTrue(CuriosityEngine().is_curious(
+            CuriosityEngine().run(lambda: {"physics_anomaly": True})
+        ))
+
+    def test_major_divergence_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"interpretation": "major_divergence+KT_phi_resonance"})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_minor_divergence_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"interpretation": "minor_divergence"})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_quarantine_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"action": "quarantine", "passed": False})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_cleaved_list_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"cleaved": [0, 1], "kt_healed": []})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_failed_zk_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"verified": False, "node_count": 3})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_anomaly_alert_triggers_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"anomaly_action": "alert", "anomaly_reasons": ["x"]})
+        self.assertTrue(engine.is_curious(r))
+
+    def test_accept_does_not_trigger_curious(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"action": "accept", "passed": True})
+        self.assertFalse(engine.is_curious(r))
+
+    def test_empty_cleaved_does_not_trigger(self):
+        engine = CuriosityEngine()
+        r = engine.run(lambda: {"cleaved": [], "kt_healed": [0]})
+        self.assertFalse(engine.is_curious(r))
+
+
+class TestCuriosityEngineLog(unittest.TestCase):
+    """Curiosity log and summary."""
+
+    def test_log_empty_on_success(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: {"passed": True})
+        self.assertEqual(len(engine.curiosity_log()), 0)
+
+    def test_log_grows_on_curiosity(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("a")))
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("b")))
+        self.assertEqual(len(engine.curiosity_log()), 2)
+
+    def test_log_is_copy(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("x")))
+        log = engine.curiosity_log()
+        log.clear()
+        self.assertEqual(len(engine.curiosity_log()), 1)
+
+    def test_summary_empty_when_no_events(self):
+        engine = CuriosityEngine()
+        s = engine.curiosity_summary()
+        self.assertEqual(s["total"], 0)
+
+    def test_summary_counts_correctly(self):
+        engine = CuriosityEngine()
+        engine.run(lambda: (_ for _ in ()).throw(ValueError("x")))
+        engine.run(lambda: {"action": "quarantine"})
+        s = engine.curiosity_summary()
+        self.assertEqual(s["total"], 2)
+        self.assertEqual(s["by_source"].get("error", 0), 1)
+        self.assertEqual(s["by_source"].get("failure", 0), 1)
+
+    def test_summary_has_required_keys(self):
+        engine = CuriosityEngine()
+        s = engine.curiosity_summary()
+        for k in ("total", "by_source", "by_state", "by_fn"):
+            self.assertIn(k, s)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
