@@ -96,6 +96,24 @@
         "consent": { "license": "MIT", "share_ok": true }
       },
       {
+        "name": "cyclic",
+        "repo": "https://github.com/JinnZ2/Cyclic-programming",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "execution_engine",
+        "paths": [
+          "cyclic_interpreter.py",
+          "epic_demo.py"
+        ],
+        "mounts": [],
+        "exports": [
+          { "local": "bridges/cyclic_encoder.py", "as": "bridges/cyclic_encoder.py" }
+        ],
+        "entities_consumed": ["FIELD.STATE", "EXEC.CYCLIC", "PHASE.TRANSITION"],
+        "entities_exported": ["BRIDGE.CYCLIC", "EXEC.REGEN", "FIELD.RESONANCE"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
         "name": "biogrid",
         "repo": "https://github.com/JinnZ2/BioGrid2.0",
         "ref": "main",
@@ -118,7 +136,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "cyclic", "biogrid"],
       "strategy": "deep-merge"
     },
 

@@ -3263,6 +3263,260 @@ class TestCuriosityEngineLog(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# CyclicBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.cyclic_encoder import (
+    CyclicBridgeEncoder,
+    resonance_strength,
+    regeneration_capacity_gain,
+    phase_transition_cost,
+    fractal_energy_per_spawn,
+    spatial_gradient_strength,
+)
+
+
+class TestCyclicResonanceStrength(unittest.TestCase):
+    def test_identical_frequencies_max(self):
+        self.assertAlmostEqual(resonance_strength(1.0, 1.0), 1.0)
+
+    def test_large_difference_near_zero(self):
+        self.assertLess(resonance_strength(1.0, 100.0), 0.01)
+
+    def test_symmetry(self):
+        self.assertAlmostEqual(
+            resonance_strength(2.0, 5.0), resonance_strength(5.0, 2.0)
+        )
+
+    def test_near_frequencies_high_resonance(self):
+        self.assertGreater(resonance_strength(1.0, 1.05), 0.9)
+
+    def test_returns_float(self):
+        self.assertIsInstance(resonance_strength(1.0, 2.0), float)
+
+
+class TestCyclicRegenerationGain(unittest.TestCase):
+    def test_zero_input_no_change(self):
+        self.assertAlmostEqual(regeneration_capacity_gain(1.0, 0.0), 1.0)
+
+    def test_positive_input_grows_capacity(self):
+        self.assertGreater(regeneration_capacity_gain(1.0, 50.0), 1.0)
+
+    def test_negative_input_clamped(self):
+        # Negative energy treated as 0
+        self.assertAlmostEqual(regeneration_capacity_gain(1.0, -10.0), 1.0)
+
+    def test_large_input_significant_growth(self):
+        c = regeneration_capacity_gain(1.0, 1000.0)
+        self.assertGreater(c, 1.0)
+
+    def test_scales_with_initial_capacity(self):
+        c1 = regeneration_capacity_gain(1.0, 100.0)
+        c2 = regeneration_capacity_gain(2.0, 100.0)
+        self.assertAlmostEqual(c2 / c1, 2.0, places=5)
+
+
+class TestCyclicPhaseTransitionCost(unittest.TestCase):
+    def test_same_phase_zero_cost(self):
+        self.assertEqual(phase_transition_cost("normal", "normal"), 0.0)
+
+    def test_adjacent_phase_costs_10(self):
+        self.assertEqual(phase_transition_cost("normal", "liquid"), 10.0)
+
+    def test_crystalline_to_plasma_costs_40(self):
+        self.assertEqual(phase_transition_cost("crystalline", "plasma"), 40.0)
+
+    def test_reverse_direction_same_cost(self):
+        self.assertEqual(
+            phase_transition_cost("gas", "normal"),
+            phase_transition_cost("normal", "gas"),
+        )
+
+    def test_unknown_phase_defaults_to_normal(self):
+        # unknown maps to normal (idx=1); liquid is idx=2 → diff=1 → 10
+        self.assertEqual(phase_transition_cost("unknown_phase", "liquid"), 10.0)
+
+
+class TestCyclicFractalEnergy(unittest.TestCase):
+    def test_depth_zero_full_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 0), 100.0)
+
+    def test_depth_one_half_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 1), 50.0)
+
+    def test_depth_three_eighth_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 3), 12.5)
+
+    def test_energy_conserved_across_spawns(self):
+        for depth in range(1, 5):
+            total = fractal_energy_per_spawn(80.0, depth) * (2 ** depth)
+            self.assertAlmostEqual(total, 80.0)
+
+
+class TestCyclicSpatialGradient(unittest.TestCase):
+    def test_positive_gradient_when_E1_higher(self):
+        self.assertGreater(spatial_gradient_strength(100.0, 60.0, 2.0), 0)
+
+    def test_negative_gradient_when_E2_higher(self):
+        self.assertLess(spatial_gradient_strength(60.0, 100.0, 2.0), 0)
+
+    def test_zero_gradient_equal_energies(self):
+        self.assertAlmostEqual(spatial_gradient_strength(50.0, 50.0, 1.0), 0.0)
+
+    def test_zero_distance_clamped(self):
+        g = spatial_gradient_strength(100.0, 0.0, 0.0)
+        self.assertAlmostEqual(g, 100.0 / 0.01)
+
+
+class TestCyclicEncoderBitLength(unittest.TestCase):
+    _GEO3 = {
+        "total_energy":      [10.0, 50.0, 5.0],
+        "entropy":           [0.1, 0.5, 0.05],
+        "quantum_coherence": [0.8, 0.3, 0.95],
+        "capacity":          [1.0, 2.5, 0.8],
+        "phase_state":       ["normal", "liquid", "crystalline"],
+        "frequency":         [1.0, 1.1, 5.0],
+        "fractal_depth":     [0, 1, 0],
+        "entangled":         [False, True, False],
+    }
+
+    def test_three_fields_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry(self._GEO3).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_one_field_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry({
+            "total_energy": [5.0], "phase_state": ["normal"],
+            "frequency": [1.0],
+        }).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_empty_geometry_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry({}).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry(self._GEO3).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = CyclicBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO3).to_binary()
+        b2 = enc.from_geometry(self._GEO3).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            CyclicBridgeEncoder().to_binary()
+
+
+class TestCyclicEncoderPhaseEncoding(unittest.TestCase):
+    _PHASES = ["crystalline", "normal", "liquid", "gas", "plasma"]
+
+    def test_all_phases_produce_39_bits(self):
+        for ph in self._PHASES:
+            enc = CyclicBridgeEncoder()
+            b = enc.from_geometry({"phase_state": [ph]}).to_binary()
+            self.assertEqual(len(b), 39)
+
+    def test_adjacent_phases_differ_by_1_bit_in_section_a(self):
+        from bridges.common import hamming_distance
+        for i in range(len(self._PHASES) - 1):
+            enc = CyclicBridgeEncoder()
+            b1 = enc.from_geometry({
+                "phase_state": [self._PHASES[i]], "total_energy": [1.0],
+            }).to_binary()
+            b2 = enc.from_geometry({
+                "phase_state": [self._PHASES[i + 1]], "total_energy": [1.0],
+            }).to_binary()
+            # Phase state is first 3 bits of Section A
+            self.assertEqual(hamming_distance(b1[:3], b2[:3]), 1,
+                             msg=f"{self._PHASES[i]} → {self._PHASES[i+1]}")
+
+
+class TestCyclicEncoderInteractionBits(unittest.TestCase):
+    def _encode(self, geo):
+        return CyclicBridgeEncoder().from_geometry(geo).to_binary()
+
+    def test_entangled_flag_set(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "entangled": [True],
+        })
+        # any_entangled is bit 36 (0-indexed): 24A + 9B + 3resonance = 36
+        self.assertEqual(b[36], "1")
+
+    def test_entangled_flag_clear(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "entangled": [False],
+        })
+        self.assertEqual(b[36], "0")
+
+    def test_fractal_active_set(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "fractal_depth": [2],
+        })
+        self.assertEqual(b[37], "1")
+
+    def test_fractal_active_clear(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "fractal_depth": [0],
+        })
+        self.assertEqual(b[37], "0")
+
+    def test_phase_spread_set_for_mixed_phases(self):
+        b = self._encode({
+            "total_energy": [1.0, 1.0],
+            "phase_state": ["crystalline", "plasma"],
+            "frequency": [1.0, 1.0],
+        })
+        self.assertEqual(b[38], "1")
+
+    def test_phase_spread_clear_for_uniform_phases(self):
+        b = self._encode({
+            "total_energy": [1.0, 1.0, 1.0],
+            "phase_state": ["normal", "normal", "normal"],
+            "frequency": [1.0, 1.0, 1.0],
+        })
+        self.assertEqual(b[38], "0")
+
+    def test_identical_frequencies_high_resonance_band(self):
+        # Identical frequencies → R=1.0 → highest resonance band (bits 33-35)
+        b_same = self._encode({
+            "total_energy": [1.0, 1.0], "phase_state": ["normal", "normal"],
+            "frequency": [2.0, 2.0],
+        })
+        b_diff = self._encode({
+            "total_energy": [1.0, 1.0], "phase_state": ["normal", "normal"],
+            "frequency": [2.0, 10.0],
+        })
+        # Resonance bits 33-35: same-freq should encode higher band
+        self.assertGreater(int(b_same[33:36], 2) + int(b_diff[33:36], 2), 0)
+
+
+class TestCyclicEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CyclicBridgeEncoder()
+        enc.from_geometry({"total_energy": [1.0], "phase_state": ["normal"]})
+        enc.to_binary()
+        r = enc.report()
+        self.assertEqual(r["modality"], "cyclic")
+
+    def test_report_bit_count(self):
+        enc = CyclicBridgeEncoder()
+        enc.from_geometry({"total_energy": [1.0, 2.0, 3.0], "phase_state": ["normal"] * 3})
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # ConstraintAgent tests
 # ═══════════════════════════════════════════════════════════════════════════
 
