@@ -3262,5 +3262,352 @@ class TestCuriosityEngineLog(unittest.TestCase):
             self.assertIn(k, s)
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# ConstraintAgent tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ca_mod = _il.import_module("Geometric-Intelligence.constraint_agent")
+AgentState     = _ca_mod.AgentState
+ResourceBudget = _ca_mod.ResourceBudget
+GeometricMap   = _ca_mod.GeometricMap
+ConstraintAgent = _ca_mod.ConstraintAgent
+_Fraction = _ca_mod.Fraction
+
+
+class TestResourceBudget(unittest.TestCase):
+    def test_default_not_depleted(self):
+        # Default energy=Fraction(1,1) — not depleted
+        b = ResourceBudget()
+        self.assertFalse(b.is_depleted())
+
+    def test_not_depleted_with_energy(self):
+        b = ResourceBudget(compute=0, energy=_Fraction(1, 2))
+        self.assertFalse(b.is_depleted())
+
+    def test_not_depleted_with_compute(self):
+        b = ResourceBudget(compute=10, energy=_Fraction(0))
+        self.assertFalse(b.is_depleted())
+
+    def test_depleted_when_both_zero(self):
+        b = ResourceBudget(compute=0, energy=_Fraction(0))
+        self.assertTrue(b.is_depleted())
+
+
+class TestGeometricMap(unittest.TestCase):
+    def test_record_resonance_clamped_high(self):
+        m = GeometricMap()
+        m.record_resonance("A", 1.5)
+        self.assertEqual(m.resonances["A"], _Fraction(1))
+
+    def test_record_resonance_clamped_low(self):
+        m = GeometricMap()
+        m.record_resonance("A", -0.5)
+        self.assertEqual(m.resonances["A"], _Fraction(0))
+
+    def test_record_relationship_idempotent(self):
+        m = GeometricMap()
+        m.record_relationship("A", "B")
+        m.record_relationship("A", "B")
+        self.assertEqual(m.relationships["A"].count("B"), 1)
+
+    def test_record_energy_flow_accumulates(self):
+        m = GeometricMap()
+        m.record_energy_flow("A", "B", 0.5)
+        m.record_energy_flow("A", "B", 0.5)
+        self.assertEqual(m.energy_flows[("A", "B")], _Fraction(1))
+
+    def test_record_energy_flow_accepts_fraction(self):
+        m = GeometricMap()
+        m.record_energy_flow("X", "Y", _Fraction(1, 4))
+        self.assertEqual(m.energy_flows[("X", "Y")], _Fraction(1, 4))
+
+
+class TestConstraintAgentInit(unittest.TestCase):
+    def test_initial_state_compressed(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+    def test_seed_has_full_resonance(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.map.resonances["SEED"], _Fraction(1))
+
+    def test_compression_ratio_one(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.compression_ratio, _Fraction(1))
+
+    def test_home_families_default_empty(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.home_families, [])
+
+    def test_bloom_threshold_stored_as_fraction(self):
+        agent = ConstraintAgent("SEED", bloom_threshold=0.75)
+        self.assertIsInstance(agent.bloom_threshold, _Fraction)
+
+
+class TestConstraintAgentResourceBudget(unittest.TestCase):
+    def test_set_resource_budget(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=100, bandwidth=5.0,
+                                  energy=0.8, time_remaining=0.9)
+        self.assertEqual(agent.budget.compute, 100)
+        self.assertAlmostEqual(float(agent.budget.energy), 0.8, places=3)
+
+    def test_should_expand_with_full_energy(self):
+        agent = ConstraintAgent("SEED", bloom_threshold=0.5)
+        agent.set_resource_budget(compute=100, energy=1.0)
+        self.assertTrue(agent.should_expand())
+
+    def test_should_not_expand_when_depleted(self):
+        agent = ConstraintAgent("SEED")
+        # Force depleted budget (energy=0, compute=0)
+        agent.set_resource_budget(compute=0, energy=0.0)
+        self.assertFalse(agent.should_expand())
+
+
+class TestConstraintAgentBloom(unittest.TestCase):
+    def test_bloom_changes_state_to_exploring(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+    def test_bloom_returns_list(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        result = agent.bloom(depth=1)
+        self.assertIsInstance(result, list)
+
+    def test_bloom_records_history(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=2)
+        self.assertEqual(len(agent.expansion_history), 1)
+        self.assertEqual(agent.expansion_history[0]["depth"], 2)
+
+    def test_bloom_with_prior_map(self):
+        prior = GeometricMap()
+        prior.resonances["CHILD"] = _Fraction(3, 4)
+        prior.relationships["SEED"] = ["CHILD"]
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        discovered = agent.bloom(depth=1, seed_map=prior)
+        self.assertIn("CHILD", discovered)
+        self.assertEqual(agent.map.resonances["CHILD"], _Fraction(3, 4))
+
+    def test_compression_ratio_zero_after_bloom(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        self.assertEqual(agent.compression_ratio, _Fraction(0))
+
+
+class TestConstraintAgentExplore(unittest.TestCase):
+    def test_explore_returns_summary_dict(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        summary = agent.explore()
+        for key in ("entities_visited", "relationships_mapped",
+                    "energy_flows_recorded", "sensor_activations"):
+            self.assertIn(key, summary)
+
+    def test_explore_records_energy_flows(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.record_resonance("A", 0.8)
+        agent.map.record_resonance("B", 0.5)
+        agent.map.record_relationship("A", "B")
+        agent.state = AgentState.EXPLORING
+        summary = agent.explore()
+        self.assertGreater(int(summary["energy_flows_recorded"]), 0)
+        self.assertIn(("A", "B"), agent.map.energy_flows)
+
+    def test_explore_returns_empty_from_compressed(self):
+        agent = ConstraintAgent("SEED")
+        result = agent.explore()
+        self.assertEqual(result, {})
+
+
+class TestConstraintAgentCompress(unittest.TestCase):
+    def test_compress_returns_one(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+
+    def test_compress_restores_state(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+    def test_compress_resets_position_to_seed(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertEqual(agent.current_position, "SEED")
+
+    def test_compress_preserves_map(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.record_resonance("EXTRA", 0.5)
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertIn("EXTRA", agent.map.resonances)
+
+    def test_compress_idempotent_on_already_compressed(self):
+        agent = ConstraintAgent("SEED")
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+
+class TestConstraintAgentSelfValidate(unittest.TestCase):
+    def test_fresh_agent_is_valid(self):
+        agent = ConstraintAgent("SEED")
+        report = agent.self_validate()
+        self.assertTrue(report["is_valid"])
+        self.assertEqual(report["inconsistencies"], [])
+
+    def test_balanced_flows_valid(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 2)
+        agent.map.energy_flows[("B", "A")] = _Fraction(1, 2)
+        report = agent.self_validate()
+        self.assertTrue(report["is_valid"])
+
+    def test_unbalanced_flows_invalid(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 2)
+        report = agent.self_validate()
+        self.assertFalse(report["is_valid"])
+        self.assertGreater(len(report["inconsistencies"]), 0)
+
+    def test_report_has_required_keys(self):
+        agent = ConstraintAgent("SEED")
+        report = agent.self_validate()
+        for key in ("is_valid", "inconsistencies",
+                    "energy_balance", "geometry_coherence"):
+            self.assertIn(key, report)
+
+
+class TestConstraintAgentDetectCorruption(unittest.TestCase):
+    def test_returns_bool(self):
+        agent = ConstraintAgent("SEED")
+        result = agent.detect_corruption("any_constraint")
+        self.assertIsInstance(result, bool)
+
+    def test_stub_returns_false(self):
+        agent = ConstraintAgent("SEED")
+        self.assertFalse(agent.detect_corruption("anything"))
+
+
+class TestConstraintAgentSerialize(unittest.TestCase):
+    def _make_agent(self):
+        agent = ConstraintAgent("SEED", home_families=["stability"])
+        agent.set_resource_budget(compute=500, energy=0.8)
+        agent.map.record_resonance("CHILD", 0.6)
+        agent.map.record_relationship("SEED", "CHILD")
+        agent.map.record_energy_flow("SEED", "CHILD", 0.3)
+        return agent
+
+    def test_serialize_returns_dict(self):
+        s = self._make_agent().serialize()
+        self.assertIsInstance(s, dict)
+
+    def test_serialize_has_required_keys(self):
+        s = self._make_agent().serialize()
+        for key in ("seed_id", "home_families", "state", "compression_ratio",
+                    "budget", "map", "expansion_history", "sensor_state"):
+            self.assertIn(key, s)
+
+    def test_fractions_stored_as_tuples(self):
+        s = self._make_agent().serialize()
+        cr = s["compression_ratio"]
+        self.assertIsInstance(cr, tuple)
+        self.assertEqual(len(cr), 2)
+
+    def test_energy_flows_keys_are_strings(self):
+        s = self._make_agent().serialize()
+        for k in s["map"]["energy_flows"]:
+            self.assertIsInstance(k, str)
+
+    def test_roundtrip_preserves_seed_id(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.seed_id, "SEED")
+
+    def test_roundtrip_preserves_resonances(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn("CHILD", restored.map.resonances)
+        self.assertEqual(restored.map.resonances["CHILD"],
+                         agent.map.resonances["CHILD"])
+
+    def test_roundtrip_preserves_energy_flows(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn(("SEED", "CHILD"), restored.map.energy_flows)
+
+    def test_roundtrip_preserves_state(self):
+        agent = self._make_agent()
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.state, agent.state)
+
+    def test_roundtrip_preserves_home_families(self):
+        restored = ConstraintAgent.deserialize(self._make_agent().serialize())
+        self.assertEqual(restored.home_families, ["stability"])
+
+    def test_roundtrip_sensor_state_as_fractions(self):
+        restored = ConstraintAgent.deserialize(self._make_agent().serialize())
+        for v in restored.sensor_state.values():
+            self.assertIsInstance(v, _Fraction)
+
+    def test_deserialize_tuple_keys_safe(self):
+        agent = ConstraintAgent("X")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 3)
+        agent.map.energy_flows[("B", "C")] = _Fraction(2, 7)
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn(("A", "B"), restored.map.energy_flows)
+        self.assertIn(("B", "C"), restored.map.energy_flows)
+
+
+class TestConstraintAgentFullCycle(unittest.TestCase):
+    def test_full_lifecycle(self):
+        agent = ConstraintAgent("ROOT", home_families=["base"])
+        agent.set_resource_budget(compute=1000, energy=1.0)
+
+        agent.bloom(depth=1)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+        summary = agent.explore()
+        self.assertIsInstance(summary, dict)
+
+        report = agent.self_validate()
+        self.assertIn("is_valid", report)
+
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+        agent.set_resource_budget(compute=500, energy=0.5)
+        agent.bloom(depth=1, seed_map=agent.map)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+    def test_serialize_after_full_cycle(self):
+        agent = ConstraintAgent("ROOT")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.explore()
+        agent.compress()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.state, AgentState.COMPRESSED)
+        self.assertIn("ROOT", restored.map.resonances)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
