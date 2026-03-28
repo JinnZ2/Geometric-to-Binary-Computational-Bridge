@@ -4645,5 +4645,299 @@ class TestResilienceEncoderReport(unittest.TestCase):
             enc.to_binary()
 
 
+# ===========================================================================
+# Community encoder tests
+# ===========================================================================
+from bridges.community_encoder import (
+    CommunityBridgeEncoder,
+    food_capacity,
+    energy_capacity,
+    social_capacity,
+    institutional_capacity,
+    knowledge_capacity,
+    infrastructure_capacity,
+    food_buffer,
+    energy_buffer,
+    social_buffer,
+    institutional_buffer,
+    knowledge_buffer,
+    infrastructure_buffer,
+    profile_to_capacities,
+    profile_to_buffers,
+)
+
+
+def _minimal_profile(**overrides):
+    """Bare-minimum profile dict; overrides applied on top."""
+    base = {
+        "name": "test",
+        "population": 10_000,
+        "days_food_supply_retail": 3.0,
+        "active_farms_local": 0,
+        "community_gardens_acres": 0.0,
+        "farmers_market": False,
+        "grain_elevator_present": False,
+        "food_bank_present": False,
+        "grid_connected": True,
+        "local_generation_mw": 0.0,
+        "solar_installations": 0,
+        "wind_capacity_mw": 0.0,
+        "backup_generators": 0,
+        "fuel_reserve_days": 3.0,
+        "hospital_present": False,
+        "clinic_present": True,
+        "pharmacy_count": 1,
+        "ems_available": True,
+        "mutual_aid_networks": 0,
+        "faith_communities": 0,
+        "civic_organizations": 0,
+        "cell_towers": 1,
+        "internet_providers": 1,
+        "ham_radio_operators": 0,
+        "community_alert_system": False,
+        "wells_private": 0,
+        "surface_water_sources": 0,
+        "days_water_reserve": 1.0,
+        "backup_power_water_plant": False,
+        "water_treatment_functional": True,
+        "highway_access": True,
+        "rail_access": False,
+        "fuel_stations": 1,
+        "skill_holders_identified": 0,
+    }
+    base.update(overrides)
+    return base
+
+
+class TestFoodCapacity(unittest.TestCase):
+    def test_zero_all_is_low(self):
+        c = food_capacity(0.0, 0, 0.0, 1000)
+        self.assertLess(c, 0.30)
+
+    def test_retail_days_raises_score(self):
+        c_low  = food_capacity(1.0, 0, 0.0, 1000)
+        c_high = food_capacity(21.0, 0, 0.0, 1000)
+        self.assertGreater(c_high, c_low)
+
+    def test_farms_boost_score(self):
+        c_no_farms  = food_capacity(3.0, 0,  0.0, 10_000)
+        c_many_farms = food_capacity(3.0, 50, 0.0, 10_000)
+        self.assertGreater(c_many_farms, c_no_farms)
+
+    def test_assets_add_bonus(self):
+        c_plain  = food_capacity(3.0, 0, 0.0, 1000)
+        c_assets = food_capacity(3.0, 0, 0.0, 1000,
+                                 farmers_market=True,
+                                 grain_elevator_present=True,
+                                 food_bank_present=True)
+        self.assertGreater(c_assets, c_plain)
+
+    def test_capped_at_one(self):
+        c = food_capacity(100.0, 1000, 100.0, 1000,
+                          farmers_market=True, grain_elevator_present=True,
+                          food_bank_present=True)
+        self.assertLessEqual(c, 1.0)
+
+    def test_range_zero_to_one(self):
+        self.assertGreaterEqual(food_capacity(3.0, 5, 0.5, 5000), 0.0)
+
+
+class TestEnergyCapacity(unittest.TestCase):
+    def test_grid_only_is_moderate(self):
+        c = energy_capacity(True, 0.0, 0, 0.0, 0, 3.0)
+        self.assertGreater(c, 0.0)
+        self.assertLess(c, 0.60)
+
+    def test_local_generation_boosts(self):
+        c_low  = energy_capacity(True, 0.0, 0, 0.0, 0, 3.0)
+        c_high = energy_capacity(True, 10.0, 0, 0.0, 0, 3.0)
+        self.assertGreater(c_high, c_low)
+
+    def test_no_grid_no_local_is_low(self):
+        c = energy_capacity(False, 0.0, 0, 0.0, 0, 0.0)
+        self.assertAlmostEqual(c, 0.0, places=5)
+
+    def test_capped_at_one(self):
+        c = energy_capacity(True, 100.0, 100, 100.0, 100, 100.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestSocialCapacity(unittest.TestCase):
+    def test_full_medical_raises_score(self):
+        c_no   = social_capacity(1000, False, False, 0, False, 0, 0, 0)
+        c_full = social_capacity(1000, True,  True,  3, True,  0, 0, 0)
+        self.assertGreater(c_full, c_no)
+
+    def test_mutual_aid_raises_score(self):
+        c_none = social_capacity(1000, False, True, 1, True, 0, 0, 0)
+        c_many = social_capacity(1000, False, True, 1, True, 3, 8, 5)
+        self.assertGreater(c_many, c_none)
+
+    def test_capped_at_one(self):
+        self.assertLessEqual(
+            social_capacity(1000, True, True, 10, True, 10, 30, 20), 1.0)
+
+
+class TestInstitutionalCapacity(unittest.TestCase):
+    def test_comms_raises_score(self):
+        c_low  = institutional_capacity(0, 0, 0, False, False, False, False)
+        c_high = institutional_capacity(4, 2, 5, True,  True,  True,  True)
+        self.assertGreater(c_high, c_low)
+
+    def test_range(self):
+        c = institutional_capacity(2, 1, 1, False, True, True, False)
+        self.assertGreaterEqual(c, 0.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestKnowledgeCapacity(unittest.TestCase):
+    def test_skills_dominate(self):
+        c_none = knowledge_capacity(0, 0, False, True, 0)
+        c_full = knowledge_capacity(10, 5, True,  True, 20)
+        self.assertGreater(c_full, c_none)
+
+    def test_range(self):
+        c = knowledge_capacity(3, 2, True, True, 5)
+        self.assertGreaterEqual(c, 0.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestInfrastructureCapacity(unittest.TestCase):
+    def test_highway_only_is_base(self):
+        c = infrastructure_capacity(True, False, 1, 0, 0, 1.0, False)
+        self.assertGreater(c, 0.0)
+
+    def test_water_sources_boost(self):
+        c_low  = infrastructure_capacity(True, False, 1, 0, 0, 1.0, False)
+        c_high = infrastructure_capacity(True, True,  5, 10, 3, 7.0, True)
+        self.assertGreater(c_high, c_low)
+
+
+class TestFoodBuffer(unittest.TestCase):
+    def test_zero_days_is_low(self):
+        self.assertLess(food_buffer(0.0, False), 0.20)
+
+    def test_food_bank_adds_buffer(self):
+        self.assertGreater(food_buffer(3.0, True), food_buffer(3.0, False))
+
+    def test_range(self):
+        self.assertLessEqual(food_buffer(100.0, True), 1.0)
+
+
+class TestEnergyBuffer(unittest.TestCase):
+    def test_no_reserve_is_low(self):
+        self.assertLess(energy_buffer(0.0, 0, 0.0), 0.10)
+
+    def test_generators_help(self):
+        self.assertGreater(energy_buffer(3.0, 5, 0.0), energy_buffer(3.0, 0, 0.0))
+
+
+class TestSocialBuffer(unittest.TestCase):
+    def test_no_networks_is_zero(self):
+        self.assertAlmostEqual(social_buffer(0, 0), 0.0)
+
+    def test_networks_add_buffer(self):
+        self.assertGreater(social_buffer(3, 5), 0.0)
+
+
+class TestProfileToCapacities(unittest.TestCase):
+    def test_returns_six_domains(self):
+        caps = profile_to_capacities(_minimal_profile())
+        self.assertEqual(set(caps.keys()),
+                         {"food","energy","social","institutional","knowledge","infrastructure"})
+
+    def test_all_values_in_range(self):
+        caps = profile_to_capacities(_minimal_profile())
+        for v in caps.values():
+            self.assertGreaterEqual(v, 0.0)
+            self.assertLessEqual(v, 1.0)
+
+    def test_accepts_dataclass_like(self):
+        class Fake:
+            pass
+        f = Fake()
+        f.__dict__.update(_minimal_profile())
+        caps = profile_to_capacities(f)
+        self.assertIn("food", caps)
+
+    def test_good_profile_beats_bare(self):
+        good = _minimal_profile(
+            days_food_supply_retail=10.0,
+            active_farms_local=30,
+            farmers_market=True,
+        )
+        caps_bare = profile_to_capacities(_minimal_profile())
+        caps_good = profile_to_capacities(good)
+        self.assertGreater(caps_good["food"], caps_bare["food"])
+
+
+class TestProfileToBuffers(unittest.TestCase):
+    def test_returns_six_domains(self):
+        bufs = profile_to_buffers(_minimal_profile())
+        self.assertEqual(set(bufs.keys()),
+                         {"food","energy","social","institutional","knowledge","infrastructure"})
+
+    def test_all_values_in_range(self):
+        for v in profile_to_buffers(_minimal_profile()).values():
+            self.assertGreaterEqual(v, 0.0)
+            self.assertLessEqual(v, 1.0)
+
+
+class TestCommunityEncoderBitLength(unittest.TestCase):
+    def _encode(self, **overrides):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile(**overrides))
+        return enc.to_binary()
+
+    def test_exactly_39_bits(self):
+        self.assertEqual(len(self._encode()), 39)
+
+    def test_binary_alphabet(self):
+        self.assertTrue(all(c in "01" for c in self._encode()))
+
+    def test_deterministic(self):
+        self.assertEqual(self._encode(), self._encode())
+
+
+class TestCommunityEncoderContrast(unittest.TestCase):
+    def _encode(self, **overrides):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile(**overrides))
+        return enc.to_binary()
+
+    def test_strong_vs_weak_differ(self):
+        strong = _minimal_profile(
+            days_food_supply_retail=10.0, active_farms_local=40,
+            local_generation_mw=5.0, backup_generators=8,
+            hospital_present=True, mutual_aid_networks=3,
+            skill_holders_identified=8, ham_radio_operators=5,
+            wells_private=15, surface_water_sources=3,
+        )
+        weak   = _minimal_profile()
+        enc_s  = CommunityBridgeEncoder()
+        enc_s.from_geometry(strong)
+        enc_w  = CommunityBridgeEncoder()
+        enc_w.from_geometry(weak)
+        self.assertNotEqual(enc_s.to_binary(), enc_w.to_binary())
+
+    def test_no_geometry_raises(self):
+        with self.assertRaises(ValueError):
+            CommunityBridgeEncoder().to_binary()
+
+
+class TestCommunityEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile())
+        enc.to_binary()
+        self.assertEqual(enc.report()["modality"], "community")
+
+    def test_report_bits_39(self):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile())
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

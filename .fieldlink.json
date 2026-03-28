@@ -58,6 +58,29 @@
           { "local": "glyph_to_geometric_bridge.json", "as": "glyph_to_geometric_bridge.json" },
           { "local": "Silicon/fabrication_pathway_schema.json", "as": "Silicon/fabrication_pathway_schema.json" }
         ],
+        "family_bridge_map": {
+          "_comment": "Icosahedron family (F01-F20) → bridge modality. Drives pattern_id bridge[] field.",
+          "F01": "wave",
+          "F02": "pressure",
+          "F03": "consciousness",
+          "F04": "chemical",
+          "F05": "thermal",
+          "F06": "consciousness",
+          "F07": "gravity",
+          "F08": "chemical",
+          "F09": "wave",
+          "F10": "wave",
+          "F11": "hardware",
+          "F12": "resilience",
+          "F13": "chemical",
+          "F14": "consciousness",
+          "F15": "magnetic",
+          "F16": "consciousness",
+          "F17": "pressure",
+          "F18": "gravity",
+          "F19": "consciousness",
+          "F20": "wave"
+        },
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
       },
       {
@@ -114,6 +137,38 @@
         "consent": { "license": "MIT", "share_ok": true }
       },
       {
+        "name": "urban-resilience",
+        "repo": "https://github.com/JinnZ2/urban-resilience-sim",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "domain_source",
+        "paths": [
+          "community.py",
+          "salvage.py",
+          "food_system.py",
+          "energy_model.py",
+          "water_system.py",
+          "network.py",
+          "supply_chain.py",
+          "simulator.py"
+        ],
+        "mounts": [],
+        "exports": [
+          { "local": "bridges/community_encoder.py", "as": "bridges/community_encoder.py" },
+          { "local": "bridges/resilience_encoder.py", "as": "bridges/resilience_encoder.py" }
+        ],
+        "entities_consumed": [
+          "COMMUNITY.PROFILE", "SALVAGE.PROFILE", "DOMAIN.FOOD",
+          "DOMAIN.ENERGY", "DOMAIN.SOCIAL", "DOMAIN.INSTITUTIONAL",
+          "DOMAIN.KNOWLEDGE", "DOMAIN.INFRASTRUCTURE"
+        ],
+        "entities_exported": [
+          "BRIDGE.COMMUNITY", "BRIDGE.RESILIENCE",
+          "DOMAIN.CAPACITY", "DOMAIN.BUFFER"
+        ],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
         "name": "biogrid",
         "repo": "https://github.com/JinnZ2/BioGrid2.0",
         "ref": "main",
@@ -136,7 +191,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "cyclic", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "cyclic", "urban-resilience", "biogrid"],
       "strategy": "deep-merge"
     },
 
