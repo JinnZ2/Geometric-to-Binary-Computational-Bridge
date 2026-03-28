@@ -4939,5 +4939,257 @@ class TestCommunityEncoderReport(unittest.TestCase):
         self.assertEqual(enc.report()["bits"], 39)
 
 
+# ===========================================================================
+# Coop encoder tests
+# ===========================================================================
+from bridges.coop_encoder import (
+    CoopBridgeEncoder,
+    trust_temperature,
+    fourier_trust_flow,
+    trust_flux_density,
+    trust_resonance,
+    propagation_probability,
+    network_adoption_phase,
+    regional_trust_gradient,
+    emotion_from_network,
+)
+
+
+def _snap(**overrides):
+    """Minimal snapshot dict; overrides applied on top."""
+    base = {
+        "total_coops": 30, "adopted": 10, "adoption_pct": 33.3,
+        "new_adoptions": 2, "new_coops": 0, "resource_transfers": 5,
+        "bridges_formed": 0, "decayed": 0,
+        "avg_trust_strength": 0.40, "max_affinity": 1.0,
+    }
+    base.update(overrides)
+    return base
+
+
+class TestTrustTemperature(unittest.TestCase):
+    def test_zero_adoption(self):
+        self.assertAlmostEqual(trust_temperature(0.0), 0.0)
+
+    def test_full_adoption(self):
+        self.assertAlmostEqual(trust_temperature(100.0), 1.0)
+
+    def test_mid_adoption(self):
+        self.assertAlmostEqual(trust_temperature(50.0), 0.5)
+
+    def test_clamped_above(self):
+        self.assertLessEqual(trust_temperature(200.0), 1.0)
+
+    def test_clamped_below(self):
+        self.assertGreaterEqual(trust_temperature(-10.0), 0.0)
+
+
+class TestFourierTrustFlow(unittest.TestCase):
+    def test_zero_conductance(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.0, 5, 0.3), 0.0)
+
+    def test_zero_links(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.5, 0, 0.3), 0.0)
+
+    def test_zero_gradient(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.5, 5, 0.0), 0.0)
+
+    def test_proportional_to_conductance(self):
+        q_low  = fourier_trust_flow(0.2, 3, 0.4)
+        q_high = fourier_trust_flow(0.8, 3, 0.4)
+        self.assertAlmostEqual(q_high, q_low * 4.0, places=10)
+
+    def test_proportional_to_links(self):
+        q1 = fourier_trust_flow(0.5, 2, 0.3)
+        q2 = fourier_trust_flow(0.5, 4, 0.3)
+        self.assertAlmostEqual(q2, q1 * 2.0, places=10)
+
+
+class TestTrustFluxDensity(unittest.TestCase):
+    def test_no_coops_returns_zero(self):
+        self.assertAlmostEqual(trust_flux_density(10, 0), 0.0)
+
+    def test_proportional_to_transfers(self):
+        self.assertAlmostEqual(trust_flux_density(10, 50), 0.2)
+        self.assertAlmostEqual(trust_flux_density(20, 50), 0.4)
+
+    def test_non_negative(self):
+        self.assertGreaterEqual(trust_flux_density(0, 10), 0.0)
+
+
+class TestTrustResonance(unittest.TestCase):
+    def test_perfect_match_is_one(self):
+        self.assertAlmostEqual(trust_resonance(0.10, 0.10), 1.0, places=10)
+
+    def test_large_error_approaches_zero(self):
+        self.assertLess(trust_resonance(0.0, 1.0), 0.40)
+
+    def test_range_zero_to_one(self):
+        r = trust_resonance(0.07, 0.12)
+        self.assertGreaterEqual(r, 0.0)
+        self.assertLessEqual(r, 1.0)
+
+    def test_symmetric(self):
+        self.assertAlmostEqual(trust_resonance(0.1, 0.3), trust_resonance(0.3, 0.1))
+
+
+class TestPropagationProbability(unittest.TestCase):
+    def test_zero_trust_is_zero(self):
+        self.assertAlmostEqual(propagation_probability(0.0, 0.15, 2), 0.0)
+
+    def test_affinity_multiplies(self):
+        p1 = propagation_probability(0.4, 0.15, 2, 1.0)
+        p2 = propagation_probability(0.4, 0.15, 2, 1.5)
+        self.assertAlmostEqual(p2, p1 * 1.5, places=8)
+
+    def test_neighbors_add_network_bonus(self):
+        p0 = propagation_probability(0.3, 0.12, 0)
+        p3 = propagation_probability(0.3, 0.12, 3)
+        self.assertGreater(p3, p0)
+
+    def test_capped_at_one(self):
+        self.assertLessEqual(propagation_probability(1.0, 1.0, 100, 2.0), 1.0)
+
+
+class TestNetworkAdoptionPhase(unittest.TestCase):
+    def test_growing(self):
+        self.assertEqual(network_adoption_phase(40.0, 0.05, 0.0), "growing")
+
+    def test_stable(self):
+        self.assertEqual(network_adoption_phase(50.0, 0.005, 0.0), "stable")
+
+    def test_saturating(self):
+        self.assertEqual(network_adoption_phase(85.0, 0.01, 0.0), "saturating")
+
+    def test_decaying(self):
+        self.assertEqual(network_adoption_phase(60.0, 0.01, 0.05), "decaying")
+
+    def test_decaying_wins_over_saturating(self):
+        # High adoption but decay beats everything
+        self.assertEqual(network_adoption_phase(90.0, 0.01, 0.05), "decaying")
+
+
+class TestRegionalTrustGradient(unittest.TestCase):
+    def test_uniform_is_zero(self):
+        self.assertAlmostEqual(
+            regional_trust_gradient({"A": 50.0, "B": 50.0, "C": 50.0}), 0.0)
+
+    def test_empty_returns_zero(self):
+        self.assertAlmostEqual(regional_trust_gradient({}), 0.0)
+
+    def test_single_region_is_zero(self):
+        self.assertAlmostEqual(regional_trust_gradient({"A": 70.0}), 0.0)
+
+    def test_high_variance_returns_nonzero(self):
+        g = regional_trust_gradient({"A": 100.0, "B": 0.0})
+        self.assertGreater(g, 0.0)
+
+    def test_non_negative(self):
+        g = regional_trust_gradient({"A": 30.0, "B": 80.0, "C": 55.0})
+        self.assertGreaterEqual(g, 0.0)
+
+
+class TestEmotionFromNetwork(unittest.TestCase):
+    def test_failure_below_10pct(self):
+        self.assertEqual(emotion_from_network(5.0, 0.01, 0.0, 0.0), "failure")
+
+    def test_grief_high_decay(self):
+        self.assertEqual(emotion_from_network(50.0, 0.01, 0.10, 0.1), "grief")
+
+    def test_regenerating_recovery(self):
+        e = emotion_from_network(40.0, 0.02, 0.02, 0.1)
+        self.assertEqual(e, "regenerating")
+
+    def test_resilience_with_bridges(self):
+        e = emotion_from_network(55.0, 0.02, 0.0, 0.1, bridges_active=True)
+        self.assertEqual(e, "resilience")
+
+    def test_thriving_high_adoption_and_flow(self):
+        e = emotion_from_network(80.0, 0.01, 0.0, 0.20)
+        self.assertEqual(e, "thriving")
+
+    def test_presence_mid_adoption(self):
+        e = emotion_from_network(60.0, 0.01, 0.0, 0.05)
+        self.assertEqual(e, "presence")
+
+    def test_adaptation_high_velocity(self):
+        e = emotion_from_network(35.0, 0.05, 0.0, 0.05)
+        self.assertEqual(e, "adaptation")
+
+    def test_neutral_default(self):
+        e = emotion_from_network(30.0, 0.005, 0.0, 0.02)
+        self.assertEqual(e, "neutral")
+
+
+class TestCoopEncoderBitLength(unittest.TestCase):
+    def test_exactly_39_bits(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        self.assertEqual(len(enc.to_binary()), 39)
+
+    def test_binary_alphabet(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        self.assertTrue(all(c in "01" for c in enc.to_binary()))
+
+    def test_deterministic(self):
+        enc1 = CoopBridgeEncoder()
+        enc1.from_geometry(_snap())
+        enc2 = CoopBridgeEncoder()
+        enc2.from_geometry(_snap())
+        self.assertEqual(enc1.to_binary(), enc2.to_binary())
+
+    def test_no_geometry_raises(self):
+        with self.assertRaises(ValueError):
+            CoopBridgeEncoder().to_binary()
+
+
+class TestCoopEncoderContrast(unittest.TestCase):
+    def test_early_vs_saturating_differ(self):
+        enc_early = CoopBridgeEncoder()
+        enc_early.from_geometry(_snap(adoption_pct=15.0, adopted=4))
+        enc_sat   = CoopBridgeEncoder()
+        enc_sat.from_geometry(_snap(adoption_pct=90.0, adopted=27,
+                                    new_adoptions=0, resource_transfers=20))
+        self.assertNotEqual(enc_early.to_binary(), enc_sat.to_binary())
+
+    def test_decay_differs_from_growing(self):
+        enc_grow  = CoopBridgeEncoder()
+        enc_grow.from_geometry(_snap(new_adoptions=5, decayed=0))
+        enc_decay = CoopBridgeEncoder()
+        enc_decay.from_geometry(_snap(new_adoptions=0, decayed=4))
+        self.assertNotEqual(enc_grow.to_binary(), enc_decay.to_binary())
+
+
+class TestCoopEncoderSectionD(unittest.TestCase):
+    def test_spreading_bit_set_when_growing(self):
+        snap = _snap(adoption_pct=45.0, prev_adoption_pct=40.0)
+        enc  = CoopBridgeEncoder()
+        enc.from_geometry(snap)
+        bits = enc.to_binary()
+        self.assertEqual(bits[-1], "1")
+
+    def test_spreading_bit_clear_when_not_growing(self):
+        snap = _snap(adoption_pct=40.0, prev_adoption_pct=45.0)
+        enc  = CoopBridgeEncoder()
+        enc.from_geometry(snap)
+        bits = enc.to_binary()
+        self.assertEqual(bits[-1], "0")
+
+
+class TestCoopEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        enc.to_binary()
+        self.assertEqual(enc.report()["modality"], "coop")
+
+    def test_report_bits_39(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

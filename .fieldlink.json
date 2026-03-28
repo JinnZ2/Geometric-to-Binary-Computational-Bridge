@@ -119,6 +119,36 @@
         "consent": { "license": "MIT", "share_ok": true }
       },
       {
+        "name": "coop",
+        "repo": "https://github.com/JinnZ2/Coop-framework",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "trust_propagation_source",
+        "paths": [
+          "coop_sim.py",
+          "trust-first.md"
+        ],
+        "mounts": [],
+        "exports": [
+          { "local": "bridges/coop_encoder.py", "as": "bridges/coop_encoder.py" }
+        ],
+        "entities_consumed": [
+          "COOP.SNAPSHOT", "TRUST.STRENGTH", "TRUST.RATE",
+          "RESOURCE.TRANSFER", "ADOPTION.PCT", "BRIDGE.EVENT"
+        ],
+        "entities_exported": [
+          "BRIDGE.COOP", "TRUST.TEMPERATURE", "TRUST.FLUX",
+          "TRUST.RESONANCE", "NETWORK.EMOTION"
+        ],
+        "thermal_analogy": {
+          "trust_temperature": "adoption_pct / 100",
+          "trust_flux":        "resource_transfers / N_coops",
+          "trust_conductance": "avg link trust weight",
+          "fourier_law":       "q = conductance × links × ΔT"
+        },
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
         "name": "cyclic",
         "repo": "https://github.com/JinnZ2/Cyclic-programming",
         "ref": "main",
@@ -191,7 +221,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "cyclic", "urban-resilience", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid"],
       "strategy": "deep-merge"
     },
 
