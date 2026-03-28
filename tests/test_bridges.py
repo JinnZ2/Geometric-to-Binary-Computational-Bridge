@@ -4278,5 +4278,372 @@ class TestConstraintAgentFullCycle(unittest.TestCase):
         self.assertIn("ROOT", restored.map.resonances)
 
 
+# ===========================================================================
+# Resilience encoder tests
+# ===========================================================================
+from bridges.resilience_encoder import (
+    ResilienceBridgeEncoder,
+    domain_seed,
+    seed_entropy,
+    opposing_balance,
+    cascade_dominant,
+    crisis_phase,
+    knowledge_at_risk,
+    buffer_min,
+    DOMAIN_ORDER,
+)
+
+
+# ---------------------------------------------------------------------------
+# Pure physics helpers
+# ---------------------------------------------------------------------------
+
+class TestDomainSeed(unittest.TestCase):
+    def _all_caps(self):
+        return {d: 1.0 for d in DOMAIN_ORDER}
+
+    def test_uniform_returns_equal_proportions(self):
+        seed = domain_seed(self._all_caps())
+        for p in seed:
+            self.assertAlmostEqual(p, 1.0 / 6.0, places=10)
+
+    def test_single_domain_returns_one(self):
+        caps = {d: 0.0 for d in DOMAIN_ORDER}
+        caps["food"] = 5.0
+        seed = domain_seed(caps)
+        self.assertAlmostEqual(seed[0], 1.0, places=10)
+        for p in seed[1:]:
+            self.assertAlmostEqual(p, 0.0, places=10)
+
+    def test_zero_caps_returns_uniform_fallback(self):
+        seed = domain_seed({d: 0.0 for d in DOMAIN_ORDER})
+        for p in seed:
+            self.assertAlmostEqual(p, 1.0 / 6.0, places=10)
+
+    def test_missing_domains_default_to_zero(self):
+        seed = domain_seed({"food": 3.0, "energy": 3.0})
+        self.assertAlmostEqual(seed[0], 0.5, places=10)
+        self.assertAlmostEqual(seed[1], 0.5, places=10)
+        for p in seed[2:]:
+            self.assertAlmostEqual(p, 0.0, places=10)
+
+    def test_negative_caps_clamped(self):
+        caps = {d: 1.0 for d in DOMAIN_ORDER}
+        caps["food"] = -5.0
+        seed = domain_seed(caps)
+        self.assertGreaterEqual(min(seed), 0.0)
+
+    def test_sums_to_one(self):
+        caps = {"food": 0.5, "energy": 0.8, "social": 0.3,
+                "institutional": 0.6, "knowledge": 0.9, "infrastructure": 0.4}
+        self.assertAlmostEqual(sum(domain_seed(caps)), 1.0, places=10)
+
+
+class TestSeedEntropy(unittest.TestCase):
+    def test_uniform_is_max_entropy(self):
+        h = seed_entropy([1.0 / 6.0] * 6)
+        self.assertAlmostEqual(h, math.log2(6), places=5)
+
+    def test_concentrated_is_zero(self):
+        h = seed_entropy([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self.assertAlmostEqual(h, 0.0, places=10)
+
+    def test_two_equal_domains(self):
+        h = seed_entropy([0.5, 0.5, 0.0, 0.0, 0.0, 0.0])
+        self.assertAlmostEqual(h, 1.0, places=10)
+
+    def test_entropy_non_negative(self):
+        self.assertGreaterEqual(seed_entropy([0.3, 0.2, 0.1, 0.1, 0.2, 0.1]), 0.0)
+
+    def test_entropy_increases_with_balance(self):
+        h_concentrated = seed_entropy([0.8, 0.04, 0.04, 0.04, 0.04, 0.04])
+        h_balanced     = seed_entropy([1.0 / 6.0] * 6)
+        self.assertLess(h_concentrated, h_balanced)
+
+
+class TestOpposingBalance(unittest.TestCase):
+    def test_perfectly_symmetric_is_one(self):
+        # food=energy, social=institutional, knowledge=infra
+        seed = [0.2, 0.2, 0.15, 0.15, 0.15, 0.15]
+        self.assertAlmostEqual(opposing_balance(seed), 1.0, places=10)
+
+    def test_maximally_asymmetric(self):
+        # Each pair: one at 1, other at 0 — balance per pair = 0
+        seed = [0.5, 0.0, 0.5, 0.0, 0.0, 0.0]
+        bal = opposing_balance(seed)
+        self.assertLessEqual(bal, 1.0)
+        self.assertGreaterEqual(bal, 0.0)
+
+    def test_short_list_returns_zero(self):
+        self.assertEqual(opposing_balance([0.5, 0.5]), 0.0)
+
+    def test_range_zero_to_one(self):
+        seed = [0.4, 0.1, 0.2, 0.15, 0.1, 0.05]
+        bal = opposing_balance(seed)
+        self.assertGreaterEqual(bal, 0.0)
+        self.assertLessEqual(bal, 1.0)
+
+    def test_uniform_seed_is_balanced(self):
+        self.assertAlmostEqual(opposing_balance([1.0 / 6.0] * 6), 1.0, places=10)
+
+
+class TestCascadeDominant(unittest.TestCase):
+    def _full_bufs(self):
+        return {d: 0.8 for d in DOMAIN_ORDER}
+
+    def test_all_healthy_returns_none(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        self.assertEqual(cascade_dominant(caps, bufs), "none")
+
+    def test_depleted_energy_is_dominant(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        bufs["energy"] = 0.02
+        self.assertEqual(cascade_dominant(caps, bufs), "energy")
+
+    def test_most_depleted_wins(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        bufs["food"]  = 0.04
+        bufs["social"] = 0.01   # lower
+        self.assertEqual(cascade_dominant(caps, bufs), "social")
+
+    def test_at_threshold_returns_none(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = {d: 0.05 for d in DOMAIN_ORDER}  # exactly at threshold
+        self.assertEqual(cascade_dominant(caps, bufs), "none")
+
+    def test_just_below_threshold_returns_domain(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs["knowledge"] = 0.049
+        self.assertEqual(cascade_dominant(caps, bufs), "knowledge")
+
+
+class TestCrisisPhase(unittest.TestCase):
+    def _healthy(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        return caps, bufs
+
+    def test_stable_when_all_healthy(self):
+        caps, bufs = self._healthy()
+        self.assertEqual(crisis_phase(caps, bufs), "stable")
+
+    def test_stressed_when_cap_below_07(self):
+        caps, bufs = self._healthy()
+        caps["food"] = 0.65
+        self.assertEqual(crisis_phase(caps, bufs), "stressed")
+
+    def test_stressed_when_buf_below_04(self):
+        caps, bufs = self._healthy()
+        bufs["energy"] = 0.35
+        self.assertEqual(crisis_phase(caps, bufs), "stressed")
+
+    def test_cascade_when_buffer_depleted(self):
+        caps, bufs = self._healthy()
+        bufs["food"] = 0.03
+        self.assertEqual(crisis_phase(caps, bufs), "cascade")
+
+    def test_cascade_when_min_cap_below_03(self):
+        caps, bufs = self._healthy()
+        caps["energy"] = 0.25
+        self.assertEqual(crisis_phase(caps, bufs), "cascade")
+
+    def test_collapse_when_min_cap_below_01(self):
+        caps, bufs = self._healthy()
+        caps["food"] = 0.08
+        self.assertEqual(crisis_phase(caps, bufs), "collapse")
+
+    def test_collapse_when_three_domains_depleted(self):
+        caps, bufs = self._healthy()
+        for d in ["food", "energy", "social"]:
+            bufs[d] = 0.0
+        self.assertEqual(crisis_phase(caps, bufs), "collapse")
+
+
+class TestKnowledgeAtRisk(unittest.TestCase):
+    def test_safe(self):
+        self.assertFalse(knowledge_at_risk(0.5, 0.8))
+
+    def test_low_buffer_triggers(self):
+        self.assertTrue(knowledge_at_risk(0.15, 0.8))
+
+    def test_low_capacity_triggers(self):
+        self.assertTrue(knowledge_at_risk(0.5, 0.35))
+
+    def test_boundary_buf(self):
+        self.assertTrue(knowledge_at_risk(0.20 - 1e-10, 0.8))
+        self.assertFalse(knowledge_at_risk(0.20, 0.8))
+
+    def test_boundary_cap(self):
+        self.assertTrue(knowledge_at_risk(0.5, 0.40 - 1e-10))
+        self.assertFalse(knowledge_at_risk(0.5, 0.40))
+
+
+class TestBufferMin(unittest.TestCase):
+    def test_uniform(self):
+        self.assertAlmostEqual(buffer_min({d: 0.6 for d in DOMAIN_ORDER}), 0.6)
+
+    def test_one_low(self):
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs["infrastructure"] = 0.1
+        self.assertAlmostEqual(buffer_min(bufs), 0.1)
+
+    def test_missing_domain_defaults_to_one(self):
+        self.assertAlmostEqual(buffer_min({}), 1.0)
+
+
+# ---------------------------------------------------------------------------
+# ResilienceBridgeEncoder
+# ---------------------------------------------------------------------------
+
+class TestResilienceEncoderBitLength(unittest.TestCase):
+    def _make_enc(self, **kwargs):
+        geometry = {
+            "capacities": {d: 0.8 for d in DOMAIN_ORDER},
+            "buffers":    {d: 0.6 for d in DOMAIN_ORDER},
+        }
+        geometry.update(kwargs)
+        enc = ResilienceBridgeEncoder()
+        return enc.from_geometry(geometry).to_binary()
+
+    def test_exactly_39_bits(self):
+        self.assertEqual(len(self._make_enc()), 39)
+
+    def test_binary_alphabet(self):
+        bits = self._make_enc()
+        self.assertTrue(all(c in "01" for c in bits))
+
+    def test_deterministic(self):
+        self.assertEqual(self._make_enc(), self._make_enc())
+
+
+class TestResilienceEncoderSectionA(unittest.TestCase):
+    def _encode(self, caps, bufs=None):
+        if bufs is None:
+            bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_section_a_length_18(self):
+        bits = self._encode({d: 0.5 for d in DOMAIN_ORDER})
+        self.assertEqual(len(bits[:18]), 18)
+
+    def test_zero_caps_differs_from_full_caps(self):
+        bits_zero = self._encode({d: 0.0 for d in DOMAIN_ORDER})
+        bits_full = self._encode({d: 1.0 for d in DOMAIN_ORDER})
+        self.assertNotEqual(bits_zero[:18], bits_full[:18])
+
+
+class TestResilienceEncoderSectionB(unittest.TestCase):
+    def _encode_scenario(self, caps, bufs, **kw):
+        geometry = {"capacities": caps, "buffers": bufs}
+        geometry.update(kw)
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry(geometry)
+        return enc.to_binary()
+
+    def _stable(self):
+        return ({d: 0.9 for d in DOMAIN_ORDER}, {d: 0.8 for d in DOMAIN_ORDER})
+
+    def test_knowledge_crit_flag_set(self):
+        caps, bufs = self._stable()
+        bufs["knowledge"] = 0.10
+        bits = self._encode_scenario(caps, bufs)
+        knowledge_crit_bit = bits[18 + 2 + 3 + 1]  # offset within section B
+        self.assertEqual(knowledge_crit_bit, "1")
+
+    def test_cascading_flag_set_when_depleted(self):
+        caps, bufs = self._stable()
+        bufs["food"] = 0.02
+        bits = self._encode_scenario(caps, bufs)
+        cascading_bit = bits[18 + 2 + 3]
+        self.assertEqual(cascading_bit, "1")
+
+    def test_lag_hi_flag_set(self):
+        caps, bufs = self._stable()
+        bits = self._encode_scenario(caps, bufs, decision_lag_hours=30.0)
+        lag_bit = bits[18 + 2 + 3 + 1 + 1 + 1]
+        self.assertEqual(lag_bit, "1")
+
+    def test_lag_hi_not_set_below_threshold(self):
+        caps, bufs = self._stable()
+        bits = self._encode_scenario(caps, bufs, decision_lag_hours=20.0)
+        lag_bit = bits[18 + 2 + 3 + 1 + 1 + 1]
+        self.assertEqual(lag_bit, "0")
+
+
+class TestResilienceEncoderAutoPhase(unittest.TestCase):
+    def _encode(self, caps, bufs):
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_stable_vs_collapse_differ(self):
+        caps_s = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs_s = {d: 0.8 for d in DOMAIN_ORDER}
+        caps_c = {d: 0.05 for d in DOMAIN_ORDER}
+        bufs_c = {d: 0.0 for d in DOMAIN_ORDER}
+        self.assertNotEqual(self._encode(caps_s, bufs_s),
+                            self._encode(caps_c, bufs_c))
+
+    def test_override_phase_accepted(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs,
+                           "crisis_phase": "cascade"})
+        bits = enc.to_binary()
+        self.assertEqual(len(bits), 39)
+
+
+class TestResilienceEncoderSectionD(unittest.TestCase):
+    def _encode(self, caps, bufs=None):
+        if bufs is None:
+            bufs = {d: 0.6 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_transmissible_set_when_all_nonzero(self):
+        caps = {d: 0.5 for d in DOMAIN_ORDER}
+        bits = self._encode(caps)
+        self.assertEqual(bits[-1], "1")   # last bit = transmissible
+
+    def test_transmissible_clear_when_domain_missing(self):
+        caps = {"food": 0.5, "energy": 0.5}   # four domains zero
+        bits = self._encode(caps)
+        self.assertEqual(bits[-1], "0")
+
+    def test_balanced_vs_concentrated_entropy_bits_differ(self):
+        bits_bal = self._encode({d: 1.0 for d in DOMAIN_ORDER})
+        bits_con = self._encode(
+            {"food": 10.0, "energy": 0.01, "social": 0.01,
+             "institutional": 0.01, "knowledge": 0.01, "infrastructure": 0.01})
+        self.assertNotEqual(bits_bal[-6:-3], bits_con[-6:-3])
+
+
+class TestResilienceEncoderReport(unittest.TestCase):
+    def test_report_keys(self):
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({
+            "capacities": {d: 0.7 for d in DOMAIN_ORDER},
+            "buffers":    {d: 0.5 for d in DOMAIN_ORDER},
+        })
+        enc.to_binary()
+        rpt = enc.report()
+        self.assertIn("modality", rpt)
+        self.assertIn("bits", rpt)
+        self.assertEqual(rpt["bits"], 39)
+
+    def test_no_geometry_raises(self):
+        enc = ResilienceBridgeEncoder()
+        with self.assertRaises(ValueError):
+            enc.to_binary()
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
