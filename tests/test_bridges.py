@@ -3263,6 +3263,421 @@ class TestCuriosityEngineLog(unittest.TestCase):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# HardwareBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.hardware_encoder import (
+    HardwareBridgeEncoder,
+    component_health_score,
+    drift_percent,
+    lifetime_estimate_hours,
+    noise_power,
+    temp_coefficient_sensitivity,
+    repurpose_class,
+    bridge_target,
+)
+
+
+class TestComponentHealthScore(unittest.TestCase):
+    def test_at_baseline_is_one(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 1000.0, 2000.0), 1.0)
+
+    def test_at_failure_is_zero(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 2000.0, 2000.0), 0.0)
+
+    def test_midpoint_is_half(self):
+        self.assertAlmostEqual(component_health_score(0.0, 0.5, 1.0), 0.5)
+
+    def test_beyond_failure_clamped_to_zero(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 3000.0, 2000.0), 0.0)
+
+    def test_degenerate_same_baseline_failure(self):
+        self.assertAlmostEqual(component_health_score(100.0, 100.0, 100.0), 1.0)
+
+
+class TestDriftPercent(unittest.TestCase):
+    def test_no_drift(self):
+        self.assertAlmostEqual(drift_percent(1000.0, 1000.0), 0.0)
+
+    def test_ten_percent_drift(self):
+        self.assertAlmostEqual(drift_percent(1000.0, 1100.0), 10.0)
+
+    def test_zero_baseline_returns_zero(self):
+        self.assertAlmostEqual(drift_percent(0.0, 50.0), 0.0)
+
+    def test_symmetric(self):
+        self.assertAlmostEqual(
+            drift_percent(1000.0, 1200.0),
+            drift_percent(1000.0, 800.0),
+        )
+
+
+class TestLifetimeEstimate(unittest.TestCase):
+    def test_zero_drift_rate_returns_large(self):
+        self.assertGreater(lifetime_estimate_hours(0.9, 0.0), 1e8)
+
+    def test_proportional_to_health(self):
+        L1 = lifetime_estimate_hours(0.9, 0.01)
+        L2 = lifetime_estimate_hours(0.45, 0.01)
+        self.assertAlmostEqual(L1 / L2, 2.0, places=5)
+
+    def test_negative_drift_treated_as_zero(self):
+        self.assertGreater(lifetime_estimate_hours(1.0, -0.1), 1e8)
+
+
+class TestNoisePower(unittest.TestCase):
+    def test_zero_resistance_returns_zero(self):
+        self.assertAlmostEqual(noise_power(0.1, 0.0), 0.0)
+
+    def test_basic_calculation(self):
+        self.assertAlmostEqual(noise_power(1.0, 50.0), 0.02)
+
+    def test_doubles_with_doubled_voltage_squared(self):
+        p1 = noise_power(1.0, 100.0)
+        p2 = noise_power(2.0, 100.0)
+        self.assertAlmostEqual(p2 / p1, 4.0)
+
+
+class TestTempCoefficientSensitivity(unittest.TestCase):
+    def test_zero_delta_t_returns_zero(self):
+        self.assertAlmostEqual(temp_coefficient_sensitivity(0.1, 0.0), 0.0)
+
+    def test_typical_diode_value(self):
+        # -2.5 mV/°C for silicon diode
+        s = temp_coefficient_sensitivity(-0.0025, 1.0)
+        self.assertAlmostEqual(s, -0.0025)
+
+
+class TestRepurposeRouting(unittest.TestCase):
+    def test_diode_short_to_conductor(self):
+        self.assertEqual(repurpose_class("diode", "short_circuit"), "conductor")
+
+    def test_diode_partial_to_noise_source(self):
+        self.assertEqual(repurpose_class("diode", "partial_degradation"), "noise_source")
+
+    def test_resistor_open_to_mechanical(self):
+        self.assertEqual(repurpose_class("resistor", "open_circuit"), "mechanical")
+
+    def test_resistor_drift_to_sensor(self):
+        self.assertEqual(repurpose_class("resistor", "value_drift"), "sensor")
+
+    def test_inductor_open_to_antenna(self):
+        self.assertEqual(repurpose_class("inductor", "open_circuit"), "antenna")
+
+    def test_unknown_component_uses_default(self):
+        rp = repurpose_class("unknown_widget", "short_circuit")
+        self.assertEqual(rp, "conductor")
+
+    def test_bridge_target_noise_source_to_wave(self):
+        self.assertEqual(bridge_target("noise_source"), "wave")
+
+    def test_bridge_target_antenna_to_magnetic(self):
+        self.assertEqual(bridge_target("antenna"), "magnetic")
+
+    def test_bridge_target_mechanical_to_pressure(self):
+        self.assertEqual(bridge_target("mechanical"), "pressure")
+
+    def test_bridge_target_thermal_to_thermal(self):
+        self.assertEqual(bridge_target("thermal"), "thermal")
+
+
+class TestHardwareEncoderBitLength(unittest.TestCase):
+    _GEO = {
+        "component_type": "diode",
+        "failure_mode":   "partial_degradation",
+        "health_score":   0.45,
+        "confidence":     0.85,
+        "has_synergy":    True,
+        "voltage_v":      0.35,
+        "current_a":      0.002,
+        "temperature_c":  65.0,
+        "noise_level":    0.62,
+        "drift_pct":      18.0,
+        "lifetime_hours": 120.0,
+        "salvageable":    True,
+        "fallback_ready": True,
+    }
+
+    def test_39_bits(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = HardwareBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO).to_binary()
+        b2 = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            HardwareBridgeEncoder().to_binary()
+
+    def test_healthy_component_no_critical_flag(self):
+        enc = HardwareBridgeEncoder()
+        geo = dict(self._GEO)
+        geo["health_score"] = 0.95
+        b = enc.from_geometry(geo).to_binary()
+        # is_critical is bit 7 (3 failure_mode + 3 health_band + 1)
+        self.assertEqual(b[6], "0")
+
+    def test_critical_component_sets_flag(self):
+        enc = HardwareBridgeEncoder()
+        geo = dict(self._GEO)
+        geo["health_score"] = 0.15
+        b = enc.from_geometry(geo).to_binary()
+        self.assertEqual(b[6], "1")
+
+    def test_adjacent_failure_modes_differ_one_bit(self):
+        from bridges.common import hamming_distance
+        modes = ["none", "drift", "degradation",
+                 "partial_degradation", "open_circuit", "short_circuit"]
+        for i in range(len(modes) - 1):
+            b1 = HardwareBridgeEncoder().from_geometry({
+                "failure_mode": modes[i], "health_score": 0.5,
+            }).to_binary()
+            b2 = HardwareBridgeEncoder().from_geometry({
+                "failure_mode": modes[i + 1], "health_score": 0.5,
+            }).to_binary()
+            self.assertEqual(hamming_distance(b1[:3], b2[:3]), 1,
+                             msg=f"{modes[i]} → {modes[i+1]}")
+
+    def test_semiconductor_flag_set_for_diode(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry({"component_type": "diode"}).to_binary()
+        self.assertEqual(b[38], "1")
+
+    def test_semiconductor_flag_clear_for_resistor(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry({"component_type": "resistor"}).to_binary()
+        self.assertEqual(b[38], "0")
+
+    def test_salvageable_flag(self):
+        enc = HardwareBridgeEncoder()
+        b_yes = enc.from_geometry({"salvageable": True}).to_binary()
+        b_no  = enc.from_geometry({"salvageable": False}).to_binary()
+        # salvageable bit = 33A+9B+... section C bit 10 = index 9+12+10 = 31
+        self.assertEqual(b_yes[31], "1")
+        self.assertEqual(b_no[31],  "0")
+
+    def test_report_modality(self):
+        enc = HardwareBridgeEncoder()
+        enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(enc.report()["modality"], "hardware")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BiomachineBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.biomachine_encoder import (
+    BiomachineBridgeEncoder,
+    seal_stress_index,
+    regen_trigger,
+    material_temp_headroom,
+    shore_to_numeric,
+    dominant_bridge,
+    emotion_from_stress,
+)
+
+
+class TestSealStressIndex(unittest.TestCase):
+    def test_pristine_low_stress(self):
+        s = seal_stress_index(5.0, 25.0, 250.0, 300.0)
+        self.assertLess(s, 0.3)
+
+    def test_critical_high_stress(self):
+        s = seal_stress_index(24.0, 25.0, 40.0, 300.0,
+                              "high", 60.0, 80.0, True, True)
+        self.assertGreater(s, 0.7)
+
+    def test_salt_increases_stress(self):
+        s_no  = seal_stress_index(10.0, 25.0, 200.0, 300.0, salt_exposure=False)
+        s_yes = seal_stress_index(10.0, 25.0, 200.0, 300.0, salt_exposure=True)
+        self.assertGreater(s_yes, s_no)
+
+    def test_output_bounded_0_1(self):
+        for _ in range(5):
+            s = seal_stress_index(25.0, 25.0, 10.0, 300.0, "high", 80.0, 80.0, True, True)
+            self.assertGreaterEqual(s, 0.0)
+            self.assertLessEqual(s, 1.0)
+
+
+class TestRegenTrigger(unittest.TestCase):
+    def test_below_threshold_false(self):
+        self.assertFalse(regen_trigger(0.65))
+
+    def test_at_threshold_true(self):
+        self.assertTrue(regen_trigger(0.70))
+
+    def test_above_threshold_true(self):
+        self.assertTrue(regen_trigger(0.85))
+
+    def test_custom_threshold(self):
+        self.assertFalse(regen_trigger(0.70, threshold=0.80))
+        self.assertTrue(regen_trigger(0.80, threshold=0.80))
+
+
+class TestMaterialTempHeadroom(unittest.TestCase):
+    def test_hdpe_at_room_temp(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 25.0), 55.0)
+
+    def test_at_limit_zero(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 80.0), 0.0)
+
+    def test_beyond_limit_clamped_zero(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 100.0), 0.0)
+
+    def test_unknown_material_defaults(self):
+        h = material_temp_headroom("unknown", 25.0)
+        self.assertGreater(h, 0.0)
+
+
+class TestShoreToNumeric(unittest.TestCase):
+    def test_parses_shore_string(self):
+        self.assertAlmostEqual(shore_to_numeric("60A"), 60.0)
+
+    def test_parses_bare_number(self):
+        self.assertAlmostEqual(shore_to_numeric("80"), 80.0)
+
+    def test_invalid_returns_zero(self):
+        self.assertAlmostEqual(shore_to_numeric("unknown"), 0.0)
+
+
+class TestDominantBridge(unittest.TestCase):
+    def test_high_stress_vibration_gives_pressure(self):
+        self.assertEqual(dominant_bridge(0.75, 5.0, False, "high"), "pressure")
+
+    def test_high_temp_delta_gives_thermal(self):
+        self.assertEqual(dominant_bridge(0.2, 40.0, False, "none"), "thermal")
+
+    def test_salt_with_stress_gives_chemical(self):
+        self.assertEqual(dominant_bridge(0.55, 5.0, True, "none"), "chemical")
+
+    def test_default_gives_pressure(self):
+        self.assertEqual(dominant_bridge(0.1, 2.0, False, "none"), "pressure")
+
+
+class TestEmotionFromStress(unittest.TestCase):
+    def test_low_stress_thriving(self):
+        self.assertEqual(emotion_from_stress(0.1, False), "thriving")
+
+    def test_medium_stress_presence(self):
+        self.assertEqual(emotion_from_stress(0.3, False), "presence")
+
+    def test_high_stress_grief(self):
+        self.assertEqual(emotion_from_stress(0.75, False), "grief")
+
+    def test_regen_active_overrides(self):
+        self.assertEqual(emotion_from_stress(0.8, True), "regenerating")
+
+    def test_previous_failure_overrides(self):
+        self.assertEqual(emotion_from_stress(0.1, False, previous_failure=True), "failure")
+
+
+class TestBiomachineEncoderBitLength(unittest.TestCase):
+    _GEO = {
+        "machine_phase":       "stressed",
+        "stress_index":        0.73,
+        "material_type":       "hdpe",
+        "uv_exposure":         True,
+        "salt_exposure":       True,
+        "vibration_class":     "moderate",
+        "temp_delta_c":        22.0,
+        "compression_set_pct": 18.0,
+        "elongation_remaining":210.0,
+        "shore_hardness":      60.0,
+        "regen_active":        True,
+        "fallback_material":   "petg",
+        "harvest_active":      True,
+    }
+
+    def test_39_bits(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = BiomachineBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO).to_binary()
+        b2 = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_empty_geometry_39_bits(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({}).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            BiomachineBridgeEncoder().to_binary()
+
+    def test_above_threshold_flag_set(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.75}).to_binary()
+        # above_thresh is bit 7 (2b phase + 3b stress + 1b above_thresh = index 5)
+        self.assertEqual(b[5], "1")
+
+    def test_above_threshold_flag_clear(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.50}).to_binary()
+        self.assertEqual(b[5], "0")
+
+    def test_regen_active_flag(self):
+        enc = BiomachineBridgeEncoder()
+        b_yes = enc.from_geometry({"regen_active": True}).to_binary()
+        b_no  = enc.from_geometry({"regen_active": False}).to_binary()
+        # regen_active is first bit of Section C = 12A + 12B = index 24
+        self.assertEqual(b_yes[24], "1")
+        self.assertEqual(b_no[24],  "0")
+
+    def test_anomaly_flag_set_above_085(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.90, "material_type": "hdpe"}).to_binary()
+        self.assertEqual(b[38], "1")
+
+    def test_adjacent_machine_phases_differ_one_bit(self):
+        from bridges.common import hamming_distance
+        phases = ["nominal", "stressed", "regenerating", "failed"]
+        for i in range(len(phases) - 1):
+            b1 = BiomachineBridgeEncoder().from_geometry(
+                {"machine_phase": phases[i]}).to_binary()
+            b2 = BiomachineBridgeEncoder().from_geometry(
+                {"machine_phase": phases[i + 1]}).to_binary()
+            self.assertEqual(hamming_distance(b1[:2], b2[:2]), 1,
+                             msg=f"{phases[i]} → {phases[i+1]}")
+
+    def test_report_modality(self):
+        enc = BiomachineBridgeEncoder()
+        enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(enc.report()["modality"], "biomachine")
+
+    def test_custom_threshold(self):
+        enc = BiomachineBridgeEncoder(stress_threshold=0.50)
+        b = enc.from_geometry({"stress_index": 0.55}).to_binary()
+        self.assertEqual(b[5], "1")
+
+    def test_uv_salt_flags(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({
+            "uv_exposure": True, "salt_exposure": True,
+        }).to_binary()
+        # uv at index 9, salt at index 10 (2b phase + 3b stress + 1b thresh + 3b material)
+        self.assertEqual(b[9],  "1")
+        self.assertEqual(b[10], "1")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # CyclicBridgeEncoder tests
 # ═══════════════════════════════════════════════════════════════════════════
 
