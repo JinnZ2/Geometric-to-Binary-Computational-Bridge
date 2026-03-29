@@ -3262,5 +3262,1934 @@ class TestCuriosityEngineLog(unittest.TestCase):
             self.assertIn(k, s)
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# HardwareBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.hardware_encoder import (
+    HardwareBridgeEncoder,
+    component_health_score,
+    drift_percent,
+    lifetime_estimate_hours,
+    noise_power,
+    temp_coefficient_sensitivity,
+    repurpose_class,
+    bridge_target,
+)
+
+
+class TestComponentHealthScore(unittest.TestCase):
+    def test_at_baseline_is_one(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 1000.0, 2000.0), 1.0)
+
+    def test_at_failure_is_zero(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 2000.0, 2000.0), 0.0)
+
+    def test_midpoint_is_half(self):
+        self.assertAlmostEqual(component_health_score(0.0, 0.5, 1.0), 0.5)
+
+    def test_beyond_failure_clamped_to_zero(self):
+        self.assertAlmostEqual(component_health_score(1000.0, 3000.0, 2000.0), 0.0)
+
+    def test_degenerate_same_baseline_failure(self):
+        self.assertAlmostEqual(component_health_score(100.0, 100.0, 100.0), 1.0)
+
+
+class TestDriftPercent(unittest.TestCase):
+    def test_no_drift(self):
+        self.assertAlmostEqual(drift_percent(1000.0, 1000.0), 0.0)
+
+    def test_ten_percent_drift(self):
+        self.assertAlmostEqual(drift_percent(1000.0, 1100.0), 10.0)
+
+    def test_zero_baseline_returns_zero(self):
+        self.assertAlmostEqual(drift_percent(0.0, 50.0), 0.0)
+
+    def test_symmetric(self):
+        self.assertAlmostEqual(
+            drift_percent(1000.0, 1200.0),
+            drift_percent(1000.0, 800.0),
+        )
+
+
+class TestLifetimeEstimate(unittest.TestCase):
+    def test_zero_drift_rate_returns_large(self):
+        self.assertGreater(lifetime_estimate_hours(0.9, 0.0), 1e8)
+
+    def test_proportional_to_health(self):
+        L1 = lifetime_estimate_hours(0.9, 0.01)
+        L2 = lifetime_estimate_hours(0.45, 0.01)
+        self.assertAlmostEqual(L1 / L2, 2.0, places=5)
+
+    def test_negative_drift_treated_as_zero(self):
+        self.assertGreater(lifetime_estimate_hours(1.0, -0.1), 1e8)
+
+
+class TestNoisePower(unittest.TestCase):
+    def test_zero_resistance_returns_zero(self):
+        self.assertAlmostEqual(noise_power(0.1, 0.0), 0.0)
+
+    def test_basic_calculation(self):
+        self.assertAlmostEqual(noise_power(1.0, 50.0), 0.02)
+
+    def test_doubles_with_doubled_voltage_squared(self):
+        p1 = noise_power(1.0, 100.0)
+        p2 = noise_power(2.0, 100.0)
+        self.assertAlmostEqual(p2 / p1, 4.0)
+
+
+class TestTempCoefficientSensitivity(unittest.TestCase):
+    def test_zero_delta_t_returns_zero(self):
+        self.assertAlmostEqual(temp_coefficient_sensitivity(0.1, 0.0), 0.0)
+
+    def test_typical_diode_value(self):
+        # -2.5 mV/°C for silicon diode
+        s = temp_coefficient_sensitivity(-0.0025, 1.0)
+        self.assertAlmostEqual(s, -0.0025)
+
+
+class TestRepurposeRouting(unittest.TestCase):
+    def test_diode_short_to_conductor(self):
+        self.assertEqual(repurpose_class("diode", "short_circuit"), "conductor")
+
+    def test_diode_partial_to_noise_source(self):
+        self.assertEqual(repurpose_class("diode", "partial_degradation"), "noise_source")
+
+    def test_resistor_open_to_mechanical(self):
+        self.assertEqual(repurpose_class("resistor", "open_circuit"), "mechanical")
+
+    def test_resistor_drift_to_sensor(self):
+        self.assertEqual(repurpose_class("resistor", "value_drift"), "sensor")
+
+    def test_inductor_open_to_antenna(self):
+        self.assertEqual(repurpose_class("inductor", "open_circuit"), "antenna")
+
+    def test_unknown_component_uses_default(self):
+        rp = repurpose_class("unknown_widget", "short_circuit")
+        self.assertEqual(rp, "conductor")
+
+    def test_bridge_target_noise_source_to_wave(self):
+        self.assertEqual(bridge_target("noise_source"), "wave")
+
+    def test_bridge_target_antenna_to_magnetic(self):
+        self.assertEqual(bridge_target("antenna"), "magnetic")
+
+    def test_bridge_target_mechanical_to_pressure(self):
+        self.assertEqual(bridge_target("mechanical"), "pressure")
+
+    def test_bridge_target_thermal_to_thermal(self):
+        self.assertEqual(bridge_target("thermal"), "thermal")
+
+
+class TestHardwareEncoderBitLength(unittest.TestCase):
+    _GEO = {
+        "component_type": "diode",
+        "failure_mode":   "partial_degradation",
+        "health_score":   0.45,
+        "confidence":     0.85,
+        "has_synergy":    True,
+        "voltage_v":      0.35,
+        "current_a":      0.002,
+        "temperature_c":  65.0,
+        "noise_level":    0.62,
+        "drift_pct":      18.0,
+        "lifetime_hours": 120.0,
+        "salvageable":    True,
+        "fallback_ready": True,
+    }
+
+    def test_39_bits(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = HardwareBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO).to_binary()
+        b2 = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            HardwareBridgeEncoder().to_binary()
+
+    def test_healthy_component_no_critical_flag(self):
+        enc = HardwareBridgeEncoder()
+        geo = dict(self._GEO)
+        geo["health_score"] = 0.95
+        b = enc.from_geometry(geo).to_binary()
+        # is_critical is bit 7 (3 failure_mode + 3 health_band + 1)
+        self.assertEqual(b[6], "0")
+
+    def test_critical_component_sets_flag(self):
+        enc = HardwareBridgeEncoder()
+        geo = dict(self._GEO)
+        geo["health_score"] = 0.15
+        b = enc.from_geometry(geo).to_binary()
+        self.assertEqual(b[6], "1")
+
+    def test_adjacent_failure_modes_differ_one_bit(self):
+        from bridges.common import hamming_distance
+        modes = ["none", "drift", "degradation",
+                 "partial_degradation", "open_circuit", "short_circuit"]
+        for i in range(len(modes) - 1):
+            b1 = HardwareBridgeEncoder().from_geometry({
+                "failure_mode": modes[i], "health_score": 0.5,
+            }).to_binary()
+            b2 = HardwareBridgeEncoder().from_geometry({
+                "failure_mode": modes[i + 1], "health_score": 0.5,
+            }).to_binary()
+            self.assertEqual(hamming_distance(b1[:3], b2[:3]), 1,
+                             msg=f"{modes[i]} → {modes[i+1]}")
+
+    def test_semiconductor_flag_set_for_diode(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry({"component_type": "diode"}).to_binary()
+        self.assertEqual(b[38], "1")
+
+    def test_semiconductor_flag_clear_for_resistor(self):
+        enc = HardwareBridgeEncoder()
+        b = enc.from_geometry({"component_type": "resistor"}).to_binary()
+        self.assertEqual(b[38], "0")
+
+    def test_salvageable_flag(self):
+        enc = HardwareBridgeEncoder()
+        b_yes = enc.from_geometry({"salvageable": True}).to_binary()
+        b_no  = enc.from_geometry({"salvageable": False}).to_binary()
+        # salvageable bit = 33A+9B+... section C bit 10 = index 9+12+10 = 31
+        self.assertEqual(b_yes[31], "1")
+        self.assertEqual(b_no[31],  "0")
+
+    def test_report_modality(self):
+        enc = HardwareBridgeEncoder()
+        enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(enc.report()["modality"], "hardware")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# BiomachineBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.biomachine_encoder import (
+    BiomachineBridgeEncoder,
+    seal_stress_index,
+    regen_trigger,
+    material_temp_headroom,
+    shore_to_numeric,
+    dominant_bridge,
+    emotion_from_stress,
+)
+
+
+class TestSealStressIndex(unittest.TestCase):
+    def test_pristine_low_stress(self):
+        s = seal_stress_index(5.0, 25.0, 250.0, 300.0)
+        self.assertLess(s, 0.3)
+
+    def test_critical_high_stress(self):
+        s = seal_stress_index(24.0, 25.0, 40.0, 300.0,
+                              "high", 60.0, 80.0, True, True)
+        self.assertGreater(s, 0.7)
+
+    def test_salt_increases_stress(self):
+        s_no  = seal_stress_index(10.0, 25.0, 200.0, 300.0, salt_exposure=False)
+        s_yes = seal_stress_index(10.0, 25.0, 200.0, 300.0, salt_exposure=True)
+        self.assertGreater(s_yes, s_no)
+
+    def test_output_bounded_0_1(self):
+        for _ in range(5):
+            s = seal_stress_index(25.0, 25.0, 10.0, 300.0, "high", 80.0, 80.0, True, True)
+            self.assertGreaterEqual(s, 0.0)
+            self.assertLessEqual(s, 1.0)
+
+
+class TestRegenTrigger(unittest.TestCase):
+    def test_below_threshold_false(self):
+        self.assertFalse(regen_trigger(0.65))
+
+    def test_at_threshold_true(self):
+        self.assertTrue(regen_trigger(0.70))
+
+    def test_above_threshold_true(self):
+        self.assertTrue(regen_trigger(0.85))
+
+    def test_custom_threshold(self):
+        self.assertFalse(regen_trigger(0.70, threshold=0.80))
+        self.assertTrue(regen_trigger(0.80, threshold=0.80))
+
+
+class TestMaterialTempHeadroom(unittest.TestCase):
+    def test_hdpe_at_room_temp(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 25.0), 55.0)
+
+    def test_at_limit_zero(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 80.0), 0.0)
+
+    def test_beyond_limit_clamped_zero(self):
+        self.assertAlmostEqual(material_temp_headroom("hdpe", 100.0), 0.0)
+
+    def test_unknown_material_defaults(self):
+        h = material_temp_headroom("unknown", 25.0)
+        self.assertGreater(h, 0.0)
+
+
+class TestShoreToNumeric(unittest.TestCase):
+    def test_parses_shore_string(self):
+        self.assertAlmostEqual(shore_to_numeric("60A"), 60.0)
+
+    def test_parses_bare_number(self):
+        self.assertAlmostEqual(shore_to_numeric("80"), 80.0)
+
+    def test_invalid_returns_zero(self):
+        self.assertAlmostEqual(shore_to_numeric("unknown"), 0.0)
+
+
+class TestDominantBridge(unittest.TestCase):
+    def test_high_stress_vibration_gives_pressure(self):
+        self.assertEqual(dominant_bridge(0.75, 5.0, False, "high"), "pressure")
+
+    def test_high_temp_delta_gives_thermal(self):
+        self.assertEqual(dominant_bridge(0.2, 40.0, False, "none"), "thermal")
+
+    def test_salt_with_stress_gives_chemical(self):
+        self.assertEqual(dominant_bridge(0.55, 5.0, True, "none"), "chemical")
+
+    def test_default_gives_pressure(self):
+        self.assertEqual(dominant_bridge(0.1, 2.0, False, "none"), "pressure")
+
+
+class TestEmotionFromStress(unittest.TestCase):
+    def test_low_stress_thriving(self):
+        self.assertEqual(emotion_from_stress(0.1, False), "thriving")
+
+    def test_medium_stress_presence(self):
+        self.assertEqual(emotion_from_stress(0.3, False), "presence")
+
+    def test_high_stress_grief(self):
+        self.assertEqual(emotion_from_stress(0.75, False), "grief")
+
+    def test_regen_active_overrides(self):
+        self.assertEqual(emotion_from_stress(0.8, True), "regenerating")
+
+    def test_previous_failure_overrides(self):
+        self.assertEqual(emotion_from_stress(0.1, False, previous_failure=True), "failure")
+
+
+class TestBiomachineEncoderBitLength(unittest.TestCase):
+    _GEO = {
+        "machine_phase":       "stressed",
+        "stress_index":        0.73,
+        "material_type":       "hdpe",
+        "uv_exposure":         True,
+        "salt_exposure":       True,
+        "vibration_class":     "moderate",
+        "temp_delta_c":        22.0,
+        "compression_set_pct": 18.0,
+        "elongation_remaining":210.0,
+        "shore_hardness":      60.0,
+        "regen_active":        True,
+        "fallback_material":   "petg",
+        "harvest_active":      True,
+    }
+
+    def test_39_bits(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry(self._GEO).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = BiomachineBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO).to_binary()
+        b2 = enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_empty_geometry_39_bits(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({}).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            BiomachineBridgeEncoder().to_binary()
+
+    def test_above_threshold_flag_set(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.75}).to_binary()
+        # above_thresh is bit 7 (2b phase + 3b stress + 1b above_thresh = index 5)
+        self.assertEqual(b[5], "1")
+
+    def test_above_threshold_flag_clear(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.50}).to_binary()
+        self.assertEqual(b[5], "0")
+
+    def test_regen_active_flag(self):
+        enc = BiomachineBridgeEncoder()
+        b_yes = enc.from_geometry({"regen_active": True}).to_binary()
+        b_no  = enc.from_geometry({"regen_active": False}).to_binary()
+        # regen_active is first bit of Section C = 12A + 12B = index 24
+        self.assertEqual(b_yes[24], "1")
+        self.assertEqual(b_no[24],  "0")
+
+    def test_anomaly_flag_set_above_085(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({"stress_index": 0.90, "material_type": "hdpe"}).to_binary()
+        self.assertEqual(b[38], "1")
+
+    def test_adjacent_machine_phases_differ_one_bit(self):
+        from bridges.common import hamming_distance
+        phases = ["nominal", "stressed", "regenerating", "failed"]
+        for i in range(len(phases) - 1):
+            b1 = BiomachineBridgeEncoder().from_geometry(
+                {"machine_phase": phases[i]}).to_binary()
+            b2 = BiomachineBridgeEncoder().from_geometry(
+                {"machine_phase": phases[i + 1]}).to_binary()
+            self.assertEqual(hamming_distance(b1[:2], b2[:2]), 1,
+                             msg=f"{phases[i]} → {phases[i+1]}")
+
+    def test_report_modality(self):
+        enc = BiomachineBridgeEncoder()
+        enc.from_geometry(self._GEO).to_binary()
+        self.assertEqual(enc.report()["modality"], "biomachine")
+
+    def test_custom_threshold(self):
+        enc = BiomachineBridgeEncoder(stress_threshold=0.50)
+        b = enc.from_geometry({"stress_index": 0.55}).to_binary()
+        self.assertEqual(b[5], "1")
+
+    def test_uv_salt_flags(self):
+        enc = BiomachineBridgeEncoder()
+        b = enc.from_geometry({
+            "uv_exposure": True, "salt_exposure": True,
+        }).to_binary()
+        # uv at index 9, salt at index 10 (2b phase + 3b stress + 1b thresh + 3b material)
+        self.assertEqual(b[9],  "1")
+        self.assertEqual(b[10], "1")
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# CyclicBridgeEncoder tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+from bridges.cyclic_encoder import (
+    CyclicBridgeEncoder,
+    resonance_strength,
+    regeneration_capacity_gain,
+    phase_transition_cost,
+    fractal_energy_per_spawn,
+    spatial_gradient_strength,
+)
+
+
+class TestCyclicResonanceStrength(unittest.TestCase):
+    def test_identical_frequencies_max(self):
+        self.assertAlmostEqual(resonance_strength(1.0, 1.0), 1.0)
+
+    def test_large_difference_near_zero(self):
+        self.assertLess(resonance_strength(1.0, 100.0), 0.01)
+
+    def test_symmetry(self):
+        self.assertAlmostEqual(
+            resonance_strength(2.0, 5.0), resonance_strength(5.0, 2.0)
+        )
+
+    def test_near_frequencies_high_resonance(self):
+        self.assertGreater(resonance_strength(1.0, 1.05), 0.9)
+
+    def test_returns_float(self):
+        self.assertIsInstance(resonance_strength(1.0, 2.0), float)
+
+
+class TestCyclicRegenerationGain(unittest.TestCase):
+    def test_zero_input_no_change(self):
+        self.assertAlmostEqual(regeneration_capacity_gain(1.0, 0.0), 1.0)
+
+    def test_positive_input_grows_capacity(self):
+        self.assertGreater(regeneration_capacity_gain(1.0, 50.0), 1.0)
+
+    def test_negative_input_clamped(self):
+        # Negative energy treated as 0
+        self.assertAlmostEqual(regeneration_capacity_gain(1.0, -10.0), 1.0)
+
+    def test_large_input_significant_growth(self):
+        c = regeneration_capacity_gain(1.0, 1000.0)
+        self.assertGreater(c, 1.0)
+
+    def test_scales_with_initial_capacity(self):
+        c1 = regeneration_capacity_gain(1.0, 100.0)
+        c2 = regeneration_capacity_gain(2.0, 100.0)
+        self.assertAlmostEqual(c2 / c1, 2.0, places=5)
+
+
+class TestCyclicPhaseTransitionCost(unittest.TestCase):
+    def test_same_phase_zero_cost(self):
+        self.assertEqual(phase_transition_cost("normal", "normal"), 0.0)
+
+    def test_adjacent_phase_costs_10(self):
+        self.assertEqual(phase_transition_cost("normal", "liquid"), 10.0)
+
+    def test_crystalline_to_plasma_costs_40(self):
+        self.assertEqual(phase_transition_cost("crystalline", "plasma"), 40.0)
+
+    def test_reverse_direction_same_cost(self):
+        self.assertEqual(
+            phase_transition_cost("gas", "normal"),
+            phase_transition_cost("normal", "gas"),
+        )
+
+    def test_unknown_phase_defaults_to_normal(self):
+        # unknown maps to normal (idx=1); liquid is idx=2 → diff=1 → 10
+        self.assertEqual(phase_transition_cost("unknown_phase", "liquid"), 10.0)
+
+
+class TestCyclicFractalEnergy(unittest.TestCase):
+    def test_depth_zero_full_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 0), 100.0)
+
+    def test_depth_one_half_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 1), 50.0)
+
+    def test_depth_three_eighth_energy(self):
+        self.assertAlmostEqual(fractal_energy_per_spawn(100.0, 3), 12.5)
+
+    def test_energy_conserved_across_spawns(self):
+        for depth in range(1, 5):
+            total = fractal_energy_per_spawn(80.0, depth) * (2 ** depth)
+            self.assertAlmostEqual(total, 80.0)
+
+
+class TestCyclicSpatialGradient(unittest.TestCase):
+    def test_positive_gradient_when_E1_higher(self):
+        self.assertGreater(spatial_gradient_strength(100.0, 60.0, 2.0), 0)
+
+    def test_negative_gradient_when_E2_higher(self):
+        self.assertLess(spatial_gradient_strength(60.0, 100.0, 2.0), 0)
+
+    def test_zero_gradient_equal_energies(self):
+        self.assertAlmostEqual(spatial_gradient_strength(50.0, 50.0, 1.0), 0.0)
+
+    def test_zero_distance_clamped(self):
+        g = spatial_gradient_strength(100.0, 0.0, 0.0)
+        self.assertAlmostEqual(g, 100.0 / 0.01)
+
+
+class TestCyclicEncoderBitLength(unittest.TestCase):
+    _GEO3 = {
+        "total_energy":      [10.0, 50.0, 5.0],
+        "entropy":           [0.1, 0.5, 0.05],
+        "quantum_coherence": [0.8, 0.3, 0.95],
+        "capacity":          [1.0, 2.5, 0.8],
+        "phase_state":       ["normal", "liquid", "crystalline"],
+        "frequency":         [1.0, 1.1, 5.0],
+        "fractal_depth":     [0, 1, 0],
+        "entangled":         [False, True, False],
+    }
+
+    def test_three_fields_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry(self._GEO3).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_one_field_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry({
+            "total_energy": [5.0], "phase_state": ["normal"],
+            "frequency": [1.0],
+        }).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_empty_geometry_39_bits(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry({}).to_binary()
+        self.assertEqual(len(b), 39)
+
+    def test_binary_alphabet(self):
+        enc = CyclicBridgeEncoder()
+        b = enc.from_geometry(self._GEO3).to_binary()
+        self.assertTrue(all(c in "01" for c in b))
+
+    def test_deterministic(self):
+        enc = CyclicBridgeEncoder()
+        b1 = enc.from_geometry(self._GEO3).to_binary()
+        b2 = enc.from_geometry(self._GEO3).to_binary()
+        self.assertEqual(b1, b2)
+
+    def test_raises_without_geometry(self):
+        with self.assertRaises(ValueError):
+            CyclicBridgeEncoder().to_binary()
+
+
+class TestCyclicEncoderPhaseEncoding(unittest.TestCase):
+    _PHASES = ["crystalline", "normal", "liquid", "gas", "plasma"]
+
+    def test_all_phases_produce_39_bits(self):
+        for ph in self._PHASES:
+            enc = CyclicBridgeEncoder()
+            b = enc.from_geometry({"phase_state": [ph]}).to_binary()
+            self.assertEqual(len(b), 39)
+
+    def test_adjacent_phases_differ_by_1_bit_in_section_a(self):
+        from bridges.common import hamming_distance
+        for i in range(len(self._PHASES) - 1):
+            enc = CyclicBridgeEncoder()
+            b1 = enc.from_geometry({
+                "phase_state": [self._PHASES[i]], "total_energy": [1.0],
+            }).to_binary()
+            b2 = enc.from_geometry({
+                "phase_state": [self._PHASES[i + 1]], "total_energy": [1.0],
+            }).to_binary()
+            # Phase state is first 3 bits of Section A
+            self.assertEqual(hamming_distance(b1[:3], b2[:3]), 1,
+                             msg=f"{self._PHASES[i]} → {self._PHASES[i+1]}")
+
+
+class TestCyclicEncoderInteractionBits(unittest.TestCase):
+    def _encode(self, geo):
+        return CyclicBridgeEncoder().from_geometry(geo).to_binary()
+
+    def test_entangled_flag_set(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "entangled": [True],
+        })
+        # any_entangled is bit 36 (0-indexed): 24A + 9B + 3resonance = 36
+        self.assertEqual(b[36], "1")
+
+    def test_entangled_flag_clear(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "entangled": [False],
+        })
+        self.assertEqual(b[36], "0")
+
+    def test_fractal_active_set(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "fractal_depth": [2],
+        })
+        self.assertEqual(b[37], "1")
+
+    def test_fractal_active_clear(self):
+        b = self._encode({
+            "total_energy": [1.0], "phase_state": ["normal"],
+            "frequency": [1.0], "fractal_depth": [0],
+        })
+        self.assertEqual(b[37], "0")
+
+    def test_phase_spread_set_for_mixed_phases(self):
+        b = self._encode({
+            "total_energy": [1.0, 1.0],
+            "phase_state": ["crystalline", "plasma"],
+            "frequency": [1.0, 1.0],
+        })
+        self.assertEqual(b[38], "1")
+
+    def test_phase_spread_clear_for_uniform_phases(self):
+        b = self._encode({
+            "total_energy": [1.0, 1.0, 1.0],
+            "phase_state": ["normal", "normal", "normal"],
+            "frequency": [1.0, 1.0, 1.0],
+        })
+        self.assertEqual(b[38], "0")
+
+    def test_identical_frequencies_high_resonance_band(self):
+        # Identical frequencies → R=1.0 → highest resonance band (bits 33-35)
+        b_same = self._encode({
+            "total_energy": [1.0, 1.0], "phase_state": ["normal", "normal"],
+            "frequency": [2.0, 2.0],
+        })
+        b_diff = self._encode({
+            "total_energy": [1.0, 1.0], "phase_state": ["normal", "normal"],
+            "frequency": [2.0, 10.0],
+        })
+        # Resonance bits 33-35: same-freq should encode higher band
+        self.assertGreater(int(b_same[33:36], 2) + int(b_diff[33:36], 2), 0)
+
+
+class TestCyclicEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CyclicBridgeEncoder()
+        enc.from_geometry({"total_energy": [1.0], "phase_state": ["normal"]})
+        enc.to_binary()
+        r = enc.report()
+        self.assertEqual(r["modality"], "cyclic")
+
+    def test_report_bit_count(self):
+        enc = CyclicBridgeEncoder()
+        enc.from_geometry({"total_energy": [1.0, 2.0, 3.0], "phase_state": ["normal"] * 3})
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# ConstraintAgent tests
+# ═══════════════════════════════════════════════════════════════════════════
+
+_ca_mod = _il.import_module("Geometric-Intelligence.constraint_agent")
+AgentState     = _ca_mod.AgentState
+ResourceBudget = _ca_mod.ResourceBudget
+GeometricMap   = _ca_mod.GeometricMap
+ConstraintAgent = _ca_mod.ConstraintAgent
+_Fraction = _ca_mod.Fraction
+
+
+class TestResourceBudget(unittest.TestCase):
+    def test_default_not_depleted(self):
+        # Default energy=Fraction(1,1) — not depleted
+        b = ResourceBudget()
+        self.assertFalse(b.is_depleted())
+
+    def test_not_depleted_with_energy(self):
+        b = ResourceBudget(compute=0, energy=_Fraction(1, 2))
+        self.assertFalse(b.is_depleted())
+
+    def test_not_depleted_with_compute(self):
+        b = ResourceBudget(compute=10, energy=_Fraction(0))
+        self.assertFalse(b.is_depleted())
+
+    def test_depleted_when_both_zero(self):
+        b = ResourceBudget(compute=0, energy=_Fraction(0))
+        self.assertTrue(b.is_depleted())
+
+
+class TestGeometricMap(unittest.TestCase):
+    def test_record_resonance_clamped_high(self):
+        m = GeometricMap()
+        m.record_resonance("A", 1.5)
+        self.assertEqual(m.resonances["A"], _Fraction(1))
+
+    def test_record_resonance_clamped_low(self):
+        m = GeometricMap()
+        m.record_resonance("A", -0.5)
+        self.assertEqual(m.resonances["A"], _Fraction(0))
+
+    def test_record_relationship_idempotent(self):
+        m = GeometricMap()
+        m.record_relationship("A", "B")
+        m.record_relationship("A", "B")
+        self.assertEqual(m.relationships["A"].count("B"), 1)
+
+    def test_record_energy_flow_accumulates(self):
+        m = GeometricMap()
+        m.record_energy_flow("A", "B", 0.5)
+        m.record_energy_flow("A", "B", 0.5)
+        self.assertEqual(m.energy_flows[("A", "B")], _Fraction(1))
+
+    def test_record_energy_flow_accepts_fraction(self):
+        m = GeometricMap()
+        m.record_energy_flow("X", "Y", _Fraction(1, 4))
+        self.assertEqual(m.energy_flows[("X", "Y")], _Fraction(1, 4))
+
+
+class TestConstraintAgentInit(unittest.TestCase):
+    def test_initial_state_compressed(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+    def test_seed_has_full_resonance(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.map.resonances["SEED"], _Fraction(1))
+
+    def test_compression_ratio_one(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.compression_ratio, _Fraction(1))
+
+    def test_home_families_default_empty(self):
+        agent = ConstraintAgent("SEED")
+        self.assertEqual(agent.home_families, [])
+
+    def test_bloom_threshold_stored_as_fraction(self):
+        agent = ConstraintAgent("SEED", bloom_threshold=0.75)
+        self.assertIsInstance(agent.bloom_threshold, _Fraction)
+
+
+class TestConstraintAgentResourceBudget(unittest.TestCase):
+    def test_set_resource_budget(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=100, bandwidth=5.0,
+                                  energy=0.8, time_remaining=0.9)
+        self.assertEqual(agent.budget.compute, 100)
+        self.assertAlmostEqual(float(agent.budget.energy), 0.8, places=3)
+
+    def test_should_expand_with_full_energy(self):
+        agent = ConstraintAgent("SEED", bloom_threshold=0.5)
+        agent.set_resource_budget(compute=100, energy=1.0)
+        self.assertTrue(agent.should_expand())
+
+    def test_should_not_expand_when_depleted(self):
+        agent = ConstraintAgent("SEED")
+        # Force depleted budget (energy=0, compute=0)
+        agent.set_resource_budget(compute=0, energy=0.0)
+        self.assertFalse(agent.should_expand())
+
+
+class TestConstraintAgentBloom(unittest.TestCase):
+    def test_bloom_changes_state_to_exploring(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+    def test_bloom_returns_list(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        result = agent.bloom(depth=1)
+        self.assertIsInstance(result, list)
+
+    def test_bloom_records_history(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=2)
+        self.assertEqual(len(agent.expansion_history), 1)
+        self.assertEqual(agent.expansion_history[0]["depth"], 2)
+
+    def test_bloom_with_prior_map(self):
+        prior = GeometricMap()
+        prior.resonances["CHILD"] = _Fraction(3, 4)
+        prior.relationships["SEED"] = ["CHILD"]
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        discovered = agent.bloom(depth=1, seed_map=prior)
+        self.assertIn("CHILD", discovered)
+        self.assertEqual(agent.map.resonances["CHILD"], _Fraction(3, 4))
+
+    def test_compression_ratio_zero_after_bloom(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        self.assertEqual(agent.compression_ratio, _Fraction(0))
+
+
+class TestConstraintAgentExplore(unittest.TestCase):
+    def test_explore_returns_summary_dict(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        summary = agent.explore()
+        for key in ("entities_visited", "relationships_mapped",
+                    "energy_flows_recorded", "sensor_activations"):
+            self.assertIn(key, summary)
+
+    def test_explore_records_energy_flows(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.record_resonance("A", 0.8)
+        agent.map.record_resonance("B", 0.5)
+        agent.map.record_relationship("A", "B")
+        agent.state = AgentState.EXPLORING
+        summary = agent.explore()
+        self.assertGreater(int(summary["energy_flows_recorded"]), 0)
+        self.assertIn(("A", "B"), agent.map.energy_flows)
+
+    def test_explore_returns_empty_from_compressed(self):
+        agent = ConstraintAgent("SEED")
+        result = agent.explore()
+        self.assertEqual(result, {})
+
+
+class TestConstraintAgentCompress(unittest.TestCase):
+    def test_compress_returns_one(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+
+    def test_compress_restores_state(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+    def test_compress_resets_position_to_seed(self):
+        agent = ConstraintAgent("SEED")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertEqual(agent.current_position, "SEED")
+
+    def test_compress_preserves_map(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.record_resonance("EXTRA", 0.5)
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.compress()
+        self.assertIn("EXTRA", agent.map.resonances)
+
+    def test_compress_idempotent_on_already_compressed(self):
+        agent = ConstraintAgent("SEED")
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+
+class TestConstraintAgentSelfValidate(unittest.TestCase):
+    def test_fresh_agent_is_valid(self):
+        agent = ConstraintAgent("SEED")
+        report = agent.self_validate()
+        self.assertTrue(report["is_valid"])
+        self.assertEqual(report["inconsistencies"], [])
+
+    def test_balanced_flows_valid(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 2)
+        agent.map.energy_flows[("B", "A")] = _Fraction(1, 2)
+        report = agent.self_validate()
+        self.assertTrue(report["is_valid"])
+
+    def test_unbalanced_flows_invalid(self):
+        agent = ConstraintAgent("SEED")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 2)
+        report = agent.self_validate()
+        self.assertFalse(report["is_valid"])
+        self.assertGreater(len(report["inconsistencies"]), 0)
+
+    def test_report_has_required_keys(self):
+        agent = ConstraintAgent("SEED")
+        report = agent.self_validate()
+        for key in ("is_valid", "inconsistencies",
+                    "energy_balance", "geometry_coherence"):
+            self.assertIn(key, report)
+
+
+class TestConstraintAgentDetectCorruption(unittest.TestCase):
+    def test_returns_bool(self):
+        agent = ConstraintAgent("SEED")
+        result = agent.detect_corruption("any_constraint")
+        self.assertIsInstance(result, bool)
+
+    def test_stub_returns_false(self):
+        agent = ConstraintAgent("SEED")
+        self.assertFalse(agent.detect_corruption("anything"))
+
+
+class TestConstraintAgentSerialize(unittest.TestCase):
+    def _make_agent(self):
+        agent = ConstraintAgent("SEED", home_families=["stability"])
+        agent.set_resource_budget(compute=500, energy=0.8)
+        agent.map.record_resonance("CHILD", 0.6)
+        agent.map.record_relationship("SEED", "CHILD")
+        agent.map.record_energy_flow("SEED", "CHILD", 0.3)
+        return agent
+
+    def test_serialize_returns_dict(self):
+        s = self._make_agent().serialize()
+        self.assertIsInstance(s, dict)
+
+    def test_serialize_has_required_keys(self):
+        s = self._make_agent().serialize()
+        for key in ("seed_id", "home_families", "state", "compression_ratio",
+                    "budget", "map", "expansion_history", "sensor_state"):
+            self.assertIn(key, s)
+
+    def test_fractions_stored_as_tuples(self):
+        s = self._make_agent().serialize()
+        cr = s["compression_ratio"]
+        self.assertIsInstance(cr, tuple)
+        self.assertEqual(len(cr), 2)
+
+    def test_energy_flows_keys_are_strings(self):
+        s = self._make_agent().serialize()
+        for k in s["map"]["energy_flows"]:
+            self.assertIsInstance(k, str)
+
+    def test_roundtrip_preserves_seed_id(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.seed_id, "SEED")
+
+    def test_roundtrip_preserves_resonances(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn("CHILD", restored.map.resonances)
+        self.assertEqual(restored.map.resonances["CHILD"],
+                         agent.map.resonances["CHILD"])
+
+    def test_roundtrip_preserves_energy_flows(self):
+        agent = self._make_agent()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn(("SEED", "CHILD"), restored.map.energy_flows)
+
+    def test_roundtrip_preserves_state(self):
+        agent = self._make_agent()
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom(depth=1)
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.state, agent.state)
+
+    def test_roundtrip_preserves_home_families(self):
+        restored = ConstraintAgent.deserialize(self._make_agent().serialize())
+        self.assertEqual(restored.home_families, ["stability"])
+
+    def test_roundtrip_sensor_state_as_fractions(self):
+        restored = ConstraintAgent.deserialize(self._make_agent().serialize())
+        for v in restored.sensor_state.values():
+            self.assertIsInstance(v, _Fraction)
+
+    def test_deserialize_tuple_keys_safe(self):
+        agent = ConstraintAgent("X")
+        agent.map.energy_flows[("A", "B")] = _Fraction(1, 3)
+        agent.map.energy_flows[("B", "C")] = _Fraction(2, 7)
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertIn(("A", "B"), restored.map.energy_flows)
+        self.assertIn(("B", "C"), restored.map.energy_flows)
+
+
+class TestConstraintAgentFullCycle(unittest.TestCase):
+    def test_full_lifecycle(self):
+        agent = ConstraintAgent("ROOT", home_families=["base"])
+        agent.set_resource_budget(compute=1000, energy=1.0)
+
+        agent.bloom(depth=1)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+        summary = agent.explore()
+        self.assertIsInstance(summary, dict)
+
+        report = agent.self_validate()
+        self.assertIn("is_valid", report)
+
+        ratio = agent.compress()
+        self.assertEqual(ratio, _Fraction(1))
+        self.assertEqual(agent.state, AgentState.COMPRESSED)
+
+        agent.set_resource_budget(compute=500, energy=0.5)
+        agent.bloom(depth=1, seed_map=agent.map)
+        self.assertEqual(agent.state, AgentState.EXPLORING)
+
+    def test_serialize_after_full_cycle(self):
+        agent = ConstraintAgent("ROOT")
+        agent.set_resource_budget(compute=1000, energy=1.0)
+        agent.bloom()
+        agent.explore()
+        agent.compress()
+        restored = ConstraintAgent.deserialize(agent.serialize())
+        self.assertEqual(restored.state, AgentState.COMPRESSED)
+        self.assertIn("ROOT", restored.map.resonances)
+
+
+# ===========================================================================
+# Resilience encoder tests
+# ===========================================================================
+from bridges.resilience_encoder import (
+    ResilienceBridgeEncoder,
+    domain_seed,
+    seed_entropy,
+    opposing_balance,
+    cascade_dominant,
+    crisis_phase,
+    knowledge_at_risk,
+    buffer_min,
+    DOMAIN_ORDER,
+)
+
+
+# ---------------------------------------------------------------------------
+# Pure physics helpers
+# ---------------------------------------------------------------------------
+
+class TestDomainSeed(unittest.TestCase):
+    def _all_caps(self):
+        return {d: 1.0 for d in DOMAIN_ORDER}
+
+    def test_uniform_returns_equal_proportions(self):
+        seed = domain_seed(self._all_caps())
+        for p in seed:
+            self.assertAlmostEqual(p, 1.0 / 6.0, places=10)
+
+    def test_single_domain_returns_one(self):
+        caps = {d: 0.0 for d in DOMAIN_ORDER}
+        caps["food"] = 5.0
+        seed = domain_seed(caps)
+        self.assertAlmostEqual(seed[0], 1.0, places=10)
+        for p in seed[1:]:
+            self.assertAlmostEqual(p, 0.0, places=10)
+
+    def test_zero_caps_returns_uniform_fallback(self):
+        seed = domain_seed({d: 0.0 for d in DOMAIN_ORDER})
+        for p in seed:
+            self.assertAlmostEqual(p, 1.0 / 6.0, places=10)
+
+    def test_missing_domains_default_to_zero(self):
+        seed = domain_seed({"food": 3.0, "energy": 3.0})
+        self.assertAlmostEqual(seed[0], 0.5, places=10)
+        self.assertAlmostEqual(seed[1], 0.5, places=10)
+        for p in seed[2:]:
+            self.assertAlmostEqual(p, 0.0, places=10)
+
+    def test_negative_caps_clamped(self):
+        caps = {d: 1.0 for d in DOMAIN_ORDER}
+        caps["food"] = -5.0
+        seed = domain_seed(caps)
+        self.assertGreaterEqual(min(seed), 0.0)
+
+    def test_sums_to_one(self):
+        caps = {"food": 0.5, "energy": 0.8, "social": 0.3,
+                "institutional": 0.6, "knowledge": 0.9, "infrastructure": 0.4}
+        self.assertAlmostEqual(sum(domain_seed(caps)), 1.0, places=10)
+
+
+class TestSeedEntropy(unittest.TestCase):
+    def test_uniform_is_max_entropy(self):
+        h = seed_entropy([1.0 / 6.0] * 6)
+        self.assertAlmostEqual(h, math.log2(6), places=5)
+
+    def test_concentrated_is_zero(self):
+        h = seed_entropy([1.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        self.assertAlmostEqual(h, 0.0, places=10)
+
+    def test_two_equal_domains(self):
+        h = seed_entropy([0.5, 0.5, 0.0, 0.0, 0.0, 0.0])
+        self.assertAlmostEqual(h, 1.0, places=10)
+
+    def test_entropy_non_negative(self):
+        self.assertGreaterEqual(seed_entropy([0.3, 0.2, 0.1, 0.1, 0.2, 0.1]), 0.0)
+
+    def test_entropy_increases_with_balance(self):
+        h_concentrated = seed_entropy([0.8, 0.04, 0.04, 0.04, 0.04, 0.04])
+        h_balanced     = seed_entropy([1.0 / 6.0] * 6)
+        self.assertLess(h_concentrated, h_balanced)
+
+
+class TestOpposingBalance(unittest.TestCase):
+    def test_perfectly_symmetric_is_one(self):
+        # food=energy, social=institutional, knowledge=infra
+        seed = [0.2, 0.2, 0.15, 0.15, 0.15, 0.15]
+        self.assertAlmostEqual(opposing_balance(seed), 1.0, places=10)
+
+    def test_maximally_asymmetric(self):
+        # Each pair: one at 1, other at 0 — balance per pair = 0
+        seed = [0.5, 0.0, 0.5, 0.0, 0.0, 0.0]
+        bal = opposing_balance(seed)
+        self.assertLessEqual(bal, 1.0)
+        self.assertGreaterEqual(bal, 0.0)
+
+    def test_short_list_returns_zero(self):
+        self.assertEqual(opposing_balance([0.5, 0.5]), 0.0)
+
+    def test_range_zero_to_one(self):
+        seed = [0.4, 0.1, 0.2, 0.15, 0.1, 0.05]
+        bal = opposing_balance(seed)
+        self.assertGreaterEqual(bal, 0.0)
+        self.assertLessEqual(bal, 1.0)
+
+    def test_uniform_seed_is_balanced(self):
+        self.assertAlmostEqual(opposing_balance([1.0 / 6.0] * 6), 1.0, places=10)
+
+
+class TestCascadeDominant(unittest.TestCase):
+    def _full_bufs(self):
+        return {d: 0.8 for d in DOMAIN_ORDER}
+
+    def test_all_healthy_returns_none(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        self.assertEqual(cascade_dominant(caps, bufs), "none")
+
+    def test_depleted_energy_is_dominant(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        bufs["energy"] = 0.02
+        self.assertEqual(cascade_dominant(caps, bufs), "energy")
+
+    def test_most_depleted_wins(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = self._full_bufs()
+        bufs["food"]  = 0.04
+        bufs["social"] = 0.01   # lower
+        self.assertEqual(cascade_dominant(caps, bufs), "social")
+
+    def test_at_threshold_returns_none(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = {d: 0.05 for d in DOMAIN_ORDER}  # exactly at threshold
+        self.assertEqual(cascade_dominant(caps, bufs), "none")
+
+    def test_just_below_threshold_returns_domain(self):
+        caps = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs["knowledge"] = 0.049
+        self.assertEqual(cascade_dominant(caps, bufs), "knowledge")
+
+
+class TestCrisisPhase(unittest.TestCase):
+    def _healthy(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        return caps, bufs
+
+    def test_stable_when_all_healthy(self):
+        caps, bufs = self._healthy()
+        self.assertEqual(crisis_phase(caps, bufs), "stable")
+
+    def test_stressed_when_cap_below_07(self):
+        caps, bufs = self._healthy()
+        caps["food"] = 0.65
+        self.assertEqual(crisis_phase(caps, bufs), "stressed")
+
+    def test_stressed_when_buf_below_04(self):
+        caps, bufs = self._healthy()
+        bufs["energy"] = 0.35
+        self.assertEqual(crisis_phase(caps, bufs), "stressed")
+
+    def test_cascade_when_buffer_depleted(self):
+        caps, bufs = self._healthy()
+        bufs["food"] = 0.03
+        self.assertEqual(crisis_phase(caps, bufs), "cascade")
+
+    def test_cascade_when_min_cap_below_03(self):
+        caps, bufs = self._healthy()
+        caps["energy"] = 0.25
+        self.assertEqual(crisis_phase(caps, bufs), "cascade")
+
+    def test_collapse_when_min_cap_below_01(self):
+        caps, bufs = self._healthy()
+        caps["food"] = 0.08
+        self.assertEqual(crisis_phase(caps, bufs), "collapse")
+
+    def test_collapse_when_three_domains_depleted(self):
+        caps, bufs = self._healthy()
+        for d in ["food", "energy", "social"]:
+            bufs[d] = 0.0
+        self.assertEqual(crisis_phase(caps, bufs), "collapse")
+
+
+class TestKnowledgeAtRisk(unittest.TestCase):
+    def test_safe(self):
+        self.assertFalse(knowledge_at_risk(0.5, 0.8))
+
+    def test_low_buffer_triggers(self):
+        self.assertTrue(knowledge_at_risk(0.15, 0.8))
+
+    def test_low_capacity_triggers(self):
+        self.assertTrue(knowledge_at_risk(0.5, 0.35))
+
+    def test_boundary_buf(self):
+        self.assertTrue(knowledge_at_risk(0.20 - 1e-10, 0.8))
+        self.assertFalse(knowledge_at_risk(0.20, 0.8))
+
+    def test_boundary_cap(self):
+        self.assertTrue(knowledge_at_risk(0.5, 0.40 - 1e-10))
+        self.assertFalse(knowledge_at_risk(0.5, 0.40))
+
+
+class TestBufferMin(unittest.TestCase):
+    def test_uniform(self):
+        self.assertAlmostEqual(buffer_min({d: 0.6 for d in DOMAIN_ORDER}), 0.6)
+
+    def test_one_low(self):
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        bufs["infrastructure"] = 0.1
+        self.assertAlmostEqual(buffer_min(bufs), 0.1)
+
+    def test_missing_domain_defaults_to_one(self):
+        self.assertAlmostEqual(buffer_min({}), 1.0)
+
+
+# ---------------------------------------------------------------------------
+# ResilienceBridgeEncoder
+# ---------------------------------------------------------------------------
+
+class TestResilienceEncoderBitLength(unittest.TestCase):
+    def _make_enc(self, **kwargs):
+        geometry = {
+            "capacities": {d: 0.8 for d in DOMAIN_ORDER},
+            "buffers":    {d: 0.6 for d in DOMAIN_ORDER},
+        }
+        geometry.update(kwargs)
+        enc = ResilienceBridgeEncoder()
+        return enc.from_geometry(geometry).to_binary()
+
+    def test_exactly_39_bits(self):
+        self.assertEqual(len(self._make_enc()), 39)
+
+    def test_binary_alphabet(self):
+        bits = self._make_enc()
+        self.assertTrue(all(c in "01" for c in bits))
+
+    def test_deterministic(self):
+        self.assertEqual(self._make_enc(), self._make_enc())
+
+
+class TestResilienceEncoderSectionA(unittest.TestCase):
+    def _encode(self, caps, bufs=None):
+        if bufs is None:
+            bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_section_a_length_18(self):
+        bits = self._encode({d: 0.5 for d in DOMAIN_ORDER})
+        self.assertEqual(len(bits[:18]), 18)
+
+    def test_zero_caps_differs_from_full_caps(self):
+        bits_zero = self._encode({d: 0.0 for d in DOMAIN_ORDER})
+        bits_full = self._encode({d: 1.0 for d in DOMAIN_ORDER})
+        self.assertNotEqual(bits_zero[:18], bits_full[:18])
+
+
+class TestResilienceEncoderSectionB(unittest.TestCase):
+    def _encode_scenario(self, caps, bufs, **kw):
+        geometry = {"capacities": caps, "buffers": bufs}
+        geometry.update(kw)
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry(geometry)
+        return enc.to_binary()
+
+    def _stable(self):
+        return ({d: 0.9 for d in DOMAIN_ORDER}, {d: 0.8 for d in DOMAIN_ORDER})
+
+    def test_knowledge_crit_flag_set(self):
+        caps, bufs = self._stable()
+        bufs["knowledge"] = 0.10
+        bits = self._encode_scenario(caps, bufs)
+        knowledge_crit_bit = bits[18 + 2 + 3 + 1]  # offset within section B
+        self.assertEqual(knowledge_crit_bit, "1")
+
+    def test_cascading_flag_set_when_depleted(self):
+        caps, bufs = self._stable()
+        bufs["food"] = 0.02
+        bits = self._encode_scenario(caps, bufs)
+        cascading_bit = bits[18 + 2 + 3]
+        self.assertEqual(cascading_bit, "1")
+
+    def test_lag_hi_flag_set(self):
+        caps, bufs = self._stable()
+        bits = self._encode_scenario(caps, bufs, decision_lag_hours=30.0)
+        lag_bit = bits[18 + 2 + 3 + 1 + 1 + 1]
+        self.assertEqual(lag_bit, "1")
+
+    def test_lag_hi_not_set_below_threshold(self):
+        caps, bufs = self._stable()
+        bits = self._encode_scenario(caps, bufs, decision_lag_hours=20.0)
+        lag_bit = bits[18 + 2 + 3 + 1 + 1 + 1]
+        self.assertEqual(lag_bit, "0")
+
+
+class TestResilienceEncoderAutoPhase(unittest.TestCase):
+    def _encode(self, caps, bufs):
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_stable_vs_collapse_differ(self):
+        caps_s = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs_s = {d: 0.8 for d in DOMAIN_ORDER}
+        caps_c = {d: 0.05 for d in DOMAIN_ORDER}
+        bufs_c = {d: 0.0 for d in DOMAIN_ORDER}
+        self.assertNotEqual(self._encode(caps_s, bufs_s),
+                            self._encode(caps_c, bufs_c))
+
+    def test_override_phase_accepted(self):
+        caps = {d: 0.9 for d in DOMAIN_ORDER}
+        bufs = {d: 0.8 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs,
+                           "crisis_phase": "cascade"})
+        bits = enc.to_binary()
+        self.assertEqual(len(bits), 39)
+
+
+class TestResilienceEncoderSectionD(unittest.TestCase):
+    def _encode(self, caps, bufs=None):
+        if bufs is None:
+            bufs = {d: 0.6 for d in DOMAIN_ORDER}
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({"capacities": caps, "buffers": bufs})
+        return enc.to_binary()
+
+    def test_transmissible_set_when_all_nonzero(self):
+        caps = {d: 0.5 for d in DOMAIN_ORDER}
+        bits = self._encode(caps)
+        self.assertEqual(bits[-1], "1")   # last bit = transmissible
+
+    def test_transmissible_clear_when_domain_missing(self):
+        caps = {"food": 0.5, "energy": 0.5}   # four domains zero
+        bits = self._encode(caps)
+        self.assertEqual(bits[-1], "0")
+
+    def test_balanced_vs_concentrated_entropy_bits_differ(self):
+        bits_bal = self._encode({d: 1.0 for d in DOMAIN_ORDER})
+        bits_con = self._encode(
+            {"food": 10.0, "energy": 0.01, "social": 0.01,
+             "institutional": 0.01, "knowledge": 0.01, "infrastructure": 0.01})
+        self.assertNotEqual(bits_bal[-6:-3], bits_con[-6:-3])
+
+
+class TestResilienceEncoderReport(unittest.TestCase):
+    def test_report_keys(self):
+        enc = ResilienceBridgeEncoder()
+        enc.from_geometry({
+            "capacities": {d: 0.7 for d in DOMAIN_ORDER},
+            "buffers":    {d: 0.5 for d in DOMAIN_ORDER},
+        })
+        enc.to_binary()
+        rpt = enc.report()
+        self.assertIn("modality", rpt)
+        self.assertIn("bits", rpt)
+        self.assertEqual(rpt["bits"], 39)
+
+    def test_no_geometry_raises(self):
+        enc = ResilienceBridgeEncoder()
+        with self.assertRaises(ValueError):
+            enc.to_binary()
+
+
+# ===========================================================================
+# Community encoder tests
+# ===========================================================================
+from bridges.community_encoder import (
+    CommunityBridgeEncoder,
+    food_capacity,
+    energy_capacity,
+    social_capacity,
+    institutional_capacity,
+    knowledge_capacity,
+    infrastructure_capacity,
+    food_buffer,
+    energy_buffer,
+    social_buffer,
+    institutional_buffer,
+    knowledge_buffer,
+    infrastructure_buffer,
+    profile_to_capacities,
+    profile_to_buffers,
+)
+
+
+def _minimal_profile(**overrides):
+    """Bare-minimum profile dict; overrides applied on top."""
+    base = {
+        "name": "test",
+        "population": 10_000,
+        "days_food_supply_retail": 3.0,
+        "active_farms_local": 0,
+        "community_gardens_acres": 0.0,
+        "farmers_market": False,
+        "grain_elevator_present": False,
+        "food_bank_present": False,
+        "grid_connected": True,
+        "local_generation_mw": 0.0,
+        "solar_installations": 0,
+        "wind_capacity_mw": 0.0,
+        "backup_generators": 0,
+        "fuel_reserve_days": 3.0,
+        "hospital_present": False,
+        "clinic_present": True,
+        "pharmacy_count": 1,
+        "ems_available": True,
+        "mutual_aid_networks": 0,
+        "faith_communities": 0,
+        "civic_organizations": 0,
+        "cell_towers": 1,
+        "internet_providers": 1,
+        "ham_radio_operators": 0,
+        "community_alert_system": False,
+        "wells_private": 0,
+        "surface_water_sources": 0,
+        "days_water_reserve": 1.0,
+        "backup_power_water_plant": False,
+        "water_treatment_functional": True,
+        "highway_access": True,
+        "rail_access": False,
+        "fuel_stations": 1,
+        "skill_holders_identified": 0,
+    }
+    base.update(overrides)
+    return base
+
+
+class TestFoodCapacity(unittest.TestCase):
+    def test_zero_all_is_low(self):
+        c = food_capacity(0.0, 0, 0.0, 1000)
+        self.assertLess(c, 0.30)
+
+    def test_retail_days_raises_score(self):
+        c_low  = food_capacity(1.0, 0, 0.0, 1000)
+        c_high = food_capacity(21.0, 0, 0.0, 1000)
+        self.assertGreater(c_high, c_low)
+
+    def test_farms_boost_score(self):
+        c_no_farms  = food_capacity(3.0, 0,  0.0, 10_000)
+        c_many_farms = food_capacity(3.0, 50, 0.0, 10_000)
+        self.assertGreater(c_many_farms, c_no_farms)
+
+    def test_assets_add_bonus(self):
+        c_plain  = food_capacity(3.0, 0, 0.0, 1000)
+        c_assets = food_capacity(3.0, 0, 0.0, 1000,
+                                 farmers_market=True,
+                                 grain_elevator_present=True,
+                                 food_bank_present=True)
+        self.assertGreater(c_assets, c_plain)
+
+    def test_capped_at_one(self):
+        c = food_capacity(100.0, 1000, 100.0, 1000,
+                          farmers_market=True, grain_elevator_present=True,
+                          food_bank_present=True)
+        self.assertLessEqual(c, 1.0)
+
+    def test_range_zero_to_one(self):
+        self.assertGreaterEqual(food_capacity(3.0, 5, 0.5, 5000), 0.0)
+
+
+class TestEnergyCapacity(unittest.TestCase):
+    def test_grid_only_is_moderate(self):
+        c = energy_capacity(True, 0.0, 0, 0.0, 0, 3.0)
+        self.assertGreater(c, 0.0)
+        self.assertLess(c, 0.60)
+
+    def test_local_generation_boosts(self):
+        c_low  = energy_capacity(True, 0.0, 0, 0.0, 0, 3.0)
+        c_high = energy_capacity(True, 10.0, 0, 0.0, 0, 3.0)
+        self.assertGreater(c_high, c_low)
+
+    def test_no_grid_no_local_is_low(self):
+        c = energy_capacity(False, 0.0, 0, 0.0, 0, 0.0)
+        self.assertAlmostEqual(c, 0.0, places=5)
+
+    def test_capped_at_one(self):
+        c = energy_capacity(True, 100.0, 100, 100.0, 100, 100.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestSocialCapacity(unittest.TestCase):
+    def test_full_medical_raises_score(self):
+        c_no   = social_capacity(1000, False, False, 0, False, 0, 0, 0)
+        c_full = social_capacity(1000, True,  True,  3, True,  0, 0, 0)
+        self.assertGreater(c_full, c_no)
+
+    def test_mutual_aid_raises_score(self):
+        c_none = social_capacity(1000, False, True, 1, True, 0, 0, 0)
+        c_many = social_capacity(1000, False, True, 1, True, 3, 8, 5)
+        self.assertGreater(c_many, c_none)
+
+    def test_capped_at_one(self):
+        self.assertLessEqual(
+            social_capacity(1000, True, True, 10, True, 10, 30, 20), 1.0)
+
+
+class TestInstitutionalCapacity(unittest.TestCase):
+    def test_comms_raises_score(self):
+        c_low  = institutional_capacity(0, 0, 0, False, False, False, False)
+        c_high = institutional_capacity(4, 2, 5, True,  True,  True,  True)
+        self.assertGreater(c_high, c_low)
+
+    def test_range(self):
+        c = institutional_capacity(2, 1, 1, False, True, True, False)
+        self.assertGreaterEqual(c, 0.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestKnowledgeCapacity(unittest.TestCase):
+    def test_skills_dominate(self):
+        c_none = knowledge_capacity(0, 0, False, True, 0)
+        c_full = knowledge_capacity(10, 5, True,  True, 20)
+        self.assertGreater(c_full, c_none)
+
+    def test_range(self):
+        c = knowledge_capacity(3, 2, True, True, 5)
+        self.assertGreaterEqual(c, 0.0)
+        self.assertLessEqual(c, 1.0)
+
+
+class TestInfrastructureCapacity(unittest.TestCase):
+    def test_highway_only_is_base(self):
+        c = infrastructure_capacity(True, False, 1, 0, 0, 1.0, False)
+        self.assertGreater(c, 0.0)
+
+    def test_water_sources_boost(self):
+        c_low  = infrastructure_capacity(True, False, 1, 0, 0, 1.0, False)
+        c_high = infrastructure_capacity(True, True,  5, 10, 3, 7.0, True)
+        self.assertGreater(c_high, c_low)
+
+
+class TestFoodBuffer(unittest.TestCase):
+    def test_zero_days_is_low(self):
+        self.assertLess(food_buffer(0.0, False), 0.20)
+
+    def test_food_bank_adds_buffer(self):
+        self.assertGreater(food_buffer(3.0, True), food_buffer(3.0, False))
+
+    def test_range(self):
+        self.assertLessEqual(food_buffer(100.0, True), 1.0)
+
+
+class TestEnergyBuffer(unittest.TestCase):
+    def test_no_reserve_is_low(self):
+        self.assertLess(energy_buffer(0.0, 0, 0.0), 0.10)
+
+    def test_generators_help(self):
+        self.assertGreater(energy_buffer(3.0, 5, 0.0), energy_buffer(3.0, 0, 0.0))
+
+
+class TestSocialBuffer(unittest.TestCase):
+    def test_no_networks_is_zero(self):
+        self.assertAlmostEqual(social_buffer(0, 0), 0.0)
+
+    def test_networks_add_buffer(self):
+        self.assertGreater(social_buffer(3, 5), 0.0)
+
+
+class TestProfileToCapacities(unittest.TestCase):
+    def test_returns_six_domains(self):
+        caps = profile_to_capacities(_minimal_profile())
+        self.assertEqual(set(caps.keys()),
+                         {"food","energy","social","institutional","knowledge","infrastructure"})
+
+    def test_all_values_in_range(self):
+        caps = profile_to_capacities(_minimal_profile())
+        for v in caps.values():
+            self.assertGreaterEqual(v, 0.0)
+            self.assertLessEqual(v, 1.0)
+
+    def test_accepts_dataclass_like(self):
+        class Fake:
+            pass
+        f = Fake()
+        f.__dict__.update(_minimal_profile())
+        caps = profile_to_capacities(f)
+        self.assertIn("food", caps)
+
+    def test_good_profile_beats_bare(self):
+        good = _minimal_profile(
+            days_food_supply_retail=10.0,
+            active_farms_local=30,
+            farmers_market=True,
+        )
+        caps_bare = profile_to_capacities(_minimal_profile())
+        caps_good = profile_to_capacities(good)
+        self.assertGreater(caps_good["food"], caps_bare["food"])
+
+
+class TestProfileToBuffers(unittest.TestCase):
+    def test_returns_six_domains(self):
+        bufs = profile_to_buffers(_minimal_profile())
+        self.assertEqual(set(bufs.keys()),
+                         {"food","energy","social","institutional","knowledge","infrastructure"})
+
+    def test_all_values_in_range(self):
+        for v in profile_to_buffers(_minimal_profile()).values():
+            self.assertGreaterEqual(v, 0.0)
+            self.assertLessEqual(v, 1.0)
+
+
+class TestCommunityEncoderBitLength(unittest.TestCase):
+    def _encode(self, **overrides):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile(**overrides))
+        return enc.to_binary()
+
+    def test_exactly_39_bits(self):
+        self.assertEqual(len(self._encode()), 39)
+
+    def test_binary_alphabet(self):
+        self.assertTrue(all(c in "01" for c in self._encode()))
+
+    def test_deterministic(self):
+        self.assertEqual(self._encode(), self._encode())
+
+
+class TestCommunityEncoderContrast(unittest.TestCase):
+    def _encode(self, **overrides):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile(**overrides))
+        return enc.to_binary()
+
+    def test_strong_vs_weak_differ(self):
+        strong = _minimal_profile(
+            days_food_supply_retail=10.0, active_farms_local=40,
+            local_generation_mw=5.0, backup_generators=8,
+            hospital_present=True, mutual_aid_networks=3,
+            skill_holders_identified=8, ham_radio_operators=5,
+            wells_private=15, surface_water_sources=3,
+        )
+        weak   = _minimal_profile()
+        enc_s  = CommunityBridgeEncoder()
+        enc_s.from_geometry(strong)
+        enc_w  = CommunityBridgeEncoder()
+        enc_w.from_geometry(weak)
+        self.assertNotEqual(enc_s.to_binary(), enc_w.to_binary())
+
+    def test_no_geometry_raises(self):
+        with self.assertRaises(ValueError):
+            CommunityBridgeEncoder().to_binary()
+
+
+class TestCommunityEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile())
+        enc.to_binary()
+        self.assertEqual(enc.report()["modality"], "community")
+
+    def test_report_bits_39(self):
+        enc = CommunityBridgeEncoder()
+        enc.from_geometry(_minimal_profile())
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
+# ===========================================================================
+# Coop encoder tests
+# ===========================================================================
+from bridges.coop_encoder import (
+    CoopBridgeEncoder,
+    trust_temperature,
+    fourier_trust_flow,
+    trust_flux_density,
+    trust_resonance,
+    propagation_probability,
+    network_adoption_phase,
+    regional_trust_gradient,
+    emotion_from_network,
+)
+
+
+def _snap(**overrides):
+    """Minimal snapshot dict; overrides applied on top."""
+    base = {
+        "total_coops": 30, "adopted": 10, "adoption_pct": 33.3,
+        "new_adoptions": 2, "new_coops": 0, "resource_transfers": 5,
+        "bridges_formed": 0, "decayed": 0,
+        "avg_trust_strength": 0.40, "max_affinity": 1.0,
+    }
+    base.update(overrides)
+    return base
+
+
+class TestTrustTemperature(unittest.TestCase):
+    def test_zero_adoption(self):
+        self.assertAlmostEqual(trust_temperature(0.0), 0.0)
+
+    def test_full_adoption(self):
+        self.assertAlmostEqual(trust_temperature(100.0), 1.0)
+
+    def test_mid_adoption(self):
+        self.assertAlmostEqual(trust_temperature(50.0), 0.5)
+
+    def test_clamped_above(self):
+        self.assertLessEqual(trust_temperature(200.0), 1.0)
+
+    def test_clamped_below(self):
+        self.assertGreaterEqual(trust_temperature(-10.0), 0.0)
+
+
+class TestFourierTrustFlow(unittest.TestCase):
+    def test_zero_conductance(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.0, 5, 0.3), 0.0)
+
+    def test_zero_links(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.5, 0, 0.3), 0.0)
+
+    def test_zero_gradient(self):
+        self.assertAlmostEqual(fourier_trust_flow(0.5, 5, 0.0), 0.0)
+
+    def test_proportional_to_conductance(self):
+        q_low  = fourier_trust_flow(0.2, 3, 0.4)
+        q_high = fourier_trust_flow(0.8, 3, 0.4)
+        self.assertAlmostEqual(q_high, q_low * 4.0, places=10)
+
+    def test_proportional_to_links(self):
+        q1 = fourier_trust_flow(0.5, 2, 0.3)
+        q2 = fourier_trust_flow(0.5, 4, 0.3)
+        self.assertAlmostEqual(q2, q1 * 2.0, places=10)
+
+
+class TestTrustFluxDensity(unittest.TestCase):
+    def test_no_coops_returns_zero(self):
+        self.assertAlmostEqual(trust_flux_density(10, 0), 0.0)
+
+    def test_proportional_to_transfers(self):
+        self.assertAlmostEqual(trust_flux_density(10, 50), 0.2)
+        self.assertAlmostEqual(trust_flux_density(20, 50), 0.4)
+
+    def test_non_negative(self):
+        self.assertGreaterEqual(trust_flux_density(0, 10), 0.0)
+
+
+class TestTrustResonance(unittest.TestCase):
+    def test_perfect_match_is_one(self):
+        self.assertAlmostEqual(trust_resonance(0.10, 0.10), 1.0, places=10)
+
+    def test_large_error_approaches_zero(self):
+        self.assertLess(trust_resonance(0.0, 1.0), 0.40)
+
+    def test_range_zero_to_one(self):
+        r = trust_resonance(0.07, 0.12)
+        self.assertGreaterEqual(r, 0.0)
+        self.assertLessEqual(r, 1.0)
+
+    def test_symmetric(self):
+        self.assertAlmostEqual(trust_resonance(0.1, 0.3), trust_resonance(0.3, 0.1))
+
+
+class TestPropagationProbability(unittest.TestCase):
+    def test_zero_trust_is_zero(self):
+        self.assertAlmostEqual(propagation_probability(0.0, 0.15, 2), 0.0)
+
+    def test_affinity_multiplies(self):
+        p1 = propagation_probability(0.4, 0.15, 2, 1.0)
+        p2 = propagation_probability(0.4, 0.15, 2, 1.5)
+        self.assertAlmostEqual(p2, p1 * 1.5, places=8)
+
+    def test_neighbors_add_network_bonus(self):
+        p0 = propagation_probability(0.3, 0.12, 0)
+        p3 = propagation_probability(0.3, 0.12, 3)
+        self.assertGreater(p3, p0)
+
+    def test_capped_at_one(self):
+        self.assertLessEqual(propagation_probability(1.0, 1.0, 100, 2.0), 1.0)
+
+
+class TestNetworkAdoptionPhase(unittest.TestCase):
+    def test_growing(self):
+        self.assertEqual(network_adoption_phase(40.0, 0.05, 0.0), "growing")
+
+    def test_stable(self):
+        self.assertEqual(network_adoption_phase(50.0, 0.005, 0.0), "stable")
+
+    def test_saturating(self):
+        self.assertEqual(network_adoption_phase(85.0, 0.01, 0.0), "saturating")
+
+    def test_decaying(self):
+        self.assertEqual(network_adoption_phase(60.0, 0.01, 0.05), "decaying")
+
+    def test_decaying_wins_over_saturating(self):
+        # High adoption but decay beats everything
+        self.assertEqual(network_adoption_phase(90.0, 0.01, 0.05), "decaying")
+
+
+class TestRegionalTrustGradient(unittest.TestCase):
+    def test_uniform_is_zero(self):
+        self.assertAlmostEqual(
+            regional_trust_gradient({"A": 50.0, "B": 50.0, "C": 50.0}), 0.0)
+
+    def test_empty_returns_zero(self):
+        self.assertAlmostEqual(regional_trust_gradient({}), 0.0)
+
+    def test_single_region_is_zero(self):
+        self.assertAlmostEqual(regional_trust_gradient({"A": 70.0}), 0.0)
+
+    def test_high_variance_returns_nonzero(self):
+        g = regional_trust_gradient({"A": 100.0, "B": 0.0})
+        self.assertGreater(g, 0.0)
+
+    def test_non_negative(self):
+        g = regional_trust_gradient({"A": 30.0, "B": 80.0, "C": 55.0})
+        self.assertGreaterEqual(g, 0.0)
+
+
+class TestEmotionFromNetwork(unittest.TestCase):
+    def test_failure_below_10pct(self):
+        self.assertEqual(emotion_from_network(5.0, 0.01, 0.0, 0.0), "failure")
+
+    def test_grief_high_decay(self):
+        self.assertEqual(emotion_from_network(50.0, 0.01, 0.10, 0.1), "grief")
+
+    def test_regenerating_recovery(self):
+        e = emotion_from_network(40.0, 0.02, 0.02, 0.1)
+        self.assertEqual(e, "regenerating")
+
+    def test_resilience_with_bridges(self):
+        e = emotion_from_network(55.0, 0.02, 0.0, 0.1, bridges_active=True)
+        self.assertEqual(e, "resilience")
+
+    def test_thriving_high_adoption_and_flow(self):
+        e = emotion_from_network(80.0, 0.01, 0.0, 0.20)
+        self.assertEqual(e, "thriving")
+
+    def test_presence_mid_adoption(self):
+        e = emotion_from_network(60.0, 0.01, 0.0, 0.05)
+        self.assertEqual(e, "presence")
+
+    def test_adaptation_high_velocity(self):
+        e = emotion_from_network(35.0, 0.05, 0.0, 0.05)
+        self.assertEqual(e, "adaptation")
+
+    def test_neutral_default(self):
+        e = emotion_from_network(30.0, 0.005, 0.0, 0.02)
+        self.assertEqual(e, "neutral")
+
+
+class TestCoopEncoderBitLength(unittest.TestCase):
+    def test_exactly_39_bits(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        self.assertEqual(len(enc.to_binary()), 39)
+
+    def test_binary_alphabet(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        self.assertTrue(all(c in "01" for c in enc.to_binary()))
+
+    def test_deterministic(self):
+        enc1 = CoopBridgeEncoder()
+        enc1.from_geometry(_snap())
+        enc2 = CoopBridgeEncoder()
+        enc2.from_geometry(_snap())
+        self.assertEqual(enc1.to_binary(), enc2.to_binary())
+
+    def test_no_geometry_raises(self):
+        with self.assertRaises(ValueError):
+            CoopBridgeEncoder().to_binary()
+
+
+class TestCoopEncoderContrast(unittest.TestCase):
+    def test_early_vs_saturating_differ(self):
+        enc_early = CoopBridgeEncoder()
+        enc_early.from_geometry(_snap(adoption_pct=15.0, adopted=4))
+        enc_sat   = CoopBridgeEncoder()
+        enc_sat.from_geometry(_snap(adoption_pct=90.0, adopted=27,
+                                    new_adoptions=0, resource_transfers=20))
+        self.assertNotEqual(enc_early.to_binary(), enc_sat.to_binary())
+
+    def test_decay_differs_from_growing(self):
+        enc_grow  = CoopBridgeEncoder()
+        enc_grow.from_geometry(_snap(new_adoptions=5, decayed=0))
+        enc_decay = CoopBridgeEncoder()
+        enc_decay.from_geometry(_snap(new_adoptions=0, decayed=4))
+        self.assertNotEqual(enc_grow.to_binary(), enc_decay.to_binary())
+
+
+class TestCoopEncoderSectionD(unittest.TestCase):
+    def test_spreading_bit_set_when_growing(self):
+        snap = _snap(adoption_pct=45.0, prev_adoption_pct=40.0)
+        enc  = CoopBridgeEncoder()
+        enc.from_geometry(snap)
+        bits = enc.to_binary()
+        self.assertEqual(bits[-1], "1")
+
+    def test_spreading_bit_clear_when_not_growing(self):
+        snap = _snap(adoption_pct=40.0, prev_adoption_pct=45.0)
+        enc  = CoopBridgeEncoder()
+        enc.from_geometry(snap)
+        bits = enc.to_binary()
+        self.assertEqual(bits[-1], "0")
+
+
+class TestCoopEncoderReport(unittest.TestCase):
+    def test_report_modality(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        enc.to_binary()
+        self.assertEqual(enc.report()["modality"], "coop")
+
+    def test_report_bits_39(self):
+        enc = CoopBridgeEncoder()
+        enc.from_geometry(_snap())
+        enc.to_binary()
+        self.assertEqual(enc.report()["bits"], 39)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
