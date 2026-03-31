@@ -45,7 +45,8 @@ class PhysicalCouplingMatrix:
     Each entry represents the maximum theoretical efficiency of converting
     one physical field to another.
     """
-    
+    IDX = {name: i for i, name in enumerate(node_list)}
+
     def __init__(self):
         self.matrix = np.zeros((n_nodes, n_nodes))
         self._build_matrix()
@@ -53,8 +54,7 @@ class PhysicalCouplingMatrix:
     def _build_matrix(self):
         """Build coupling matrix from first principles."""
         
-        # Map node names to indices
-        idx = {name: i for i, name in enumerate(node_list)}
+        idx = self.IDX
         
         # ========== EM (Organized Electromagnetic) ==========
         # EM can be converted to many forms with high efficiency
@@ -156,8 +156,7 @@ class PhysicalCouplingMatrix:
     
     def get_efficiency(self, from_node: str, to_node: str) -> float:
         """Get coupling efficiency between two physical nodes."""
-        idx = {name: i for i, name in enumerate(node_list)}
-        return self.matrix[idx[from_node], idx[to_node]]
+        return self.matrix[self.IDX[from_node], self.IDX[to_node]]
     
     def get_physical_path(self, from_node: str, to_node: str, 
                           intermediate: str = None) -> float:
@@ -314,57 +313,65 @@ class PhysicalEnergyFlow:
         for source in self.sources:
             self.energy[source.node] += source.power_mw
     
+    def _modulated_efficiency(self, from_node: str, to_node: str,
+                               modulators: List[CouplingModulator] = None) -> float:
+        """Get coupling efficiency, scaled by any active modulators."""
+        eff = self.coupling.get_efficiency(from_node, to_node)
+        if eff == 0 or not modulators:
+            return eff
+        for mod in modulators:
+            if (from_node, to_node) in mod.affects:
+                eff *= mod.modulation_function()
+        return min(eff, 1.0)
+
     def apply_couplings(self, modulators: List[CouplingModulator] = None):
         """
         Propagate energy through couplings.
         Energy flows from higher-entropy to lower-entropy (when possible),
         but more importantly, it degrades toward thermal equilibrium.
         """
-        # Order of operations: convert from structured to structured first,
-        # then structured to degraded, finally degraded to structured (limited)
-        
-        # Track thermal accumulation (entropy increase)
         thermal_accumulation = 0.0
-        
-        # Convert structured forms to other structured forms
         structured_nodes = ["EM", "M", "C", "R", "F", "G", "K"]
-        
+
+        # Convert structured forms to other structured forms
         for from_node in structured_nodes:
             if self.energy[from_node] <= 0:
                 continue
-                
+
             for to_node in structured_nodes:
                 if from_node == to_node:
                     continue
-                
-                eff = self.coupling.get_efficiency(from_node, to_node)
+
+                eff = self._modulated_efficiency(from_node, to_node, modulators)
                 if eff > 0:
-                    transfer = self.energy[from_node] * eff * 0.1  # 10% per iteration
+                    transfer = min(self.energy[from_node],
+                                   self.energy[from_node] * eff * 0.1)
                     self.energy[from_node] -= transfer
                     self.energy[to_node] += transfer
-        
+
         # Convert structured to thermal (degradation)
         for from_node in structured_nodes:
             if self.energy[from_node] <= 0:
                 continue
-                
-            eff_to_thermal = self.coupling.get_efficiency(from_node, "T")
+
+            eff_to_thermal = self._modulated_efficiency(from_node, "T", modulators)
             if eff_to_thermal > 0:
-                transfer = self.energy[from_node] * eff_to_thermal * 0.2
+                transfer = min(self.energy[from_node],
+                               self.energy[from_node] * eff_to_thermal * 0.2)
                 self.energy[from_node] -= transfer
                 thermal_accumulation += transfer
-        
+
         # Convert thermal back to structured (limited by Carnot)
         thermal_available = self.energy["T"] + thermal_accumulation
-        
+
         for to_node in structured_nodes:
-            eff = self.coupling.get_efficiency("T", to_node)
+            eff = self._modulated_efficiency("T", to_node, modulators)
             if eff > 0:
-                # Thermal to structured is limited by Carnot and temperature gradient
-                max_transfer = thermal_available * eff * 0.05
+                max_transfer = min(thermal_available,
+                                   thermal_available * eff * 0.05)
                 self.energy[to_node] += max_transfer
                 thermal_available -= max_transfer
-        
+
         self.energy["T"] = thermal_available
     
     def iterate(self, iterations: int = 50, modulators: List[CouplingModulator] = None):
@@ -387,7 +394,7 @@ class PhysicalEnergyFlow:
         """Get final energy distribution."""
         # Convert to original node naming for comparison
         mapping = {
-            "EM": "G (Grid)",
+            "EM": "EM (Grid)",
             "M": "M (Mobility)",
             "C": "C (Chemical/Biological)",
             "T": "T (Thermal)",
@@ -556,6 +563,47 @@ def run_physical_model():
     """)
     
     return flow, results
+
+# ---------------------------
+# 7. Node-to-Interaction Mapping
+# ---------------------------
+#
+# NODE       REFRAME                           PRIMARY INTERACTION        SECONDARY
+# -----      -------                           -------------------        ---------
+# EM (Grid)  Organized EM transport layer       Electromagnetic            Thermal (I^2R losses)
+# T          High-entropy energy reservoir      Electromagnetic (degraded) Radiative (IR), Mechanical (convection)
+# M          Low-entropy structured motion      Mechanical (emergent EM)   Gravitational, Thermal (friction)
+# C (Bio)    Adaptive chemical energy proc.     Chemical (delta-mu)        Electromagnetic (bonding), Thermal (metabolism)
+# R          External radiative forcing         Electromagnetic (photons)  --
+# F          External fluid forcing             Mechanical (fluid motion)  Gravitational (large-scale flows)
+# G          Gravitational potential field       Gravitational              Mechanical (hydro)
+# K          Rotational / Coriolis modulator    Mechanical (angular mom.)  Fluid (atmospheric shaping)
+#
+# COMPRESSED VIEW
+# ---------------
+# SOURCES:           Radiative (R), Nuclear (not yet modelled)
+# STRUCTURED ENERGY: Mechanical (M), Electrical (EM), Chemical (C)
+# DEGRADED:          Thermal (T)
+# FLOW SHAPERS:      Gravity (G), Rotation/Coriolis (K), Geometry/resonance
+#
+# The coupling matrix expresses interaction-to-interaction conversion.
+# This exposes: which conversions are physically weak, where gains are
+# overestimated, and where new couplings actually matter.
+#
+# KEY CONVERSIONS
+# ---------------
+# Piezo roads   : M  -> EM            (narrow regime)
+# Biogas        : C  -> T  -> EM
+# Solar PV      : R  -> EM
+# Solar thermal : R  -> T  -> EM
+# Wind          : F  -> M  -> EM
+# Thermal store : T  <-> T            (time shifting)
+#
+# OPTIMIZATION PRINCIPLE
+# ----------------------
+# The system minimizes irreversible flow into the thermal reservoir.
+# "Energy is conserved; utility is lost when structure collapses
+#  into thermal equilibrium."
 
 if __name__ == "__main__":
     run_physical_model()
