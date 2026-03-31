@@ -169,23 +169,97 @@ def report(state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 # ---------------------------
+# Scenario Library
+# ---------------------------
+
+SCENARIOS = {
+    "big_ag_bot": {
+        "label": "Big Ag-Bot (200 Acres Monocrop)",
+        "description": "Industrial monocrop: maximizes gross tonnage via massive "
+                       "input energy, no ecological coupling, mines soil.",
+        "state": {
+            "soil_trend": -0.2,
+            "water_retention": 0.35,
+            "input_energy": 3.0,
+            "output_yield": 2.0,
+            "disturbance": 0.4,
+            "waste_factor": 0.7,
+            "nutrient_density": 0.4,
+            "production_area": 200,
+            "ecological_area": 0,
+            "coupling_strength": 0.0,
+            "ecological_amplification": 1.0,
+        },
+    },
+    "sovereign_steward": {
+        "label": "Sovereign Steward (30 Prod + 170 Wild)",
+        "description": "30 acres production, 170 acres wild bio-battery. "
+                       "Builds soil, closed-loop waste, high nutrient density.",
+        "state": {
+            "soil_trend": 0.1,
+            "water_retention": 0.7,
+            "input_energy": 0.5,
+            "output_yield": 0.8,
+            "disturbance": 0.05,
+            "waste_factor": 0.1,
+            "nutrient_density": 0.9,
+            "production_area": 30,
+            "ecological_area": 170,
+            "coupling_strength": 0.9,
+            "ecological_amplification": 2.0,
+        },
+    },
+    "corporate_270": {
+        "label": 'Corporate "270% Productivity" Claim',
+        "description": "Maps the claim 'AI-managed precision ag will increase "
+                       "productivity 270% by 2030 while keeping emissions in check' "
+                       "to system state. Forces S_e = 0.",
+        "state": {
+            "soil_trend": -0.05,
+            "water_retention": 0.5,
+            "input_energy": 2.0,
+            "output_yield": 2.7,
+            "disturbance": 0.25,
+            "waste_factor": 0.7,
+            "nutrient_density": 0.4,
+            "production_area": 200,
+            "ecological_area": 0,
+            "coupling_strength": 0.0,
+            "ecological_amplification": 1.0,
+        },
+    },
+}
+
+
+def compare_scenarios(*names: str) -> Dict[str, Any]:
+    """Run report() on named scenarios and return side-by-side results."""
+    results = {}
+    for name in names:
+        scenario = SCENARIOS[name]
+        r = report(scenario["state"])
+        r["label"] = scenario["label"]
+        r["description"] = scenario["description"]
+        results[name] = r
+    return results
+
+
+# ---------------------------
 # Example Run
 # ---------------------------
 
 if __name__ == "__main__":
-    example = {
-        "soil_trend": -0.05,
-        "water_retention": 0.5,
-        "input_energy": 2.0,
-        "output_yield": 1.0,
-        "disturbance": 0.2,
-        "waste_factor": 0.4,
-        "nutrient_density": 0.8,
-        "production_area": 30,
-        "ecological_area": 170,
-        "coupling_strength": 0.8,
-        "ecological_amplification": 2.0
-    }
-
     from pprint import pprint
-    pprint(report(example))
+
+    print("=== Scenario Comparison ===\n")
+    comparison = compare_scenarios("big_ag_bot", "sovereign_steward", "corporate_270")
+    for name, result in comparison.items():
+        h = result["yield_analysis"]["total_nourishment_units"]
+        s = result["score"]
+        thermal = result["thermal_limit"]
+        violations = [k for k, v in result["drift"].items() if v]
+        print(f"  {result['label']}")
+        print(f"    H_total: {h:.2f}  |  Score: {s:.2f}  |  "
+              f"Thermal: {'CRITICAL' if thermal['critical_alert'] else 'nominal'}")
+        if violations:
+            print(f"    Violations: {', '.join(violations)}")
+        print()
