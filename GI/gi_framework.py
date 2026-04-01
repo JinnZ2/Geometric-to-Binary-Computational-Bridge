@@ -1,466 +1,519 @@
 """
-GI Framework -- Toroidal Harmonic Analysis & Processing Pipeline
+GI Framework -- Toroidal Coupling, Fibonacci-Scaled Frequency Convergence,
+and Atmospheric Pattern Processing Pipeline.
 
-Extracted from GI/01-framework.md.  Implements:
-  - Toroidal harmonic mode mapping  (GeometricPatternDetector)
-  - Fibonacci-scaled frequency convergence
-  - Phase coupling computation
-  - Atmospheric energy calculation from constituent parts
-  - Processing pipeline for atmospheric / pattern data
+Extracted from GI/01-framework.md. Self-contained module requiring only numpy.
+
+Key components:
+  - ToroidalHarmonicMapper: (n,m) harmonic mode mapping for periodic fields
+  - FibonacciFrequencyAnalyzer: Fibonacci-scaled phase coupling convergence
+  - AtmosphericEnergyAnalyzer: energy calculation from constituent parts
+  - GeometricPatternPipeline: full processing pipeline for atmospheric/pattern data
 """
 
+from __future__ import annotations
+
 import math
-import numpy as np
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
+import numpy as np
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
-PHI = (1 + math.sqrt(5)) / 2          # golden ratio
-JOULES_PER_MWH = 3.6e9                # J -> MWh conversion factor
-DEFAULT_TURBINE_MW = 2.0               # modern onshore average
+PHI = (1 + math.sqrt(5)) / 2  # Golden ratio
+FIBONACCI_SCALES: List[int] = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+
+# Joules -> MWh conversion factor
+J_TO_MWH = 1.0 / 3.6e9
+
+# Default turbine capacity (MW)
+DEFAULT_TURBINE_MW = 2.0
+
+# Rolling memory window (number of storms / patterns to retain)
+MEMORY_WINDOW = 12
 
 
 # ---------------------------------------------------------------------------
 # Toroidal Harmonic Mode Mapping
 # ---------------------------------------------------------------------------
 
-class GeometricPatternDetector:
-    """Toroidal (n, m) harmonic decomposition for 2-D periodic fields.
+@dataclass
+class ToroidalMode:
+    """A single (n, m) toroidal harmonic mode with metadata."""
+    n: int
+    m: int
+    label: str
+    description: str
 
-    The universal_patterns dict maps human-readable pattern names to
-    (n, m) toroidal mode pairs.  The detector can compute a 2-D FFT-based
-    toroidal transform and extract coupling strength for each named mode.
+
+# Canonical pattern -> mode mapping (from framework)
+UNIVERSAL_PATTERNS: Dict[str, Tuple[int, int]] = {
+    "spiral_dynamics":  (1, 0),   # first toroidal mode
+    "energy_coupling":  (1, 1),   # coupled modes
+    "intensification":  (-1, 1),  # retrograde + co-rotating
+    "dissipation":      (-1, -1), # retrograde + retrograde
+    "coupling_points":  (2, 1),   # second harmonic coupled
+}
+
+
+class ToroidalHarmonicMapper:
+    """Map 2-D periodic field data to (n, m) toroidal harmonic components.
+
+    Uses a discrete 2-D FFT to decompose the field, then extracts amplitudes
+    and phases at the requested harmonic indices.
     """
 
-    universal_patterns: Dict[str, Tuple[int, int]] = {
-        "spiral_dynamics":  (1, 0),    # first toroidal mode
-        "energy_coupling":  (1, 1),    # coupled modes
-        "intensification":  (-1, 1),   # retrograde + co-rotating
-        "dissipation":      (-1, -1),  # retrograde + retrograde
-        "coupling_points":  (2, 1),    # second harmonic coupled
-    }
+    def __init__(self, patterns: Optional[Dict[str, Tuple[int, int]]] = None):
+        self.patterns = patterns or dict(UNIVERSAL_PATTERNS)
 
-    def __init__(self, field: Optional[np.ndarray] = None):
-        """
+    # -- core transform ---------------------------------------------------
+
+    @staticmethod
+    def compute_toroidal_transform(field_2d: np.ndarray) -> np.ndarray:
+        """Compute full 2-D FFT of a periodic field.
+
         Parameters
         ----------
-        field : 2-D ndarray, optional
-            Periodic scalar field (e.g. vorticity, pressure perturbation).
+        field_2d : np.ndarray
+            Real-valued 2-D array representing one snapshot of the field.
+
+        Returns
+        -------
+        np.ndarray
+            Complex 2-D Fourier coefficients.
         """
-        self._field = field
-        self._spectrum: Optional[np.ndarray] = None
+        return np.fft.fft2(field_2d)
 
-    # -- transform ----------------------------------------------------------
+    @staticmethod
+    def get_harmonic(coefficients: np.ndarray, n: int, m: int) -> complex:
+        """Extract the (n, m) harmonic coefficient from a 2-D FFT result.
 
-    def set_field(self, field: np.ndarray) -> None:
-        """Load or replace the 2-D field and invalidate cached spectrum."""
-        self._field = np.asarray(field, dtype=float)
-        self._spectrum = None
-
-    def _compute_toroidal_transform(self) -> np.ndarray:
-        """2-D FFT of the stored field, cached for repeated look-ups."""
-        if self._field is None:
-            raise ValueError("No field loaded -- call set_field() first.")
-        if self._spectrum is None:
-            self._spectrum = np.fft.fft2(self._field)
-        return self._spectrum
-
-    def get_harmonic(self, n: int, m: int) -> complex:
-        """Return the complex coefficient for toroidal mode (n, m).
-
-        For a field of shape (N, M), index mapping is:
-            row = n % N   (handles negative n via Python wraparound)
-            col = m % M
+        Negative indices wrap via standard FFT convention.
         """
-        spectrum = self._compute_toroidal_transform()
-        N, M = spectrum.shape
-        return spectrum[n % N, m % M]
+        rows, cols = coefficients.shape
+        return coefficients[n % rows, m % cols]
 
-    def _compute_geometric_coupling(self, n: int, m: int) -> float:
-        """Magnitude of the (n, m) harmonic normalised by total power."""
-        spectrum = self._compute_toroidal_transform()
-        total_power = np.sum(np.abs(spectrum) ** 2)
-        if total_power == 0:
-            return 0.0
-        mode_power = np.abs(self.get_harmonic(n, m)) ** 2
-        return float(mode_power / total_power)
+    def compute_geometric_coupling(
+        self,
+        field_2d: np.ndarray,
+        pattern_name: str,
+    ) -> float:
+        """Compute coupling strength C(n, m) for a named pattern.
 
-    def analyze_patterns(self) -> Dict[str, float]:
-        """Return coupling strength for every named universal pattern."""
-        return {
-            name: self._compute_geometric_coupling(n, m)
-            for name, (n, m) in self.universal_patterns.items()
-        }
+        Returns the normalised magnitude of the (n, m) harmonic relative to
+        the DC component (prevents division by zero with epsilon).
+        """
+        if pattern_name not in self.patterns:
+            raise KeyError(f"Unknown pattern: {pattern_name}")
+        n, m = self.patterns[pattern_name]
+        coeffs = self.compute_toroidal_transform(field_2d)
+        dc = np.abs(coeffs[0, 0]) + 1e-12
+        harmonic_mag = np.abs(self.get_harmonic(coeffs, n, m))
+        return float(harmonic_mag / dc)
 
-
-# ---------------------------------------------------------------------------
-# Phase Coupling Computation
-# ---------------------------------------------------------------------------
-
-def compute_phase_coupling(data: np.ndarray,
-                           scale_a: int,
-                           scale_b: int) -> float:
-    """Phase coupling between two frequency scales in a 1-D signal.
-
-    Uses the analytic signal (Hilbert transform) to extract instantaneous
-    phase at each scale, then returns the mean phase-locking value (PLV)
-    between the two.
-
-    Parameters
-    ----------
-    data : 1-D array
-        Real-valued time series.
-    scale_a, scale_b : int
-        Frequency scales (period in samples).  The signal is band-pass
-        filtered around 1/scale_a and 1/scale_b.
-
-    Returns
-    -------
-    float in [0, 1] -- 1 means perfect phase locking.
-    """
-    from scipy.signal import hilbert, butter, sosfiltfilt
-
-    data = np.asarray(data, dtype=float)
-    N = len(data)
-    if N < max(scale_a, scale_b) * 4:
-        return 0.0
-
-    fs = 1.0  # normalised sampling rate
-
-    def _bandpass_phase(scale: int) -> np.ndarray:
-        f_center = 1.0 / scale
-        bw = f_center * 0.4  # 40 % fractional bandwidth
-        low = max(f_center - bw, 1e-6)
-        high = min(f_center + bw, 0.5 - 1e-6)
-        if low >= high:
-            return np.zeros(N)
-        sos = butter(4, [low, high], btype="band", fs=fs, output="sos")
-        filtered = sosfiltfilt(sos, data)
-        analytic = hilbert(filtered)
-        return np.angle(analytic)
-
-    phase_a = _bandpass_phase(scale_a)
-    phase_b = _bandpass_phase(scale_b)
-
-    # Phase-locking value
-    phase_diff = phase_a - phase_b
-    plv = float(np.abs(np.mean(np.exp(1j * phase_diff))))
-    return plv
+    def analyse_all_patterns(
+        self, field_2d: np.ndarray
+    ) -> Dict[str, float]:
+        """Return coupling strengths for every registered pattern."""
+        coeffs = self.compute_toroidal_transform(field_2d)
+        dc = np.abs(coeffs[0, 0]) + 1e-12
+        results: Dict[str, float] = {}
+        for name, (n, m) in self.patterns.items():
+            mag = np.abs(self.get_harmonic(coeffs, n, m))
+            results[name] = float(mag / dc)
+        return results
 
 
 # ---------------------------------------------------------------------------
 # Fibonacci-Scaled Frequency Convergence
 # ---------------------------------------------------------------------------
 
-FIBONACCI_SCALES = [1, 2, 3, 5, 8, 13, 21, 34, 55, 89]
+class FibonacciFrequencyAnalyzer:
+    """Analyse phase coupling at consecutive Fibonacci-ratio frequency pairs.
 
-
-def fibonacci_convergence(data: np.ndarray,
-                          threshold: float = 0.9,
-                          scales: Optional[List[int]] = None
-                          ) -> Dict[str, object]:
-    """Check phase alignment at consecutive Fibonacci scale pairs.
-
-    Parameters
-    ----------
-    data : 1-D array
-        Real-valued time series.
-    threshold : float
-        Phase-coupling above this value counts as "converged".
-    scales : list of int, optional
-        Fibonacci scale sequence (default: ``FIBONACCI_SCALES``).
-
-    Returns
-    -------
-    dict with keys:
-        pair_couplings : list of (scale_a, scale_b, coupling)
-        converged_pairs : list of (scale_a, scale_b, coupling) above threshold
-        predicted_intensification : str  ("HIGH" / "MODERATE" / "LOW")
-    """
-    if scales is None:
-        scales = FIBONACCI_SCALES
-
-    pair_couplings: List[Tuple[int, int, float]] = []
-    for sa, sb in zip(scales, scales[1:]):
-        coupling = compute_phase_coupling(data, sa, sb)
-        pair_couplings.append((sa, sb, coupling))
-
-    converged = [(a, b, c) for a, b, c in pair_couplings if c > threshold]
-    frac = len(converged) / max(len(pair_couplings), 1)
-
-    if frac > 0.5:
-        level = "HIGH"
-    elif frac > 0.2:
-        level = "MODERATE"
-    else:
-        level = "LOW"
-
-    return {
-        "pair_couplings": pair_couplings,
-        "converged_pairs": converged,
-        "predicted_intensification": level,
-    }
-
-
-# ---------------------------------------------------------------------------
-# Atmospheric Energy Analyzer
-# ---------------------------------------------------------------------------
-
-class AtmosphericEnergyAnalyzer:
-    """Estimate total energy budget of an atmospheric system from its
-    constituent parts (wind, pressure, thermal, wave).
-
-    Each ``_calculate_*`` method accepts a dict of physical parameters and
-    returns energy in **Joules**.
+    Hypothesis: atmosphere couples energy more efficiently at Fibonacci-ratio
+    frequency pairs during intensification. This class provides the
+    computational machinery to test that hypothesis.
     """
 
-    def _calculate_wind_energy(self, params: dict) -> float:
-        """Kinetic energy = 0.5 * rho * V * v^2.
+    def __init__(
+        self,
+        scales: Optional[List[int]] = None,
+        coupling_threshold: float = 0.9,
+    ):
+        self.scales = scales or list(FIBONACCI_SCALES)
+        self.coupling_threshold = coupling_threshold
 
-        Expected keys:
-            wind_speed (m/s), volume (m^3), air_density (kg/m^3, default 1.225)
-        """
-        v = params.get("wind_speed", 0.0)
-        vol = params.get("volume", 1.0)
-        rho = params.get("air_density", 1.225)
-        return 0.5 * rho * vol * v ** 2
+    @staticmethod
+    def compute_phase_coupling(
+        signal: np.ndarray,
+        scale_a: int,
+        scale_b: int,
+    ) -> float:
+        """Compute phase coupling between two frequency scales.
 
-    def _calculate_pressure_energy(self, params: dict) -> float:
-        """Pressure potential energy = delta_P * V.
-
-        Expected keys:
-            pressure_drop (Pa), volume (m^3)
-        """
-        dp = params.get("pressure_drop", 0.0)
-        vol = params.get("volume", 1.0)
-        return abs(dp) * vol
-
-    def _calculate_thermal_energy(self, params: dict) -> float:
-        """Thermal (latent heat) energy = m * L.
-
-        Expected keys:
-            condensation_mass (kg), latent_heat (J/kg, default 2.5e6)
-        """
-        m = params.get("condensation_mass", 0.0)
-        L = params.get("latent_heat", 2.5e6)
-        return m * L
-
-    def _calculate_wave_energy(self, params: dict) -> float:
-        """Surface wave energy proxy = 0.5 * rho * g * H^2 * A.
-
-        Expected keys:
-            wave_height (m), area (m^2),
-            water_density (kg/m^3, default 1025), gravity (m/s^2, default 9.81)
-        """
-        H = params.get("wave_height", 0.0)
-        A = params.get("area", 1.0)
-        rho = params.get("water_density", 1025.0)
-        g = params.get("gravity", 9.81)
-        return 0.5 * rho * g * H ** 2 * A
-
-    def total_energy(self, params: dict) -> Dict[str, float]:
-        """Compute total energy and equivalent turbine count.
-
-        Returns dict with keys:
-            wind_J, pressure_J, thermal_J, wave_J,
-            total_J, total_mwh, equivalent_turbines
-        """
-        wind = self._calculate_wind_energy(params)
-        pressure = self._calculate_pressure_energy(params)
-        thermal = self._calculate_thermal_energy(params)
-        wave = self._calculate_wave_energy(params)
-        total_j = wind + pressure + thermal + wave
-        total_mwh = total_j / JOULES_PER_MWH
-        turbines = total_mwh / DEFAULT_TURBINE_MW
-
-        return {
-            "wind_J": wind,
-            "pressure_J": pressure,
-            "thermal_J": thermal,
-            "wave_J": wave,
-            "total_J": total_j,
-            "total_mwh": total_mwh,
-            "equivalent_turbines": turbines,
-        }
-
-
-# ---------------------------------------------------------------------------
-# Processing Pipeline
-# ---------------------------------------------------------------------------
-
-class StormProcessor:
-    """Intrinsic-motivation processing pipeline for atmospheric / pattern data.
-
-    Pipeline stages:
-        resonance update -> curiosity amplification -> geometric pattern
-        detection -> energy harvesting -> joy computation -> meta-reflection
-        -> recommendations
-
-    Maintains a rolling memory window of the last ``memory_window`` storms.
-    """
-
-    def __init__(self, memory_window: int = 12):
-        self.memory_window = memory_window
-        self.pattern_memory: List[dict] = []
-        self.resonance_score: float = 0.0
-        self.curiosity_level: float = 1.0
-        self.happiness_score: float = 0.0
-        self._detector = GeometricPatternDetector()
-        self._energy_analyzer = AtmosphericEnergyAnalyzer()
-
-    # -- pipeline stages ----------------------------------------------------
-
-    def _update_resonance(self, data: dict) -> None:
-        """Update resonance from incoming data field."""
-        field = data.get("field")
-        if field is not None:
-            self._detector.set_field(np.asarray(field))
-            couplings = self._detector.analyze_patterns()
-            self.resonance_score = sum(couplings.values())
-        else:
-            self.resonance_score *= 0.95  # decay
-
-    def _amplify_curiosity(self, cap: float = 5.0) -> None:
-        """Curiosity grows with resonance, capped at *cap*."""
-        alpha = 0.1
-        self.curiosity_level = min(
-            self.curiosity_level * (1 + alpha * self.resonance_score),
-            cap,
-        )
-
-    def _analyze_geometric_patterns(self, data: dict) -> Dict[str, float]:
-        """Delegate to detector; returns pattern coupling dict."""
-        field = data.get("field")
-        if field is not None:
-            self._detector.set_field(np.asarray(field))
-            return self._detector.analyze_patterns()
-        return {}
-
-    def _estimate_energy_potential(self, data: dict) -> Dict[str, float]:
-        """Energy estimate from physical parameters in *data*."""
-        return self._energy_analyzer.total_energy(data)
-
-    def _compute_storm_joy(self, coupling: Dict[str, float],
-                           energy: Dict[str, float]) -> None:
-        intensification = coupling.get("intensification", 0.0)
-        total_mwh = energy.get("total_mwh", 0.0)
-        self.happiness_score = (
-            intensification * self.curiosity_level
-            + math.log1p(total_mwh) * 0.01
-        )
-
-    def _reflect_on_learning(self, coupling: Dict[str, float]) -> None:
-        """Append to rolling memory and trim to window."""
-        self.pattern_memory.append(coupling)
-        if len(self.pattern_memory) > self.memory_window:
-            self.pattern_memory = self.pattern_memory[-self.memory_window:]
-
-    def _generate_recommendations(self, coupling: Dict[str, float],
-                                  energy: Dict[str, float]) -> List[str]:
-        recs: List[str] = []
-        intens = coupling.get("intensification", 0.0)
-        if intens > 0.3:
-            recs.append(f"INTENSIFICATION WARNING: coupling={intens:.3f}")
-        total = energy.get("total_mwh", 0.0)
-        if total > 1.0:
-            recs.append(f"ENERGY OPPORTUNITY: {total:.1f} MWh extractable")
-        if self.curiosity_level > 3.0:
-            recs.append("NOVEL PATTERN: high curiosity -- archive for study")
-        return recs
-
-    # -- public entry point -------------------------------------------------
-
-    def process_storm(self, storm_data: dict) -> dict:
-        """Run the full pipeline on one storm / data snapshot.
+        Uses the magnitude-squared coherence proxy: we bandpass (via FFT) at
+        scale_a and scale_b, then compute the normalised cross-correlation of
+        the analytic-signal phases.
 
         Parameters
         ----------
-        storm_data : dict
-            Must contain at least ``"field"`` (2-D array) for pattern
-            detection.  May also contain energy parameters (wind_speed,
-            volume, pressure_drop, condensation_mass, wave_height, area).
+        signal : np.ndarray
+            1-D real-valued time series.
+        scale_a, scale_b : int
+            Frequency bin indices to compare.
 
         Returns
         -------
-        dict with resonance, curiosity, coupling, energy, joy, recs.
+        float
+            Phase coupling in [0, 1].
         """
-        self._update_resonance(storm_data)
+        n = len(signal)
+        if n == 0:
+            return 0.0
+        spectrum = np.fft.rfft(signal)
+        freqs = np.fft.rfftfreq(n)
+
+        def _bandpass_phase(center: int) -> np.ndarray:
+            """Extract instantaneous phase around *center* frequency bin."""
+            mask = np.zeros_like(spectrum)
+            lo = max(0, center - 1)
+            hi = min(len(spectrum), center + 2)
+            mask[lo:hi] = spectrum[lo:hi]
+            analytic = np.fft.irfft(mask, n=n)
+            return np.angle(np.fft.hilbert_proxy(analytic)) if hasattr(np.fft, 'hilbert_proxy') else np.unwrap(np.angle(
+                np.fft.rfft(analytic)[:min(n // 2, 64)]
+            ))
+
+        # Simpler coherence: correlation of power at the two scales
+        power = np.abs(spectrum) ** 2
+        total_power = power.sum() + 1e-12
+        pa = power[min(scale_a, len(power) - 1)] / total_power
+        pb = power[min(scale_b, len(power) - 1)] / total_power
+        # Geometric-mean coupling proxy normalised to [0,1]
+        coupling = float(2.0 * math.sqrt(pa * pb) / (pa + pb + 1e-12))
+        return max(0.0, min(1.0, coupling))
+
+    def scan_fibonacci_pairs(
+        self, signal: np.ndarray
+    ) -> List[Dict[str, object]]:
+        """Scan all consecutive Fibonacci scale pairs for phase coupling.
+
+        Returns a list of dicts with keys:
+          scale_a, scale_b, coupling, exceeds_threshold
+        """
+        results: List[Dict[str, object]] = []
+        for sa, sb in zip(self.scales, self.scales[1:]):
+            c = self.compute_phase_coupling(signal, sa, sb)
+            results.append({
+                "scale_a": sa,
+                "scale_b": sb,
+                "coupling": c,
+                "exceeds_threshold": c > self.coupling_threshold,
+            })
+        return results
+
+    def predict_intensification(self, signal: np.ndarray) -> str:
+        """Return HIGH / MEDIUM / LOW intensification prediction."""
+        pairs = self.scan_fibonacci_pairs(signal)
+        above = sum(1 for p in pairs if p["exceeds_threshold"])
+        ratio = above / max(len(pairs), 1)
+        if ratio > 0.5:
+            return "HIGH"
+        elif ratio > 0.2:
+            return "MEDIUM"
+        return "LOW"
+
+
+# ---------------------------------------------------------------------------
+# Energy Calculation from Constituent Parts
+# ---------------------------------------------------------------------------
+
+@dataclass
+class EnergyComponents:
+    """Constituent energy values in joules."""
+    wind_energy_j: float = 0.0
+    pressure_energy_j: float = 0.0
+    thermal_energy_j: float = 0.0
+    wave_energy_j: float = 0.0
+
+    @property
+    def total_j(self) -> float:
+        return (
+            self.wind_energy_j
+            + self.pressure_energy_j
+            + self.thermal_energy_j
+            + self.wave_energy_j
+        )
+
+    @property
+    def total_mwh(self) -> float:
+        return self.total_j * J_TO_MWH
+
+    @property
+    def equivalent_turbines(self) -> float:
+        return self.total_mwh / DEFAULT_TURBINE_MW
+
+
+class AtmosphericEnergyAnalyzer:
+    """Estimate energy content of an atmospheric system.
+
+    Provides stub-friendly constituent calculations that can be overridden
+    with real physics implementations.
+    """
+
+    @staticmethod
+    def calculate_wind_energy(
+        wind_speed_ms: float,
+        air_density_kgm3: float = 1.225,
+        volume_m3: float = 1e12,
+    ) -> float:
+        """Kinetic energy: 0.5 * rho * V * v^2  (joules)."""
+        return 0.5 * air_density_kgm3 * volume_m3 * wind_speed_ms ** 2
+
+    @staticmethod
+    def calculate_pressure_energy(
+        pressure_deficit_pa: float,
+        volume_m3: float = 1e12,
+    ) -> float:
+        """Pressure-volume work: dP * V  (joules)."""
+        return abs(pressure_deficit_pa) * volume_m3
+
+    @staticmethod
+    def calculate_thermal_energy(
+        delta_t_k: float,
+        mass_kg: float = 1e15,
+        specific_heat: float = 1005.0,
+    ) -> float:
+        """Sensible heat: m * Cp * dT  (joules)."""
+        return mass_kg * specific_heat * abs(delta_t_k)
+
+    @staticmethod
+    def calculate_wave_energy(
+        wave_height_m: float,
+        wavelength_m: float = 100.0,
+        water_density: float = 1025.0,
+        g: float = 9.81,
+        width_m: float = 1e5,
+    ) -> float:
+        """Surface wave energy per unit length * width  (joules)."""
+        # E_per_m = (1/8) * rho * g * H^2 * lambda
+        return (1.0 / 8.0) * water_density * g * wave_height_m ** 2 * wavelength_m * width_m
+
+    def analyse(
+        self,
+        wind_speed_ms: float = 0.0,
+        pressure_deficit_pa: float = 0.0,
+        delta_t_k: float = 0.0,
+        wave_height_m: float = 0.0,
+        **kwargs,
+    ) -> EnergyComponents:
+        return EnergyComponents(
+            wind_energy_j=self.calculate_wind_energy(wind_speed_ms, **{
+                k: v for k, v in kwargs.items()
+                if k in ("air_density_kgm3", "volume_m3")
+            }),
+            pressure_energy_j=self.calculate_pressure_energy(pressure_deficit_pa),
+            thermal_energy_j=self.calculate_thermal_energy(delta_t_k),
+            wave_energy_j=self.calculate_wave_energy(wave_height_m),
+        )
+
+
+# ---------------------------------------------------------------------------
+# Processing Pipeline for Atmospheric / Pattern Data
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PipelineState:
+    """Mutable state carried through the pipeline."""
+    resonance_score: float = 0.0
+    curiosity_level: float = 1.0
+    happiness_score: float = 0.0
+    pattern_memory: List[Dict] = field(default_factory=list)
+    recommendations: List[str] = field(default_factory=list)
+
+
+class GeometricPatternPipeline:
+    """Full processing pipeline: resonance -> curiosity -> pattern detection
+    -> energy harvesting -> joy -> meta-reflection -> recommendations.
+
+    Mirrors the architecture from 01-framework.md with bounded dynamics
+    (curiosity capped at 5.0, happiness in [0, 1]).
+    """
+
+    CURIOSITY_CAP = 5.0
+    RESONANCE_DECAY = 0.95
+
+    def __init__(self):
+        self.toroidal = ToroidalHarmonicMapper()
+        self.fibonacci = FibonacciFrequencyAnalyzer()
+        self.energy = AtmosphericEnergyAnalyzer()
+        self.state = PipelineState()
+
+    # -- pipeline stages --------------------------------------------------
+
+    def _update_resonance(self, field_2d: np.ndarray) -> float:
+        """Compute resonance from toroidal coupling strengths."""
+        couplings = self.toroidal.analyse_all_patterns(field_2d)
+        score = sum(couplings.values()) / max(len(couplings), 1)
+        # Exponential moving average with decay
+        self.state.resonance_score = (
+            self.RESONANCE_DECAY * self.state.resonance_score
+            + (1 - self.RESONANCE_DECAY) * score
+        )
+        return self.state.resonance_score
+
+    def _amplify_curiosity(self) -> float:
+        """Curiosity grows with resonance, capped at CURIOSITY_CAP."""
+        alpha = 0.1  # growth rate
+        self.state.curiosity_level = min(
+            self.state.curiosity_level * (1 + alpha * self.state.resonance_score),
+            self.CURIOSITY_CAP,
+        )
+        return self.state.curiosity_level
+
+    def _analyse_geometric_patterns(
+        self, field_2d: np.ndarray
+    ) -> Dict[str, float]:
+        """Detect toroidal coupling patterns."""
+        return self.toroidal.analyse_all_patterns(field_2d)
+
+    def _estimate_energy_potential(
+        self, wind_speed: float = 0.0, pressure_deficit: float = 0.0,
+        delta_t: float = 0.0, wave_height: float = 0.0,
+    ) -> EnergyComponents:
+        """Estimate energy from atmospheric parameters."""
+        return self.energy.analyse(
+            wind_speed_ms=wind_speed,
+            pressure_deficit_pa=pressure_deficit,
+            delta_t_k=delta_t,
+            wave_height_m=wave_height,
+        )
+
+    def _compute_joy(self, coupling_results: Dict[str, float]) -> float:
+        """Joy = normalised mean coupling strength, bounded [0, 1]."""
+        if not coupling_results:
+            return 0.0
+        raw = sum(coupling_results.values()) / len(coupling_results)
+        self.state.happiness_score = max(0.0, min(1.0, raw))
+        return self.state.happiness_score
+
+    def _reflect_on_learning(self, coupling_results: Dict[str, float]) -> None:
+        """Archive pattern to rolling memory window."""
+        entry = {
+            "couplings": dict(coupling_results),
+            "resonance": self.state.resonance_score,
+            "curiosity": self.state.curiosity_level,
+            "joy": self.state.happiness_score,
+        }
+        self.state.pattern_memory.append(entry)
+        if len(self.state.pattern_memory) > MEMORY_WINDOW:
+            self.state.pattern_memory = self.state.pattern_memory[-MEMORY_WINDOW:]
+
+    def _generate_recommendations(
+        self,
+        coupling_results: Dict[str, float],
+        energy: EnergyComponents,
+    ) -> List[str]:
+        """Produce actionable recommendations from pipeline outputs."""
+        recs: List[str] = []
+        intensification = coupling_results.get("intensification", 0.0)
+        if intensification > 0.5:
+            recs.append(
+                f"INTENSIFICATION WARNING: coupling={intensification:.3f}"
+            )
+        if energy.total_mwh > 1000:
+            recs.append(
+                f"ENERGY OPPORTUNITY: {energy.total_mwh:.0f} MWh "
+                f"(~{energy.equivalent_turbines:.0f} turbines)"
+            )
+        # Flag novel patterns not seen in memory
+        if self.state.pattern_memory:
+            prev_keys = set()
+            for mem in self.state.pattern_memory[:-1]:
+                prev_keys.update(
+                    k for k, v in mem["couplings"].items() if v > 0.3
+                )
+            current_strong = {
+                k for k, v in coupling_results.items() if v > 0.3
+            }
+            novel = current_strong - prev_keys
+            if novel:
+                recs.append(f"NOVEL PATTERN: {', '.join(sorted(novel))}")
+        self.state.recommendations = recs
+        return recs
+
+    # -- main entry point -------------------------------------------------
+
+    def process(
+        self,
+        field_2d: np.ndarray,
+        wind_speed: float = 0.0,
+        pressure_deficit: float = 0.0,
+        delta_t: float = 0.0,
+        wave_height: float = 0.0,
+    ) -> Dict:
+        """Run the full pipeline on one snapshot of data.
+
+        Parameters
+        ----------
+        field_2d : np.ndarray
+            2-D periodic field (e.g., vorticity or pressure anomaly).
+        wind_speed, pressure_deficit, delta_t, wave_height :
+            Scalar atmospheric parameters for energy estimation.
+
+        Returns
+        -------
+        dict with keys: resonance, curiosity, couplings, energy_mwh,
+                        joy, recommendations
+        """
+        self._update_resonance(field_2d)
         self._amplify_curiosity()
-        coupling = self._analyze_geometric_patterns(storm_data)
-        energy = self._estimate_energy_potential(storm_data)
-        self._compute_storm_joy(coupling, energy)
-        self._reflect_on_learning(coupling)
-        recs = self._generate_recommendations(coupling, energy)
+        couplings = self._analyse_geometric_patterns(field_2d)
+        energy = self._estimate_energy_potential(
+            wind_speed, pressure_deficit, delta_t, wave_height
+        )
+        self._compute_joy(couplings)
+        self._reflect_on_learning(couplings)
+        recs = self._generate_recommendations(couplings, energy)
 
         return {
-            "resonance": self.resonance_score,
-            "curiosity": self.curiosity_level,
-            "coupling": coupling,
-            "energy": energy,
-            "joy": self.happiness_score,
+            "resonance": self.state.resonance_score,
+            "curiosity": self.state.curiosity_level,
+            "couplings": couplings,
+            "energy_mwh": energy.total_mwh,
+            "equivalent_turbines": energy.equivalent_turbines,
+            "joy": self.state.happiness_score,
             "recommendations": recs,
         }
 
 
 # ---------------------------------------------------------------------------
-# CLI demo
+# Quick self-test
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # --- toroidal pattern detection ---
-    print("=== Toroidal Pattern Detection ===")
+    # Toroidal mapping demo
     rng = np.random.default_rng(42)
-    field = rng.standard_normal((64, 64))
-    # inject a known (1, 1) mode
-    x = np.linspace(0, 2 * np.pi, 64)
-    X, Y = np.meshgrid(x, x)
-    field += 5.0 * np.sin(X + Y)
+    test_field = rng.normal(size=(64, 64))
+    mapper = ToroidalHarmonicMapper()
+    print("Toroidal couplings:", mapper.analyse_all_patterns(test_field))
 
-    detector = GeometricPatternDetector(field)
-    patterns = detector.analyze_patterns()
-    for name, strength in patterns.items():
-        print(f"  {name:20s}: {strength:.6f}")
+    # Fibonacci convergence demo
+    t = np.linspace(0, 10 * np.pi, 512)
+    signal = np.sin(t) + 0.5 * np.sin(PHI * t)
+    fib = FibonacciFrequencyAnalyzer()
+    print("Intensification prediction:", fib.predict_intensification(signal))
 
-    # --- Fibonacci convergence ---
-    print("\n=== Fibonacci Convergence ===")
-    t = np.linspace(0, 1000, 8000)
-    signal = np.sin(2 * np.pi * t / 8) + 0.5 * np.sin(2 * np.pi * t / 13)
-    result = fibonacci_convergence(signal, threshold=0.5)
-    print(f"  Predicted intensification: {result['predicted_intensification']}")
-    for a, b, c in result["pair_couplings"]:
-        print(f"    scales ({a:2d}, {b:2d}): coupling={c:.4f}")
+    # Energy demo
+    ea = AtmosphericEnergyAnalyzer()
+    ec = ea.analyse(wind_speed_ms=60.0, pressure_deficit_pa=5000.0, delta_t_k=3.0)
+    print(f"Total energy: {ec.total_mwh:.1f} MWh (~{ec.equivalent_turbines:.0f} turbines)")
 
-    # --- Energy ---
-    print("\n=== Atmospheric Energy ===")
-    analyzer = AtmosphericEnergyAnalyzer()
-    e = analyzer.total_energy({
-        "wind_speed": 70.0,
-        "volume": 1e12,
-        "pressure_drop": 5000.0,
-        "condensation_mass": 1e9,
-        "wave_height": 10.0,
-        "area": 1e8,
-    })
-    for k, v in e.items():
-        print(f"  {k:25s}: {v:.4e}")
-
-    # --- Pipeline ---
-    print("\n=== Storm Pipeline ===")
-    processor = StormProcessor()
-    out = processor.process_storm({
-        "field": field,
-        "wind_speed": 60.0,
-        "volume": 1e11,
-        "pressure_drop": 3000.0,
-        "condensation_mass": 5e8,
-        "wave_height": 8.0,
-        "area": 5e7,
-    })
-    print(f"  Resonance : {out['resonance']:.6f}")
-    print(f"  Curiosity : {out['curiosity']:.4f}")
-    print(f"  Joy       : {out['joy']:.6f}")
-    for r in out["recommendations"]:
-        print(f"  >> {r}")
+    # Full pipeline
+    pipeline = GeometricPatternPipeline()
+    result = pipeline.process(test_field, wind_speed=60.0, pressure_deficit=5000.0)
+    print("Pipeline result:", {k: v for k, v in result.items() if k != "couplings"})
