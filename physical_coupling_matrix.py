@@ -138,12 +138,32 @@ class PhysicalCouplingMatrix:
         
         # ========== G (Gravitational) ==========
         # Gravity can be converted to M (hydro), T (potential → heat)
-        
+
         # G → M (falling mass, hydro): 80-95%
         self.matrix[idx["G"], idx["M"]] = 0.90
-        
+
         # G → T (tidal friction): near 100%
         self.matrix[idx["G"], idx["T"]] = 0.95
+
+        # G → EM (gravitational potential → hydroelectric → grid): 70-85%
+        # Two-step path G→M→EM is ~81%, but direct hydro turbine+generator
+        # systems achieve 80-85% end-to-end.
+        self.matrix[idx["G"], idx["EM"]] = 0.82
+
+        # EM → G (electromagnetic pump/lift, crane, elevator): 75-90%
+        # Electric motors lifting mass against gravity — limited by motor
+        # efficiency and friction losses.
+        self.matrix[idx["EM"], idx["G"]] = 0.85
+
+        # C → G (chemical energy → gravitational potential): 25-35%
+        # Biological: organisms climbing, sap rising. Mechanical: combustion
+        # engine lifting mass. Limited by Carnot + mechanical chain.
+        self.matrix[idx["C"], idx["G"]] = 0.30
+
+        # G → C (gravitational pressure → chemical bonds): 5-15%
+        # Geological: pressure-driven mineral formation, deep-sea
+        # chemosynthesis driven by hydrostatic pressure gradients.
+        self.matrix[idx["G"], idx["C"]] = 0.10
         
         # ========== K (Kinetic/Coriolis) ==========
         # Rotation, Coriolis shapes flows but doesn't directly convert
