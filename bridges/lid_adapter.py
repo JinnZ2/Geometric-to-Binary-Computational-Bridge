@@ -222,6 +222,36 @@ class LIDAdapter:
                     return data
         return None
 
+    def load_all_entities(self) -> Dict[str, dict]:
+        """
+        Walk the ``ontology/`` directory tree and load every entity JSON.
+
+        Skips collection files (top-level arrays) and non-entity files.
+        Results are merged into ``self._ontology`` and returned.
+        """
+        if not self._lid_available:
+            return {}
+        ontology_dir = self.lid_root / "ontology"
+        if not ontology_dir.is_dir():
+            return {}
+        for root, _dirs, files in os.walk(ontology_dir):
+            for fname in files:
+                if not fname.endswith(".json"):
+                    continue
+                fpath = Path(root) / fname
+                try:
+                    with open(fpath) as f:
+                        data = json.load(f)
+                except (json.JSONDecodeError, OSError):
+                    continue
+                # Skip collection files (arrays) and files without an id
+                if not isinstance(data, dict) or "id" not in data:
+                    continue
+                eid = data["id"]
+                if eid not in self._ontology:
+                    self._ontology[eid] = data
+        return self._ontology
+
     def list_bridge_entities(self) -> List[dict]:
         """List all LID entities that have a known bridge encoder mapping."""
         index = self.load_index()
@@ -392,11 +422,14 @@ class LIDAdapter:
 
     def auto_wire(self) -> Dict[str, List[str]]:
         """
-        Map every LID entity to its bridge modality(ies) based on
+        Map **every** LID entity to its bridge modality(ies) based on
         category baselines + keyword inference from descriptions/patterns.
 
-        Returns dict of entity_id → list of modality names.
-        Caches result on self._auto_wired.
+        Iterates all entity files under ``ontology/`` (not just the
+        14-entity index), so all 78 entities get wired.
+
+        Returns dict of entity_id → sorted list of modality names.
+        Caches result on ``self._auto_wired``.
         """
         if self._auto_wired is not None:
             return self._auto_wired
@@ -405,20 +438,27 @@ class LIDAdapter:
             self._auto_wired = {}
             return self._auto_wired
 
-        index = self.load_index()
+        all_entities = self.load_all_entities()
         result: Dict[str, List[str]] = {}
 
-        for entry in index.get("entities", []):
-            entity_id = entry.get("id")
-            if not entity_id:
-                continue
-            entity = self.load_entity(entity_id)
-            if entity is None:
-                # Fallback: use category baseline only
-                category = entry.get("ontology", "")
-                result[entity_id] = list(_ONTOLOGY_BASELINE.get(category, []))
-            else:
-                result[entity_id] = self._infer_modalities(entity)
+        for entity_id, entity in all_entities.items():
+            modalities = self._infer_modalities(entity)
+
+            # Layer: also honour hard-coded ENTITY_ENCODER_MAP entries
+            if entity_id in ENTITY_ENCODER_MAP:
+                mod_path = ENTITY_ENCODER_MAP[entity_id][0]
+                mod_name = mod_path.rsplit(".", 1)[-1].replace("_encoder", "")
+                if mod_name not in modalities:
+                    modalities.append(mod_name)
+
+            # Layer: classify_to_bridge on description as catch-all
+            desc = entity.get("description", "")
+            if desc:
+                classified = self.classify_to_bridge(desc)
+                if classified and classified not in modalities:
+                    modalities.append(classified)
+
+            result[entity_id] = sorted(modalities)
 
         self._auto_wired = result
         return result
@@ -472,12 +512,11 @@ class LIDAdapter:
             f"LID root: {self.lid_root}",
         ]
         if self._lid_available:
-            index = self.load_index()
-            total = len(index.get("entities", []))
+            all_ents = self.load_all_entities()
             bridge = len(self.list_bridge_entities())
             wired = self.get_all_bridge_routes()
-            lines.append(f"Total LID entities: {total}")
-            lines.append(f"Hard-mapped entities: {bridge}")
+            lines.append(f"Total LID entities: {len(all_ents)}")
+            lines.append(f"Hard-mapped entities (ENTITY_ENCODER_MAP): {bridge}")
             lines.append(f"Auto-wired entities: {len(wired)}")
-            lines.append(f"Modality encoders: {len(MODALITY_ENCODER_MAP)}")
+            lines.append(f"Modality encoders available: {len(MODALITY_ENCODER_MAP)}")
         return "\n".join(lines)
