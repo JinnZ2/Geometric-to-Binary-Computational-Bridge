@@ -2051,7 +2051,7 @@ import os as _os
 
 _gzk_path = _os.path.join(
     _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
-    "Geometric-Intelligence", "geometric_zk.py",
+    "geometric_intelligence", "geometric_zk.py",
 )
 _gzk_spec = _ilu.spec_from_file_location("geometric_zk", _gzk_path)
 _gzk = _ilu.module_from_spec(_gzk_spec)
@@ -2558,7 +2558,7 @@ _gpe_spec = _ilu.spec_from_file_location(
     "geometric_protection_engine",
     _os.path.join(
         _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
-        "Geometric-Intelligence", "geometric_protection_engine.py",
+        "geometric_intelligence", "geometric_protection_engine.py",
     ),
 )
 _gpe = _ilu.module_from_spec(_gpe_spec)
@@ -3071,7 +3071,7 @@ class TestMagneticBridgeComparator(unittest.TestCase):
 # ═══════════════════════════════════════════════════════════════════════════
 
 import importlib as _il
-_ce_mod = _il.import_module("Geometric-Intelligence.curiosity_engine")
+_ce_mod = _il.import_module("geometric_intelligence.curiosity_engine")
 CuriosityEngine = _ce_mod.CuriosityEngine
 
 
@@ -3935,7 +3935,7 @@ class TestCyclicEncoderReport(unittest.TestCase):
 # ConstraintAgent tests
 # ═══════════════════════════════════════════════════════════════════════════
 
-_ca_mod = _il.import_module("Geometric-Intelligence.constraint_agent")
+_ca_mod = _il.import_module("geometric_intelligence.constraint_agent")
 AgentState     = _ca_mod.AgentState
 ResourceBudget = _ca_mod.ResourceBudget
 GeometricMap   = _ca_mod.GeometricMap
