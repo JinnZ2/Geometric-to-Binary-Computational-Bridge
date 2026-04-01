@@ -50,6 +50,8 @@ class PhysicalCouplingMatrix:
     def __init__(self):
         self.matrix = np.zeros((n_nodes, n_nodes))
         self._build_matrix()
+        self.info_matrix = np.zeros((n_nodes, n_nodes))
+        self._build_info_matrix()
     
     def _build_matrix(self):
         """Build coupling matrix from first principles."""
@@ -174,15 +176,86 @@ class PhysicalCouplingMatrix:
         # K can be converted to EM (generator) via angular momentum
         self.matrix[idx["K"], idx["EM"]] = 0.85
     
+    def _build_info_matrix(self):
+        """Build informational/structural coupling matrix.
+
+        Each entry represents how easily patterns and structural information
+        transfer between two domains, independent of energy conversion
+        efficiency.  The matrix is symmetric (informational affinity is
+        bidirectional) with 1.0 on the diagonal.
+        """
+        idx = self.IDX
+
+        # Diagonal — perfect self-coupling
+        for i in range(n_nodes):
+            self.info_matrix[i, i] = 1.0
+
+        # Helper to set symmetric pairs
+        def _sym(a: str, b: str, v: float):
+            self.info_matrix[idx[a], idx[b]] = v
+            self.info_matrix[idx[b], idx[a]] = v
+
+        # EM ↔ M: motor/generator principles, tight structural mapping
+        _sym("EM", "M", 0.85)
+        # EM ↔ C: electrochemistry, battery modeling
+        _sym("EM", "C", 0.70)
+        # EM ↔ T: thermal noise limits information, but well-characterized
+        _sym("EM", "T", 0.60)
+        # EM ↔ R: both electromagnetic — wavelength/frequency encoding
+        _sym("EM", "R", 0.90)
+        # EM ↔ G: gravitational waves carry information, GPS uses EM+G
+        _sym("EM", "G", 0.75)
+        # M ↔ F: fluid mechanics is mechanical, structural overlap
+        _sym("M", "F", 0.80)
+        # M ↔ G: classical mechanics, orbital mechanics
+        _sym("M", "G", 0.85)
+        # C ↔ T: thermochemistry, Arrhenius
+        _sym("C", "T", 0.65)
+        # C ↔ G: crystallography, mineral formation (key LID insight)
+        _sym("C", "G", 0.85)
+        # R ↔ T: blackbody radiation, Planck's law
+        _sym("R", "T", 0.75)
+        # G ↔ K: rotational dynamics, Kepler's laws
+        _sym("G", "K", 0.90)
+        # F ↔ K: Coriolis, atmospheric dynamics
+        _sym("F", "K", 0.80)
+        # T ↔ F: convection patterns carry some structural info
+        _sym("T", "F", 0.55)
+
     def get_efficiency(self, from_node: str, to_node: str) -> float:
         """Get coupling efficiency between two physical nodes."""
         return self.matrix[self.IDX[from_node], self.IDX[to_node]]
     
-    def get_physical_path(self, from_node: str, to_node: str, 
+    def get_info_coupling(self, from_node: str, to_node: str) -> float:
+        """Get informational/structural coupling between two physical nodes."""
+        return self.info_matrix[self.IDX[from_node], self.IDX[to_node]]
+
+    def get_combined_coupling(self, from_node: str, to_node: str,
+                              energy_weight: float = 0.5) -> float:
+        """Return weighted blend of energy and informational coupling.
+
+        Parameters
+        ----------
+        from_node, to_node : str
+            Node identifiers (e.g. "EM", "C", "G").
+        energy_weight : float, optional
+            Weight given to energy efficiency (0-1). The informational
+            coupling receives weight ``1 - energy_weight``. Default 0.5.
+        """
+        info_weight = 1.0 - energy_weight
+        return (energy_weight * self.get_efficiency(from_node, to_node) +
+                info_weight * self.get_info_coupling(from_node, to_node))
+
+    def get_physical_path(self, from_node: str, to_node: str,
                           intermediate: str = None) -> float:
-        """Calculate efficiency of multi-step conversion."""
+        """Calculate efficiency of multi-step conversion.
+
+        Note: This method uses **energy efficiency** only.  For
+        informational/structural coupling see ``get_info_coupling`` or
+        ``get_combined_coupling``.
+        """
         if intermediate:
-            return (self.get_efficiency(from_node, intermediate) * 
+            return (self.get_efficiency(from_node, intermediate) *
                     self.get_efficiency(intermediate, to_node))
         return self.get_efficiency(from_node, to_node)
 

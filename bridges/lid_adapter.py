@@ -34,7 +34,9 @@ Usage
 
 from __future__ import annotations
 
+import importlib
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
@@ -42,7 +44,7 @@ from typing import Dict, List, Optional, Tuple, Any
 
 # ── Encoder registry ──────────────────────────────────────────────────────
 
-# Map LID entity IDs → bridge encoder module + class
+# Map LID entity IDs → bridge encoder module + class  (legacy hard-coded)
 ENTITY_ENCODER_MAP: Dict[str, Tuple[str, str]] = {
     "MAG_BRIDGE":       ("bridges.magnetic_encoder",      "MagneticBridgeEncoder"),
     "LIGHT_BR":         ("bridges.light_encoder",         "LightBridgeEncoder"),
@@ -53,6 +55,91 @@ ENTITY_ENCODER_MAP: Dict[str, Tuple[str, str]] = {
     "THERMAL":          ("bridges.thermal_encoder",       "ThermalBridgeEncoder"),
     "FLUX":             ("bridges.wave_encoder",          "WaveBridgeEncoder"),
     "RES_SENSOR":       ("bridges.sound_encoder",         "SoundBridgeEncoder"),
+}
+
+# Map modality name → (module, class) for all 11 bridge encoders
+MODALITY_ENCODER_MAP: Dict[str, Tuple[str, str]] = {
+    "magnetic":      ("bridges.magnetic_encoder",      "MagneticBridgeEncoder"),
+    "light":         ("bridges.light_encoder",         "LightBridgeEncoder"),
+    "sound":         ("bridges.sound_encoder",         "SoundBridgeEncoder"),
+    "gravity":       ("bridges.gravity_encoder",       "GravityBridgeEncoder"),
+    "electric":      ("bridges.electric_encoder",      "ElectricBridgeEncoder"),
+    "wave":          ("bridges.wave_encoder",          "WaveBridgeEncoder"),
+    "thermal":       ("bridges.thermal_encoder",       "ThermalBridgeEncoder"),
+    "pressure":      ("bridges.pressure_encoder",      "PressureBridgeEncoder"),
+    "chemical":      ("bridges.chemical_encoder",      "ChemicalBridgeEncoder"),
+    "consciousness": ("bridges.consciousness_encoder", "ConsciousnessBridgeEncoder"),
+    "emotion":       ("bridges.emotion_encoder",       "EmotionBridgeEncoder"),
+}
+
+# ── Pattern/keyword → modality inference tables ──────────────────────────
+
+# Keywords found in entity descriptions, patterns, and core_attributes that
+# signal affinity with a particular bridge modality.
+_PATTERN_MODALITY_KEYWORDS: Dict[str, List[str]] = {
+    "magnetic": [
+        "magnetic", "polarity", "ferromagnet", "magnetosphere", "dipole",
+        "field line", "flux stabiliz", "spin symmetry", "gauss", "tesla",
+    ],
+    "electric": [
+        "electric", "charge", "voltage", "current", "coulomb", "capacit",
+        "discharge", "potential difference", "ioniz", "signal propagation",
+    ],
+    "light": [
+        "light", "photon", "wavelength", "spectrum", "polariz", "optical",
+        "luminous", "refract", "dispers", "glow", "photon emission",
+        "bioluminescen", "chromatophore", "iridescen", "pigment",
+    ],
+    "sound": [
+        "sound", "acoustic", "pitch", "resonan", "vibrat", "echolocat",
+        "ultrasonic", "infrasound", "harmonic", "stridulat", "song",
+        "sonar", "piezoelectric",
+    ],
+    "gravity": [
+        "gravity", "gravitation", "orbit", "curvature", "mass", "geodesic",
+        "tidal", "centripetal", "weight", "freefall",
+    ],
+    "wave": [
+        "quantum", "wave function", "psi", "momentum", "schrodinger",
+        "superposition", "entangle", "decoher", "phase coherence",
+        "interference", "diffraction",
+    ],
+    "thermal": [
+        "thermal", "temperature", "heat", "infrared", "boltzmann",
+        "thermoregulat", "endotherm", "exotherm", "radiat", "cooling",
+        "solar", "photovoltaic",
+    ],
+    "pressure": [
+        "pressure", "stress", "strain", "haptic", "force", "pascal",
+        "tension", "elastic", "compression", "hardness", "turgor",
+        "hydraulic",
+    ],
+    "chemical": [
+        "chemical", "reaction", "molecule", "bond", "catalyst", "ph ",
+        "enzyme", "metabol", "nutrient", "photosynthes", "oxidat",
+        "ferment", "digest", "symbiosis", "toxin", "venom", "secretion",
+        "chemoreception", "pheromone", "biofilm",
+    ],
+    "consciousness": [
+        "consciousness", "awareness", "entropy", "attention", "phi",
+        "self-organiz", "negentrop", "emergence", "cogniti", "intelligence",
+        "threshold", "information", "sentien", "neurology",
+    ],
+    "emotion": [
+        "emotion", "affect", "pleasure", "arousal", "dominance", "pad",
+        "play", "social bonding", "empathy", "cooperative", "culture",
+    ],
+}
+
+# Ontology category → guaranteed baseline modalities (always assigned)
+_ONTOLOGY_BASELINE: Dict[str, List[str]] = {
+    "energy":   ["wave"],
+    "crystal":  ["magnetic", "light", "pressure"],
+    "plasma":   ["electric", "thermal", "wave"],
+    "shape":    ["gravity", "pressure"],
+    "temporal": ["wave", "consciousness"],
+    "animal":   ["sound", "consciousness", "emotion"],
+    "plant":    ["chemical", "thermal"],
 }
 
 # Map LID ontology categories → bridge modality names
@@ -84,6 +171,7 @@ class LIDAdapter:
         self._ontology: Dict[str, dict] = {}
         self._index: Optional[dict] = None
         self._lid_available = self.lid_root is not None
+        self._auto_wired: Optional[Dict[str, List[str]]] = None
 
     @staticmethod
     def _resolve_root(lid_root) -> Optional[Path]:
@@ -133,6 +221,36 @@ class LIDAdapter:
                     self._ontology[entity_id] = data
                     return data
         return None
+
+    def load_all_entities(self) -> Dict[str, dict]:
+        """
+        Walk the ``ontology/`` directory tree and load every entity JSON.
+
+        Skips collection files (top-level arrays) and non-entity files.
+        Results are merged into ``self._ontology`` and returned.
+        """
+        if not self._lid_available:
+            return {}
+        ontology_dir = self.lid_root / "ontology"
+        if not ontology_dir.is_dir():
+            return {}
+        for root, _dirs, files in os.walk(ontology_dir):
+            for fname in files:
+                if not fname.endswith(".json"):
+                    continue
+                fpath = Path(root) / fname
+                try:
+                    with open(fpath) as f:
+                        data = json.load(f)
+                except (json.JSONDecodeError, OSError):
+                    continue
+                # Skip collection files (arrays) and files without an id
+                if not isinstance(data, dict) or "id" not in data:
+                    continue
+                eid = data["id"]
+                if eid not in self._ontology:
+                    self._ontology[eid] = data
+        return self._ontology
 
     def list_bridge_entities(self) -> List[dict]:
         """List all LID entities that have a known bridge encoder mapping."""
@@ -273,6 +391,118 @@ class LIDAdapter:
             "comparisons": comparisons,
         }
 
+    # ── Auto-wiring ─────────────────────────────────────────────────
+
+    def _infer_modalities(self, entity: dict) -> List[str]:
+        """Infer bridge modalities from an entity's text content."""
+        # Build a single searchable text blob from all relevant fields
+        parts = [
+            entity.get("description", ""),
+            json.dumps(entity.get("core_attributes", {})),
+            json.dumps(entity.get("patterns", [])),
+        ]
+        blob = " ".join(parts).lower()
+
+        hits: Dict[str, int] = {}
+        for modality, keywords in _PATTERN_MODALITY_KEYWORDS.items():
+            for kw in keywords:
+                if kw in blob:
+                    hits[modality] = hits.get(modality, 0) + 1
+
+        # Start with baseline modalities for this ontology category
+        category = entity.get("ontology", "")
+        baseline = list(_ONTOLOGY_BASELINE.get(category, []))
+
+        # Add any keyword-inferred modalities
+        for modality in hits:
+            if modality not in baseline:
+                baseline.append(modality)
+
+        return baseline
+
+    def auto_wire(self) -> Dict[str, List[str]]:
+        """
+        Map **every** LID entity to its bridge modality(ies) based on
+        category baselines + keyword inference from descriptions/patterns.
+
+        Iterates all entity files under ``ontology/`` (not just the
+        14-entity index), so all 78 entities get wired.
+
+        Returns dict of entity_id → sorted list of modality names.
+        Caches result on ``self._auto_wired``.
+        """
+        if self._auto_wired is not None:
+            return self._auto_wired
+
+        if not self._lid_available:
+            self._auto_wired = {}
+            return self._auto_wired
+
+        all_entities = self.load_all_entities()
+        result: Dict[str, List[str]] = {}
+
+        for entity_id, entity in all_entities.items():
+            modalities = self._infer_modalities(entity)
+
+            # Layer: also honour hard-coded ENTITY_ENCODER_MAP entries
+            if entity_id in ENTITY_ENCODER_MAP:
+                mod_path = ENTITY_ENCODER_MAP[entity_id][0]
+                mod_name = mod_path.rsplit(".", 1)[-1].replace("_encoder", "")
+                if mod_name not in modalities:
+                    modalities.append(mod_name)
+
+            # Layer: classify_to_bridge on description as catch-all
+            desc = entity.get("description", "")
+            if desc:
+                classified = self.classify_to_bridge(desc)
+                if classified and classified not in modalities:
+                    modalities.append(classified)
+
+            result[entity_id] = sorted(modalities)
+
+        self._auto_wired = result
+        return result
+
+    def get_all_bridge_routes(self) -> Dict[str, List[str]]:
+        """Return the full auto-wired mapping (calls auto_wire if needed)."""
+        return self.auto_wire()
+
+    def encoder_for_modality(self, modality: str) -> Any:
+        """Instantiate a bridge encoder by modality name."""
+        if modality not in MODALITY_ENCODER_MAP:
+            return None
+        module_path, class_name = MODALITY_ENCODER_MAP[modality]
+        try:
+            mod = importlib.import_module(module_path)
+            cls = getattr(mod, class_name)
+            return cls()
+        except (ImportError, AttributeError):
+            return None
+
+    def encode_entity(self, entity_id: str,
+                      geometry_data: Any = None) -> Dict[str, Any]:
+        """
+        Look up an entity's bridge routes and return encoder instances.
+
+        Returns dict of {modality: encoder_instance}.
+        If geometry_data is provided, calls from_geometry() + to_binary()
+        on each encoder.
+        """
+        routes = self.get_all_bridge_routes()
+        modalities = routes.get(entity_id, [])
+
+        encoders: Dict[str, Any] = {}
+        for modality in modalities:
+            enc = self.encoder_for_modality(modality)
+            if enc is None:
+                continue
+            if geometry_data is not None:
+                enc.from_geometry(geometry_data)
+                enc.to_binary()
+            encoders[modality] = enc
+
+        return encoders
+
     # ── Summary ───────────────────────────────────────────────────────
 
     def summary(self) -> str:
@@ -282,10 +512,11 @@ class LIDAdapter:
             f"LID root: {self.lid_root}",
         ]
         if self._lid_available:
-            index = self.load_index()
-            total = len(index.get("entities", []))
+            all_ents = self.load_all_entities()
             bridge = len(self.list_bridge_entities())
-            lines.append(f"Total LID entities: {total}")
-            lines.append(f"Bridge-mapped entities: {bridge}")
-            lines.append(f"Entity→Encoder map: {len(ENTITY_ENCODER_MAP)} entries")
+            wired = self.get_all_bridge_routes()
+            lines.append(f"Total LID entities: {len(all_ents)}")
+            lines.append(f"Hard-mapped entities (ENTITY_ENCODER_MAP): {bridge}")
+            lines.append(f"Auto-wired entities: {len(wired)}")
+            lines.append(f"Modality encoders available: {len(MODALITY_ENCODER_MAP)}")
         return "\n".join(lines)
