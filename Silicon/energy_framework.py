@@ -287,30 +287,48 @@ def build_ai_system(
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    # Quick smoke test
-    print("=== Energy Framework smoke test ===\n")
+    print("=== Energy Framework Self-Test ===\n")
 
-    print(f"Aerobic respiration (1 glucose, 32 ATP): "
-          f"{aerobic_respiration_energy():.1f} kJ")
+    # Aerobic respiration
+    e = aerobic_respiration_energy(1.0, 32)
+    print(f"1 mol glucose -> {e:.1f} kJ  (32 ATP x 30.5 kJ/mol)")
 
-    print(f"Q10 rate (base=1.0, +10C): "
-          f"{q10_metabolic_rate(1.0, 10.0):.2f}")
+    # Restoration curve
+    times = [0, 2, 4, 8]
+    for t in times:
+        level = restored_energy_at(100.0, 40.0, t, tau_r=3.0)
+        print(f"  Restoration at t={t}h: {level:.1f}")
 
-    print(f"Thermoregulation cost (0C env, 37C core): "
-          f"{thermoregulation_cost(0, 37):.2f}")
+    # Q10
+    rate = q10_metabolic_rate(1.0, 10.0)
+    print(f"Q10 rate at +10C: {rate:.2f}x  (expect 2.0)")
 
-    print(f"Energy per bit (1pF, 1V): "
-          f"{energy_per_bit(1e-12, 1.0):.2e} J")
+    # Thermoregulation
+    cost = thermoregulation_cost(5.0, 37.0, k_t=0.01)
+    print(f"Thermoreg cost at 5C env, 37C core: {cost:.2f}")
 
-    print(f"Battery efficiency (85/100): "
-          f"{battery_efficiency(85, 100):.2%}")
+    # Digital op energy
+    e_op = energy_per_bit(1e-15, 0.7)
+    print(f"Energy per op (1fF, 0.7V): {e_op:.2e} J  ({e_op*1e12:.2f} pJ)")
 
-    print(f"Cognitive load (5 tasks): "
-          f"{cognitive_load_cost(5):.3f}")
+    # Battery efficiency
+    eta = battery_efficiency(90, 100)
+    print(f"Battery efficiency: {eta*100:.0f}%")
 
+    # Social overhead
+    e_s = social_infrastructure_cost(100, 0.5, 0.3)
+    print(f"Social overhead (100 agents): {e_s:.1f}")
+
+    # Cognitive load
+    e_c = cognitive_load_cost(5, k_focus=1.0)
+    print(f"Cognitive load (5 tasks): {e_c:.3f}")
+
+    # Cross-domain comparison
     bio = build_biological_system(t_env=0.0)
     ai = build_ai_system()
     comparison = compare_systems(bio, ai)
-    print(f"\nCross-domain comparison: {comparison}")
+    print(f"\nCross-domain comparison:")
+    for name, data in comparison.items():
+        print(f"  {name}: E_total={data['e_total']:.4g}, ratio={data['ratio_to_best']:.2f}")
 
     print("\nAll checks passed.")
