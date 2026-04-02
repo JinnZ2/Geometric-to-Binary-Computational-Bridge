@@ -565,18 +565,23 @@ def test_without_singles(N: int, B_bound: Optional[int] = None,
     glyph_deps = glyph_null_search(filtered_glyphs, max_depth=4)
     glyph_ms = (time.time() - t0) * 1000
     
-    # Try GF(2) as comparison
-    t0 = time.time()
-    gf2_deps = gf2_gauss(filtered_relations, factor_base)
-    gf2_ms = (time.time() - t0) * 1000
-    
+    # Skip GF(2) for large N — it takes O(D^2 * R) which is minutes at 55+ bits
+    bits = int(math.log2(N)) + 1
+    if bits <= 50:
+        t0 = time.time()
+        gf2_deps = gf2_gauss(filtered_relations, factor_base)
+        gf2_ms = (time.time() - t0) * 1000
+    else:
+        gf2_deps = []
+        gf2_ms = 0.0
+
     # Extract factors
     glyph_factor = None
     for dep in glyph_deps:
         glyph_factor = sovereign_sqrt(N, filtered_relations, dep, factor_base)
         if glyph_factor:
             break
-    
+
     gf2_factor = None
     for dep in gf2_deps:
         gf2_factor = sovereign_sqrt(N, filtered_relations, dep, factor_base)

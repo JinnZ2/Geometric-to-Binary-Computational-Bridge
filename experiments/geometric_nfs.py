@@ -47,13 +47,55 @@ from experiments.number_theoretic_energy import (
 # Each octahedron (3 primes) has precomputed quadratic residues.
 # O(1) check per octahedron instead of O(p*q*r) table lookup.
 
+def _tonelli_shanks(n: int, p: int) -> int:
+    """Compute sqrt(n) mod p using Tonelli-Shanks. O(log^2 p)."""
+    if n % p == 0:
+        return 0
+    if p == 2:
+        return n % 2
+    # Factor out powers of 2 from p-1: p-1 = Q * 2^S
+    Q = p - 1
+    S = 0
+    while Q % 2 == 0:
+        Q //= 2
+        S += 1
+    # Find a quadratic non-residue
+    z = 2
+    while pow(z, (p - 1) // 2, p) != p - 1:
+        z += 1
+    M = S
+    c = pow(z, Q, p)
+    t = pow(n, Q, p)
+    R = pow(n, (Q + 1) // 2, p)
+    while True:
+        if t == 1:
+            return R
+        # Find least i such that t^(2^i) ≡ 1 (mod p)
+        i = 1
+        tmp = (t * t) % p
+        while tmp != 1:
+            tmp = (tmp * tmp) % p
+            i += 1
+        b = pow(c, 1 << (M - i - 1), p)
+        M = i
+        c = (b * b) % p
+        t = (t * c) % p
+        R = (R * b) % p
+
+
 def quadratic_residues(N: int, p: int) -> Set[int]:
-    """Values of (a mod p) where p divides (a^2 - N)."""
+    """Values of (a mod p) where p divides (a^2 - N). O(log^2 p)."""
     if p == 2:
         return {N % 2}
-    if pow(N, (p - 1) // 2, p) != 1:
+    n_mod_p = N % p
+    if n_mod_p == 0:
+        return {0}
+    if pow(n_mod_p, (p - 1) // 2, p) != 1:
         return set()  # N is not a QR mod p
-    return {r for r in range(p) if (r * r) % p == N % p}
+    r = _tonelli_shanks(n_mod_p, p)
+    # Two roots: r and p-r
+    roots = {r, p - r}
+    return roots
 
 
 @dataclass
@@ -199,13 +241,7 @@ class OctahedralLattice:
         # p | Q(a) = (a^2 - N), i.e., a ≡ r (mod p) where r^2 ≡ N (mod p)
         prime_roots = []
         for p in all_primes:
-            if p == 2:
-                roots = {self.N % 2}
-            else:
-                roots = set()
-                for r in range(p):
-                    if (r * r) % p == self.N % p:
-                        roots.add(r)
+            roots = quadratic_residues(self.N, p)
             prime_roots.append((p, roots))
 
         log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
@@ -231,19 +267,26 @@ class OctahedralLattice:
                     # numpy stride assignment: sieve_log[first::p] += logp
                     sieve_log[first::p] += logp
 
-            # Phase 2: Vectorized per-position threshold check
-            # Q(a) = a^2 - N. Threshold = log(Q) - 1.5*log(largest_prime).
-            # Vectorized with numpy for speed.
-            offsets = np.arange(actual_size, dtype=np.int64)
-            a_vals = np.int64(start_a) + offsets
-            Q_vals = a_vals * a_vals - np.int64(self.N)
+            # Phase 2: Per-position threshold check
+            # Q(a) = a^2 - N. Threshold = log(Q) - log(largest_prime).
+            # Use float64 for log computation to avoid int64 overflow
+            # at 64+ bits (N > 2^63).
 
-            # Mask: Q > 0 and sieve has accumulated enough log
-            positive = Q_vals > 0
-            Q_positive = np.where(positive, Q_vals, 1)  # avoid log(0)
-            log_Q = np.log(Q_positive.astype(np.float64)).astype(np.float32)
-            # Standard QS threshold: allow one large prime factor
-            # not in the base. Tolerance = log(largest_prime_in_base).
+            # Compute log(Q) using float approximation:
+            # Q(a) = (start_a + idx)^2 - N = 2*start_a*idx + idx^2 + (start_a^2 - N)
+            # For large N, compute base_Q = start_a^2 - N in Python, then
+            # approximate log(Q) = log(base_Q + 2*start_a*idx + idx^2)
+            base_Q = int(start_a) * int(start_a) - self.N
+            sa2 = 2 * int(start_a)
+
+            # Vectorize: approximate log(Q) for each position
+            # Q(idx) = base_Q + sa2*idx + idx^2
+            offsets = np.arange(actual_size, dtype=np.float64)
+            Q_approx = float(base_Q) + float(sa2) * offsets + offsets * offsets
+
+            positive = Q_approx > 0
+            Q_safe = np.where(positive, Q_approx, 1.0)
+            log_Q = np.log(Q_safe).astype(np.float32)
             thresholds = log_Q - max_log_p
 
             mask = positive & (sieve_log >= thresholds)
