@@ -425,7 +425,7 @@ def glyph_null_search(glyphs: List[GlyphState],
     # Focused LSH: use hint to bias bands toward hot octahedra
     # In PAIR mode, we could skip this entirely, but run it anyway
     # as a safety net in case the pair extraction fails.
-    n_bands = 20 if hint.strategy == "PAIR" else 40
+    n_bands = 20 if hint.strategy == "PAIR" else (60 if hint.strategy == "DEEP" else 40)
     lsh_buckets = _lsh_bands(glyphs, n_bands=n_bands, band_width=2, hint=hint)
 
     # Collect candidate pairs from LSH, compute XOR weight
@@ -478,7 +478,8 @@ def glyph_null_search(glyphs: List[GlyphState],
     # A residual tracks: the XOR signature + which relation indices formed it
     residual_hash: Dict[Tuple, List[List[int]]] = defaultdict(list)
 
-    for i, j, w in lsh_pairs[:3000]:
+    residual_limit = 5000 if hint.strategy == "DEEP" else 3000
+    for i, j, w in lsh_pairs[:residual_limit]:
         residual = glyphs[i].xor_with(glyphs[j])
         res_sig = tuple((k, v) for k, v in enumerate(residual) if v != 0)
         residual_hash[res_sig].append([
@@ -515,8 +516,9 @@ def glyph_null_search(glyphs: List[GlyphState],
 
     # Round 2: XOR residuals with each other
     # For efficiency, only use low-weight residuals
+    max_res_weight = 5 if hint.strategy == "DEEP" else 3
     res_items = [(sig, pairs[0]) for sig, pairs in residual_hash.items()
-                 if len(sig) <= 3]
+                 if len(sig) <= max_res_weight]
 
     # Index residuals by individual (pos, val) for fast matching
     res_pos_idx: Dict[Tuple[int, int], List[int]] = defaultdict(list)
@@ -561,9 +563,10 @@ def glyph_null_search(glyphs: List[GlyphState],
     res_by_weight = sorted(res_items, key=lambda x: len(x[0]))
 
     # Try chains of 3: res_a XOR res_b = res_c, then look for res_c match
-    for ia in range(min(len(res_by_weight), 200)):
+    chain_limit = 500 if hint.strategy == "DEEP" else 200
+    for ia in range(min(len(res_by_weight), chain_limit)):
         sig_a, pair_a = res_by_weight[ia]
-        for ib in range(ia + 1, min(len(res_by_weight), 200)):
+        for ib in range(ia + 1, min(len(res_by_weight), chain_limit)):
             sig_b, pair_b = res_by_weight[ib]
 
             # XOR sig_a and sig_b to get the needed sig_c
@@ -600,7 +603,391 @@ def glyph_null_search(glyphs: List[GlyphState],
 
 
 # ======================================================================
-# HARD PART 1 TEST: Remove singles, test glyph search
+# HARD PART 2: Hierarchical Octahedral Decomposition
+# ======================================================================
+#
+# At 100+ bits: ~50,000 octahedra, ~100,000 relations, weight ~5.
+# The flat search works in O(R * W * B) for LSH, but the DEEP path
+# (chain composition) scales as O(K^2) where K = residual count.
+# At 100 bits, K can exceed 100,000 → minutes of search.
+#
+# The fix: exploit coupling decay d^(-0.44) as a SPATIAL DECOMPOSITION.
+#
+# Coupling decay guarantees:
+# - Nearby octahedra (distance 1-3) share many relations
+# - Distant octahedra (distance 10+) are nearly independent
+# - Most state weight concentrates in a few "hot" clusters
+#
+# This means the null space has HIERARCHICAL STRUCTURE:
+# - Local dependencies: relations cancelling within a cluster
+# - Regional dependencies: compositions across 2-3 nearby clusters
+# - Global dependencies: rare, require chain composition
+#
+# The hierarchical search:
+# 1. Partition octahedra into clusters of size C (~16-32)
+# 2. Project each state to cluster-level signatures
+# 3. Find cluster-level matches (coarse cancellation)
+# 4. Refine within matched clusters (exact cancellation)
+#
+# This is analogous to:
+# - Multigrid: coarse solve → refine → exact solve
+# - Crystal symmetry: local → regional → global
+# - Fractal search: zoom in on promising regions
+#
+# Complexity: O(R * W * (B + C)) instead of O(K^2)
+# where C = cluster size (~16) and B = LSH bands (~40)
+
+@dataclass
+class OctahedralCluster:
+    """A group of consecutive strongly-coupled octahedra."""
+    cluster_id: int
+    start: int          # First octahedron index
+    end: int            # Last octahedron index (exclusive)
+    size: int           # end - start
+    heat: float         # Total activation count in this cluster
+    hot_rank: int       # Rank by heat (0 = hottest)
+
+    @property
+    def indices(self) -> range:
+        return range(self.start, self.end)
+
+
+@dataclass
+class ClusterSignature:
+    """A relation's state projected to cluster level."""
+    relation_idx: int
+    # Cluster-level signature: (cluster_id, xor_of_states_in_cluster)
+    cluster_states: Tuple[Tuple[int, int], ...]  # (cluster_id, combined_state)
+    cluster_weight: int  # Number of active clusters
+
+    @property
+    def signature(self) -> Tuple[Tuple[int, int], ...]:
+        return self.cluster_states
+
+
+def _build_clusters(n_octahedra: int, hint: Optional[SieveHint] = None,
+                    cluster_size: int = 0) -> List[OctahedralCluster]:
+    """
+    Partition octahedra into clusters based on coupling structure.
+
+    Uses coupling decay: nearby octahedra are strongly coupled.
+    Default cluster size adapts to total octahedra count:
+    - < 500 octahedra: cluster_size = 8 (small problem)
+    - 500-5000: cluster_size = 16
+    - 5000+: cluster_size = 32 (large problem needs bigger clusters)
+    """
+    if cluster_size <= 0:
+        if n_octahedra < 500:
+            cluster_size = 8
+        elif n_octahedra < 5000:
+            cluster_size = 16
+        else:
+            cluster_size = 32
+
+    clusters = []
+    heat_map = hint.heat_map if hint else {}
+
+    for cid in range((n_octahedra + cluster_size - 1) // cluster_size):
+        start = cid * cluster_size
+        end = min(start + cluster_size, n_octahedra)
+        heat = sum(heat_map.get(k, 0) for k in range(start, end))
+        clusters.append(OctahedralCluster(
+            cluster_id=cid, start=start, end=end,
+            size=end - start, heat=heat, hot_rank=0,
+        ))
+
+    # Rank by heat (hottest first)
+    ranked = sorted(range(len(clusters)), key=lambda i: -clusters[i].heat)
+    for rank, idx in enumerate(ranked):
+        clusters[idx].hot_rank = rank
+
+    return clusters
+
+
+def _project_to_clusters(glyphs: List[GlyphState],
+                          clusters: List[OctahedralCluster]) -> List[ClusterSignature]:
+    """
+    Project octahedral states to cluster-level signatures.
+
+    For each cluster, XOR all octahedral states within it to produce
+    a single cluster-level state. This is a LOSSY compression that
+    preserves the key property: if two states cancel at full resolution,
+    their cluster projections also cancel.
+
+    The reverse is not true — cluster cancellation doesn't guarantee
+    full cancellation. But it's a cheap filter: only check full
+    resolution for pairs that cancel at cluster level.
+    """
+    result = []
+    for g in glyphs:
+        cluster_states = []
+        for c in clusters:
+            # XOR all octahedral states in this cluster
+            combined = 0
+            for k in c.indices:
+                if k < len(g.glyphs):
+                    combined ^= g.glyphs[k]
+            if combined != 0:
+                cluster_states.append((c.cluster_id, combined))
+
+        result.append(ClusterSignature(
+            relation_idx=g.relation_idx,
+            cluster_states=tuple(cluster_states),
+            cluster_weight=len(cluster_states),
+        ))
+    return result
+
+
+def hierarchical_null_search(glyphs: List[GlyphState],
+                              hint: Optional[SieveHint] = None,
+                              max_depth: int = 4) -> List[List[int]]:
+    """
+    Hierarchical null search using cluster decomposition.
+
+    Three-level search:
+    Level 0: Full-resolution (exact match, duplicates) — O(R)
+    Level 1: Cluster-projected matching — O(R * CW * B)
+             where CW = cluster weight (~2-3), B = bands
+    Level 2: Cross-cluster composition — O(K_cluster^2)
+             where K_cluster << K_full (fewer residuals at cluster level)
+
+    The key insight: cluster projection preserves cancellation.
+    If states A and B cancel (XOR to zero at every octahedron),
+    then their cluster projections also cancel. So we use the
+    cheap cluster-level search as a FILTER for the expensive
+    full-resolution verification.
+    """
+    if not glyphs:
+        return []
+
+    if hint is None:
+        hint = SieveHint.from_glyphs(glyphs)
+
+    n_octa = len(glyphs[0].glyphs)
+
+    # For small problems, fall back to flat search (overhead not worth it)
+    if n_octa < 200:
+        return glyph_null_search(glyphs, max_depth=max_depth, hint=hint)
+
+    # ── Level 0: Full-resolution exact matches ──
+    dependencies = []
+
+    # Singles
+    for g in glyphs:
+        if g.weight == 0:
+            dependencies.append([g.relation_idx])
+
+    # Exact signature duplicates
+    sig_hash: Dict[Tuple, List[int]] = defaultdict(list)
+    for i, g in enumerate(glyphs):
+        sig_hash[g.signature].append(i)
+
+    for sig, indices in sig_hash.items():
+        if len(indices) >= 2 and sig:
+            for a in range(len(indices)):
+                for b in range(a + 1, len(indices)):
+                    dependencies.append([
+                        glyphs[indices[a]].relation_idx,
+                        glyphs[indices[b]].relation_idx,
+                    ])
+
+    if dependencies:
+        return dependencies
+
+    # ── Build cluster hierarchy ──
+    clusters = _build_clusters(n_octa, hint)
+    cluster_sigs = _project_to_clusters(glyphs, clusters)
+
+    # ── Level 1: Cluster-projected search ──
+    # Hash cluster signatures — matches here are CANDIDATE pairs
+    # that might cancel at full resolution
+    csig_hash: Dict[Tuple, List[int]] = defaultdict(list)
+    for i, cs in enumerate(cluster_sigs):
+        csig_hash[cs.signature].append(i)
+
+    # Exact cluster-level duplicates → verify at full resolution
+    for csig, indices in csig_hash.items():
+        if len(indices) >= 2 and csig:
+            for a in range(min(len(indices), 20)):
+                for b in range(a + 1, min(len(indices), 20)):
+                    i, j = indices[a], indices[b]
+                    # Verify full resolution
+                    residual = glyphs[i].xor_with(glyphs[j])
+                    if all(r == 0 for r in residual):
+                        dependencies.append([
+                            glyphs[i].relation_idx,
+                            glyphs[j].relation_idx,
+                        ])
+
+    if dependencies:
+        return dependencies
+
+    # ── Level 1b: Cluster-level LSH with hot cluster biasing ──
+    # Focus LSH on hot clusters (highest heat) for coarse matching
+    hot_clusters = sorted(clusters, key=lambda c: -c.heat)
+    n_hot_clusters = max(1, len(hot_clusters) // 5)
+
+    # LSH on cluster signatures — much smaller space than full octahedral
+    rng = random.Random(42)
+    n_bands = 40
+    cluster_ids = [c.cluster_id for c in clusters]
+    hot_cids = [c.cluster_id for c in hot_clusters[:n_hot_clusters]]
+
+    lsh_seen: Set[Tuple[int, int]] = set()
+    lsh_pairs: List[Tuple[int, int, int]] = []  # (i, j, xor_weight)
+
+    for band_i in range(n_bands):
+        # Bias toward hot clusters
+        if hot_cids and band_i < n_bands * 2 // 3:
+            pool = hot_cids
+        else:
+            pool = cluster_ids
+        if len(pool) < 2:
+            continue
+        band_pos = tuple(sorted(rng.sample(pool, min(2, len(pool)))))
+
+        # Hash each cluster signature at these band positions
+        band_buckets: Dict[Tuple, List[int]] = defaultdict(list)
+        for i, cs in enumerate(cluster_sigs):
+            cs_dict = dict(cs.cluster_states)
+            key = tuple(cs_dict.get(p, 0) for p in band_pos)
+            band_buckets[key].append(i)
+
+        for bucket_indices in band_buckets.values():
+            if len(bucket_indices) < 2 or len(bucket_indices) > 200:
+                continue
+            for a in range(len(bucket_indices)):
+                for b in range(a + 1, len(bucket_indices)):
+                    i, j = bucket_indices[a], bucket_indices[b]
+                    pair = (min(i, j), max(i, j))
+                    if pair in lsh_seen:
+                        continue
+                    lsh_seen.add(pair)
+
+                    # Check full-resolution XOR weight
+                    w = glyphs[i].xor_weight(glyphs[j])
+                    if w == 0:
+                        dependencies.append([glyphs[i].relation_idx,
+                                             glyphs[j].relation_idx])
+                    elif w <= max(4, int(hint.avg_weight * 1.5)):
+                        lsh_pairs.append((i, j, w))
+
+    if dependencies:
+        return dependencies
+
+    # Sort by XOR weight (best cancellations first)
+    lsh_pairs.sort(key=lambda x: x[2])
+
+    # ── Level 2: Residual composition at cluster level ──
+    # Build residuals from best pairs, index by cluster signature
+    residual_hash: Dict[Tuple, List[List[int]]] = defaultdict(list)
+
+    for i, j, w in lsh_pairs[:5000]:
+        residual = glyphs[i].xor_with(glyphs[j])
+        res_sig = tuple((k, v) for k, v in enumerate(residual) if v != 0)
+        residual_hash[res_sig].append([
+            glyphs[i].relation_idx, glyphs[j].relation_idx
+        ])
+
+    # Triple search: residual + single state = zero
+    for res_sig, pair_lists in list(residual_hash.items()):
+        if res_sig in sig_hash:
+            for k in sig_hash[res_sig]:
+                pair = pair_lists[0]
+                if glyphs[k].relation_idx not in pair:
+                    dependencies.append(pair + [glyphs[k].relation_idx])
+
+    if dependencies:
+        return dependencies
+
+    # Quad search: two residuals with same signature cancel
+    for res_sig, pair_lists in residual_hash.items():
+        if len(pair_lists) >= 2:
+            for a in range(min(len(pair_lists), 10)):
+                for b in range(a + 1, min(len(pair_lists), 10)):
+                    combined = pair_lists[a] + pair_lists[b]
+                    if len(set(combined)) == len(combined):
+                        dependencies.append(combined)
+
+    if dependencies:
+        return dependencies
+
+    # ── Level 2b: Cross-cluster residual composition ──
+    # XOR residuals with each other to find quads/quintets
+    res_items = [(sig, pairs[0]) for sig, pairs in residual_hash.items()
+                 if len(sig) <= max(4, int(hint.avg_weight * 1.2))]
+
+    # Project residuals to cluster space for faster matching
+    res_cluster_hash: Dict[Tuple, List[int]] = defaultdict(list)
+    for idx, (sig, _) in enumerate(res_items):
+        # Cluster projection of this residual
+        c_proj = {}
+        for k, v in sig:
+            for c in clusters:
+                if c.start <= k < c.end:
+                    c_proj[c.cluster_id] = c_proj.get(c.cluster_id, 0) ^ v
+                    break
+        c_key = tuple(sorted((cid, cv) for cid, cv in c_proj.items() if cv != 0))
+        res_cluster_hash[c_key].append(idx)
+
+    # Residuals with same cluster projection might cancel
+    for c_key, r_indices in res_cluster_hash.items():
+        if len(r_indices) >= 2:
+            for a in range(min(len(r_indices), 50)):
+                for b in range(a + 1, min(len(r_indices), 50)):
+                    ri, rj = r_indices[a], r_indices[b]
+                    sig_a, pair_a = res_items[ri]
+                    sig_b, pair_b = res_items[rj]
+
+                    # Full-resolution check
+                    combined = {}
+                    for k, v in sig_a:
+                        combined[k] = combined.get(k, 0) ^ v
+                    for k, v in sig_b:
+                        combined[k] = combined.get(k, 0) ^ v
+
+                    if all(v == 0 for v in combined.values()):
+                        full = pair_a + pair_b
+                        if len(set(full)) == len(full):
+                            dependencies.append(full)
+
+        if dependencies:
+            return dependencies
+
+    # ── Level 3: Chain composition (fallback) ──
+    # Sort residuals by weight, try chains of 3
+    res_by_weight = sorted(res_items, key=lambda x: len(x[0]))
+    for ia in range(min(len(res_by_weight), 300)):
+        sig_a, pair_a = res_by_weight[ia]
+        for ib in range(ia + 1, min(len(res_by_weight), 300)):
+            sig_b, pair_b = res_by_weight[ib]
+            combined = {}
+            for k, v in sig_a:
+                combined[k] = combined.get(k, 0) ^ v
+            for k, v in sig_b:
+                combined[k] = combined.get(k, 0) ^ v
+            needed = tuple(sorted((k, v) for k, v in combined.items() if v != 0))
+
+            if not needed:
+                continue
+            if needed in residual_hash:
+                pair_c = residual_hash[needed][0]
+                full = pair_a + pair_b + pair_c
+                if len(set(full)) == len(full):
+                    dependencies.append(full)
+                    break
+            if needed in sig_hash:
+                for k in sig_hash[needed]:
+                    full = pair_a + pair_b + [glyphs[k].relation_idx]
+                    if len(set(full)) == len(full):
+                        dependencies.append(full)
+                        break
+                if dependencies:
+                    break
+        if dependencies:
+            return dependencies
+
+    return dependencies
 # ======================================================================
 
 def test_without_singles(N: int, B_bound: Optional[int] = None,
@@ -655,9 +1042,18 @@ def test_without_singles(N: int, B_bound: Optional[int] = None,
     # Compute sieve hint — geometric coupling between sieve and search
     hint = SieveHint.from_glyphs(filtered_glyphs) if filtered_glyphs else None
 
-    # Sieve-coupled glyph search
+    # Sieve-coupled glyph search — dispatch to hierarchical for DEEP/large
     t0 = time.time()
-    glyph_deps = glyph_null_search(filtered_glyphs, max_depth=4, hint=hint)
+    use_hierarchical = (
+        hint is not None and (
+            hint.strategy == "DEEP" or
+            (hint is not None and lattice.n_octahedra >= 200)
+        )
+    )
+    if use_hierarchical:
+        glyph_deps = hierarchical_null_search(filtered_glyphs, hint=hint, max_depth=4)
+    else:
+        glyph_deps = glyph_null_search(filtered_glyphs, max_depth=4, hint=hint)
     glyph_ms = (time.time() - t0) * 1000
     
     # Skip GF(2) for large N — it takes O(D^2 * R) which is minutes at 55+ bits
