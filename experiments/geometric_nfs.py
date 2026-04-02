@@ -47,13 +47,55 @@ from experiments.number_theoretic_energy import (
 # Each octahedron (3 primes) has precomputed quadratic residues.
 # O(1) check per octahedron instead of O(p*q*r) table lookup.
 
+def _tonelli_shanks(n: int, p: int) -> int:
+    """Compute sqrt(n) mod p using Tonelli-Shanks. O(log^2 p)."""
+    if n % p == 0:
+        return 0
+    if p == 2:
+        return n % 2
+    # Factor out powers of 2 from p-1: p-1 = Q * 2^S
+    Q = p - 1
+    S = 0
+    while Q % 2 == 0:
+        Q //= 2
+        S += 1
+    # Find a quadratic non-residue
+    z = 2
+    while pow(z, (p - 1) // 2, p) != p - 1:
+        z += 1
+    M = S
+    c = pow(z, Q, p)
+    t = pow(n, Q, p)
+    R = pow(n, (Q + 1) // 2, p)
+    while True:
+        if t == 1:
+            return R
+        # Find least i such that t^(2^i) ≡ 1 (mod p)
+        i = 1
+        tmp = (t * t) % p
+        while tmp != 1:
+            tmp = (tmp * tmp) % p
+            i += 1
+        b = pow(c, 1 << (M - i - 1), p)
+        M = i
+        c = (b * b) % p
+        t = (t * c) % p
+        R = (R * b) % p
+
+
 def quadratic_residues(N: int, p: int) -> Set[int]:
-    """Values of (a mod p) where p divides (a^2 - N)."""
+    """Values of (a mod p) where p divides (a^2 - N). O(log^2 p)."""
     if p == 2:
         return {N % 2}
-    if pow(N, (p - 1) // 2, p) != 1:
+    n_mod_p = N % p
+    if n_mod_p == 0:
+        return {0}
+    if pow(n_mod_p, (p - 1) // 2, p) != 1:
         return set()  # N is not a QR mod p
-    return {r for r in range(p) if (r * r) % p == N % p}
+    r = _tonelli_shanks(n_mod_p, p)
+    # Two roots: r and p-r
+    roots = {r, p - r}
+    return roots
 
 
 @dataclass
@@ -159,6 +201,139 @@ class OctahedralLattice:
             hits = octa.rim_check(a)
             saved += sum(1 for h in hits if not h)
         return saved
+
+    def octahedral_sieve(self, sieve_size: int = 0,
+                          max_relations: int = 0) -> List[Dict]:
+        """
+        Octahedral log sieve — sieve at octahedron granularity.
+
+        Instead of testing each candidate against each prime (O(M * |FB|)),
+        we flip the loop: for each prime, stride through the sieve array
+        marking all positions it hits (O(|FB| * M/p)). Then only trial-
+        divide candidates whose accumulated log passes the threshold.
+
+        The octahedral structure groups primes in triples. When all 3
+        primes in an octahedron hit the same position, that position gets
+        3 log contributions at once — the octahedron "lights up" fully.
+
+        Key insight: Q(a) = a^2 - N varies enormously across the sieve
+        window. Near sqrt(N), Q can be tiny (even single digits!). These
+        small-Q values are gold — almost always smooth with high-multiplicity
+        exponents that create singles (all-even → weight 0 in octahedral space).
+        The threshold must be PER-POSITION, not window-wide.
+
+        Complexity: O(sum(M/p for p in FB) + smooth * |FB|)
+        """
+        sqrt_N = isqrt(self.N) + 1
+
+        # Auto-size: sieve window scales with factor base
+        if sieve_size <= 0:
+            sieve_size = max(100000, len(self.factor_base) * 50)
+        if max_relations <= 0:
+            max_relations = len(self.factor_base) + 10
+
+        all_primes = []
+        for octa in self.octahedra:
+            all_primes.extend(octa.primes)
+        all_primes.extend(self.leftover)
+
+        # Precompute sieve roots: for each prime p, the offsets where
+        # p | Q(a) = (a^2 - N), i.e., a ≡ r (mod p) where r^2 ≡ N (mod p)
+        prime_roots = []
+        for p in all_primes:
+            roots = quadratic_residues(self.N, p)
+            prime_roots.append((p, roots))
+
+        log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
+        max_log_p = float(log_primes[-1]) if len(log_primes) > 0 else 10.0
+
+        relations = []
+        sieve_offset = 0
+
+        while len(relations) < max_relations:
+            # Allocate sieve array for this window
+            actual_size = min(sieve_size, 500000)
+            sieve_log = np.zeros(actual_size, dtype=np.float32)
+            start_a = sqrt_N + sieve_offset
+
+            # Phase 1: Accumulate log(p) at sieve positions (octahedral stride)
+            # For small primes, use numpy slice assignment (vectorized).
+            # For large primes (stride > actual_size/4), use Python loop
+            # since numpy slice with large step has overhead.
+            for p, roots in prime_roots:
+                logp = math.log(p)
+                for r in roots:
+                    first = (r - (start_a % p)) % p
+                    # numpy stride assignment: sieve_log[first::p] += logp
+                    sieve_log[first::p] += logp
+
+            # Phase 2: Per-position threshold check
+            # Q(a) = a^2 - N. Threshold = log(Q) - log(largest_prime).
+            # Use float64 for log computation to avoid int64 overflow
+            # at 64+ bits (N > 2^63).
+
+            # Compute log(Q) using float approximation:
+            # Q(a) = (start_a + idx)^2 - N = 2*start_a*idx + idx^2 + (start_a^2 - N)
+            # For large N, compute base_Q = start_a^2 - N in Python, then
+            # approximate log(Q) = log(base_Q + 2*start_a*idx + idx^2)
+            base_Q = int(start_a) * int(start_a) - self.N
+            sa2 = 2 * int(start_a)
+
+            # Vectorize: approximate log(Q) for each position
+            # Q(idx) = base_Q + sa2*idx + idx^2
+            offsets = np.arange(actual_size, dtype=np.float64)
+            Q_approx = float(base_Q) + float(sa2) * offsets + offsets * offsets
+
+            positive = Q_approx > 0
+            Q_safe = np.where(positive, Q_approx, 1.0)
+            log_Q = np.log(Q_safe).astype(np.float32)
+            thresholds = log_Q - max_log_p
+
+            mask = positive & (sieve_log >= thresholds)
+            candidates = np.where(mask)[0]
+
+            # Phase 3: RIM-guided trial division on candidates
+            # Only divide by primes that the sieve says hit this position.
+            # For each candidate, check a mod p against precomputed roots.
+            for idx in candidates:
+                a = int(start_a) + int(idx)  # Ensure native Python int
+                Q = a * a - self.N
+                if Q <= 0:
+                    continue
+
+                absQ = abs(Q)
+                exponents = {}
+                remainder = absQ
+
+                for p, roots in prime_roots:
+                    if not roots:
+                        continue
+                    # RIM check: does a mod p match any root?
+                    if a % p not in roots:
+                        continue
+                    count = 0
+                    while remainder % p == 0:
+                        count += 1
+                        remainder //= p
+                    if count > 0:
+                        exponents[p] = count
+                    if remainder == 1:
+                        break  # Fully factored, stop early
+
+                if remainder == 1:
+                    relations.append({
+                        'a': a, 'Q': Q, 'exponents': exponents
+                    })
+                    if len(relations) >= max_relations:
+                        break
+
+            sieve_offset += actual_size
+
+            # Safety: don't sieve forever
+            if sieve_offset > sieve_size * 20:
+                break
+
+        return relations
 
 
 # ======================================================================
@@ -431,7 +606,7 @@ def sovereign_sqrt(N: int, relations: List[Dict], dep_indices: List[int],
 
     for idx in dep_indices:
         rel = relations[idx]
-        x = (x * rel['a']) % N
+        x = (x * int(rel['a'])) % N
         for p, count in rel['exponents'].items():
             total_exponents[p] += count
 
