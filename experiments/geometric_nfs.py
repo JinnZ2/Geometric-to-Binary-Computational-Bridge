@@ -238,96 +238,178 @@ def geometric_null_search(states: List[OctahedralState],
     """
     Find dependencies using geometric state cancellation.
 
-    Strategy:
-    1. Sort relations by weight (sparse states first)
-    2. Find pairs that partially cancel (reduce total weight)
-    3. Extend to triples/quads that fully cancel (all-zero state)
+    Four phases, each more expensive but reaching deeper:
 
-    This exploits the coupling decay: low-weight relations
-    (touching few octahedra) are easy to cancel locally.
+    Phase 0: Singles — O(R). Relations with all-even exponents.
+    Phase 1: Hash duplicates — O(R). Exact state matches via dict.
+    Phase 2: Near-duplicates — O(R * W * 8). States differing in 1
+             octahedron, found via "delete-one" hash signatures.
+    Phase 3: Iterative cancellation graph — O(R * W^2).
+             Build partial cancellations, extend to triples/quads.
 
-    Unlike GF(2) Gauss which is O(D^2 * R), this is:
-    - O(R^2) for pairs (but most pairs are filtered by state matching)
-    - O(R^3) for triples (but filtered by partial cancellation)
-    - Effective complexity depends on sparsity of octahedral states
-
-    For sparse matrices (most relations touch few octahedra),
-    this is faster than Gauss. For dense matrices, Gauss wins.
-    The coupling decay guarantees increasing sparsity at higher levels.
+    W = average weight (active octahedra per relation, typically 3-6).
+    At W << D (guaranteed by coupling decay), all phases are sub-O(R^2).
     """
     dependencies = []
 
-    # Phase 0: Single relations that are already perfect squares
+    # Phase 0: Singles — O(R)
     for s in states:
         if s.is_zero:
             dependencies.append([s.relation_idx])
 
-    # Phase 1: Pairs
-    # Index states by their non-zero octahedra for fast lookup
-    state_index: Dict[int, List[int]] = defaultdict(list)
+    # Phase 1: Hash duplicates — O(R)
+    # Exact duplicate states cancel perfectly via XOR
+    state_hash: Dict[Tuple[int, ...], List[int]] = defaultdict(list)
     for i, s in enumerate(states):
-        for octa_idx, val in enumerate(s.states):
-            if val != 0:
-                state_index[octa_idx].append(i)
+        state_hash[s.states].append(i)
 
-    # Find pairs that fully cancel
-    for i in range(len(states)):
-        for j in range(i + 1, len(states)):
-            combined = states[i].cancels_with(states[j])
-            if combined.is_zero:
-                dependencies.append([states[i].relation_idx, states[j].relation_idx])
+    for key, indices in state_hash.items():
+        if len(indices) >= 2 and any(v != 0 for v in key):
+            for a in range(len(indices)):
+                for b in range(a + 1, len(indices)):
+                    dependencies.append([
+                        states[indices[a]].relation_idx,
+                        states[indices[b]].relation_idx,
+                    ])
 
-    if dependencies or max_depth <= 2:
+    if dependencies:
         return dependencies
 
-    # Phase 2: Triples — find pairs that partially cancel, then extend
-    partial_pairs: List[Tuple[int, int, OctahedralState]] = []
-    for i in range(len(states)):
-        for j in range(i + 1, len(states)):
-            combined = states[i].cancels_with(states[j])
-            if combined.weight < states[i].weight and combined.weight < states[j].weight:
-                if combined.weight <= 3:  # Only keep if significantly reduced
-                    partial_pairs.append((i, j, combined))
+    # Phase 2: Near-duplicates — O(R * W * 8)
+    # Two states that differ in exactly one octahedron can be cancelled
+    # by a third state that matches that octahedron's residual.
+    # Use "delete-one" signatures: for each state, generate W signatures
+    # by zeroing out one active octahedron. States with matching
+    # delete-one signatures differ in at most that one octahedron.
 
-    for i, j, partial in partial_pairs:
-        for k in range(len(states)):
-            if k == i or k == j:
+    # Build delete-one index
+    delete_one_index: Dict[Tuple, List[Tuple[int, int, int]]] = defaultdict(list)
+    for i, s in enumerate(states):
+        if s.is_zero:
+            continue
+        active = [(k, v) for k, v in enumerate(s.states) if v != 0]
+        for pos, (octa_idx, val) in enumerate(active):
+            # Signature = state with this octahedron zeroed
+            sig = list(s.states)
+            sig[octa_idx] = 0
+            sig_key = tuple(sig)
+            delete_one_index[sig_key].append((i, octa_idx, val))
+
+    # Near-duplicate pairs: same delete-one signature but different
+    # residual at the deleted octahedron
+    for sig_key, entries in delete_one_index.items():
+        if len(entries) < 2:
+            continue
+        # Group by the deleted octahedron index
+        by_octa: Dict[int, List[Tuple[int, int]]] = defaultdict(list)
+        for i, octa_idx, val in entries:
+            by_octa[octa_idx].append((i, val))
+
+        for octa_idx, group in by_octa.items():
+            if len(group) < 2:
                 continue
-            full = partial.cancels_with(states[k])
-            if full.is_zero:
-                dependencies.append([
-                    states[i].relation_idx,
-                    states[j].relation_idx,
-                    states[k].relation_idx,
-                ])
+            # Pairs with same residual at this octahedron = exact match = cancel
+            val_groups: Dict[int, List[int]] = defaultdict(list)
+            for i, val in group:
+                val_groups[val].append(i)
+            for val, indices in val_groups.items():
+                if len(indices) >= 2:
+                    for a in range(len(indices)):
+                        for b in range(a + 1, len(indices)):
+                            dependencies.append([
+                                states[indices[a]].relation_idx,
+                                states[indices[b]].relation_idx,
+                            ])
 
-    if dependencies or max_depth <= 3:
+            # Pairs with DIFFERENT residuals: they differ at exactly this
+            # octahedron. Their XOR has weight 1. Find a third state
+            # that cancels just this one octahedron.
+            vals = list(val_groups.keys())
+            for va_idx in range(len(vals)):
+                for vb_idx in range(va_idx + 1, len(vals)):
+                    residual = vals[va_idx] ^ vals[vb_idx]
+                    # Need a third state with ONLY this octahedron active
+                    # at the residual value
+                    target = [0] * len(states[0].states)
+                    target[octa_idx] = residual
+                    target_key = tuple(target)
+                    if target_key in state_hash:
+                        for k in state_hash[target_key]:
+                            i_list = val_groups[vals[va_idx]]
+                            j_list = val_groups[vals[vb_idx]]
+                            dependencies.append([
+                                states[i_list[0]].relation_idx,
+                                states[j_list[0]].relation_idx,
+                                states[k].relation_idx,
+                            ])
+
+    if dependencies:
         return dependencies
 
-    # Phase 3: Quads — extend triples
-    partial_triples = []
-    for i, j, pij in partial_pairs:
-        for k in range(len(states)):
-            if k == i or k == j:
-                continue
-            pijk = pij.cancels_with(states[k])
-            if pijk.weight > 0 and pijk.weight <= 2:
-                partial_triples.append((i, j, k, pijk))
+    # Phase 3: Iterative cancellation graph — O(R * W^2)
+    # For each pair of states sharing an octahedron, compute the
+    # partial cancellation. Index the residual. If a residual matches
+    # another state or another partial, we have a triple/quad.
 
-    for i, j, k, partial in partial_triples[:1000]:  # Limit search
-        for m in range(len(states)):
-            if m in (i, j, k):
+    # Build index of states by active octahedron + value
+    octa_val_index: Dict[Tuple[int, int], List[int]] = defaultdict(list)
+    for i, s in enumerate(states):
+        for k, v in enumerate(s.states):
+            if v != 0:
+                octa_val_index[(k, v)].append(i)
+
+    # Find pairs sharing at least one octahedron state
+    partial_pairs: Dict[Tuple[int, ...], List[Tuple[int, int]]] = defaultdict(list)
+    seen_pairs: Set[Tuple[int, int]] = set()
+
+    for (octa_idx, val), indices in octa_val_index.items():
+        for a in range(min(len(indices), 50)):
+            for b in range(a + 1, min(len(indices), 50)):
+                i, j = indices[a], indices[b]
+                if (i, j) in seen_pairs:
+                    continue
+                seen_pairs.add((i, j))
+                combined = states[i].cancels_with(states[j])
+                if combined.is_zero:
+                    dependencies.append([states[i].relation_idx, states[j].relation_idx])
+                elif combined.weight <= 3:
+                    partial_pairs[combined.states].append((i, j))
+
+    if dependencies:
+        return dependencies
+
+    # Try to cancel partials with single states
+    for residual, pairs in partial_pairs.items():
+        if residual in state_hash:
+            for k in state_hash[residual]:
+                i, j = pairs[0]
+                if k != i and k != j:
+                    dependencies.append([
+                        states[i].relation_idx,
+                        states[j].relation_idx,
+                        states[k].relation_idx,
+                    ])
+
+    if dependencies:
+        return dependencies
+
+    # Try to cancel partials with other partials
+    for res_a, pairs_a in list(partial_pairs.items())[:500]:
+        for res_b, pairs_b in list(partial_pairs.items())[:500]:
+            if res_a == res_b and pairs_a is not pairs_b:
                 continue
-            full = partial.cancels_with(states[m])
-            if full.is_zero:
-                dependencies.append([
-                    states[i].relation_idx,
-                    states[j].relation_idx,
-                    states[k].relation_idx,
-                    states[m].relation_idx,
-                ])
-                if len(dependencies) >= 5:
-                    return dependencies
+            combined_res = tuple(a ^ b for a, b in zip(res_a, res_b))
+            if all(v == 0 for v in combined_res):
+                ia, ja = pairs_a[0]
+                ib, jb = pairs_b[0]
+                if len({ia, ja, ib, jb}) == 4:
+                    dependencies.append([
+                        states[ia].relation_idx, states[ja].relation_idx,
+                        states[ib].relation_idx, states[jb].relation_idx,
+                    ])
+
+        if dependencies:
+            return dependencies
 
     return dependencies
 
