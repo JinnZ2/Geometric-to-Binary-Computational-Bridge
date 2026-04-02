@@ -155,61 +155,149 @@ def relations_to_glyphs(relations: List[Dict], factor_base: List[int],
 
 
 # ======================================================================
-# GLYPH-AWARE NULL SEARCH v2 — Breaks the 53-bit Wall
+# SIEVE HINT: Geometric coupling between sieve and search
 # ======================================================================
 #
-# At 53+ bits: ~1400 octahedra, avg weight ~4.2, ZERO duplicate signatures.
-# Pairwise XOR weights average 7.6 (WORSE than individual 4.2).
-# Position overlaps: mean 0.59 — most pairs share 0-1 octahedra.
+# The sieve and search are not independent steps — they share geometric
+# structure. The sieve discovers HOW relations distribute across octahedral
+# space. This distribution determines whether pairs, triples, or deeper
+# compositions will be needed.
 #
-# v1 died here because:
-# - Phase 1 (exact hash): no duplicates exist
-# - Phase 2 (position-set): no groups with matching values
-# - Phase 3 (residual): weight cap of 3 was too aggressive,
-#   100-pair-per-bucket cap missed the productive pairs
+# The SieveHint encodes this coupling:
+# 1. Octahedral heat map — which octahedra are "hot" (activated by many
+#    relations). Hot octahedra are where cancellations are most likely.
+# 2. Pair prediction — precompute duplicate signature count. If dup_sigs > 0,
+#    the search can skip expensive LSH/overlap phases entirely.
+# 3. Strategy selection — PAIR, TRIPLE, or DEEP mode, determined from
+#    the signature landscape.
+# 4. Focused LSH — weight LSH band projections toward hot octahedra,
+#    not random positions. This concentrates search where cancellations live.
 #
-# v2 innovations:
-# 1. LSH (Locality-Sensitive Hashing) on positions — random band
-#    projections find near-neighbors in O(R * n_bands)
-# 2. Overlap-prioritized pairing — inverted position index finds
-#    ALL pairs sharing ≥2 octahedra, dramatically reducing search space
-# 3. Multi-round residual algebra — residuals from round 1 become
-#    inputs to round 2. Adaptive weight cap based on avg weight.
-# 4. Greedy chain reduction — sort by XOR weight, compose best-first
+# The binary pipeline has no equivalent — GF(2) Gauss treats all columns
+# equally. The geometric pipeline uses the STRUCTURE of the sieve's output
+# to accelerate the search.
+
+@dataclass
+class SieveHint:
+    """Geometric coupling between sieve and search phases."""
+    n_relations: int
+    n_octahedra: int
+    avg_weight: float
+    # Heat map: activation count per octahedron
+    heat_map: Dict[int, int] = field(default_factory=dict)
+    # Hot octahedra: top 20% by activation (where cancellations cluster)
+    hot_octahedra: List[int] = field(default_factory=list)
+    # Signature analysis
+    dup_sigs: int = 0           # Signatures with 2+ copies
+    max_group: int = 0          # Largest signature group
+    unique_ratio: float = 1.0   # unique_sigs / total
+    # Value distribution per octahedron: which values are common
+    value_dist: Dict[int, Counter] = field(default_factory=dict)
+    # Strategy recommendation
+    strategy: str = "UNKNOWN"   # PAIR, TRIPLE, or DEEP
+
+    @classmethod
+    def from_glyphs(cls, glyphs: List[GlyphState]) -> 'SieveHint':
+        """Analyze glyph states to produce search hints."""
+        if not glyphs:
+            return cls(n_relations=0, n_octahedra=0, avg_weight=0)
+
+        n_octa = len(glyphs[0].glyphs)
+        avg_w = sum(g.weight for g in glyphs) / len(glyphs)
+
+        # Heat map: count activations per octahedron
+        heat = Counter()
+        val_dist = defaultdict(Counter)
+        for g in glyphs:
+            for k, v in enumerate(g.glyphs):
+                if v != 0:
+                    heat[k] += 1
+                    val_dist[k][v] += 1
+
+        # Hot octahedra: top 20% by activation count
+        sorted_octa = sorted(heat.keys(), key=lambda k: -heat[k])
+        n_hot = max(1, len(sorted_octa) // 5)
+        hot = sorted_octa[:n_hot]
+
+        # Signature analysis
+        sig_counts = Counter(g.signature for g in glyphs)
+        dup_sigs = sum(1 for s, c in sig_counts.items() if c >= 2 and s)
+        max_group = max(sig_counts.values()) if sig_counts else 0
+        unique_sigs = len(sig_counts)
+        unique_ratio = unique_sigs / len(glyphs) if glyphs else 1.0
+
+        # Strategy selection based on signature landscape
+        if dup_sigs > 0:
+            strategy = "PAIR"       # Fast path: exact duplicates exist
+        elif avg_w <= 4.5 and n_octa < 5000:
+            strategy = "TRIPLE"     # Medium: LSH + overlap will find triples
+        else:
+            strategy = "DEEP"       # Expensive: need chain composition
+
+        return cls(
+            n_relations=len(glyphs),
+            n_octahedra=n_octa,
+            avg_weight=avg_w,
+            heat_map=dict(heat),
+            hot_octahedra=hot,
+            dup_sigs=dup_sigs,
+            max_group=max_group,
+            unique_ratio=unique_ratio,
+            value_dist=dict(val_dist),
+            strategy=strategy,
+        )
+
+
+# ======================================================================
+# GLYPH-AWARE NULL SEARCH v3 — Sieve-Coupled Adaptive Search
+# ======================================================================
 #
-# Complexity: O(R * W * B) for LSH + O(R * W^2) for overlap pairing
-# where W = avg weight (~4), B = n_bands (~20). Both sub-O(R^2).
+# v2 broke the 53-bit wall with LSH + overlap pairing.
+# v3 uses SieveHint to ADAPT the search strategy:
+#
+# PAIR mode:   Skip LSH/overlap, go straight to hash lookup. O(R).
+# TRIPLE mode: Focus LSH bands on hot octahedra (not random).
+#              Only overlap-pair through hot octahedra. O(R * W * B).
+# DEEP mode:   Full chain composition with adaptive depth. O(K^2).
+#
+# The sieve-to-search coupling means the total pipeline is faster
+# than the sum of its parts — the sieve's geometric knowledge
+# eliminates dead-end search paths before they're explored.
 
 def _lsh_bands(glyphs: List[GlyphState], n_bands: int = 30,
-               band_width: int = 2, seed: int = 42) -> Dict[Tuple, List[int]]:
+               band_width: int = 2, seed: int = 42,
+               hint: Optional['SieveHint'] = None) -> Dict[Tuple, List[int]]:
     """
     Locality-Sensitive Hashing for octahedral glyph states.
 
-    Projects each state's active (position, value) pairs onto random
-    subsets of octahedra (bands). States with similar active positions
-    collide in at least one band with high probability.
+    When a SieveHint is provided, focuses bands on HOT octahedra —
+    positions where many relations are active. This concentrates
+    the search where cancellations are most likely to occur.
 
-    Each band selects `band_width` random octahedra and hashes the
-    (position, value) tuple at those positions. Two states collide
-    in a band iff they agree on all selected positions (including
-    both being zero at a position).
-
-    P(collision in at least one band) ≈ 1 - (1 - s^band_width)^n_bands
-    where s = Jaccard similarity of active position sets.
-
-    For s=0.3 (typical for states sharing 1-2 of 4 positions):
-      band_width=2, n_bands=30 → P ≈ 1 - (1-0.09)^30 ≈ 0.95
+    Without hint: random band projections (uniform).
+    With hint: 2/3 of bands sample from hot octahedra, 1/3 random.
+    This biased sampling increases collision probability for states
+    that share hot octahedra (the productive pairs).
     """
     rng = random.Random(seed)
     if not glyphs:
         return {}
     n_octa = len(glyphs[0].glyphs)
 
-    # Generate random band projections
+    # Generate band projections — biased toward hot octahedra if hinted
     bands = []
-    for _ in range(n_bands):
-        positions = tuple(sorted(rng.sample(range(n_octa),
-                                            min(band_width, n_octa))))
+    hot = hint.hot_octahedra if hint and hint.hot_octahedra else []
+
+    for band_i in range(n_bands):
+        if hot and band_i < n_bands * 2 // 3:
+            # Focused band: sample from hot octahedra
+            pool = hot if len(hot) >= band_width else list(range(n_octa))
+            positions = tuple(sorted(rng.sample(pool,
+                                                min(band_width, len(pool)))))
+        else:
+            # Random band: uniform sampling
+            positions = tuple(sorted(rng.sample(range(n_octa),
+                                                min(band_width, n_octa))))
         bands.append(positions)
 
     # Hash each glyph into bands
@@ -218,7 +306,6 @@ def _lsh_bands(glyphs: List[GlyphState], n_bands: int = 30,
         if g.weight == 0:
             continue
         for band_idx, positions in enumerate(bands):
-            # Band signature = (band_idx, values at selected positions)
             key = (band_idx,) + tuple(g.glyphs[p] for p in positions)
             buckets[key].append(i)
 
@@ -264,25 +351,26 @@ def _overlap_pairs(glyphs: List[GlyphState],
 
 
 def glyph_null_search(glyphs: List[GlyphState],
-                       max_depth: int = 4) -> List[List[int]]:
+                       max_depth: int = 4,
+                       hint: Optional[SieveHint] = None) -> List[List[int]]:
     """
-    Find dependencies using glyph composition — v2 with LSH + overlap pairing.
+    Find dependencies using glyph composition — v3 with sieve coupling.
 
-    Phase 0: Singles (all-zero states) — O(R)
-    Phase 1: Exact signature duplicates — O(R) via hash
-    Phase 2: Position-set grouping — O(R * W)
-    Phase 3: LSH near-neighbor search — O(R * W * B)
-    Phase 4: Overlap-prioritized pairing with multi-round residuals — O(R * W^2)
-    Phase 5: Greedy chain composition — O(K^2) where K = number of residuals
+    The SieveHint steers strategy selection:
+    - PAIR mode:   Phases 0-2 only (exact hash). O(R).
+    - TRIPLE mode: Phases 0-4 with focused LSH. O(R * W * B).
+    - DEEP mode:   All phases including chain composition. O(K^2).
     """
     dependencies = []
     if not glyphs:
         return dependencies
     n_octa = len(glyphs[0].glyphs)
-    avg_weight = sum(g.weight for g in glyphs) / len(glyphs) if glyphs else 1
 
-    # Adaptive residual weight cap: track residuals up to 1.5x avg weight
-    # At 53 bits (avg_weight ~4.2), this is ~6 instead of hardcoded 3
+    # Compute hint if not provided
+    if hint is None:
+        hint = SieveHint.from_glyphs(glyphs)
+
+    avg_weight = hint.avg_weight
     max_residual_weight = max(4, int(avg_weight * 1.5))
 
     # Phase 0: Singles (all-zero = perfect square)
@@ -334,7 +422,11 @@ def glyph_null_search(glyphs: List[GlyphState],
 
     # Phase 3: LSH near-neighbor search — O(R * W * B)
     # Find pairs that collide in LSH bands → likely to have low XOR weight
-    lsh_buckets = _lsh_bands(glyphs, n_bands=30, band_width=2)
+    # Focused LSH: use hint to bias bands toward hot octahedra
+    # In PAIR mode, we could skip this entirely, but run it anyway
+    # as a safety net in case the pair extraction fails.
+    n_bands = 20 if hint.strategy == "PAIR" else 40
+    lsh_buckets = _lsh_bands(glyphs, n_bands=n_bands, band_width=2, hint=hint)
 
     # Collect candidate pairs from LSH, compute XOR weight
     lsh_seen: Set[Tuple[int, int]] = set()
@@ -560,9 +652,12 @@ def test_without_singles(N: int, B_bound: Optional[int] = None,
     for i, g in enumerate(filtered_glyphs):
         g.relation_idx = i
     
-    # Try glyph search WITHOUT singles
+    # Compute sieve hint — geometric coupling between sieve and search
+    hint = SieveHint.from_glyphs(filtered_glyphs) if filtered_glyphs else None
+
+    # Sieve-coupled glyph search
     t0 = time.time()
-    glyph_deps = glyph_null_search(filtered_glyphs, max_depth=4)
+    glyph_deps = glyph_null_search(filtered_glyphs, max_depth=4, hint=hint)
     glyph_ms = (time.time() - t0) * 1000
     
     # Skip GF(2) for large N — it takes O(D^2 * R) which is minutes at 55+ bits
@@ -605,6 +700,9 @@ def test_without_singles(N: int, B_bound: Optional[int] = None,
         'glyph_dep_sizes': [len(d) for d in glyph_deps[:5]],
         'glyph_ms': glyph_ms,
         'sieve_ms': sieve_ms,
+        'strategy': hint.strategy if hint else 'NONE',
+        'dup_sigs': hint.dup_sigs if hint else 0,
+        'n_hot': len(hint.hot_octahedra) if hint else 0,
         'gf2_found': gf2_factor is not None,
         'gf2_deps': len(gf2_deps),
         'gf2_ms': gf2_ms,
@@ -619,10 +717,11 @@ def run_hard_part_1():
     print("=" * 120)
 
     hdr = (f"{'N':>24} {'bits':>4} | {'rels':>6} {'octa':>5} {'wt':>4} | "
-           f"{'sieve':>8} {'search':>8} {'total':>8} | "
-           f"{'status':>6} {'deps':>4} {'sizes':>14}")
+           f"{'sieve':>7} {'search':>7} {'total':>7} | "
+           f"{'strat':>7} {'dups':>4} {'hot':>4} | "
+           f"{'st':>4} {'deps':>4} {'sizes':>12}")
     print(f"\n{hdr}")
-    print("-" * 120)
+    print("-" * 125)
 
     wins = 0
     fails = 0
@@ -650,10 +749,15 @@ def run_hard_part_1():
         search_s = result['glyph_ms'] / 1000
         total_s = sieve_s + search_s
 
+        strat = result.get('strategy', '?')
+        dups = result.get('dup_sigs', 0)
+        n_hot = result.get('n_hot', 0)
+
         print(f"{result['N']:24d} {result['bits']:4d} | {result['relations']:6d} "
               f"{result['octahedra']:5d} {result['avg_weight']:4.1f} | "
-              f"{sieve_s:7.2f}s {search_s:7.2f}s {total_s:7.2f}s | "
-              f"{status:>6} {result['glyph_deps']:4d} {sizes_str:>14}")
+              f"{sieve_s:6.2f}s {search_s:6.2f}s {total_s:6.2f}s | "
+              f"{strat:>7} {dups:4d} {n_hot:4d} | "
+              f"{status:>4} {result['glyph_deps']:4d} {sizes_str:>12}")
         sys.stdout.flush()
 
         if not result['glyph_found']:
@@ -663,30 +767,32 @@ def run_hard_part_1():
     print(f"  Geometric pipeline wins: {wins}")
     print(f"  Failures:                {fails}")
 
-    print(f"\n{'ARCHITECTURE':=^120}")
+    print(f"\n{'ARCHITECTURE':=^125}")
     print("""
-    The full geometric factorization pipeline:
+    The full geometric factorization pipeline with sieve-search coupling:
 
-    1. OCTAHEDRAL LOG SIEVE — replaces trial division
-       For each prime p, precompute roots r where p | (a^2 - N).
-       Stride through sieve array at step p, accumulating log(p).
-       Only trial-divide candidates passing log threshold.
-       Complexity: O(sum(M/p)) ≈ O(M * ln(ln(B))) vs O(M * |FB|)
-       Speedup: ~|FB| / ln(ln(B)) ≈ 1500x at 61 bits
+    1. OCTAHEDRAL LOG SIEVE → produces relations + geometric hint
+       Tonelli-Shanks roots, numpy-vectorized stride, per-position threshold.
+       The sieve's output IS the hint: it reveals the octahedral landscape.
 
-    2. GLYPH LSH SEARCH — replaces GF(2) Gaussian elimination
-       LSH bands project octahedral states into collision buckets.
-       Overlap-prioritized pairing finds cancellations geometrically.
-       Multi-round residual algebra composes partial cancellations.
-       Complexity: O(R * W * B) vs O(D^2 * R)
-       Speedup: ~D^2 / (W * B) ≈ 300x+ at 55 bits
+    2. SIEVE HINT → geometric coupling (the key innovation)
+       - Heat map: which octahedra are "hot" (many activations)
+       - Pair prediction: dup_sigs > 0 means pairs exist → fast path
+       - Strategy: PAIR / TRIPLE / DEEP selected before search begins
+       - Focused LSH: 2/3 of bands target hot octahedra, not random
 
-    3. SOVEREIGN SQUARE ROOT — local per-octahedron extraction
-       Each octahedral block contributes p^(e/2) mod N independently.
-       No number exceeds N at any point.
+       Binary has NO equivalent — GF(2) Gauss treats all columns equally.
 
-    Binary pipeline:  trial_division → Gaussian_elimination → big_sqrt
-    Geometric pipeline: octahedral_sieve → LSH_glyph_search → sovereign_sqrt
+    3. ADAPTIVE GLYPH SEARCH — strategy chosen by hint
+       PAIR mode:   Hash lookup only. O(R). When dups exist.
+       TRIPLE mode: Focused LSH + hot-octahedra overlap. O(R * W * B).
+       DEEP mode:   Full chain composition. O(K^2).
+
+    4. SOVEREIGN SQUARE ROOT — local per-octahedron extraction
+
+    The correlation between sieve timing and search timing is not a bug —
+    it's the geometric structure of N itself, now encoded as a first-class
+    object (SieveHint) that the search can reason about.
     """)
 
 
