@@ -160,6 +160,138 @@ class OctahedralLattice:
             saved += sum(1 for h in hits if not h)
         return saved
 
+    def octahedral_sieve(self, sieve_size: int = 0,
+                          max_relations: int = 0) -> List[Dict]:
+        """
+        Octahedral log sieve — sieve at octahedron granularity.
+
+        Instead of testing each candidate against each prime (O(M * |FB|)),
+        we flip the loop: for each prime, stride through the sieve array
+        marking all positions it hits (O(|FB| * M/p)). Then only trial-
+        divide candidates whose accumulated log passes the threshold.
+
+        The octahedral structure groups primes in triples. When all 3
+        primes in an octahedron hit the same position, that position gets
+        3 log contributions at once — the octahedron "lights up" fully.
+
+        Key insight: Q(a) = a^2 - N varies enormously across the sieve
+        window. Near sqrt(N), Q can be tiny (even single digits!). These
+        small-Q values are gold — almost always smooth with high-multiplicity
+        exponents that create singles (all-even → weight 0 in octahedral space).
+        The threshold must be PER-POSITION, not window-wide.
+
+        Complexity: O(sum(M/p for p in FB) + smooth * |FB|)
+        """
+        sqrt_N = isqrt(self.N) + 1
+
+        # Auto-size: sieve window scales with factor base
+        if sieve_size <= 0:
+            sieve_size = max(100000, len(self.factor_base) * 50)
+        if max_relations <= 0:
+            max_relations = len(self.factor_base) + 10
+
+        all_primes = []
+        for octa in self.octahedra:
+            all_primes.extend(octa.primes)
+        all_primes.extend(self.leftover)
+
+        # Precompute sieve roots: for each prime p, the offsets where
+        # p | Q(a) = (a^2 - N), i.e., a ≡ r (mod p) where r^2 ≡ N (mod p)
+        prime_roots = []
+        for p in all_primes:
+            if p == 2:
+                roots = {self.N % 2}
+            else:
+                roots = set()
+                for r in range(p):
+                    if (r * r) % p == self.N % p:
+                        roots.add(r)
+            prime_roots.append((p, roots))
+
+        log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
+        max_log_p = float(log_primes[-1]) if len(log_primes) > 0 else 10.0
+
+        relations = []
+        sieve_offset = 0
+
+        while len(relations) < max_relations:
+            # Allocate sieve array for this window
+            actual_size = min(sieve_size, 500000)
+            sieve_log = np.zeros(actual_size, dtype=np.float32)
+            start_a = sqrt_N + sieve_offset
+
+            # Phase 1: Accumulate log(p) at sieve positions (octahedral stride)
+            # For small primes, use numpy slice assignment (vectorized).
+            # For large primes (stride > actual_size/4), use Python loop
+            # since numpy slice with large step has overhead.
+            for p, roots in prime_roots:
+                logp = math.log(p)
+                for r in roots:
+                    first = (r - (start_a % p)) % p
+                    # numpy stride assignment: sieve_log[first::p] += logp
+                    sieve_log[first::p] += logp
+
+            # Phase 2: Vectorized per-position threshold check
+            # Q(a) = a^2 - N. Threshold = log(Q) - 1.5*log(largest_prime).
+            # Vectorized with numpy for speed.
+            offsets = np.arange(actual_size, dtype=np.int64)
+            a_vals = np.int64(start_a) + offsets
+            Q_vals = a_vals * a_vals - np.int64(self.N)
+
+            # Mask: Q > 0 and sieve has accumulated enough log
+            positive = Q_vals > 0
+            Q_positive = np.where(positive, Q_vals, 1)  # avoid log(0)
+            log_Q = np.log(Q_positive.astype(np.float64)).astype(np.float32)
+            # Standard QS threshold: allow one large prime factor
+            # not in the base. Tolerance = log(largest_prime_in_base).
+            thresholds = log_Q - max_log_p
+
+            mask = positive & (sieve_log >= thresholds)
+            candidates = np.where(mask)[0]
+
+            # Phase 3: RIM-guided trial division on candidates
+            # Only divide by primes that the sieve says hit this position.
+            # For each candidate, check a mod p against precomputed roots.
+            for idx in candidates:
+                a = int(start_a) + int(idx)  # Ensure native Python int
+                Q = a * a - self.N
+                if Q <= 0:
+                    continue
+
+                absQ = abs(Q)
+                exponents = {}
+                remainder = absQ
+
+                for p, roots in prime_roots:
+                    if not roots:
+                        continue
+                    # RIM check: does a mod p match any root?
+                    if a % p not in roots:
+                        continue
+                    count = 0
+                    while remainder % p == 0:
+                        count += 1
+                        remainder //= p
+                    if count > 0:
+                        exponents[p] = count
+                    if remainder == 1:
+                        break  # Fully factored, stop early
+
+                if remainder == 1:
+                    relations.append({
+                        'a': a, 'Q': Q, 'exponents': exponents
+                    })
+                    if len(relations) >= max_relations:
+                        break
+
+            sieve_offset += actual_size
+
+            # Safety: don't sieve forever
+            if sieve_offset > sieve_size * 20:
+                break
+
+        return relations
+
 
 # ======================================================================
 # GEOMETRIC NULL SPACE: Beyond GF(2) Gaussian Elimination
@@ -431,7 +563,7 @@ def sovereign_sqrt(N: int, relations: List[Dict], dep_indices: List[int],
 
     for idx in dep_indices:
         rel = relations[idx]
-        x = (x * rel['a']) % N
+        x = (x * int(rel['a'])) % N
         for p, count in rel['exponents'].items():
             total_exponents[p] += count
 
