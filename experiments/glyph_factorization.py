@@ -346,24 +346,23 @@ def _lsh_bands(glyphs: List[GlyphState], n_bands: int = 30,
 
 def _overlap_pairs(glyphs: List[GlyphState],
                    min_overlap: int = 2,
-                   max_per_position: int = 200) -> List[Tuple[int, int, int]]:
+                   max_per_position: int = 200,
+                   hot_positions: Optional[Set[int]] = None) -> List[Tuple[int, int, int]]:
     """
     Find pairs of states sharing at least `min_overlap` active octahedra.
 
     Returns (i, j, overlap_count) sorted by overlap descending.
     Uses inverted index by position for O(R * W) construction.
 
-    Key insight: at 53 bits, avg weight is 4.2 and n_octahedra is 1429.
-    Two random states share ~4.2^2/1429 ≈ 0.012 positions on average.
-    But the distribution is heavy-tailed: some octahedra are "hot"
-    (many relations activate them) and pairs through hot octahedra
-    dominate productive cancellations.
+    If hot_positions is provided, only index those positions (faster for
+    large problems where most positions are cold and unproductive).
     """
     # Inverted index: octahedron position → list of glyph indices
     pos_idx: Dict[int, List[int]] = defaultdict(list)
     for i, g in enumerate(glyphs):
         for k in g._sparse:
-            pos_idx[k].append(i)
+            if hot_positions is None or k in hot_positions:
+                pos_idx[k].append(i)
 
     # Count pairwise overlaps via inverted index
     pair_overlaps: Dict[Tuple[int, int], int] = Counter()
@@ -439,6 +438,8 @@ def glyph_null_search(glyphs: List[GlyphState],
         for i in indices:
             vals = tuple(glyphs[i]._sparse.get(p, 0) for p in sorted(positions))
             val_hash[vals].append(i)
+
+        # Pairs: exact value match
         for vals, val_indices in val_hash.items():
             if len(val_indices) >= 2:
                 for a in range(len(val_indices)):
@@ -448,8 +449,95 @@ def glyph_null_search(glyphs: List[GlyphState],
                             glyphs[val_indices[b]].relation_idx,
                         ])
 
+        # Triples within same position set: vals_a XOR vals_b = vals_c
+        if not dependencies and len(indices) >= 3 and hint.strategy == "DEEP":
+            val_items = list(val_hash.items())
+            xor_val_hash = {vals: idxs[0] for vals, idxs in val_items}
+            for ai in range(min(len(val_items), 500)):
+                va, idxs_a = val_items[ai]
+                for bi in range(ai + 1, min(len(val_items), 500)):
+                    vb, idxs_b = val_items[bi]
+                    needed = tuple(a ^ b for a, b in zip(va, vb))
+                    if needed in xor_val_hash:
+                        ic = xor_val_hash[needed]
+                        triple = [glyphs[idxs_a[0]].relation_idx,
+                                  glyphs[idxs_b[0]].relation_idx,
+                                  glyphs[ic].relation_idx]
+                        if len(set(triple)) == 3:
+                            dependencies.append(triple)
+
     if dependencies:
         return dependencies
+
+    # Initialize pair accumulators (used across phases 2b-6)
+    lsh_seen: Set[Tuple[int, int]] = set()
+    lsh_pairs: List[Tuple[int, int, int]] = []  # (i, j, xor_weight)
+
+    # Phase 2b (DEEP only): Hot-position guided triple search
+    # Pairs sharing hot positions → XOR residual → global sig_hash lookup.
+    # The residual from two glyphs sharing hot positions is low-weight at those
+    # positions, and the sig_hash can match ANY glyph with that exact residual.
+    if hint.strategy == "DEEP" and hint.hot_octahedra:
+        hot_set = set(hint.hot_octahedra[:200])
+        # Build inverted index on hot positions only
+        hot_idx: Dict[int, List[int]] = defaultdict(list)
+        for i, g in enumerate(glyphs):
+            for k in g._sparse:
+                if k in hot_set:
+                    hot_idx[k].append(i)
+
+        # Collect pairs from shared hot positions, compute XOR signatures
+        # Sort positions by bucket size — medium buckets most productive
+        sorted_positions = sorted(hot_idx.keys(),
+                                   key=lambda p: abs(len(hot_idx[p]) - 100))
+        deep_seen: Set[Tuple[int, int]] = set()
+        deep_pairs: List[Tuple[int, int, int]] = []  # feed to later phases
+        max_deep_checks = 500000
+        checks = 0
+        for pos in sorted_positions:
+            indices = hot_idx[pos]
+            if len(indices) < 2:
+                continue
+            sample = indices[:300] if len(indices) <= 300 else random.sample(indices, 300)
+            for a in range(len(sample)):
+                for b in range(a + 1, len(sample)):
+                    pair = (min(sample[a], sample[b]), max(sample[a], sample[b]))
+                    if pair in deep_seen:
+                        continue
+                    deep_seen.add(pair)
+                    checks += 1
+                    i, j = pair
+                    needed = glyphs[i].xor_signature(glyphs[j])
+                    if not needed:
+                        dependencies.append([glyphs[i].relation_idx,
+                                             glyphs[j].relation_idx])
+                    elif needed in sig_hash:
+                        for k in sig_hash[needed]:
+                            if glyphs[k].relation_idx not in (
+                                glyphs[i].relation_idx, glyphs[j].relation_idx):
+                                dependencies.append([glyphs[i].relation_idx,
+                                                     glyphs[j].relation_idx,
+                                                     glyphs[k].relation_idx])
+                                break
+                    else:
+                        # Accumulate low-weight pairs for later phases
+                        w = len(needed)
+                        if w <= max_residual_weight:
+                            deep_pairs.append((i, j, w))
+                    if dependencies:
+                        break
+                if dependencies or checks >= max_deep_checks:
+                    break
+            if dependencies or checks >= max_deep_checks:
+                break
+
+        if dependencies:
+            return dependencies
+
+        # Feed deep pairs into lsh_pairs for phases 4-6
+        if deep_pairs:
+            lsh_pairs.extend(deep_pairs)
+            lsh_seen.update((min(i,j), max(i,j)) for i,j,w in deep_pairs)
 
     # Phase 3: LSH near-neighbor search — O(R * W * B)
     # Find pairs that collide in LSH bands → likely to have low XOR weight
@@ -460,9 +548,6 @@ def glyph_null_search(glyphs: List[GlyphState],
     lsh_buckets = _lsh_bands(glyphs, n_bands=n_bands, band_width=2, hint=hint)
 
     # Collect candidate pairs from LSH, compute XOR weight
-    lsh_seen: Set[Tuple[int, int]] = set()
-    lsh_pairs: List[Tuple[int, int, int]] = []  # (i, j, xor_weight)
-
     for bucket_key, indices in lsh_buckets.items():
         if len(indices) < 2 or len(indices) > 200:
             continue  # Skip trivially empty or overpopulated buckets
@@ -487,10 +572,11 @@ def glyph_null_search(glyphs: List[GlyphState],
     lsh_pairs.sort(key=lambda x: x[2])
 
     # Phase 4: Overlap-prioritized residual algebra
-    # Use overlap pairs if LSH didn't yield enough low-weight residuals
-    if len(lsh_pairs) < 50:
-        overlap_result = _overlap_pairs(glyphs, min_overlap=2)
-        for i, j, ov in overlap_result[:5000]:
+    # For DEEP: always run (LSH misses at high dimensions). Otherwise only if LSH sparse.
+    if len(lsh_pairs) < 50 or hint.strategy == "DEEP":
+        hot_pos = set(hint.hot_octahedra) if hint.strategy == "DEEP" else None
+        overlap_result = _overlap_pairs(glyphs, min_overlap=2, hot_positions=hot_pos)
+        for i, j, ov in overlap_result[:10000]:
             pair = (min(i, j), max(i, j))
             if pair not in lsh_seen:
                 lsh_seen.add(pair)
@@ -546,7 +632,7 @@ def glyph_null_search(glyphs: List[GlyphState],
 
     # Round 2: XOR residuals with each other
     # For efficiency, only use low-weight residuals
-    max_res_weight = 5 if hint.strategy == "DEEP" else 3
+    max_res_weight = max(8, int(avg_weight * 1.5)) if hint.strategy == "DEEP" else 3
     res_items = [(sig, pairs[0]) for sig, pairs in residual_hash.items()
                  if len(sig) <= max_res_weight]
 
@@ -585,15 +671,15 @@ def glyph_null_search(glyphs: List[GlyphState],
         return dependencies
 
     # Phase 6: Greedy chain building
-    # Take the lowest-weight residuals, try to compose chains of 3+
-    # residuals that cancel. Each residual is itself a pair, so a chain
-    # of 3 residuals = 6 relations (sextet dependency).
+    # res_a XOR res_b → look for match in residual_hash or sig_hash.
+    # A chain of 2 residuals + 1 match = 4-5 relation dependency.
 
-    # Sort residuals by weight
     res_by_weight = sorted(res_items, key=lambda x: len(x[0]))
 
-    # Try chains of 3: res_a XOR res_b = res_c, then look for res_c match
-    chain_limit = 500 if hint.strategy == "DEEP" else 200
+    # Phase 6a: res XOR res → sig_hash (quintet: 2 pairs + 1 single)
+    # This extends the search: even if res_a alone doesn't match a glyph,
+    # res_a XOR res_b might produce a weight-5 residual that DOES match.
+    chain_limit = 1000 if hint.strategy == "DEEP" else 200
     for ia in range(min(len(res_by_weight), chain_limit)):
         sig_a, pair_a = res_by_weight[ia]
         for ib in range(ia + 1, min(len(res_by_weight), chain_limit)):
