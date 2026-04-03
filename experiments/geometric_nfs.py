@@ -252,43 +252,27 @@ class OctahedralLattice:
 
         while len(relations) < max_relations:
             # Allocate sieve array for this window
-            actual_size = min(sieve_size, 500000)
-            sieve_log = np.zeros(actual_size, dtype=np.float32)
+            actual_size = min(sieve_size, 2000000)  # 2M window for better amortization
             start_a = sqrt_N + sieve_offset
 
+            sieve_log = np.zeros(actual_size, dtype=np.float32)
+
             # Phase 1: Accumulate log(p) at sieve positions (octahedral stride)
-            # For small primes, use numpy slice assignment (vectorized).
-            # For large primes (stride > actual_size/4), use Python loop
-            # since numpy slice with large step has overhead.
             for p, roots in prime_roots:
                 logp = math.log(p)
                 for r in roots:
                     first = (r - (start_a % p)) % p
-                    # numpy stride assignment: sieve_log[first::p] += logp
                     sieve_log[first::p] += logp
 
             # Phase 2: Per-position threshold check
-            # Q(a) = a^2 - N. Threshold = log(Q) - log(largest_prime).
-            # Use float64 for log computation to avoid int64 overflow
-            # at 64+ bits (N > 2^63).
-
-            # Compute log(Q) using float approximation:
-            # Q(a) = (start_a + idx)^2 - N = 2*start_a*idx + idx^2 + (start_a^2 - N)
-            # For large N, compute base_Q = start_a^2 - N in Python, then
-            # approximate log(Q) = log(base_Q + 2*start_a*idx + idx^2)
             base_Q = int(start_a) * int(start_a) - self.N
             sa2 = 2 * int(start_a)
-
-            # Vectorize: approximate log(Q) for each position
-            # Q(idx) = base_Q + sa2*idx + idx^2
             offsets = np.arange(actual_size, dtype=np.float64)
             Q_approx = float(base_Q) + float(sa2) * offsets + offsets * offsets
-
             positive = Q_approx > 0
             Q_safe = np.where(positive, Q_approx, 1.0)
             log_Q = np.log(Q_safe).astype(np.float32)
             thresholds = log_Q - max_log_p
-
             mask = positive & (sieve_log >= thresholds)
             candidates = np.where(mask)[0]
 
