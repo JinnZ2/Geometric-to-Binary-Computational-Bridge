@@ -467,3 +467,6 @@ if __name__ == "__main__":
         print(f"\n  {comp['component_type']:12s} [{comp['failure_mode']}]")
         print(f"  repurpose → {rp:14s}  bridge → {bridge_target(rp)}")
         print(f"  binary    : {b}  ({len(b)} bits)")
+
+
+### notes to do: have ("diode", "short_circuit") mapping to "conductor". In a high-energy task, a shorted diode often becomes a thermal event (a fuse) before it becomes a useful conductor. Have you considered adding a conditional check in Section D that triggers a QUARANTINE if the temp_band and current_band spike simultaneously, regardless of the health score?
