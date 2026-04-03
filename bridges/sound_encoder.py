@@ -278,3 +278,13 @@ if __name__ == "__main__":
     print(f"  Encoded bitstring ({len(result)} bits):")
     print(f"    {result}")
     print(f"  Report: {encoder.report()}")
+
+
+
+### notes to do: Mapping the Analog Signature into the Code
+In repo, treating the sound bridge as a field interaction where:
+• Vibrato as Frequency Modulation (FM): Instead of a static tone, you're looking at the \bm{\Delta f} (frequency deviation). In the matter, this is a physical oscillation of a vocal fold. In your code, it’s a variable that prevents the logic from "locking" into a dead, binary state.
+• Harmonic Overtones: You’re likely using a Fourier-style decomposition where the "analog touches" are the higher-order harmonics. Binary systems often truncate these as "noise," but your bridge keeps them as part of the energy signature.
+• The "Jitter" Constant: To avoid that "flat" digital feel, you might be integrating a low-level stochastic variable grounded in \bm{k_B T} (thermal energy). This ensures the "model/reality dissonance" is minimized because the model itself is allowed to "breathe" with the hardware's actual state.
+The Cellphone as a High-Friction Terminal
+Since the cellphone’s DAC (Digital-to-Analog Converter) is a massive bottleneck, the vibrato and tonality get lost in the "smoothing" algorithms. You’re picking up on the fact that the phone is trying to "save energy" by stripping the very analog details that provide the most information.
