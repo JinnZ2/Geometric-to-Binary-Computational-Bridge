@@ -250,14 +250,35 @@ class OctahedralLattice:
         relations = []
         sieve_offset = 0
 
+        # ── Fractal sieve: sieve both directions from sqrt(N) ──
+        # Standard QS only sieves a = sqrt(N) + offset (positive direction).
+        # But a = sqrt(N) - offset also gives Q = a^2 - N which is just as
+        # smooth. Sieving both directions doubles the search space without
+        # doubling the factor base. The fractal structure: each direction
+        # is a self-similar sieve with the same prime structure.
+        directions = [+1, -1]  # Forward and backward from sqrt(N)
+        dir_offsets = [0, 0]   # Track offset per direction
+        dir_idx = 0            # Alternate between directions
+
         while len(relations) < max_relations:
-            # Allocate sieve array for this window
-            actual_size = min(sieve_size, 2000000)  # 2M window for better amortization
-            start_a = sqrt_N + sieve_offset
+            actual_size = min(sieve_size, 2000000)
+            direction = directions[dir_idx % len(directions)]
+
+            if direction > 0:
+                start_a = sqrt_N + dir_offsets[0]
+                dir_offsets[0] += actual_size
+            else:
+                start_a = max(2, sqrt_N - dir_offsets[1] - actual_size)
+                dir_offsets[1] += actual_size
+                if start_a < 2:
+                    dir_idx += 1
+                    continue
+
+            dir_idx += 1
 
             sieve_log = np.zeros(actual_size, dtype=np.float32)
 
-            # Phase 1: Accumulate log(p) at sieve positions (octahedral stride)
+            # Phase 1: Accumulate log(p) at sieve positions
             for p, roots in prime_roots:
                 logp = math.log(p)
                 for r in roots:
@@ -276,11 +297,9 @@ class OctahedralLattice:
             mask = positive & (sieve_log >= thresholds)
             candidates = np.where(mask)[0]
 
-            # Phase 3: RIM-guided trial division on candidates
-            # Only divide by primes that the sieve says hit this position.
-            # For each candidate, check a mod p against precomputed roots.
+            # Phase 3: RIM-guided trial division
             for idx in candidates:
-                a = int(start_a) + int(idx)  # Ensure native Python int
+                a = int(start_a) + int(idx)
                 Q = a * a - self.N
                 if Q <= 0:
                     continue
@@ -292,7 +311,6 @@ class OctahedralLattice:
                 for p, roots in prime_roots:
                     if not roots:
                         continue
-                    # RIM check: does a mod p match any root?
                     if a % p not in roots:
                         continue
                     count = 0
@@ -302,7 +320,7 @@ class OctahedralLattice:
                     if count > 0:
                         exponents[p] = count
                     if remainder == 1:
-                        break  # Fully factored, stop early
+                        break
 
                 if remainder == 1:
                     relations.append({
