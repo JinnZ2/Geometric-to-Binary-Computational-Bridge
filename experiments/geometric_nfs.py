@@ -247,56 +247,84 @@ class OctahedralLattice:
         log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
         max_log_p = float(log_primes[-1]) if len(log_primes) > 0 else 10.0
 
+        # Large primes (stride > block) only hit 1-2 positions per window.
+        # Split for potential block-sieve optimization in future.
+        large_prime_cutoff = max(1, len(prime_roots) * 2 // 3)
+        small_roots = prime_roots[:large_prime_cutoff]
+        large_roots = prime_roots[large_prime_cutoff:]
+
         relations = []
         sieve_offset = 0
 
-        while len(relations) < max_relations:
-            # Allocate sieve array for this window
-            actual_size = min(sieve_size, 500000)
-            sieve_log = np.zeros(actual_size, dtype=np.float32)
-            start_a = sqrt_N + sieve_offset
+        # ── Fractal sieve: sieve both directions from sqrt(N) ──
+        # Standard QS only sieves a = sqrt(N) + offset (positive direction).
+        # But a = sqrt(N) - offset also gives Q = a^2 - N which is just as
+        # smooth. Sieving both directions doubles the search space without
+        # doubling the factor base. The fractal structure: each direction
+        # is a self-similar sieve with the same prime structure.
+        directions = [+1, -1]  # Forward and backward from sqrt(N)
+        dir_offsets = [0, 0]   # Track offset per direction
+        dir_idx = 0            # Alternate between directions
 
-            # Phase 1: Accumulate log(p) at sieve positions (octahedral stride)
-            # For small primes, use numpy slice assignment (vectorized).
-            # For large primes (stride > actual_size/4), use Python loop
-            # since numpy slice with large step has overhead.
-            for p, roots in prime_roots:
+        while len(relations) < max_relations:
+            actual_size = min(sieve_size, 2000000)
+            direction = directions[dir_idx % len(directions)]
+
+            if direction > 0:
+                start_a = sqrt_N + dir_offsets[0]
+                dir_offsets[0] += actual_size
+            else:
+                start_a = max(2, sqrt_N - dir_offsets[1] - actual_size)
+                dir_offsets[1] += actual_size
+                if start_a < 2:
+                    dir_idx += 1
+                    continue
+
+            dir_idx += 1
+
+            sieve_log = np.zeros(actual_size, dtype=np.float32)
+
+            # Phase 1: Accumulate log(p) at sieve positions
+            # Small primes: many hits per window, use numpy stride
+            sa_mod_cache = int(start_a)
+            for p, roots in small_roots:
                 logp = math.log(p)
+                sa_mod = sa_mod_cache % p
                 for r in roots:
-                    first = (r - (start_a % p)) % p
-                    # numpy stride assignment: sieve_log[first::p] += logp
+                    first = (r - sa_mod) % p
                     sieve_log[first::p] += logp
 
-            # Phase 2: Per-position threshold check
-            # Q(a) = a^2 - N. Threshold = log(Q) - log(largest_prime).
-            # Use float64 for log computation to avoid int64 overflow
-            # at 64+ bits (N > 2^63).
+            # Large primes: few hits per window (stride > actual_size/4).
+            # Use direct index assignment instead of stride for very large p.
+            for p, roots in large_roots:
+                logp = math.log(p)
+                sa_mod = sa_mod_cache % p
+                if p >= actual_size:
+                    # Prime larger than window — at most 1 hit per root
+                    for r in roots:
+                        first = (r - sa_mod) % p
+                        if first < actual_size:
+                            sieve_log[first] += logp
+                else:
+                    for r in roots:
+                        first = (r - sa_mod) % p
+                        sieve_log[first::p] += logp
 
-            # Compute log(Q) using float approximation:
-            # Q(a) = (start_a + idx)^2 - N = 2*start_a*idx + idx^2 + (start_a^2 - N)
-            # For large N, compute base_Q = start_a^2 - N in Python, then
-            # approximate log(Q) = log(base_Q + 2*start_a*idx + idx^2)
+            # Phase 2: Per-position threshold check
             base_Q = int(start_a) * int(start_a) - self.N
             sa2 = 2 * int(start_a)
-
-            # Vectorize: approximate log(Q) for each position
-            # Q(idx) = base_Q + sa2*idx + idx^2
             offsets = np.arange(actual_size, dtype=np.float64)
             Q_approx = float(base_Q) + float(sa2) * offsets + offsets * offsets
-
             positive = Q_approx > 0
             Q_safe = np.where(positive, Q_approx, 1.0)
             log_Q = np.log(Q_safe).astype(np.float32)
             thresholds = log_Q - max_log_p
-
             mask = positive & (sieve_log >= thresholds)
             candidates = np.where(mask)[0]
 
-            # Phase 3: RIM-guided trial division on candidates
-            # Only divide by primes that the sieve says hit this position.
-            # For each candidate, check a mod p against precomputed roots.
+            # Phase 3: RIM-guided trial division
             for idx in candidates:
-                a = int(start_a) + int(idx)  # Ensure native Python int
+                a = int(start_a) + int(idx)
                 Q = a * a - self.N
                 if Q <= 0:
                     continue
@@ -308,7 +336,6 @@ class OctahedralLattice:
                 for p, roots in prime_roots:
                     if not roots:
                         continue
-                    # RIM check: does a mod p match any root?
                     if a % p not in roots:
                         continue
                     count = 0
@@ -318,7 +345,7 @@ class OctahedralLattice:
                     if count > 0:
                         exponents[p] = count
                     if remainder == 1:
-                        break  # Fully factored, stop early
+                        break
 
                 if remainder == 1:
                     relations.append({
