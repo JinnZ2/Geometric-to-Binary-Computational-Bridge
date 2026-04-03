@@ -247,6 +247,12 @@ class OctahedralLattice:
         log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
         max_log_p = float(log_primes[-1]) if len(log_primes) > 0 else 10.0
 
+        # Large primes (stride > block) only hit 1-2 positions per window.
+        # Split for potential block-sieve optimization in future.
+        large_prime_cutoff = max(1, len(prime_roots) * 2 // 3)
+        small_roots = prime_roots[:large_prime_cutoff]
+        large_roots = prime_roots[large_prime_cutoff:]
+
         relations = []
         sieve_offset = 0
 
@@ -279,11 +285,30 @@ class OctahedralLattice:
             sieve_log = np.zeros(actual_size, dtype=np.float32)
 
             # Phase 1: Accumulate log(p) at sieve positions
-            for p, roots in prime_roots:
+            # Small primes: many hits per window, use numpy stride
+            sa_mod_cache = int(start_a)
+            for p, roots in small_roots:
                 logp = math.log(p)
+                sa_mod = sa_mod_cache % p
                 for r in roots:
-                    first = (r - (start_a % p)) % p
+                    first = (r - sa_mod) % p
                     sieve_log[first::p] += logp
+
+            # Large primes: few hits per window (stride > actual_size/4).
+            # Use direct index assignment instead of stride for very large p.
+            for p, roots in large_roots:
+                logp = math.log(p)
+                sa_mod = sa_mod_cache % p
+                if p >= actual_size:
+                    # Prime larger than window — at most 1 hit per root
+                    for r in roots:
+                        first = (r - sa_mod) % p
+                        if first < actual_size:
+                            sieve_log[first] += logp
+                else:
+                    for r in roots:
+                        first = (r - sa_mod) % p
+                        sieve_log[first::p] += logp
 
             # Phase 2: Per-position threshold check
             base_Q = int(start_a) * int(start_a) - self.N
