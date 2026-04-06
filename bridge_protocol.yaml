@@ -1,0 +1,30 @@
+Geometric Binary Bridge Protocol v1.0
+======================================
+
+Header (32 bits):
+  magic:       0xGB (8 bits) - identifies protocol
+  version:     1 (4 bits)    - protocol version
+  modality:    0-7 (4 bits)  - 0=hardware,1=electric,2=magnetic,3=gravitational,
+                                4=spectrum,5=polyhedral,6=GEIS,7=reserved
+  length:      0-65535 (16 bits) - total bits including header
+
+Payload (variable):
+  modality-specific bit layout (per encoder)
+
+Trailer (8 bits):
+  checksum:    XOR of all previous bytes
+
+Bridge Targets (8 modalities):
+  0: thermal   (temperature, heat flux)
+  1: electric  (voltage, current, charge)
+  2: magnetic  (B-field, H-field, flux)
+  3: light     (intensity, wavelength, polarization)
+  4: sound     (pressure, frequency, amplitude)
+  5: wave      (RF, microwave, frequency, phase)
+  6: pressure  (force, strain, tactile)
+  7: chemical  (concentration, pH, gas)
+
+Every continuous value is Gray-coded into bands.
+Every measurement includes confidence (from noise power).
+Every component includes drift and lifetime estimates.
+Every system includes drill depth (pass/monitor/alert/quarantine).
