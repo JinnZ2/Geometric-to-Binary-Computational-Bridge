@@ -428,6 +428,8 @@ class OctahedralLattice:
                 prime_idx += len(octa.primes)
 
         relations = []
+        partials: Dict[int, Tuple] = {}  # large_prime → (a, exponents)
+        n_partials_combined = 0
         sieve_offset = 0
         sieve_elapsed = 0.0
 
@@ -491,16 +493,38 @@ class OctahedralLattice:
                     tiled = np.tile(rolled, n_tiles)[:actual_size]
                     sieve_log += tiled
 
-            # Split primes: small (stride, sequential) vs large (scatter, vectorized)
-            # Threshold: primes > actual_size hit at most 1 position per root
-            large_mask = all_p >= actual_size
-            small_mask = ~large_mask
-            n_small = int(small_mask.sum())
+            # ── Three-tier cuttlefish nervous system ──
+            #
+            # Tier 1: GANGLIA — tiny primes (p < axon_cutoff)
+            #   Few primes, many hits each. Sequential stride loop.
+            #   Python loop is small (~4K primes at 87 bits).
+            #
+            # Tier 2: AXON FIELD — medium primes (axon_cutoff <= p < window)
+            #   Many primes, few hits each (<=AXON_MAX_HITS per root).
+            #   FULLY VECTORIZED via numpy broadcasting — ZERO Python loops.
+            #   Computes ALL positions for ALL primes in one 2D array operation.
+            #   This is the geometric glyph made operational: the modular
+            #   projections of all primes are computed as a single tensor op.
+            #
+            # Tier 3: CHROMATOPHORE — huge primes (p >= window)
+            #   At most 1 hit per root. Vectorized bincount (existing).
+            #
+            # At 87 bits: Tier 1 = ~4K, Tier 2 = ~70K, Tier 3 = ~132K
+            # vs old: stride loop = 74K, bincount = 132K
+            # The axon field eliminates 70K Python iterations.
 
-            # Phase 1a — GANGLIA: Small primes, sequential stride
-            # Skip primes already covered by glyph projection tables
-            for i in range(n_small):
-                if i in glyph_prime_indices:
+            AXON_MAX_HITS = 5  # Primes with <= this many hits use broadcasting
+            axon_cutoff = max(256, actual_size // AXON_MAX_HITS)
+
+            # Classification masks
+            ganglia_mask = all_p < axon_cutoff          # Tier 1: stride
+            axon_mask = (all_p >= axon_cutoff) & (all_p < actual_size)  # Tier 2: broadcast
+            chromo_mask = all_p >= actual_size           # Tier 3: scatter
+
+            # Tier 1 — GANGLIA: tiny primes, sequential stride
+            ganglia_idx = np.where(ganglia_mask)[0]
+            for i in ganglia_idx:
+                if int(i) in glyph_prime_indices:
                     continue
                 p = int(all_p[i])
                 logp = float(all_logp[i])
@@ -513,39 +537,69 @@ class OctahedralLattice:
                     first2 = (r2 - sa_mod) % p
                     sieve_log[first2::p] += logp
 
-            # Phase 1b — CHROMATOPHORE FIELD: Large primes, vectorized scatter
-            # Many primes (often 60%+ of factor base), at most 1 hit each.
-            # Use np.bincount (weighted histogram) instead of np.add.at —
-            # bincount is fully vectorized C, add.at disables SIMD.
-            if large_mask.any():
-                large_p = all_p[large_mask]
-                large_logp = all_logp[large_mask]
-                large_r1 = root1[large_mask]
-                large_r2 = root2[large_mask]
-                large_has_r2 = has_root2[large_mask]
+            # Tier 2 — AXON FIELD: medium primes, fully vectorized broadcasting
+            # Each prime hits at most AXON_MAX_HITS positions per root.
+            # We build a 2D array [n_primes x MAX_HITS] of ALL hit positions,
+            # then flatten valid ones and bincount in one pass.
+            if axon_mask.any():
+                ax_p = all_p[axon_mask]
+                ax_logp = all_logp[axon_mask]
+                ax_r1 = root1[axon_mask]
+                ax_r2 = root2[axon_mask]
+                ax_has_r2 = has_root2[axon_mask]
 
-                # Vectorized: compute first position for all root1
-                sa_mods = sa_int % large_p
-                first1 = (large_r1 - sa_mods) % large_p
+                ax_sa_mods = sa_int % ax_p  # vectorized modulo
+
+                # Root 1: broadcasting — [n_primes, 1] + [n_primes, 1] * [1, MAX_HITS]
+                firsts1 = (ax_r1 - ax_sa_mods) % ax_p
+                steps = np.arange(AXON_MAX_HITS, dtype=np.int64)
+                expanded1 = firsts1[:, None] + ax_p[:, None] * steps[None, :]
+                valid1 = expanded1 < actual_size
+
+                pos_list = [expanded1[valid1].astype(np.intp)]
+                wt_list = [np.broadcast_to(ax_logp[:, None], expanded1.shape)[valid1]]
+
+                # Root 2: same broadcasting for primes with second root
+                if ax_has_r2.any():
+                    m2 = ax_has_r2
+                    firsts2 = (ax_r2[m2] - ax_sa_mods[m2]) % ax_p[m2]
+                    expanded2 = firsts2[:, None] + ax_p[m2, None] * steps[None, :]
+                    valid2 = expanded2 < actual_size
+                    pos_list.append(expanded2[valid2].astype(np.intp))
+                    wt_list.append(np.broadcast_to(
+                        ax_logp[m2, None], expanded2.shape)[valid2])
+
+                axon_pos = np.concatenate(pos_list)
+                axon_wts = np.concatenate(wt_list)
+                sieve_log += np.bincount(axon_pos, weights=axon_wts,
+                                          minlength=actual_size).astype(np.float32)
+
+            # Tier 3 — CHROMATOPHORE: huge primes, at most 1 hit per root
+            if chromo_mask.any():
+                chr_p = all_p[chromo_mask]
+                chr_logp = all_logp[chromo_mask]
+                chr_r1 = root1[chromo_mask]
+                chr_r2 = root2[chromo_mask]
+                chr_has_r2 = has_root2[chromo_mask]
+
+                chr_sa_mods = sa_int % chr_p
+                first1 = (chr_r1 - chr_sa_mods) % chr_p
                 valid1 = first1 < actual_size
 
-                # Collect all valid positions and weights
                 positions = []
                 weights = []
                 if valid1.any():
                     positions.append(first1[valid1])
-                    weights.append(large_logp[valid1])
+                    weights.append(chr_logp[valid1])
 
-                # Vectorized: compute first position for all root2
-                if large_has_r2.any():
-                    mask2 = large_has_r2
-                    first2 = (large_r2[mask2] - sa_mods[mask2]) % large_p[mask2]
+                if chr_has_r2.any():
+                    m2 = chr_has_r2
+                    first2 = (chr_r2[m2] - chr_sa_mods[m2]) % chr_p[m2]
                     valid2 = first2 < actual_size
                     if valid2.any():
                         positions.append(first2[valid2])
-                        weights.append(large_logp[mask2][valid2])
+                        weights.append(chr_logp[m2][valid2])
 
-                # Single bincount scatter-add (fully vectorized C)
                 if positions:
                     all_pos = np.concatenate(positions).astype(np.intp)
                     all_wts = np.concatenate(weights)
@@ -560,26 +614,47 @@ class OctahedralLattice:
             positive = Q_approx > 0
             Q_safe = np.where(positive, Q_approx, 1.0)
             log_Q = np.log(Q_safe).astype(np.float32)
-            thresholds = log_Q - max_log_p
+            # Large prime variation: allow values missing one prime up to
+            # lp_multiplier * max_prime. The threshold slack = log(lp_multiplier)
+            # controls how many extra candidates reach trial division.
+            # lp_mult=100 adds ~4.6 to the slack — modest, targeted increase.
+            lp_multiplier = 100
+            lp_slack = math.log(lp_multiplier) if lp_multiplier > 1 else 0.0
+            thresholds = log_Q - max_log_p - lp_slack
             mask = positive & (sieve_log >= thresholds)
             candidates = np.where(mask)[0]
 
-            # Phase 3: RIM-guided trial division
+            # Phase 3: Vectorized RIM check + trial division
+            #
+            # The key optimization: instead of checking a%p for 70K primes
+            # in a Python loop, compute ALL residues in one numpy operation.
+            # Then only trial-divide by the ~5-20 primes that actually hit.
+            #
+            # This is the geometric glyph in action: the vectorized modular
+            # projection of 'a' onto ALL prime circles simultaneously.
+            # The hitting primes are the "resonant vertices" of a's glyph.
+            large_prime_bound = all_primes[-1] * lp_multiplier if all_primes else 10**12
+
             for idx in candidates:
                 a = int(start_a) + int(idx)
                 Q = a * a - self.N
                 if Q <= 0:
                     continue
 
+                # Vectorized RIM check: a%p for ALL primes at once
+                a_mod = a % all_p  # single numpy op — the "glyph projection"
+                hit_r1 = (a_mod == root1)
+                hit_r2 = has_root2 & (a_mod == root2)
+                hits = hit_r1 | hit_r2
+                hit_indices = np.where(hits)[0]
+
+                # Trial division only on hitting primes (typically 5-20)
                 absQ = abs(Q)
                 exponents = {}
                 remainder = absQ
 
-                for p, roots in prime_roots:
-                    if not roots:
-                        continue
-                    if a % p not in roots:
-                        continue
+                for i in hit_indices:
+                    p = int(all_p[i])
                     count = 0
                     while remainder % p == 0:
                         count += 1
@@ -593,8 +668,28 @@ class OctahedralLattice:
                     relations.append({
                         'a': a, 'Q': Q, 'exponents': exponents
                     })
-                    if len(relations) >= max_relations:
-                        break
+                elif 1 < remainder < large_prime_bound:
+                    lp = remainder
+                    if lp in partials:
+                        pa, p_exp, pQ = partials[lp]
+                        combined_exp = dict(exponents)
+                        for pp, cc in p_exp.items():
+                            combined_exp[pp] = combined_exp.get(pp, 0) + cc
+                        # Large prime appears once in each partial → 2 total.
+                        # Must include in exponents so sovereign_sqrt computes
+                        # y correctly: y includes lp^(2/2) = lp.
+                        combined_exp[lp] = combined_exp.get(lp, 0) + 2
+                        relations.append({
+                            'a': a, 'Q': Q * pQ,
+                            'exponents': combined_exp,
+                            'combined_a': [a, pa],
+                        })
+                        n_partials_combined += 1
+                    else:
+                        partials[lp] = (a, exponents, Q)
+
+                if len(relations) >= max_relations:
+                    break
 
             sieve_offset += actual_size
 
@@ -892,7 +987,12 @@ def sovereign_sqrt(N: int, relations: List[Dict], dep_indices: List[int],
 
     for idx in dep_indices:
         rel = relations[idx]
-        x = (x * int(rel['a'])) % N
+        # Combined partial relations have two a values
+        if 'combined_a' in rel:
+            for ai in rel['combined_a']:
+                x = (x * int(ai)) % N
+        else:
+            x = (x * int(rel['a'])) % N
         for p, count in rel['exponents'].items():
             total_exponents[p] += count
 
