@@ -2,6 +2,10 @@ __pycache__/
 node_modules/
 Front end/dist/
 
+# Sieve checkpoint files (runtime artifacts)
+scent_trail_*.json
+*.glyph
+
 # Sibling repos cloned locally for reference
 Component-failure-repurposing-database/
 Coop-framework/
