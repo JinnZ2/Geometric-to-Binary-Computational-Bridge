@@ -27,6 +27,8 @@ References:
 
 import math
 import time
+import json
+import os
 import numpy as np
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional, Dict, Set
@@ -126,6 +128,126 @@ class Octahedron:
         """Do all primes divide? (Full octahedron coherence)"""
         return all(self.rim_check(a))
 
+    def projection_glyph(self) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Build the projection glyph — a precomputed lookup table encoding
+        the modular arithmetic for this entire octahedron as a geometric object.
+
+        Instead of computing a%p1, a%p2, a%p3 separately (3 Python calls),
+        the glyph encodes ALL three projections into a single periodic table
+        with period = p1*p2*p3.
+
+        Returns:
+            state_table: array[product] of uint8 — octahedral state (0-7) at each offset
+            logw_table:  array[product] of float32 — total log weight at each offset
+
+        The glyph IS the function: position → octahedral state.
+        It replaces 3 modular arithmetic calls with 1 table lookup.
+
+        Geometric meaning: each position in the CRT cycle maps to a vertex
+        on the octahedron. The 8 possible states correspond to which subset
+        of the 3 primes divide Q(a) at that position. State 0 = no hits
+        (transparent), State 7 = all 3 hit (full octahedral coherence).
+        """
+        P = self.product
+        state_table = np.zeros(P, dtype=np.uint8)
+        logw_table = np.zeros(P, dtype=np.float32)
+
+        for vertex, (p, res) in enumerate(zip(self.primes, self.residues)):
+            logp = math.log(p)
+            for r in res:
+                # Every position ≡ r (mod p) gets this vertex lit
+                positions = np.arange(r, P, p)
+                state_table[positions] |= (1 << vertex)
+                logw_table[positions] += logp
+
+        return state_table, logw_table
+
+
+# ======================================================================
+# SCENT TRAIL: Sovereign State Checkpointing
+# ======================================================================
+# The sieve at 99+ bits takes hours. If the process dies, ALL relations
+# are lost. The Scent Trail saves relations to disk periodically —
+# the geometric "save point" that lets computation resume without
+# re-traversing explored territory.
+#
+# The trail is a JSON file (not pickle — inspectable, portable) containing:
+#   - N: the number being factored
+#   - factor_base: the primes used
+#   - relations: smooth relations found so far
+#   - sieve_offset: where the sieve left off
+#   - dir_offsets: bidirectional sieve positions
+#   - elapsed_s: total sieve time so far
+#
+# On restart, follow_trail() loads the checkpoint and the sieve
+# continues from where it stopped. Zero redundant computation.
+
+class ScentTrail:
+    """Checkpoint system for long-running sieves."""
+
+    @staticmethod
+    def trail_path(N: int) -> str:
+        bits = N.bit_length()
+        return f"scent_trail_{bits}bit.json"
+
+    @staticmethod
+    def drop(N: int, factor_base: List[int], relations: List[Dict],
+             dir_offsets: List[int], sieve_offset: int, elapsed_s: float):
+        """Save the current sieve state as a scent trail."""
+        path = ScentTrail.trail_path(N)
+        data = {
+            'N': str(N),
+            'factor_base_size': len(factor_base),
+            'n_relations': len(relations),
+            'relations': [
+                {'a': r['a'], 'Q': r['Q'],
+                 'exponents': {str(k): v for k, v in r['exponents'].items()}}
+                for r in relations
+            ],
+            'dir_offsets': dir_offsets,
+            'sieve_offset': sieve_offset,
+            'elapsed_s': elapsed_s,
+            'timestamp': time.time(),
+        }
+        with open(path, 'w') as f:
+            json.dump(data, f)
+        print(f"  [scent] Dropped trail: {len(relations)} relations, "
+              f"{elapsed_s:.1f}s elapsed → {path}")
+
+    @staticmethod
+    def follow(N: int) -> Optional[Dict]:
+        """Load a scent trail if one exists for this N."""
+        path = ScentTrail.trail_path(N)
+        if not os.path.exists(path):
+            return None
+        with open(path) as f:
+            data = json.load(f)
+        if str(N) != data['N']:
+            return None
+        # Reconstruct relations with int keys
+        relations = []
+        for r in data['relations']:
+            relations.append({
+                'a': r['a'], 'Q': r['Q'],
+                'exponents': {int(k): v for k, v in r['exponents'].items()}
+            })
+        print(f"  [scent] Following trail: {len(relations)} relations, "
+              f"{data['elapsed_s']:.1f}s cached from {path}")
+        return {
+            'relations': relations,
+            'dir_offsets': data['dir_offsets'],
+            'sieve_offset': data['sieve_offset'],
+            'elapsed_s': data['elapsed_s'],
+        }
+
+    @staticmethod
+    def clear(N: int):
+        """Remove a scent trail after successful factorization."""
+        path = ScentTrail.trail_path(N)
+        if os.path.exists(path):
+            os.remove(path)
+
 
 @dataclass
 class OctahedralLattice:
@@ -203,7 +325,8 @@ class OctahedralLattice:
         return saved
 
     def octahedral_sieve(self, sieve_size: int = 0,
-                          max_relations: int = 0) -> List[Dict]:
+                          max_relations: int = 0,
+                          use_glyph_projection: bool = False) -> List[Dict]:
         """
         Octahedral log sieve — sieve at octahedron granularity.
 
@@ -221,6 +344,12 @@ class OctahedralLattice:
         small-Q values are gold — almost always smooth with high-multiplicity
         exponents that create singles (all-even → weight 0 in octahedral space).
         The threshold must be PER-POSITION, not window-wide.
+
+        When use_glyph_projection=True, small octahedra use precomputed
+        projection glyphs: each octahedron's 3-prime modular arithmetic is
+        encoded as a single periodic lookup table (the "glyph"), tiled across
+        the sieve window. This replaces 3 stride operations with 1 np.tile.
+        The glyph IS the geometric encoding of modular arithmetic.
 
         Complexity: O(sum(M/p for p in FB) + smooth * |FB|)
         """
@@ -247,14 +376,75 @@ class OctahedralLattice:
         log_primes = np.array([math.log(p) for p in all_primes], dtype=np.float32)
         max_log_p = float(log_primes[-1]) if len(log_primes) > 0 else 10.0
 
-        # Large primes (stride > block) only hit 1-2 positions per window.
-        # Split for potential block-sieve optimization in future.
-        large_prime_cutoff = max(1, len(prime_roots) * 2 // 3)
-        small_roots = prime_roots[:large_prime_cutoff]
-        large_roots = prime_roots[large_prime_cutoff:]
+        # ── Cuttlefish sieve architecture ──
+        # Biology: cuttlefish skin has distributed ganglia (fast local reflexes)
+        # + central brain (slow global modulation). NOT centralized processing.
+        #
+        # Sieve analogy:
+        #   Small primes = ganglia (stride many positions, sequential but few)
+        #   Large primes = chromatophore field (hit 1-2 positions each, MANY primes)
+        #   Brain modulation = threshold from SieveHint
+        #
+        # Key optimization: large primes (p > window_size) each hit at most
+        # 1 position per root. Instead of 470k Python loop iterations,
+        # compute ALL positions vectorized with numpy, then scatter-add.
+        # This replaces O(n_large) Python ops with O(1) numpy ops.
+
+        # Precompute arrays for vectorized large-prime sieving
+        # Split: primes smaller than window use stride, larger use scatter
+        # We'll determine the actual split per-window based on actual_size
+        all_p = np.array([p for p, _ in prime_roots], dtype=np.int64)
+        all_logp = np.array([math.log(p) for p, _ in prime_roots], dtype=np.float32)
+
+        # Precompute roots arrays — most primes have exactly 2 roots
+        # Store as parallel arrays for vectorization
+        root1 = np.zeros(len(prime_roots), dtype=np.int64)
+        root2 = np.full(len(prime_roots), -1, dtype=np.int64)  # -1 = no second root
+        for i, (p, roots) in enumerate(prime_roots):
+            rlist = sorted(roots)
+            if len(rlist) >= 1:
+                root1[i] = rlist[0]
+            if len(rlist) >= 2:
+                root2[i] = rlist[1]
+        has_root2 = root2 >= 0
+
+        # ── GLYPH PROJECTION TABLES ──
+        # When enabled, precompute octahedral projection glyphs for small octahedra.
+        # Each glyph encodes 3 primes' modular arithmetic as a single periodic table.
+        # The glyph IS the function: position → log_weight.
+        # Instead of 3 Python calls (a%p1, a%p2, a%p3), one numpy tile operation.
+        glyph_tables = []  # (product, logw_table) for small octahedra
+        glyph_prime_indices = set()  # indices into all_primes covered by glyph tables
+        GLYPH_MAX_PRODUCT = 100000  # Only build glyphs for octahedra with small product
+
+        if use_glyph_projection:
+            prime_idx = 0
+            for octa in self.octahedra:
+                if octa.product <= GLYPH_MAX_PRODUCT:
+                    _, logw = octa.projection_glyph()
+                    glyph_tables.append((octa.product, logw))
+                    for j in range(len(octa.primes)):
+                        glyph_prime_indices.add(prime_idx + j)
+                prime_idx += len(octa.primes)
 
         relations = []
+        partials: Dict[int, Tuple] = {}  # large_prime → (a, exponents)
+        n_partials_combined = 0
         sieve_offset = 0
+        sieve_elapsed = 0.0
+
+        # ── SCENT TRAIL: Resume from checkpoint if available ──
+        trail = ScentTrail.follow(self.N)
+        if trail:
+            relations = trail['relations']
+            sieve_offset = trail['sieve_offset']
+            sieve_elapsed = trail['elapsed_s']
+
+        # Checkpoint interval: drop scent every N relations
+        # At 99 bits we find ~1 relation per 10s, so every 500 rels ≈ 80 min
+        checkpoint_interval = max(200, max_relations // 5)
+        last_checkpoint = len(relations)
+        t_sieve_start = time.time()
 
         # ── Fractal sieve: sieve both directions from sqrt(N) ──
         # Standard QS only sieves a = sqrt(N) + offset (positive direction).
@@ -284,31 +474,137 @@ class OctahedralLattice:
 
             sieve_log = np.zeros(actual_size, dtype=np.float32)
 
-            # Phase 1: Accumulate log(p) at sieve positions
-            # Small primes: many hits per window, use numpy stride
-            sa_mod_cache = int(start_a)
-            for p, roots in small_roots:
-                logp = math.log(p)
-                sa_mod = sa_mod_cache % p
-                for r in roots:
-                    first = (r - sa_mod) % p
-                    sieve_log[first::p] += logp
+            # ── Phase 1: Cuttlefish sieve — ganglia + chromatophore field ──
+            sa_int = int(start_a)
 
-            # Large primes: few hits per window (stride > actual_size/4).
-            # Use direct index assignment instead of stride for very large p.
-            for p, roots in large_roots:
-                logp = math.log(p)
-                sa_mod = sa_mod_cache % p
-                if p >= actual_size:
-                    # Prime larger than window — at most 1 hit per root
-                    for r in roots:
-                        first = (r - sa_mod) % p
-                        if first < actual_size:
-                            sieve_log[first] += logp
-                else:
-                    for r in roots:
-                        first = (r - sa_mod) % p
-                        sieve_log[first::p] += logp
+            # Phase 1-GLYPH: Octahedral projection glyph tiling
+            # For small octahedra, tile the precomputed glyph across the window.
+            # Each glyph encodes (a%p1, a%p2, a%p3) → log_weight as a single
+            # periodic array. np.tile replaces 3 stride loops with 1 memory copy.
+            # This is the geometric encoding of modular arithmetic.
+            if glyph_tables:
+                for product, logw_table in glyph_tables:
+                    # Phase offset: where in the glyph cycle does this window start?
+                    offset_in_cycle = sa_int % product
+                    # Roll the glyph to align with this window's starting position
+                    rolled = np.roll(logw_table, -offset_in_cycle)
+                    # Tile across the window
+                    n_tiles = (actual_size + product - 1) // product
+                    tiled = np.tile(rolled, n_tiles)[:actual_size]
+                    sieve_log += tiled
+
+            # ── Three-tier cuttlefish nervous system ──
+            #
+            # Tier 1: GANGLIA — tiny primes (p < axon_cutoff)
+            #   Few primes, many hits each. Sequential stride loop.
+            #   Python loop is small (~4K primes at 87 bits).
+            #
+            # Tier 2: AXON FIELD — medium primes (axon_cutoff <= p < window)
+            #   Many primes, few hits each (<=AXON_MAX_HITS per root).
+            #   FULLY VECTORIZED via numpy broadcasting — ZERO Python loops.
+            #   Computes ALL positions for ALL primes in one 2D array operation.
+            #   This is the geometric glyph made operational: the modular
+            #   projections of all primes are computed as a single tensor op.
+            #
+            # Tier 3: CHROMATOPHORE — huge primes (p >= window)
+            #   At most 1 hit per root. Vectorized bincount (existing).
+            #
+            # At 87 bits: Tier 1 = ~4K, Tier 2 = ~70K, Tier 3 = ~132K
+            # vs old: stride loop = 74K, bincount = 132K
+            # The axon field eliminates 70K Python iterations.
+
+            AXON_MAX_HITS = 5  # Primes with <= this many hits use broadcasting
+            axon_cutoff = max(256, actual_size // AXON_MAX_HITS)
+
+            # Classification masks
+            ganglia_mask = all_p < axon_cutoff          # Tier 1: stride
+            axon_mask = (all_p >= axon_cutoff) & (all_p < actual_size)  # Tier 2: broadcast
+            chromo_mask = all_p >= actual_size           # Tier 3: scatter
+
+            # Tier 1 — GANGLIA: tiny primes, sequential stride
+            ganglia_idx = np.where(ganglia_mask)[0]
+            for i in ganglia_idx:
+                if int(i) in glyph_prime_indices:
+                    continue
+                p = int(all_p[i])
+                logp = float(all_logp[i])
+                sa_mod = sa_int % p
+                r1 = int(root1[i])
+                first1 = (r1 - sa_mod) % p
+                sieve_log[first1::p] += logp
+                if has_root2[i]:
+                    r2 = int(root2[i])
+                    first2 = (r2 - sa_mod) % p
+                    sieve_log[first2::p] += logp
+
+            # Tier 2 — AXON FIELD: medium primes, fully vectorized broadcasting
+            # Each prime hits at most AXON_MAX_HITS positions per root.
+            # We build a 2D array [n_primes x MAX_HITS] of ALL hit positions,
+            # then flatten valid ones and bincount in one pass.
+            if axon_mask.any():
+                ax_p = all_p[axon_mask]
+                ax_logp = all_logp[axon_mask]
+                ax_r1 = root1[axon_mask]
+                ax_r2 = root2[axon_mask]
+                ax_has_r2 = has_root2[axon_mask]
+
+                ax_sa_mods = sa_int % ax_p  # vectorized modulo
+
+                # Root 1: broadcasting — [n_primes, 1] + [n_primes, 1] * [1, MAX_HITS]
+                firsts1 = (ax_r1 - ax_sa_mods) % ax_p
+                steps = np.arange(AXON_MAX_HITS, dtype=np.int64)
+                expanded1 = firsts1[:, None] + ax_p[:, None] * steps[None, :]
+                valid1 = expanded1 < actual_size
+
+                pos_list = [expanded1[valid1].astype(np.intp)]
+                wt_list = [np.broadcast_to(ax_logp[:, None], expanded1.shape)[valid1]]
+
+                # Root 2: same broadcasting for primes with second root
+                if ax_has_r2.any():
+                    m2 = ax_has_r2
+                    firsts2 = (ax_r2[m2] - ax_sa_mods[m2]) % ax_p[m2]
+                    expanded2 = firsts2[:, None] + ax_p[m2, None] * steps[None, :]
+                    valid2 = expanded2 < actual_size
+                    pos_list.append(expanded2[valid2].astype(np.intp))
+                    wt_list.append(np.broadcast_to(
+                        ax_logp[m2, None], expanded2.shape)[valid2])
+
+                axon_pos = np.concatenate(pos_list)
+                axon_wts = np.concatenate(wt_list)
+                sieve_log += np.bincount(axon_pos, weights=axon_wts,
+                                          minlength=actual_size).astype(np.float32)
+
+            # Tier 3 — CHROMATOPHORE: huge primes, at most 1 hit per root
+            if chromo_mask.any():
+                chr_p = all_p[chromo_mask]
+                chr_logp = all_logp[chromo_mask]
+                chr_r1 = root1[chromo_mask]
+                chr_r2 = root2[chromo_mask]
+                chr_has_r2 = has_root2[chromo_mask]
+
+                chr_sa_mods = sa_int % chr_p
+                first1 = (chr_r1 - chr_sa_mods) % chr_p
+                valid1 = first1 < actual_size
+
+                positions = []
+                weights = []
+                if valid1.any():
+                    positions.append(first1[valid1])
+                    weights.append(chr_logp[valid1])
+
+                if chr_has_r2.any():
+                    m2 = chr_has_r2
+                    first2 = (chr_r2[m2] - chr_sa_mods[m2]) % chr_p[m2]
+                    valid2 = first2 < actual_size
+                    if valid2.any():
+                        positions.append(first2[valid2])
+                        weights.append(chr_logp[m2][valid2])
+
+                if positions:
+                    all_pos = np.concatenate(positions).astype(np.intp)
+                    all_wts = np.concatenate(weights)
+                    sieve_log += np.bincount(all_pos, weights=all_wts,
+                                             minlength=actual_size).astype(np.float32)
 
             # Phase 2: Per-position threshold check
             base_Q = int(start_a) * int(start_a) - self.N
@@ -318,26 +614,47 @@ class OctahedralLattice:
             positive = Q_approx > 0
             Q_safe = np.where(positive, Q_approx, 1.0)
             log_Q = np.log(Q_safe).astype(np.float32)
-            thresholds = log_Q - max_log_p
+            # Large prime variation: allow values missing one prime up to
+            # lp_multiplier * max_prime. The threshold slack = log(lp_multiplier)
+            # controls how many extra candidates reach trial division.
+            # lp_mult=100 adds ~4.6 to the slack — modest, targeted increase.
+            lp_multiplier = 100
+            lp_slack = math.log(lp_multiplier) if lp_multiplier > 1 else 0.0
+            thresholds = log_Q - max_log_p - lp_slack
             mask = positive & (sieve_log >= thresholds)
             candidates = np.where(mask)[0]
 
-            # Phase 3: RIM-guided trial division
+            # Phase 3: Vectorized RIM check + trial division
+            #
+            # The key optimization: instead of checking a%p for 70K primes
+            # in a Python loop, compute ALL residues in one numpy operation.
+            # Then only trial-divide by the ~5-20 primes that actually hit.
+            #
+            # This is the geometric glyph in action: the vectorized modular
+            # projection of 'a' onto ALL prime circles simultaneously.
+            # The hitting primes are the "resonant vertices" of a's glyph.
+            large_prime_bound = all_primes[-1] * lp_multiplier if all_primes else 10**12
+
             for idx in candidates:
                 a = int(start_a) + int(idx)
                 Q = a * a - self.N
                 if Q <= 0:
                     continue
 
+                # Vectorized RIM check: a%p for ALL primes at once
+                a_mod = a % all_p  # single numpy op — the "glyph projection"
+                hit_r1 = (a_mod == root1)
+                hit_r2 = has_root2 & (a_mod == root2)
+                hits = hit_r1 | hit_r2
+                hit_indices = np.where(hits)[0]
+
+                # Trial division only on hitting primes (typically 5-20)
                 absQ = abs(Q)
                 exponents = {}
                 remainder = absQ
 
-                for p, roots in prime_roots:
-                    if not roots:
-                        continue
-                    if a % p not in roots:
-                        continue
+                for i in hit_indices:
+                    p = int(all_p[i])
                     count = 0
                     while remainder % p == 0:
                         count += 1
@@ -351,14 +668,51 @@ class OctahedralLattice:
                     relations.append({
                         'a': a, 'Q': Q, 'exponents': exponents
                     })
-                    if len(relations) >= max_relations:
-                        break
+                elif 1 < remainder < large_prime_bound:
+                    lp = remainder
+                    if lp in partials:
+                        pa, p_exp, pQ = partials[lp]
+                        combined_exp = dict(exponents)
+                        for pp, cc in p_exp.items():
+                            combined_exp[pp] = combined_exp.get(pp, 0) + cc
+                        # Large prime appears once in each partial → 2 total.
+                        # Must include in exponents so sovereign_sqrt computes
+                        # y correctly: y includes lp^(2/2) = lp.
+                        combined_exp[lp] = combined_exp.get(lp, 0) + 2
+                        relations.append({
+                            'a': a, 'Q': Q * pQ,
+                            'exponents': combined_exp,
+                            'combined_a': [a, pa],
+                        })
+                        n_partials_combined += 1
+                    else:
+                        partials[lp] = (a, exponents, Q)
+
+                if len(relations) >= max_relations:
+                    break
 
             sieve_offset += actual_size
+
+            # ── SCENT TRAIL: Periodic checkpoint ──
+            if len(relations) - last_checkpoint >= checkpoint_interval:
+                elapsed = sieve_elapsed + (time.time() - t_sieve_start)
+                dir_offs = [dir_offsets[0], dir_offsets[1]]
+                ScentTrail.drop(self.N, self.factor_base, relations,
+                                dir_offs, sieve_offset, elapsed)
+                last_checkpoint = len(relations)
 
             # Safety: don't sieve forever
             if sieve_offset > sieve_size * 20:
                 break
+
+        # Final checkpoint on completion
+        if len(relations) >= max_relations:
+            ScentTrail.clear(self.N)  # Success — remove trail
+        elif len(relations) > 0 and len(relations) > last_checkpoint:
+            # Partial progress — save for resume
+            elapsed = sieve_elapsed + (time.time() - t_sieve_start)
+            ScentTrail.drop(self.N, self.factor_base, relations,
+                            [dir_offsets[0], dir_offsets[1]], sieve_offset, elapsed)
 
         return relations
 
@@ -633,7 +987,12 @@ def sovereign_sqrt(N: int, relations: List[Dict], dep_indices: List[int],
 
     for idx in dep_indices:
         rel = relations[idx]
-        x = (x * int(rel['a'])) % N
+        # Combined partial relations have two a values
+        if 'combined_a' in rel:
+            for ai in rel['combined_a']:
+                x = (x * int(ai)) % N
+        else:
+            x = (x * int(rel['a'])) % N
         for p, count in rel['exponents'].items():
             total_exponents[p] += count
 

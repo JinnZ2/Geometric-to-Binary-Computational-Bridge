@@ -130,6 +130,32 @@ class GlyphState:
         """Compact signature: only non-zero (position, value) pairs."""
         return tuple(sorted(self._sparse.items()))
 
+    @property
+    def packed_int(self) -> int:
+        """Meta-Glyph: pack entire octahedral state into a single Python int.
+
+        Each octahedron occupies 3 bits at position (octa_idx * 3).
+        XOR of two packed_ints gives the combined state in one operation.
+
+        Performance note: in Python, bigint operations are O(n_bits/64),
+        so this is slower than sparse signature for hashing (O(W) vs O(n_bits)).
+        Use packed_int for:
+          - Serialization (the Glyph IS a single number)
+          - Future C/SIMD paths where it becomes a true register operation
+          - Compact storage (one int vs dict)
+        Use sparse signature for:
+          - Hash-based duplicate detection (O(W) hashing, W << n_bits)
+          - XOR composition checks (sparse dict merge)
+        """
+        n = 0
+        for pos, val in self._sparse.items():
+            n |= (val << (pos * 3))
+        return n
+
+    def xor_packed(self, other: 'GlyphState') -> int:
+        """Packed XOR — useful for serialization and future SIMD paths."""
+        return self.packed_int ^ other.packed_int
+
     def xor_with(self, other: 'GlyphState') -> Tuple[int, ...]:
         """Binary XOR cancellation — returns dense tuple."""
         result = [0] * self._n_octa
