@@ -441,8 +441,8 @@ class OctahedralLattice:
             sieve_elapsed = trail['elapsed_s']
 
         # Checkpoint interval: drop scent every N relations
-        # At 99 bits we find ~1 relation per 10s, so every 500 rels ≈ 80 min
-        checkpoint_interval = max(200, max_relations // 5)
+        # Checkpoint every 50K relations — frequent enough to survive crashes
+        checkpoint_interval = 50000
         last_checkpoint = len(relations)
         t_sieve_start = time.time()
 
@@ -470,6 +470,11 @@ class OctahedralLattice:
             else:
                 start_a = max(2, sqrt_N - dir_offsets[1] - actual_size)
                 dir_offsets[1] += actual_size
+                # Skip backward blocks where entire window has a < sqrt(N)
+                # (all Q = a^2 - N would be negative → no smooth candidates)
+                if start_a + actual_size < sqrt_N:
+                    dir_idx += 1
+                    continue
                 if start_a < 2:
                     dir_idx += 1
                     continue
@@ -630,13 +635,16 @@ class OctahedralLattice:
 
             # Phase 3: Vectorized RIM check + trial division
             #
-            # The key optimization: instead of checking a%p for 70K primes
-            # in a Python loop, compute ALL residues in one numpy operation.
-            # Then only trial-divide by the ~5-20 primes that actually hit.
-            #
-            # This is the geometric glyph in action: the vectorized modular
-            # projection of 'a' onto ALL prime circles simultaneously.
-            # The hitting primes are the "resonant vertices" of a's glyph.
+            # Cap candidates: at large bit sizes (99b+), the loose threshold
+            # passes millions of positions but a % all_p costs ~7ms each.
+            # Select the BEST candidates (highest sieve excess over threshold)
+            # which are most likely to be smooth/nearly-smooth.
+            MAX_CANDIDATES = 50000
+            if len(candidates) > MAX_CANDIDATES:
+                excess = sieve_log[candidates] - thresholds[candidates]
+                best_idx = np.argpartition(-excess, MAX_CANDIDATES)[:MAX_CANDIDATES]
+                candidates = candidates[best_idx]
+
             large_prime_bound = all_primes[-1] * lp_multiplier if all_primes else 10**12
 
             for idx in candidates:
@@ -697,6 +705,16 @@ class OctahedralLattice:
 
             sieve_offset += actual_size
 
+            # Heartbeat: print progress every block
+            elapsed = sieve_elapsed + (time.time() - t_sieve_start)
+            trail_rels = len(trail['relations']) if trail else 0
+            new_rels = len(relations) - trail_rels
+            rate = new_rels / max(1, time.time() - t_sieve_start)
+            print(f'  [heartbeat] {len(relations):,}/{max_relations:,} rels '
+                  f'| cands={len(candidates):,} | dir=[{dir_offsets[0]:,},{dir_offsets[1]:,}] '
+                  f'| {elapsed:.0f}s | {rate:.1f} rel/s',
+                  flush=True)
+
             # ── SCENT TRAIL: Periodic checkpoint ──
             if len(relations) - last_checkpoint >= checkpoint_interval:
                 elapsed = sieve_elapsed + (time.time() - t_sieve_start)
@@ -709,9 +727,12 @@ class OctahedralLattice:
             if sieve_offset > sieve_size * 20:
                 break
 
-        # Final checkpoint on completion
+        # Final checkpoint — keep trail until factorization fully succeeds
+        # (caller clears after sovereign_sqrt finds a factor).
         if len(relations) >= max_relations:
-            ScentTrail.clear(self.N)  # Success — remove trail
+            elapsed = sieve_elapsed + (time.time() - t_sieve_start)
+            ScentTrail.drop(self.N, self.factor_base, relations,
+                            [dir_offsets[0], dir_offsets[1]], sieve_offset, elapsed)
         elif len(relations) > 0 and len(relations) > last_checkpoint:
             # Partial progress — save for resume
             elapsed = sieve_elapsed + (time.time() - t_sieve_start)
