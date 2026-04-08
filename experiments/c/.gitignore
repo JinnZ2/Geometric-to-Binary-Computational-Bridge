@@ -1,0 +1,6 @@
+# Build artifacts
+*.so
+*.dylib
+*.a
+*.o
+test_nfs
