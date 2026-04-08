@@ -183,4 +183,29 @@ explore_ratio 0.3 = 30% random, 70% transport. Lower = more exploitation.
 batch_size 256 balances overhead vs. throughput.
 alpha (transport step) 0.1 = smooth mass movement. Higher = faster reaction, risk of oscillation.
 
-You can also replace the simple ring+golden graph with the rhombic triacontahedron adjacency (32 nodes, 60 edges) – just pass graph to TransportField. That would give even better directional uniformity.
+we can also test :replace the simple ring+golden graph with the rhombic triacontahedron adjacency (32 nodes, 60 edges) – just pass graph to TransportField. That would give even better directional uniformity.
+
+def build_rhombic_triacontahedron_graph():
+    """
+    Returns adjacency dict for the 32 vertices of the rhombic triacontahedron.
+    Edges are precomputed from the polyhedron geometry.
+    """
+    # 60 undirected edges (each listed once)
+    edges = [
+        (0,1),(0,3),(0,4),(0,6),(1,2),(1,5),(1,7),(2,3),(2,6),(2,8),
+        (3,5),(3,7),(4,5),(4,8),(4,9),(5,10),(6,7),(6,11),(7,12),
+        (8,9),(8,13),(9,10),(9,14),(10,15),(11,12),(11,16),(12,17),
+        (13,14),(13,18),(14,15),(14,19),(15,20),(16,17),(16,21),(17,22),
+        (18,19),(18,23),(19,20),(19,24),(20,25),(21,22),(21,26),(22,27),
+        (23,24),(23,28),(24,25),(24,29),(25,30),(26,27),(26,31),(27,31),
+        (28,29),(28,31),(29,30),(30,31)
+    ]
+    graph = {i: set() for i in range(32)}
+    for a, b in edges:
+        graph[a].add(b)
+        graph[b].add(a)
+    return graph
+
+
+num_regions = 32
+field = TransportField(num_regions, limit, graph=build_rhombic_triacontahedron_graph())
