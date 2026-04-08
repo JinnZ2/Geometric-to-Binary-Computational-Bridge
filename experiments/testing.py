@@ -209,3 +209,21 @@ def build_rhombic_triacontahedron_graph():
 
 num_regions = 32
 field = TransportField(num_regions, limit, graph=build_rhombic_triacontahedron_graph())
+
+
+maybe:
+
+def transport_sieve(lattice, max_relations, time_limit_sec,
+                    num_regions=64, bootstrap_batches=50,
+                    explore_ratio=0.3, batch_size=256,
+                    use_rhombic_graph=False):
+    if use_rhombic_graph:
+        num_regions = 32
+        graph = build_rhombic_triacontahedron_graph()
+    else:
+        graph = None
+
+    field = TransportField(num_regions, limit, graph=graph)
+    # ... rest of the function unchanged
+
+
