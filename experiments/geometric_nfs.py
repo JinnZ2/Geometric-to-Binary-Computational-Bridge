@@ -456,6 +456,10 @@ class OctahedralLattice:
         dir_offsets = [0, 0]   # Track offset per direction
         dir_idx = 0            # Alternate between directions
 
+        # Restore dir_offsets from trail so we don't re-sieve covered ranges
+        if trail and 'dir_offsets' in trail:
+            dir_offsets = list(trail['dir_offsets'])
+
         while len(relations) < max_relations:
             actual_size = min(sieve_size, 2000000)
             direction = directions[dir_idx % len(directions)]
