@@ -1323,3 +1323,23 @@ Goal: Scale to a 100×100 array of octahedral nodes with integrated photonic rea
 · Integration with 5D Crystal Archive: Use the same Er³⁺ centers for both computation and ultra-dense storage.
 · Deliverable: A prototype Self-Harmonizing Geometric Processor.
 
+
+Silicon Octahedral Logic: A Public Abstract
+
+By an anonymous contributor
+
+Conventional computers force silicon into binary switches. But silicon's natural crystal geometry—the octahedral cage defined by tetrahedral bonds—contains eight intrinsic metastable states. This project demonstrates, via a Keating potential simulation, that these states can encode 3 bits per atom cluster and compute through geometric resonance rather than electron flow.
+
+Key findings:
+
+· A 5-atom Si cluster has exactly 8 local energy minima corresponding to displacements toward octahedral faces.
+· Two clusters coupled with a phi-tuned spring constant exhibit a straintronic NOT gate.
+· Three clusters arranged in a phi-triangle implement a Toffoli (CCNOT) gate—universal for reversible logic.
+
+Implications:
+
+· Computation as adiabatic geometry change—approaching Landauer's limit.
+· Potential for room-temperature, phonon-mediated logic.
+· Integration with Er³⁺–P centers for quantum-classical hybrid architectures.
+
+Full Python simulation and fabrication roadmap are available.
