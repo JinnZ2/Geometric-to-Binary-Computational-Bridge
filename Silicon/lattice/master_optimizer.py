@@ -24,18 +24,23 @@ from dataclasses import dataclass, asdict
 from typing import Dict, Tuple, List
 import time
 
-from er_dft_framework import (
+from Silicon.lattice.er_dft_framework import (
 DFTConfig, ErDFTAnalyzer, FormationEnergyResult,
 generate_strain_scan_inputs
 )
-from codoping_framework import (
+from Silicon.lattice.codoping_framework import (
 CoDopingConfig, ErPCoDopingAnalyzer, CoDopingResult,
 generate_codoping_scan_inputs
 )
-from qutip_coherence_framework import (
-QuantumSystemConfig, ErQuantumSimulator,
-QUTIP_AVAILABLE
-)
+# qutip_coherence_framework moved to experiments/silicon_speculative/
+try:
+    from experiments.silicon_speculative.qutip_coherence_framework import (
+        QuantumSystemConfig, ErQuantumSimulator, QUTIP_AVAILABLE
+    )
+except ImportError:
+    QUTIP_AVAILABLE = False
+    QuantumSystemConfig = None
+    ErQuantumSimulator = None
 
 # Constants
 

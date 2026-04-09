@@ -42,7 +42,11 @@ import numpy as np
 import sys, os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
-from Silicon.vortex_phase_learning import winding_number_field
+# vortex_phase_learning moved to experiments/silicon_speculative/
+try:
+    from experiments.silicon_speculative.vortex_phase_learning import winding_number_field
+except ImportError:
+    winding_number_field = None
 
 # ============================================================
 # Section 1: T_KT derivation

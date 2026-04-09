@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- fault injection and hierarchical diagnosis
 """
 triage_diagnostics.py – Simulated fault injection and hierarchical diagnosis.
 """

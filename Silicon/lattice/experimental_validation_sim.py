@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- SPM/PL/ODMR simulator with realistic noise
 """
 Experimental Validation Simulator for Octahedral 8-State Encoding
 Simulates SPM force curves, PL spectra, and ODMR for a single Er:P center in strained Si.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- main CLI for FRET stack
 """
 fret-stack – CLI for the FRET Engineering Stack simulations.
 
@@ -19,6 +20,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import os
+
+# Import CLI extensions
+from extended_cli import register_extended_subcommands
+from frontier_cli import register_frontier_subcommands
+from handler_functions import cmd_acoustic, cmd_thermal
 
 # Import simulation modules
 from fret_core import R0, k_FRET, E_FRET
@@ -459,7 +465,13 @@ def main():
     # ----- all -----
     all_parser = subparsers.add_parser('all', help='Run all simulations and generate summary report')
     all_parser.add_argument('--outdir', '-d', default='fret_sim_output', help='Output directory [fret_sim_output]')
-    
+
+    # ----- extended subcommands (acoustic, thermal, entropy) -----
+    register_extended_subcommands(subparsers)
+
+    # ----- frontier subcommands (time, vacuum, thermo, axion, radical, qet, unified) -----
+    register_frontier_subcommands(subparsers)
+
     args = parser.parse_args()
     
     # Dispatch to appropriate handler
@@ -475,8 +487,92 @@ def main():
         cmd_triage(args)
     elif args.command == 'all':
         cmd_all(args)
+    elif args.command == 'acoustic':
+        cmd_acoustic(args)
+    elif args.command == 'thermal':
+        cmd_thermal(args)
+    elif args.command == 'entropy':
+        cmd_entropy(args)
+    elif args.command == 'frontier':
+        cmd_frontier(args)
     else:
         parser.print_help()
+
+
+def cmd_entropy(args):
+    """Run entropic linker distance distribution simulation."""
+    from entropy_fret import EntropicLinker
+    linker = EntropicLinker(L_contour=args.L_contour, L_p=args.L_p)
+    r_vals = np.linspace(0.5, args.L_contour * 0.8, 200)
+    p_vals = np.array([linker.distance_pdf(r) for r in r_vals])
+    E_vals = np.array([E_FRET(r, args.R0) for r in r_vals])
+    E_avg = np.trapz(p_vals * E_vals, r_vals) / np.trapz(p_vals, r_vals)
+    print(f"Linker: L_contour={args.L_contour} nm, L_p={args.L_p} nm")
+    print(f"R0={args.R0} nm")
+    print(f"<E_FRET> (distance-averaged) = {E_avg:.4f}")
+    results = {'L_contour': args.L_contour, 'L_p': args.L_p,
+               'R0': args.R0, 'E_avg': float(E_avg)}
+    if args.output:
+        import json
+        with open(args.output, 'w') as f:
+            json.dump(results, f, indent=2)
+    if args.plot:
+        import matplotlib.pyplot as plt
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+        ax1.plot(r_vals, p_vals)
+        ax1.set_xlabel('Distance (nm)')
+        ax1.set_ylabel('P(r)')
+        ax1.set_title('Linker Distance Distribution')
+        ax2.plot(r_vals, E_vals)
+        ax2.set_xlabel('Distance (nm)')
+        ax2.set_ylabel('E_FRET')
+        ax2.set_title(f'FRET Efficiency (R0={args.R0} nm), <E>={E_avg:.4f}')
+        plt.tight_layout()
+        plt.savefig(args.plot)
+
+
+def cmd_frontier(args):
+    """Run frontier physics arena simulation."""
+    arena = args.arena
+    if arena == 'time':
+        from temporal_fret import PhotonicTimeCrystal
+        ptc = PhotonicTimeCrystal(n0=args.n0, delta_n=args.delta_n,
+                                   modulation_freq=args.freq * 1e6)
+        print(f"Photonic Time Crystal: n0={args.n0}, dn={args.delta_n}, f={args.freq} MHz")
+        print(f"  Floquet gap: {ptc.floquet_gap():.6f} eV")
+    elif arena == 'vacuum':
+        from vacuum_fret import casimir_force, casimir_delta_r
+        F = casimir_force(args.d_plate * 1e-9, args.area * 1e-18)
+        dr = casimir_delta_r(args.d_plate * 1e-9, args.area * 1e-18)
+        print(f"Casimir cavity: d={args.d_plate} nm, A={args.area} nm^2")
+        print(f"  Force: {F:.4e} N")
+        print(f"  Distance shift: {dr:.4e} m")
+    elif arena == 'thermo':
+        from quantum_thermo import QuantumBattery
+        qb = QuantumBattery(energy=args.energy, temperature=args.temp)
+        print(f"Quantum Battery: E={args.energy} eV, T={args.temp} K")
+        print(f"  Ergotropy: {qb.ergotropy():.4f} eV")
+    elif arena == 'axion':
+        from axion_fret import axion_photon_rate
+        rate = axion_photon_rate(args.B_field, args.axion_mass)
+        print(f"Axion-photon: B={args.B_field} T, m_a={args.axion_mass} eV")
+        print(f"  Conversion rate: {rate:.4e} Hz")
+    elif arena == 'radical':
+        from radical_pair import RadicalPair
+        rp = RadicalPair(B_field=args.B_strength * 1e-3)
+        print(f"Radical pair: B={args.B_strength} mT")
+        print(f"  Singlet yield: {rp.singlet_yield():.4f}")
+    elif arena == 'qet':
+        from qet import QETProtocol
+        qet = QETProtocol(chain_length=args.chain_len)
+        E = qet.teleported_energy(args.distance)
+        print(f"QET: chain={args.chain_len}, distance={args.distance}")
+        print(f"  Teleported energy: {E:.6f}")
+    elif arena == 'unified':
+        print("Unified arena: see experiments/silicon_speculative/FRET/grand_unified.py")
+    else:
+        print(f"Unknown arena: {arena}")
+
 
 if __name__ == "__main__":
     main()

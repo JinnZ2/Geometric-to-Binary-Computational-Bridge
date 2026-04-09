@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- exciton-polariton strong coupling energy transfer
 """
 polariton_fret.py – Exciton-polariton mediated energy transfer.
 """

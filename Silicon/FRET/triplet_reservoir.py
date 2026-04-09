@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- kinetic triplet state model with rISC
 """
 triplet_reservoir.py – Kinetic model including triplet states and rISC.
 Computes effective FRET efficiency boost.

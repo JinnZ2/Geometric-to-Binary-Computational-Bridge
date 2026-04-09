@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- DBR reflectance and radiative rate modification
 """
 photonic_branching.py – Transfer matrix calculation for 1D photonic crystal.
 Determines radiative rate modification factor F.

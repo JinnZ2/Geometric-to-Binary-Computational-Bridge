@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- distance distribution under potential, orientation averaging
 """
 geometry_lock.py – Modeling distance distribution and orientation factor under a potential.
 """

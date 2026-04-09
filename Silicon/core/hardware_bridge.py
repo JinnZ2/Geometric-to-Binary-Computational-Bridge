@@ -452,7 +452,7 @@ if __name__ == "__main__":
 
     # --- GAP 2 demo: physical magnetic energy ---
     print("\n--- GAP 2: Physical magnetic energy ---")
-    from Silicon.octahedral_sim import STATES
+    from Silicon.core.octahedral_sim import STATES
     B_probe = np.array([0.0, 0.0, 1.0])  # 1T along z
 
     print(f"  {'State':>5} {'Gray':>4} {'Eigenvalues':>15} {'E_mag (μeV)':>12}")

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- meta-selector routing to geometric solvers
 """
 Geometric Computation Selector
 ==============================

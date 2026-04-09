@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- Zeeman spectral shift and Landevin magnetic alignment
 """
 magneto_fret.py – Magnetic field control of FRET.
 - Zeeman spectral shift

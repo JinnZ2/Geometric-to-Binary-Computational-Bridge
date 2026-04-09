@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- variance budget for lifetime drift acceptance
 """
 lifetime_analysis.py – Compute τ_acceptable from variance budget equation.
 """

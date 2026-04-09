@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- self-organizing probability field on rhombic triacontahedron
 """
 Transport Sieve on Rhombic Triacontahedron Graph
 =================================================

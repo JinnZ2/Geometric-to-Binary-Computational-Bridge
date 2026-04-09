@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- quantum battery ergotropy and thermal rectification
 """
 quantum_thermo.py – Maximum work extraction and thermal rectification.
 """

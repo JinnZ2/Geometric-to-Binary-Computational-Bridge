@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- 2D lattice with coupled bridges and energy minimization
 """
 Multi-Bridge Neural Lattice
 2D array of octahedral nodes coupled via strain, spin, and optical bridges.

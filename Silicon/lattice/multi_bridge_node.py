@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- octahedral node with strain-spin cross-talk
 """
 Tensor-Constrained Octahedral Encoder (JSON Specification)
 Implements the formal 8-state encoding with eigenvalue constraints.

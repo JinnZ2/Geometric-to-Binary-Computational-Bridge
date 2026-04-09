@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- NSET, plasmon relay, BIC-enhanced long-range FRET
 """
 extended_range.py – Extend FRET beyond the classical 10‑nm limit.
 Implements:

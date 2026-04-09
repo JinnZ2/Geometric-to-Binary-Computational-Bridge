@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- linear vs golden-ratio candidate ordering benchmark
 """
 Benchmark: Linear vs Golden‑ratio candidate ordering for NFS relation collection.
 Uses an existing OctahedralLattice and tests both orders for a fixed time.

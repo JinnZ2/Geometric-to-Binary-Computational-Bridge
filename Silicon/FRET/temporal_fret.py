@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- photonic time crystals with periodic refractive index
 """
 temporal_fret.py – Time as a control axis: Photonic Time Crystals (PTC).
 Modulates radiative rate k_rad(t) or FRET rate k_FRET(t) periodically.

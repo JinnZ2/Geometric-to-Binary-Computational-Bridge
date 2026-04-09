@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- handler functions for acoustic simulation
 def cmd_acoustic(args):
     """Run acoustic modulation simulation."""
     import matplotlib.pyplot as plt

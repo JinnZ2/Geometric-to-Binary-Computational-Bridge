@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from dataclasses import dataclass
 from typing import List, Tuple, Optional
 import json
-from er_dft_framework import DFTConfig, ErDFTAnalyzer
+from Silicon.lattice.er_dft_framework import DFTConfig, ErDFTAnalyzer
 
 # Physical constants
 

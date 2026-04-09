@@ -1,3 +1,4 @@
+# STATUS: speculative -- electron/nuclear spin coupling demo in octahedral geometry
 """
 Multi-Bridge Octahedral Node: Strain + Spin Coupling
 Adds electron spin (Er³⁺) and nuclear spin (³¹P) to the octahedral strain model.
