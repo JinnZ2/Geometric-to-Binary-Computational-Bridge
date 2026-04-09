@@ -248,6 +248,35 @@ This function can be fitted to experimental data or full-wave simulations to ext
 
 
 
+## Extreme Environments: Gravity & Plasma
+
+The deterministic FRET framework extends beyond laboratory conditions into regimes where fundamental physics becomes an engineering tool.
+
+### Gravitational Control
+
+Three mechanisms couple gravity to FRET:
+
+| Effect | Equation | Control Lever |
+|:---|:---|:---|
+| Redshift | $\Delta\lambda/\lambda \approx \Delta\Phi/c^2$ | $J$ tuning |
+| Time dilation | $\gamma = \sqrt{1+2\Phi/c^2}$ | Rate scaling |
+| Tidal strain | $\epsilon \sim (GM/R^3) L_0 / k$ | $r$ modulation |
+
+For Earth-bound experiments, effects are minuscule ($\sim 10^{-9}$). However, near compact objects (neutron stars, black holes), FRET becomes a probe of strong-field gravity. Conversely, if we could engineer artificial potentials (via acceleration or rotation), gravitational analogs become accessible.
+
+### Plasma as a Tunable Dielectric
+
+An ionized gas provides a frequency-dependent refractive index $n(\omega) = \sqrt{1 - \omega_p^2/\omega^2}$, altering both $R_0$ and the LDOS. Additionally:
+
+- **Debye screening** introduces an exponential cutoff $e^{-r/\lambda_D}$ to the dipole coupling.
+- **Collisional decoherence** suppresses quantum yield.
+
+A cold, dense plasma could serve as an active medium for spectral tuning, while a hot plasma represents an extreme test of molecular stability.
+
+These modules lay the groundwork for exploring FRET in astrophysical contexts or in laboratory plasma devices.
+
+
+
 1. Photon Management: Recycling and Trapping
 The goal is to increase the System Quantum Yield (\bm{\mathbf{\Phi_{\text{sys}}}}) by ensuring every incident photon and every emitted photon is utilized by the FRET hubs. This counters the inherent \bm{\mathbf{f_{\text{rad}} \leq 0.03}} (radiative loss) that still exists.
 A. The Luminescent Solar Concentrator (LSC) Architecture
