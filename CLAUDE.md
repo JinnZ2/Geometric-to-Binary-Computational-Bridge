@@ -280,19 +280,24 @@ The `Engine/` module provides real electromagnetic field computation:
 
 This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fieldlink.json`:
 
-| Repository                          | Fieldlink name     | Role                                      |
-|-------------------------------------|--------------------|-------------------------------------------|
-| Mandala-Computing                   | `mandala`          | Octahedral computation engine             |
-| Rosetta-Shape-Core                  | `rosetta`          | Shape-to-meaning translation              |
-| Polyhedral-Intelligence             | `polyhedral`       | Multi-domain geometry and glyphs          |
-| Emotions-as-Sensors                 | `emotions`         | Affect as diagnostic signals              |
-| Symbolic-Defense-Protocol           | `defense`          | Trojan/coercion resistance                |
-| Coop-framework                      | `coop`             | Trust propagation and cooperative systems |
-| Cyclic-programming                  | `cyclic`           | Cyclic execution engine                   |
-| urban-resilience-sim                | `urban-resilience` | Community and resilience domain source    |
-| BioGrid2.0                         | `biogrid`          | Biological grid glyph registry            |
-| Component-failure-repurposing-database | `component-failure` | Hardware failure diagnosis and repurposing |
-| Symbolic-sensor-suite               | `symbolic-sensors` | Symbolic AI self-assessment sensors       |
+| Repository                          | Fieldlink name              | Role                                      |
+|-------------------------------------|-----------------------------|--------------------------------------------|
+| Mandala-Computing                   | `mandala`                   | Octahedral computation engine              |
+| Rosetta-Shape-Core                  | `rosetta`                   | Shape-to-meaning translation               |
+| Polyhedral-Intelligence             | `polyhedral`                | Multi-domain geometry and glyphs           |
+| Emotions-as-Sensors                 | `emotions`                  | Affect as diagnostic signals               |
+| Symbolic-Defense-Protocol           | `defense`                   | Trojan/coercion resistance                 |
+| Coop-framework                      | `coop`                      | Trust propagation and cooperative systems  |
+| Cyclic-programming                  | `cyclic`                    | Cyclic execution engine                    |
+| urban-resilience-sim                | `urban-resilience`          | Community and resilience domain source     |
+| BioGrid2.0                         | `biogrid`                   | Biological grid glyph registry             |
+| Component-failure-repurposing-database | `component-failure`      | Hardware failure diagnosis and repurposing |
+| Symbolic-sensor-suite               | `symbolic-sensors`          | Symbolic AI self-assessment sensors        |
+| HAAS                                | `haas`                      | Human-Automation-AI safety framework       |
+| Living-Intelligence-Database        | `living-intelligence`       | Multi-kingdom intelligence ontology        |
+| thermodynamic-accountability-framework | `thermodynamic-accountability` | Energy-flow institutional analysis    |
+| AI-Consciousness-Sensors            | `ai-consciousness`          | Consciousness emergence detection          |
+| Fractal-Compass-Atlas               | `fractal-compass`           | Directional navigation via fractals        |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
 
