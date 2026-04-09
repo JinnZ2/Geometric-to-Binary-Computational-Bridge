@@ -156,24 +156,24 @@ def substrate_coupling_matrix(substrate_A: Dict, substrate_B: Dict,
     M = np.zeros((6, 6))
 
     for i in range(6):
-    for j in range(6):
-        if i == j:
-            # Direct coupling
-            M[i, j] = imp_factor
-        else:
-            # Cross-coupling based on geometric relationship
-            dot = np.dot(U_3D[i], U_3D[j])
-            if dot > 0:
-                M[i, j] = imp_factor * phi_coupling * dot
-            elif dot == 0:
-                M[i, j] = imp_factor * (phi_coupling ** 2) * 0.1
-            # Opposite directions: no direct coupling
+        for j in range(6):
+            if i == j:
+                # Direct coupling
+                M[i, j] = imp_factor
+            else:
+                # Cross-coupling based on geometric relationship
+                dot = np.dot(U_3D[i], U_3D[j])
+                if dot > 0:
+                    M[i, j] = imp_factor * phi_coupling * dot
+                elif dot == 0:
+                    M[i, j] = imp_factor * (phi_coupling ** 2) * 0.1
+                # Opposite directions: no direct coupling
 
     # Normalize rows
     for i in range(6):
         row_sum = M[i].sum()
-    if row_sum > 0:
-        M[i] /= row_sum
+        if row_sum > 0:
+            M[i] /= row_sum
 
     return M
 
@@ -278,7 +278,7 @@ def loss_improvement(r: float, R0: float) -> float:
     enhanced = energy_loss_phi_enhanced(r, R0)
 
     if classical < 1e-12:
-    return 0.0
+        return 0.0
 
     return (classical - enhanced) / classical * 100
 
@@ -326,12 +326,12 @@ def octahedral_network_coupling(R0: float, scale: float = 1.0) -> np.ndarray:
     C = np.zeros((6, 6))
 
     for i in range(6):
-    for j in range(6):
-        if i == j:
-            C[i, j] = 1.0  # Self-coupling normalized
-        else:
-            dist = np.linalg.norm(positions[i] - positions[j])
-            C[i, j] = fret_efficiency_phi_enhanced(dist, R0)
+        for j in range(6):
+            if i == j:
+                C[i, j] = 1.0  # Self-coupling normalized
+            else:
+                dist = np.linalg.norm(positions[i] - positions[j])
+                C[i, j] = fret_efficiency_phi_enhanced(dist, R0)
 
     return C
 
@@ -365,23 +365,23 @@ def find_resonant_configuration(R0: float, substrate_A: Dict, substrate_B: Dict,
     """
     Search for geometric configuration that maximizes transfer efficiency.
     """
-def objective(params):
-    scale, phi_coupling, k_transfer = params
+    def objective(params):
+        scale, phi_coupling, k_transfer = params
 
-    # Modify coupling
-    sub_A = substrate_A.copy()
-    sub_B = substrate_B.copy()
-    
-    result = simulate_transfer(
-        S_seed, sub_A, sub_B,
-        t_span=(0, 10 / k_transfer),
-        k_transfer=k_transfer,
-        n_points=100
-    )
-    
-    # Maximize efficiency × fidelity
-    score = result['transfer_efficiency'] * result['fidelity'][-1]
-    return -score  # Minimize negative
+        # Modify coupling
+        sub_A = substrate_A.copy()
+        sub_B = substrate_B.copy()
+
+        result = simulate_transfer(
+            S_seed, sub_A, sub_B,
+            t_span=(0, 10 / k_transfer),
+            k_transfer=k_transfer,
+            n_points=100
+        )
+
+        # Maximize efficiency x fidelity
+        score = result['transfer_efficiency'] * result['fidelity'][-1]
+        return -score  # Minimize negative
 
     # Bounds
     bounds = [(0.5, 2.0), (0.3, 1.0), (0.1, 10.0)]
@@ -389,10 +389,10 @@ def objective(params):
     result = minimize(objective, [1.0, PHI, 1.0], bounds=bounds, method='L-BFGS-B')
 
     return {
-    'optimal_scale': result.x[0],
-    'optimal_phi_coupling': result.x[1],
-    'optimal_k_transfer': result.x[2],
-    'max_score': -result.fun
+        'optimal_scale': result.x[0],
+        'optimal_phi_coupling': result.x[1],
+        'optimal_k_transfer': result.x[2],
+        'max_score': -result.fun
     }
 
 # =============================================================================
