@@ -346,7 +346,88 @@ Triage order: Geometry → Rate budget → Servo → Reservoir
 
 For scalable self-assembled systems with defect tolerance, see the **Soliton Antenna** framework.
 
------
+
+Theorem 1: Phononic Cage Suppression of κ² Variance
+
+Statement: For a donor–acceptor pair embedded in a crystalline lattice with a phonon bandgap at the rotational frequencies of the dyes, the root‑mean‑square fluctuation of the orientation factor satisfies
+
+\frac{\sigma_{\kappa^2}}{\langle \kappa^2 \rangle} \le \frac{\hbar}{k_B T_{\text{eff}}}
+
+where T_{\text{eff}} is the effective temperature of the rotational bath, determined by the phonon density of states inside the gap.
+
+Derivation sketch:
+
+· Model dye as rigid rotor in a harmonic angular potential created by the lattice.
+· Rotational correlation time \tau_{\text{rot}} is proportional to \exp(E_{\text{barrier}}/k_B T) for a free rotor, but inside a phononic bandgap the spectral density of bath modes at the librational frequency is suppressed by an exponential factor.
+· Use fluctuation–dissipation theorem to relate angular variance to the integrated bath spectrum.
+· Result: \langle \delta \theta^2 \rangle is reduced, hence \langle \kappa^2 \rangle approaches its maximum value (4 for parallel dipoles) and variance shrinks.
+
+Simulation hook: Use a Langevin equation for the dye orientation with a colored‑noise torque derived from a Debye‑type phonon density of states with a gap.
+
+---
+
+Theorem 2: Optimal Stark Shift for Servo Bandwidth
+
+Statement: Given a spectral overlap integral J(\lambda) that depends on donor emission f_D(\lambda) and acceptor absorption \epsilon_A(\lambda), a small Stark shift \Delta \lambda yields a fractional change in J given by
+
+\frac{\delta J}{J} = \frac{\Delta \lambda}{\lambda_0} \cdot S(\lambda_0)
+
+where S(\lambda_0) is the logarithmic derivative of J at the set‑point. The maximum achievable correction bandwidth is
+
+\Delta J_{\text{max}} = J \cdot \frac{\Delta \mu \cdot E_{\text{max}}}{k_B T} \cdot S
+
+Derivation:
+
+· Expand J = \int f_D(\lambda)\epsilon_A(\lambda)\, d\lambda under a rigid shift of both spectra (assume both donor and acceptor experience similar linear Stark effect).
+· The shift magnitude is \Delta \lambda = \frac{\Delta \mu \cdot E}{hc} (ignoring polarizability term for simplicity).
+· The first‑order fractional change is \frac{\delta J}{J} = \frac{\Delta \lambda}{J} \int f_D'(\lambda)\epsilon_A(\lambda) + f_D(\lambda)\epsilon_A'(\lambda) \, d\lambda. Integrating by parts yields the S factor.
+
+Simulation hook: Compute J numerically for realistic dye spectra (e.g., from a database of fluorophore spectra) and determine S(\lambda_0) to inform the proportional gain K_P.
+
+---
+
+Theorem 3: Branching Ratio Improvement in a 1D Photonic Crystal
+
+Statement: For a donor placed at the center of a dielectric defect layer within a DBR stack, the radiative decay rate modification factor F = k_{\text{rad}}' / k_{\text{rad}} is given by
+
+F = 1 - \frac{\xi}{Q} \cdot \frac{\lambda_D / 2n}{d_{\text{defect}}}
+
+where \xi is the overlap of the donor dipole with the cavity mode, Q is the cavity quality factor, and the fraction accounts for spatial confinement of the mode.
+
+Derivation:
+
+· Use Fermi's golden rule with the photonic local density of states (LDOS) modified by the cavity.
+· For a weak cavity (mirror reflectivity R), the on‑resonance LDOS is enhanced by the Purcell factor F_p = \frac{3}{4\pi^2} \frac{Q}{V_{\text{eff}}} times orientation factor.
+· However, for suppression, tune the donor emission to the stop‑band edge, where LDOS is reduced. A simple 1D transfer matrix model yields an expression for F that can be approximated as above.
+
+Simulation hook: Use tmm (transfer matrix method) in Python to compute the exact LDOS for a given DBR stack and dipole position, outputting F as a function of wavelength and angle.
+
+---
+
+2. Master Equation for Simulations
+
+A unified rate‑equation model that captures all four architectures is:
+
+\begin{aligned}
+\frac{d[S_1]}{dt} &= I_{\text{exc}}(t) - (k_F + k_R + k_{nr,S} + k_{\text{ISC}})[S_1] + k_{\text{rISC}}[T_1] \\
+\frac{d[T_1]}{dt} &= k_{\text{ISC}}[S_1] - (k_{\text{rISC}} + k_{nr,T} + k_P)[T_1] \\
+\frac{d[A]}{dt} &= k_F [S_1] - k_{\text{decay}}[A] \quad (\text{acceptor excited state})
+\end{aligned}
+
+where
+
+· k_F = k_{\text{FRET}} = \frac{1}{\tau_D} \left(\frac{R_0}{r}\right)^6 with R_0 dependent on \kappa^2, \Phi_D, J, n.
+· k_R = F \cdot k_{R,0} with F from photonic environment.
+· k_{\text{ISC}}, k_{\text{rISC}} are triplet‑related.
+· All rates can be time‑dependent if we implement the spectral servo (varying J) or geometry drift.
+
+Observables:
+
+· FRET efficiency: E = \frac{k_F}{k_F + k_R + k_{nr,S} + k_{\text{ISC}}(1 - \Phi_{\text{T}})} where \Phi_{\text{T}} = \frac{k_{\text{rISC}}}{k_{\text{rISC}}+k_{nr,T}+k_P}.
+· Donor lifetime: \tau_{DA} = \frac{1}{k_F + k_R + k_{nr,S} + k_{\text{ISC}}(1-\Phi_{\text{T}})}.
+
+
+
 
 *Originated by JinnZ2 and co-created with AI systems.*
 *License: MIT (code), CC BY-SA 4.0 (text)*
