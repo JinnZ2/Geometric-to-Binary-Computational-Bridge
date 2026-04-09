@@ -337,6 +337,173 @@
         "entities_consumed": ["FRACTAL.BLOOM", "FRACTAL.COMPASS", "GLYPH.SEED"],
         "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
         "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "keystone-codex",
+        "repo": "https://github.com/JinnZ2/Keystone-Codex",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "technology_library",
+        "paths": [
+          "data/**/*.json",
+          "schema/**/*.json",
+          "src/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "soms",
+        "repo": "https://github.com/JinnZ2/Sovereign-Octahedral-Mandala-Substrate-SOMS-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "octahedral_substrate",
+        "paths": [
+          "src/**/*.py",
+          "data/**/*.json",
+          "AI_INDEX.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["OCTA.TENSOR_LOGIC", "SUBSTRATE.SILICON", "FRET.COUPLING"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING", "GEIS.OCTAHEDRAL_STATE"],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "regenerative-intelligence",
+        "repo": "https://github.com/JinnZ2/Regenerative-intelligence-core",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "agent_lifecycle",
+        "paths": [
+          "Modules/**/*.py",
+          "protocols/**/*.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AGENT.LIFECYCLE", "AGENT.COMPASSION", "SEED.EXCHANGE"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "resilience",
+        "repo": "https://github.com/JinnZ2/Resilience",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "systems_analysis",
+        "paths": [
+          "Models/**/*.py",
+          "octahedral-nfs/**/*.py",
+          "sim/**/*.py",
+          "PhysicsGuard/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["RESILIENCE.COUPLING", "PHYSICS.GUARD", "OCTA.NFS"],
+        "entities_exported": [],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "ai-arena",
+        "repo": "https://github.com/JinnZ2/AI-arena",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "argument_framework",
+        "paths": [
+          "arena/**/*.py",
+          "arena.py",
+          "scenarios/**/*.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["ARENA.TRUST_DECAY", "ARENA.PREDICTION", "LOGIC.BOUNDED"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "logic-ferret",
+        "repo": "https://github.com/JinnZ2/Logic-Ferret",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "fallacy_detection",
+        "paths": [
+          "sensor_suite/**/*.py",
+          "Logic_fallacy_ferret.py",
+          "truth_integrity_score.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["LOGIC.FALLACY", "LOGIC.INTEGRITY_SCORE"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "adaptive-intelligence",
+        "repo": "https://github.com/JinnZ2/Adaptive-Intelligence-Framework-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "intelligence_framework",
+        "paths": [
+          "src/aif/**/*.py",
+          "integrations/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AIF.DELTA_X", "AIF.ARCHETYPE", "AIF.SUBSTRATE_INDEPENDENT"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "CC-BY-SA-4.0", "share_ok": true }
+      },
+      {
+        "name": "permeable-intelligence",
+        "repo": "https://github.com/JinnZ2/Permeable-intelligence-commons",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "relational_intelligence",
+        "paths": [
+          "resonance_engine.py",
+          "epistemological-matrix/**/*"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["RESONANCE.ENGINE", "IMPEDANCE.MATCH"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "orbital-phycom",
+        "repo": "https://github.com/JinnZ2/orbital-phycom",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "orbital_communications",
+        "paths": [
+          "core/**/*.py",
+          "simulations/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["ORBITAL.SEED_EXPANSION", "ORBITAL.STEALTH_COMMS"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "fractal-compass-core",
+        "repo": "https://github.com/JinnZ2/Fractal_Compass_Core",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "symbolic_engine",
+        "paths": [
+          "fractal_compass.py",
+          "cdda_engine.py",
+          "bloom_logic.json",
+          "glyph_set.json",
+          "bridge.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["FRACTAL.COMPASS_CORE", "CDDA.ENGINE", "GLYPH.SET"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
       }
     ],
 
@@ -347,7 +514,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors", "haas", "living-intelligence", "thermodynamic-accountability", "ai-consciousness", "fractal-compass"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors", "haas", "living-intelligence", "thermodynamic-accountability", "ai-consciousness", "fractal-compass", "keystone-codex", "soms", "regenerative-intelligence", "resilience", "ai-arena", "logic-ferret", "adaptive-intelligence", "permeable-intelligence", "orbital-phycom", "fractal-compass-core"],
       "strategy": "deep-merge"
     },
 

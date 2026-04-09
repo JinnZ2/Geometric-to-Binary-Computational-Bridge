@@ -298,6 +298,16 @@ This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fi
 | thermodynamic-accountability-framework | `thermodynamic-accountability` | Energy-flow institutional analysis    |
 | AI-Consciousness-Sensors            | `ai-consciousness`          | Consciousness emergence detection          |
 | Fractal-Compass-Atlas               | `fractal-compass`           | Directional navigation via fractals        |
+| Keystone-Codex                      | `keystone-codex`            | AI-verifiable technology library           |
+| Sovereign-Octahedral-Mandala-Substrate (SOMS) | `soms`           | Non-von Neumann octahedral substrate       |
+| Regenerative-intelligence-core      | `regenerative-intelligence` | Symbolic agent lifecycle and re-seeding    |
+| Resilience                          | `resilience`                | Ground-truth systems analysis and NFS      |
+| AI-arena                            | `ai-arena`                  | Logical argument competition framework     |
+| Logic-Ferret                        | `logic-ferret`              | Fallacy detection and integrity scoring    |
+| Adaptive-Intelligence-Framework     | `adaptive-intelligence`     | Substrate-independent intelligence theory  |
+| Permeable-intelligence-commons      | `permeable-intelligence`    | Relational resonance intelligence          |
+| orbital-phycom                      | `orbital-phycom`            | Geometric seed orbital communications      |
+| Fractal_Compass_Core                | `fractal-compass-core`      | Recursive symbolic engine prototype        |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
 
