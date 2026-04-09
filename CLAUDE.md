@@ -39,6 +39,10 @@ python GEIS/demo.py
 # Bridge format conversion
 python scripts/bridge_convert.py
 
+# Build C NFS acceleration library (optional)
+cd experiments/c && make          # builds libgeometric_nfs.so
+cd experiments/c && make test     # builds + runs 36 C tests
+
 # Frontend
 cd "Front end" && npm install && npm run dev
 ```
@@ -48,6 +52,7 @@ cd "Front end" && npm install && npm run dev
 | Layer    | Language          | Key Libraries                                    | Declared In        |
 |----------|-------------------|--------------------------------------------------|--------------------|
 | Backend  | Python            | `numpy`, `scipy`                                 | `requirements.txt` |
+| C Accel  | C11               | `math.h` (no external deps)                     | `experiments/c/Makefile` |
 | Frontend | JavaScript/React  | `react`, `three`, `@react-three/fiber`, `@react-three/drei` | `Front end/package.json` |
 
 ### Testing
@@ -57,6 +62,7 @@ cd "Front end" && npm install && npm run dev
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
 | Bridges | `tests/test_bridges.py` | 231 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
+| C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
 
@@ -131,6 +137,18 @@ Geometric-Intelligence/         Integrity & consciousness research
 ├── Zero-knowledge-proof.md       ZK proofs via geometry
 ├── Multi-helix*.md               Multi-dimensional symmetry patterns
 └── Geometric-seed.py             Seed generation algorithm
+```
+
+### C Acceleration (Optional)
+
+```
+experiments/c/                  C library for NFS hot paths
+├── geometric_nfs_core.h          Public API + inline octahedral helpers
+├── geometric_nfs_core.c          Sieve, trial div, geometric search, GF(2)
+├── Makefile                      Build system (Linux .so / macOS .dylib)
+├── test_nfs.c                    C smoke tests (36 assertions)
+├── gnfs_ctypes.py                Python ctypes wrapper (drop-in accelerator)
+└── README.md                     Build & usage instructions
 ```
 
 ### Supporting
@@ -288,6 +306,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
   Files are `.jsx`; `solver.js` mirrors the Python Engine as a standalone JS implementation.
 - `Silicon/crystalline_nn_sim.py` — phi-spaced octahedral NN, all Storage.md §X predictions verified
 - `Silicon/prototaxites_sim.py` — Prototaxites energy mimetics, all 4 framework predictions verified
+- `experiments/c/` — C acceleration library for geometric NFS hot paths, 36 tests passing. Python ctypes wrapper (`gnfs_ctypes.py`) provides drop-in acceleration when compiled.
 
 ### Remaining Items
 - Frontend not yet tested live in a browser against real user interaction (build passes, dev server untested in this environment).
