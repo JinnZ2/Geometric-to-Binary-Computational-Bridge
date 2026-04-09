@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — seed uniqueness/collision testing
 # It is a standalone research script not imported by any test suite.
 
 #!/usr/bin/env python3

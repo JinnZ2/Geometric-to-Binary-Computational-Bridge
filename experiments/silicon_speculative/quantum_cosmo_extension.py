@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — phi-enhancement at quantum/cosmological scales, untested
 """
 quantum_cosmo_extension.py
 

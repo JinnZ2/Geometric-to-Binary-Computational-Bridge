@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — DFT input generation for Er in strained Si
 # It is a standalone research script not imported by any test suite.
 
 # #!/usr/bin/env python3

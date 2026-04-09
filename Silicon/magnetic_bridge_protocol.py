@@ -1,3 +1,4 @@
+# STATUS: validated — tested by tests/test_silicon_modules.py
 """
 Magnetic Bridge Protocol — executable specification extracted from Magnetic-bridge.md
 

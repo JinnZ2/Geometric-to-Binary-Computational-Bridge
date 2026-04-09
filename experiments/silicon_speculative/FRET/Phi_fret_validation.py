@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: speculative — phi-FRET validation framework, awaiting experimental data
 # It is a standalone research script not imported by any test suite.
 
 #!/usr/bin/env python3

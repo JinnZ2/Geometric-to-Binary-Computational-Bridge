@@ -1,3 +1,4 @@
+# STATUS: infrastructure — thermal-information coupling module
 """
 Thermal-Information Coupling in Octahedral Silicon -- computational module.
 

@@ -22,6 +22,8 @@
 
 ## Quick Reference
 
+**AI:** Read `AI_INDEX.json` first for machine-readable navigation.
+
 ### Commands
 
 ```bash
@@ -42,6 +44,10 @@ python scripts/bridge_convert.py
 # Build C NFS acceleration library (optional)
 cd experiments/c && make          # builds libgeometric_nfs.so
 cd experiments/c && make test     # builds + runs 36 C tests
+
+# Sync atlas mounts from sibling repos
+./fieldlink-sync.sh              # pulls all mounts
+./fieldlink-sync.sh --dry        # preview without downloading
 
 # Frontend
 cd "Front end" && npm install && npm run dev

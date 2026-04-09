@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — 8D hyper-octahedral seed expansion
 # It is a standalone research script not imported by any test suite.
 
 #!/usr/bin/env python3

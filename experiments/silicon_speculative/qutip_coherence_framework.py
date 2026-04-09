@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — QuTip coherence time simulation (requires qutip)
 """
 QuTip Coherence Time Simulation Framework
 

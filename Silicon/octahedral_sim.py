@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — octahedral silicon analytical simulation
 """
 Octahedral Silicon Encoding — Analytical Physics Simulation
 ============================================================

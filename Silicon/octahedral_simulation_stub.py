@@ -1,3 +1,4 @@
+# STATUS: infrastructure — simulation stub for testing
 import numpy as np
 import random, time
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — vortex-based ML attention heads experiment
 """
 vortex_attention_heads.py
 =========================

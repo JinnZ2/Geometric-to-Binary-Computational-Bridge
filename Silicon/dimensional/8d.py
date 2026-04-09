@@ -1,3 +1,4 @@
+# STATUS: infrastructure — 8D dimensional module
 import numpy as np
 
 # -------------------------------

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — octahedral state → magnetic bridge pipeline
 """
 Octahedral State → Magnetic Bridge Pipeline
 ============================================

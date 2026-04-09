@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — orbital-octahedral fractal growth
 # It is a standalone research script not imported by any test suite.
 
 """

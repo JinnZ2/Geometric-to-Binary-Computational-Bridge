@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — vortex phase learning experiment
 """
 vortex_phase_learning.py
 ========================

@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — 6D octahedral seed expansion
 # It is a standalone research script not imported by any test suite.
 
 """

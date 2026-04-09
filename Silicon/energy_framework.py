@@ -1,3 +1,4 @@
+# STATUS: infrastructure — cross-domain energy comparison framework
 """
 Energy Framework: Cross-Domain Energy Comparison
 =================================================

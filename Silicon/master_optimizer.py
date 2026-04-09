@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — multi-phase optimization pipeline (DFT → codoping → coherence)
 # It is a standalone research script not imported by any test suite.
 
 # #!/usr/bin/env python3
