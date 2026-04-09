@@ -55,7 +55,8 @@
       "Silicon/lcea_analysis.py",
       "Silicon/crystalline_nn_sim.py",
       "Silicon/prototaxites_sim.py",
-      "Silicon/topological_memory.py"
+      "Silicon/topological_memory.py",
+      "Silicon/hardware_bridge.py"
     ],
     "infrastructure": [
       "Silicon/er_dft_framework.py",
