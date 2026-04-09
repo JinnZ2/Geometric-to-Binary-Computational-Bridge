@@ -1,4 +1,120 @@
-♻️ 1. Photon Management: Recycling and Trapping
+1. Multiple Acceptors (farFRET): Using an antenna-like array of acceptors to increase the probability of energy transfer.
+2. NSET (Nanosurface Energy Transfer): Replacing the acceptor molecule with a metal nanoparticle, changing the physics to an r⁻⁴ dependence.
+3. BIC Metasurfaces: Using a dielectric metasurface to create a "bound state in the continuum" that mediates long-range interactions over 100 nm.
+4. Plasmon-Assisted FRET: Using a metallic nanostructure to bridge the donor and acceptor, extending the range to >200 nm.
+
+
+   · Governing Equation: The total transfer rate, k_T, is k_T = Σ k_FRET(rᵢ). For N identical acceptors at the same distance r, this simplifies to k_T = N * k_FRET(r).
+· Efficiency & Lifetime: The enhanced efficiency and corresponding donor lifetime τ_DA are then:
+  ```math
+  E_{multi} = \frac{N \cdot k_{FRET}}{N \cdot k_{FRET} + k_{rad} + k_{nr}} = \frac{N \cdot (R_0/r)^6}{N \cdot (R_0/r)^6 + 1}
+  ```
+  ```math
+  τ_{DA} = \frac{τ_D}{1 + N \cdot (R_0/r)^6}
+  ```
+· Modeling & Code: This is a straightforward modification to your fret_core.py module.
+
+```python
+def E_multi_acceptor(r: float, R0: float, N: int = 1) -> float:
+    """Calculate FRET efficiency for N identical acceptors at distance r."""
+    return (N * (R0/r)**6) / (N * (R0/r)**6 + 1)
+
+def tau_DA_multi(r: float, R0: float, tau_D: float, N: int = 1) -> float:
+    """Calculate donor lifetime with N identical acceptors."""
+    return tau_D / (1 + N * (R0/r)**6)
+```
+
+
+
+NSET (Nanosurface Energy Transfer)
+
+
+· Governing Equation (Persson & Lang model): The rate of energy transfer k_NSET to a spherical NP of radius a is:
+  ```math
+  k_{NSET} = \frac{1}{τ_D} \left( \frac{d_0}{r} \right)^4
+  ```
+  Where d_0 is a characteristic distance that depends on the NP's properties, the donor's quantum yield Φ_D, and orientation κ². The r⁻⁴ dependence comes from the dipole coupling to a surface rather than a point.
+· Modeling & Code: This can be implemented as a new class, NSETDonor.
+
+```python
+class NSETDonor:
+    def __init__(self, tau_D: float, d0: float):
+        self.tau_D = tau_D
+        self.d0 = d0 # characteristic distance
+
+    def k_NSET(self, r: float) -> float:
+        """Calculate NSET rate at distance r from nanoparticle."""
+        return (1.0 / self.tau_D) * (self.d0 / r)**4
+
+    def E_NSET(self, r: float, k_rad: float = 0.1, k_nr: float = 0.1) -> float:
+        """Calculate NSET efficiency."""
+        k_nset = self.k_NSET(r)
+        return k_nset / (k_nset + k_rad + k_nr)
+```
+
+
+BIC-Enhanced FRET (Bound State in the Continuum)
+
+
+ a phenomenological model based on an enhanced Förster radius.
+· Modeling & Code: A BIC-enhanced environment can be modeled as a position-dependent enhancement factor, η(r), that modifies the local Förster radius R_0 or directly the k_FRET rate.
+
+```python
+def k_FRET_BIC(r: float, R0: float, tau_D: float, Q: float, lambda_c: float) -> float:
+    """
+    Phenomenological model for BIC-enhanced FRET rate.
+    Args:
+        Q: Quality factor of the BIC resonance.
+        lambda_c: Resonance wavelength (nm).
+    """
+    k0 = (1.0 / tau_D) * (R0 / r)**6
+
+    # Simple Lorentzian model for the BIC enhancement
+    # Peak enhancement ~ Q, and the effect could extend up to ~ wavelength.
+    enhancement_factor = 1.0 + Q / (1.0 + (2 * r / lambda_c)**2)
+
+    return k0 * enhancement_factor
+```
+
+
+Plasmon-Assisted FRET
+
+The achievable range here is extreme: >200 nm.
+
+· Mechanism: The donor couples to a plasmon mode of the nanostructure (with Purcell-enhanced rate k_D→plasmon), and the plasmon mode couples to the acceptor (k_plasmon→A).
+· Modeling & Code: This can be modeled as a two-step cascade with an intermediate state.
+  ```python
+  def E_plasmon_assisted(r_DA: float, params: dict) -> float:
+      """
+      Calculate efficiency of plasmon-assisted FRET.
+      Args:
+          r_DA: Total distance between donor and acceptor.
+          params: Dictionary containing Purcell factors (F_D, F_A),
+                  plasmon lifetime (tau_pl), and coupling strengths.
+      """
+      # Step 1: Donor to Plasmon
+      k_rad_D0 = 1.0 / params['tau_D'] # intrinsic radiative rate
+      k_D_plasmon = params['F_D'] * k_rad_D0 # Purcell-enhanced rate into plasmon
+  
+      # Step 2: Plasmon to Acceptor
+      # This is a near-field coupling. We can model it as an effective FRET-like step
+      # but with a much larger characteristic distance.
+      R_eff = params['R0_plasmon'] # "effective" R0 for plasmon-acceptor coupling
+      k_plasmon_A = (1.0 / params['tau_pl']) * (R_eff / r_DA)**6
+  
+      # Cascade efficiency:
+      # 1. Efficiency of donor exciting the plasmon
+      E1 = k_D_plasmon / (k_D_plasmon + k_rad_D0 + params.get('k_nr_D', 0))
+      # 2. Efficiency of plasmon exciting the acceptor
+      E2 = k_plasmon_A / (k_plasmon_A + 1.0 / params['tau_pl'])
+  
+      return E1 * E2
+  ```
+
+
+
+
+1. Photon Management: Recycling and Trapping
 The goal is to increase the System Quantum Yield (\bm{\mathbf{\Phi_{\text{sys}}}}) by ensuring every incident photon and every emitted photon is utilized by the FRET hubs. This counters the inherent \bm{\mathbf{f_{\text{rad}} \leq 0.03}} (radiative loss) that still exists.
 A. The Luminescent Solar Concentrator (LSC) Architecture
 Integrating the fractal FRET hubs into a large-area LSC is the most effective photon-recycling strategy.
