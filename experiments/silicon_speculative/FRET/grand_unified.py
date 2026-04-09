@@ -1,3 +1,4 @@
+# STATUS: speculative -- temporal PTC + Casimir + axion dark matter search
 # grand_unified.py
 """
 Combines Temporal PTC, Casimir cavity, and Axion sensing.

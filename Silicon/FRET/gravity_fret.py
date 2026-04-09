@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- gravitational redshift and time dilation on FRET
 """
 gravity_fret.py – Gravitational effects on FRET.
 - Redshift spectral detuning

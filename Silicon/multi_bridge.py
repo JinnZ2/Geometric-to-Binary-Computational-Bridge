@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- unified octahedral node with strain/spin/optical/electric bridges
 """
 Multi-Bridge Octahedral Node: Harmonic + Magnetic + Optical + Electric
 Unified simulation of all four bridges interacting through a single silicon octahedron.

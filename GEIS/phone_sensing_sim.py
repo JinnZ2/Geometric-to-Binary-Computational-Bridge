@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- phone termux-sensor integration to 3D cube
 import subprocess
 import json
 import time

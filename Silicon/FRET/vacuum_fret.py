@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- Casimir cavity force tuning of donor-acceptor distance
 """
 vacuum_fret.py – Engineering the quantum vacuum via Casimir forces.
 """

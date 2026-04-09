@@ -1,3 +1,4 @@
+# STATUS: speculative -- accretion disk, wormhole, dark matter FRET thought experiments
 """
 thought_experiments.py – Executable simulations for the five speculative scenarios.
 Uses the existing multi-physics modules.

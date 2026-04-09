@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- Forster radius, FRET rate, FRET efficiency core equations
 """
 fret_core.py – Basic FRET physics: Förster radius, rate, efficiency.
 """

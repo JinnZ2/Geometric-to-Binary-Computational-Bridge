@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- quantum energy teleportation on spin chain
 """
 qet.py – Quantum Energy Teleportation protocol.
 Energy transfer without carrier travel.

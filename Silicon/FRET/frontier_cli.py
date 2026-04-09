@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- frontier CLI for speculative physics modes
 frontier_parser = subparsers.add_parser('frontier', help='Explore speculative physics arenas')
 frontier_parser.add_argument('arena', choices=['time','vacuum','thermo','axion','radical','qet','unified'],
                              help='Arena to simulate')

@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- acoustic SAW/BAW modulation of FRET distance
 """
 acoustic_fret.py – Acoustic control of FRET via distance modulation.
 - Time-dependent r(t) from surface acoustic waves (SAW) or bulk resonators.

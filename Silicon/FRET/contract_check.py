@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- FRET cascade with parameter drift and servo correction
 """
 contract_check.py – Simulate FRET cascade performance over time with drift.
 Checks against the output contract specifications.

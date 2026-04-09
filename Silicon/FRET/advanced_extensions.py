@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- DNA origami, Stark tuning, phononic bandgap, triplets
 """
 advanced_extensions.py – Research‑grade extensions for FRET simulations.
 Incorporates:

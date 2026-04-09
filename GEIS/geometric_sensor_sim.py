@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- geometric sensor simulator with tensor accumulation
 """
 Geometric Sensor Simulator & Token Sequence Learning
 =====================================================

@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- radical pair magnetic sensing via hyperfine coupling
 """
 radical_pair.py – Radical pair mechanism for magnetic field sensing.
 Nature's magneto-FRET.

@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- 3D binary cube rotation dependency detection
 """
 3D Binary Cube Dependencies
 ===========================
@@ -219,6 +220,7 @@ if __name__ == "__main__":
 
 
 
-###1. Replace bits_to_cube with actual octahedral state packing – each voxel is a 3‑bit state, not a flat bit.
-2. Implement canonical_form for octahedral state cubes – rotates the entire cube and also permutes the 3 bits per voxel according to the same rotation (since octahedral symmetry maps vertices to vertices).
-3. Use the geometric hash to find dependencies – similar to geometric_null_search but in 3D.
+# TODO:
+# 1. Replace bits_to_cube with actual octahedral state packing -- each voxel is a 3-bit state, not a flat bit.
+# 2. Implement canonical_form for octahedral state cubes -- rotates the entire cube and also permutes the 3 bits per voxel according to the same rotation (since octahedral symmetry maps vertices to vertices).
+# 3. Use the geometric hash to find dependencies -- similar to geometric_null_search but in 3D.

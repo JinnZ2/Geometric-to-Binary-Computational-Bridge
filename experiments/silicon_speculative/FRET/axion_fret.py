@@ -1,3 +1,4 @@
+# STATUS: speculative -- axion dark matter to photon conversion modulating FRET
 """
 axion_fret.py – FRET-based axion dark matter sensor.
 Axion-photon conversion in B-field modulates spectral overlap J.

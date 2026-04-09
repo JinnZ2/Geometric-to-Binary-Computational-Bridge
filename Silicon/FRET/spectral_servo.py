@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- spectral overlap J computation and PI control servo
 """
 spectral_servo.py – Spectral overlap computation and PI control for J stabilization.
 """

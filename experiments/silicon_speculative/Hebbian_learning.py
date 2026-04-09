@@ -1,3 +1,4 @@
+# STATUS: speculative -- plastic lattice couplings with Hebbian learning
 """
 Plastic Multi-Bridge Neural Lattice
 Adds Hebbian learning to the multi-bridge lattice.

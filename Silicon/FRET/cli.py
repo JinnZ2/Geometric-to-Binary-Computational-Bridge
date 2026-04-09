@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- main CLI for FRET stack
 """
 fret-stack – CLI for the FRET Engineering Stack simulations.
 

@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- plasma dielectric screening and collisional decoherence
 """
 plasma_fret.py – Plasma effects on FRET.
 - Dielectric function ε(ω) modifying refractive index and LDOS

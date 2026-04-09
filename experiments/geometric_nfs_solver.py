@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- octahedral lattice NFS with sparse GF(2) fallback
 """
 Geometric NFS Solver
 ====================

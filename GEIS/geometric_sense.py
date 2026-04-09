@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure -- phone accelerometer to geometric token encoding
 """
 Real‑time Geometric Sensing via 3D Cube
 ========================================

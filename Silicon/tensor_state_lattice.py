@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- tensor-state lattice with Zeeman addressing and Hebbian plasticity
 """
 Tensor-State Lattice with Magnetic Read/Write and Hebbian Plasticity
 Implements the Octahedral_State_Encoder JSON specification across a 2D array.

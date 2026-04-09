@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- temperature-dependent R0 and conformational switches
 """
 thermal_fret.py – Thermal control of FRET.
 - Temperature-dependent R0 via spectral overlap and quantum yield.

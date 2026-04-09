@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- entropic linker and worm-like chain distributions
 """
 entropy_fret.py – Entropy-driven distance distributions.
 """

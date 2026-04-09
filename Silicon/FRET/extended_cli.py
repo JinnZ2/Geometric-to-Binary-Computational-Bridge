@@ -1,3 +1,4 @@
+# STATUS: infrastructure -- extended CLI for thermal/acoustic/entropy modes
 # ----- acoustic (SAW/BAW modulation) -----
 acoustic_parser = subparsers.add_parser('acoustic', help='Simulate acoustic modulation of FRET')
 acoustic_parser.add_argument('--r0', type=float, default=3.0, help='Mean distance (nm) [3.0]')
