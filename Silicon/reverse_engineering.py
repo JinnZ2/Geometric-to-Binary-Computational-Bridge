@@ -73,7 +73,6 @@ v16 = np.concatenate([p, np.array([1.0 - p_sum])])
 
 # Final normalization for safety
 return v16 / v16.sum()
-```
 
 def seed_to_params(seed16: np.ndarray) -> np.ndarray:
     """
@@ -87,7 +86,6 @@ def seed_to_params(seed16: np.ndarray) -> np.ndarray:
     """
 seed_norm = seed16 / seed16.sum()
 return seed_norm[:15]
-```
 
 # =============================================================================
 
@@ -98,7 +96,7 @@ return seed_norm[:15]
 def calculate_loss_static(params15: np.ndarray, target_shells: List[Dict],
 num_steps: int, rho: float = 1.5,
 epsilon: float = 0.6, sigma_scale: float = 0.5) -> float:
-"""
+    """
 Loss function for static (Euclidean) expansion.
 
 Measures L2 distance between simulated shell proportions and target.
@@ -118,18 +116,16 @@ for n in range(1, num_steps + 1):
     total_loss += float(np.sum((S_sim - S_target)**2))
     
 return total_loss
-```
 
 def calculate_loss_dynamic(params15: np.ndarray, target_shells: List[Dict],
 num_steps: int, rho: float = 1.5,
 base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
 sigma_scale: float = 0.5) -> float:
-"""
+    """
 Loss function for dynamic (Phi-modulated) expansion.
 """
 hypo_seed = params_to_seed(params15)
 
-```
 try:
     sim_shells = expand_seed_dynamic(hypo_seed, E0=1.0, r0=1.0, 
                                     steps=num_steps, rho=rho,
@@ -146,7 +142,6 @@ for n in range(1, num_steps + 1):
     total_loss += float(np.sum((S_sim - S_target)**2))
     
 return total_loss
-```
 
 # =============================================================================
 
@@ -157,7 +152,7 @@ return total_loss
 def recover_seed_lbfgs(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, maxiter: int = 500,
 **expansion_params) -> Dict:
-"""
+    """
 Recover seed using L-BFGS-B optimization (gradient-based, local).
 
 Fast but may get stuck in local minima for complex structures.
@@ -208,12 +203,11 @@ return {
     'optimizer': 'L-BFGS-B',
     'scipy_result': result
 }
-```
 
 def recover_seed_de(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, maxiter: int = 200,
 popsize: int = 15, **expansion_params) -> Dict:
-"""
+    """
 Recover seed using Differential Evolution (global optimizer).
 
 More robust than L-BFGS-B but slower. Use for difficult cases
@@ -265,12 +259,11 @@ return {
     'optimizer': 'Differential Evolution',
     'scipy_result': result
 }
-```
 
 def recover_seed_multistart(target_shells: List[Dict], num_steps: int,
 use_dynamic: bool = False, n_starts: int = 5,
 maxiter: int = 300, **expansion_params) -> Dict:
-"""
+    """
 Recover seed using multiple random starting points with L-BFGS-B.
 
 Balance between speed of local optimization and robustness of
@@ -336,7 +329,6 @@ return {
     'optimizer': f'Multi-start L-BFGS-B ({n_starts} starts)',
     'scipy_result': best_result
 }
-```
 
 # =============================================================================
 
@@ -347,7 +339,7 @@ return {
 def recover_seed(target_shells: List[Dict], num_steps: int = None,
 use_dynamic: bool = False, method: str = 'auto',
 **expansion_params) -> Dict:
-"""
+    """
 High-level interface for seed recovery.
 
 Args:
@@ -385,7 +377,6 @@ else:
     raise ValueError(f"Unknown method: {method}")
 
 return result
-```
 
 # =============================================================================
 
@@ -395,7 +386,7 @@ return result
 
 def verify_recovery(true_seed: np.ndarray, recovered_seed: np.ndarray,
 tol: float = 1e-4) -> Tuple[bool, float]:
-"""
+    """
 Verify that recovered seed matches original.
 
 Args:
@@ -412,12 +403,11 @@ rec_norm = recovered_seed / recovered_seed.sum()
 max_dev = np.max(np.abs(true_norm - rec_norm))
 
 return max_dev <= tol, max_dev
-```
 
 def round_trip_test(seed: np.ndarray, steps: int = 5,
 use_dynamic: bool = False, verbose: bool = True,
 **expansion_params) -> Dict:
-"""
+    """
 Complete round-trip test: seed → structure → recovered seed
 
 Args:
@@ -469,7 +459,6 @@ return {
     'time': recovery['time'],
     'optimizer': recovery['optimizer']
 }
-```
 
 # =============================================================================
 
@@ -477,13 +466,12 @@ return {
 
 # =============================================================================
 
-if **name** == "**main**":
+# if **name** == "**main**":
 print("=" * 70)
 print("REVERSE ENGINEERING: Seed Recovery from Expanded Structure")
 print("Proving bidirectional (bijective) mapping")
 print("=" * 70)
 
-```
 # Test seed with clear structure
 test_seed = np.array([
     10.0, 0.1,   # Strong +X1

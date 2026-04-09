@@ -75,7 +75,7 @@ return is_phi, closest_phi, min_deviation
 def expected_classical_rate(r: float, R0: float, tau_D: float = 1e-9) -> float:
     """Classical FRET rate: k_T = (1/τ_D) × (R0/r)^6"""
 if r <= 0:
-return float('inf')
+    return float('inf')
 return (1.0 / tau_D) * (R0 / r) ** 6
 
 # =============================================================================
@@ -123,7 +123,6 @@ for i in range(n_molecules):
         ))
 
 return pairs
-```
 
 # =============================================================================
 
@@ -136,7 +135,6 @@ def perform_t_test(pairs: List[PigmentPair], metric: str = 'transfer_rate') -> S
 phi_pairs = [p for p in pairs if p.is_phi_distance]
 control_pairs = [p for p in pairs if not p.is_phi_distance]
 
-```
 phi_values = [getattr(p, metric) for p in phi_pairs]
 control_values = [getattr(p, metric) for p in control_pairs]
 
@@ -178,14 +176,12 @@ return StatisticalResult(
     is_significant=p_value < 0.01,
     power=power
 )
-```
 
 def perform_correlation_test(pairs: List[PigmentPair]) -> Dict:
     """Test correlation between phi-deviation and enhancement."""
 deviations = []
 enhancements = []
 
-```
 for p in pairs:
     expected = expected_classical_rate(p.distance, R0_CHLOROPHYLL)
     if expected > 0:
@@ -204,15 +200,13 @@ return {
     'n_pairs': len(deviations),
     'supports_hypothesis': r_pearson < -0.2 and p_pearson < 0.05
 }
-```
 
 def perform_permutation_test(pairs: List[PigmentPair], n_permutations: int = 10000,
 metric: str = 'transfer_rate') -> Dict:
-"""Non-parametric permutation test."""
+    """Non-parametric permutation test."""
 phi_values = [getattr(p, metric) for p in pairs if p.is_phi_distance]
 control_values = [getattr(p, metric) for p in pairs if not p.is_phi_distance]
 
-```
 observed_diff = np.mean(phi_values) - np.mean(control_values)
 
 all_values = phi_values + control_values
@@ -234,15 +228,13 @@ return {
     'is_significant': p_value < 0.01,
     'percentile': 100 * (1 - p_value)
 }
-```
 
 def perform_bootstrap(pairs: List[PigmentPair], n_bootstrap: int = 5000,
 metric: str = 'transfer_rate') -> Dict:
-"""Bootstrap CI for effect size."""
+    """Bootstrap CI for effect size."""
 phi_values = [getattr(p, metric) for p in pairs if p.is_phi_distance]
 control_values = [getattr(p, metric) for p in pairs if not p.is_phi_distance]
 
-```
 effect_sizes = []
 
 for _ in range(n_bootstrap):
@@ -262,7 +254,6 @@ return {
     'probability_positive': np.mean([e > 0 for e in effect_sizes]),
     'ci_excludes_zero': np.percentile(effect_sizes, 2.5) > 0
 }
-```
 
 # =============================================================================
 
@@ -278,7 +269,6 @@ results = {
 'n_control': sum(1 for p in pairs if not p.is_phi_distance)
 }
 
-```
 results['t_test'] = perform_t_test(pairs)
 results['correlation'] = perform_correlation_test(pairs)
 results['permutation'] = perform_permutation_test(pairs)
@@ -300,7 +290,6 @@ results['verdict'] = {
 }
 
 return results
-```
 
 def print_report(results: Dict):
     """Print analysis report."""
@@ -308,7 +297,6 @@ print("=" * 70)
 print("PHI-ENHANCEMENT HYPOTHESIS: STATISTICAL ANALYSIS")
 print("=" * 70)
 
-```
 print(f"\nDATA: {results['n_total']} pairs ({results['n_phi']} phi, {results['n_control']} control)")
 
 t = results['t_test']
@@ -340,7 +328,6 @@ print(f"\n" + "=" * 70)
 print(f"VERDICT: {v['tests_passed']}/{v['total_tests']} tests passed")
 print(f">>> {v['conclusion']} <<<")
 print("=" * 70)
-```
 
 # =============================================================================
 
@@ -348,15 +335,13 @@ print("=" * 70)
 
 # =============================================================================
 
-if **name** == "**main**":
+# if **name** == "**main**":
 print("Testing with embedded signal (should detect)…")
 pairs_signal = generate_lhcii_pigment_data(seed=42, embed_signal=True)
 results_signal = run_complete_analysis(pairs_signal)
 print_report(results_signal)
 
-```
 print("\n\nTesting null hypothesis (no signal)...")
 pairs_null = generate_lhcii_pigment_data(seed=42, embed_signal=False)
 results_null = run_complete_analysis(pairs_null)
 print_report(results_null)
-```

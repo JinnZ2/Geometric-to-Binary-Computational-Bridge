@@ -32,7 +32,6 @@ class DFTConfig:
 # Supercell parameters
 supercell_size: Tuple[int, int, int] = (3, 3, 3)  # Multiple of conventional unit cells
 
-```
 # Strain scan parameters
 strain_min: float = 0.0  # Minimum biaxial strain (%)
 strain_max: float = 2.5  # Maximum biaxial strain (%)
@@ -53,7 +52,6 @@ temperature: float = 300.0  # K
 
 # Target coherence time
 target_T2: float = 0.1  # seconds (100 ms)
-```
 
 @dataclass
 class FormationEnergyResult:
@@ -69,7 +67,6 @@ force_max: float  # Maximum residual force (eV/Å)
 class ErDFTAnalyzer:
     """Analyzer for Er dopant DFT calculations in strained Si"""
 
-```
 def __init__(self, config: DFTConfig):
     self.config = config
     self.results_O: List[FormationEnergyResult] = []
@@ -393,7 +390,6 @@ def export_results(self, filepath: str):
         json.dump(data, f, indent=2)
     
     print(f"✓ Exported results to {filepath}")
-```
 
 def generate_strain_scan_inputs(config: DFTConfig, base_dir: str = "./dft_inputs"):
     """
@@ -433,11 +429,10 @@ print(f"✓ Generated {len(strains) * 2} input directories in {base_dir}/")
 print(f"{'='*60}\n")
 
 return analyzer
-```
 
-if **name** == "**main**":
+if __name__ == "__main__":
 # Example usage
-config = DFTConfig(
+    config = DFTConfig(
 supercell_size=(3, 3, 3),
 strain_min=0.0,
 strain_max=2.5,
@@ -449,7 +444,6 @@ temperature=300.0,
 target_T2=0.1
 )
 
-```
 print("\n🔬 Er in Strained Si - DFT Framework")
 print("=" * 60)
 print(f"Target: Find ε* that maximizes ΔE_barrier")
@@ -457,7 +451,6 @@ print(f"Goal: Enable T₂ ≥ {config.target_T2*1000:.0f} ms at {config.temperat
 print("=" * 60)
 
 analyzer = generate_strain_scan_inputs(config)
-```
 
 
 ##extension:::##

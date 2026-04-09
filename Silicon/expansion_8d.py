@@ -62,7 +62,6 @@ for i in range(n_dim):
     U[2 * i, i] = 1.0       # +Xi direction
     U[2 * i + 1, i] = -1.0  # -Xi direction
 return U
-```
 
 # Global geometry for 8D system
 
@@ -82,7 +81,6 @@ def influence_weight(u_i: np.ndarray, u_j: np.ndarray) -> float:
     Uses max(0, dot_product) to ensure non-negative influence.
     """
 return max(0.0, float(np.dot(u_i, u_j)))
-```
 
 def radial_envelope(r_shell: float, r_sample: float, sigma_scale: float = 0.5) -> float:
     """
@@ -93,23 +91,21 @@ def radial_envelope(r_shell: float, r_sample: float, sigma_scale: float = 0.5) -
     """
 sigma = max(sigma_scale * r_shell, 1e-12)
 return np.exp(-((r_sample - r_shell)**2) / (2.0 * sigma**2))
-```
 
 def field_contribution(S: np.ndarray, r_shell: float, r_sample: float,
 sigma_scale: float = 0.5) -> np.ndarray:
-"""Calculate field contribution from a shell at sample point."""
+    """Calculate field contribution from a shell at sample point."""
 envelope = radial_envelope(r_shell, r_sample, sigma_scale)
 return S * envelope
 
 def total_field(shells: List[Dict], r_sample: float, W: np.ndarray,
 sigma_scale: float = 0.5) -> np.ndarray:
-"""
+    """
 Calculate total field at sample radius from all inner shells.
 Causality constraint: only shells with r < r_sample contribute.
 """
 field = np.zeros(N_VERTICES, dtype=float)
 
-```
 for shell in shells:
     if shell['r'] >= r_sample:
         continue  # Causality: only inner shells contribute
@@ -117,7 +113,6 @@ for shell in shells:
     field += W @ contrib
     
 return field
-```
 
 # =============================================================================
 
@@ -133,12 +128,10 @@ def normalize_to_energy(v: np.ndarray, E: float, eps: float = 1e-12) -> np.ndarr
 v = np.maximum(v, 0.0)
 total = v.sum()
 
-```
 if total < eps:
     return np.ones(len(v)) * (E / len(v))
     
 return v * (E / total)
-```
 
 # =============================================================================
 
@@ -154,7 +147,6 @@ def build_influence_matrix_euclidean(U: np.ndarray) -> np.ndarray:
 N = U.shape[0]
 W = np.zeros((N, N), dtype=float)
 
-```
 for i in range(N):
     for j in range(N):
         W[i, j] = influence_weight(U[i], U[j])
@@ -165,11 +157,10 @@ for i in range(N):
         W[i] = 1.0 / N
         
 return W
-```
 
 def build_influence_matrix_dynamic(U: np.ndarray, T: np.ndarray,
 alpha: float = 0.1) -> np.ndarray:
-"""
+    """
 Build dynamic influence matrix: W' = W_euclidean + alpha * T
 
 The torsion tensor T modifies local field coupling rules based on
@@ -191,7 +182,6 @@ for i in range(N):
         W[i] = 1.0 / N
         
 return W
-```
 
 # =============================================================================
 
@@ -224,7 +214,6 @@ for i in range(N):
                 T[i, j] = 0.02 * phase * ((i - j) % 3 - 1.0) * (1.0 / (1 + abs(i - j)))
                 
 return T
-```
 
 def get_dynamic_epsilon(r_shell: float, base_epsilon: float = 0.6) -> float:
     """
@@ -235,7 +224,6 @@ def get_dynamic_epsilon(r_shell: float, base_epsilon: float = 0.6) -> float:
     """
 # Placeholder: slight modulation around base value
 return base_epsilon
-```
 
 # =============================================================================
 
@@ -245,16 +233,14 @@ return base_epsilon
 
 def form_shell(shells: List[Dict], r_new: float, E_new: float,
 W: np.ndarray, sigma_scale: float = 0.5) -> np.ndarray:
-"""
+    """
 Form new shell based on total field from inner shells.
 """
 if len(shells) == 0:
-return np.ones(N_VERTICES) * (E_new / N_VERTICES)
+    return np.ones(N_VERTICES) * (E_new / N_VERTICES)
 
-```
 field = total_field(shells, r_new, W, sigma_scale)
 return normalize_to_energy(field, E_new)
-```
 
 # =============================================================================
 
@@ -265,7 +251,7 @@ return normalize_to_energy(field, E_new)
 def expand_seed(seed: np.ndarray, E0: float = 1.0, r0: float = 1.0,
 steps: int = 10, rho: float = 1.5, epsilon: float = 0.6,
 sigma_scale: float = 0.5) -> List[Dict]:
-"""
+    """
 Expand seed using static Euclidean physics.
 
 Args:
@@ -302,13 +288,12 @@ for n in range(steps):
     })
     
 return shells
-```
 
 def expand_seed_dynamic(seed: np.ndarray, E0: float = 1.0, r0: float = 1.0,
 steps: int = 10, rho: float = 1.5,
 base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
 sigma_scale: float = 0.5) -> List[Dict]:
-"""
+    """
 Expand seed using dynamic physics modulated by Phi-algorithms.
 
 The influence matrix W' changes at each shell based on torsion tensor T,
@@ -342,7 +327,6 @@ for n in range(steps):
     })
     
 return shells
-```
 
 # =============================================================================
 
@@ -368,7 +352,6 @@ for i in range(15):  # Store first 15, 16th is implicit
     encoded.append(val)
     
 return encoded
-```
 
 def decode_seed_binary(encoded: List[int], bits_per_value: int = 8) -> np.ndarray:
     """
@@ -376,7 +359,6 @@ def decode_seed_binary(encoded: List[int], bits_per_value: int = 8) -> np.ndarra
     """
 max_val = (1 << bits_per_value) - 1
 
-```
 proportions = []
 for val in encoded:
     proportions.append(val / max_val)
@@ -388,7 +370,6 @@ proportions.append(max(0.0, remainder))
 # Re-normalize
 total = sum(proportions)
 return np.array([p / total for p in proportions])
-```
 
 # =============================================================================
 
@@ -398,7 +379,7 @@ return np.array([p / total for p in proportions])
 
 def verify_expansion(seed: np.ndarray, steps: int = 20,
 use_dynamic: bool = False) -> Tuple[bool, float]:
-"""
+    """
 Verify that expansion preserves seed structure.
 
 Returns:
@@ -420,7 +401,6 @@ for s in shells:
     max_deviation = max(max_deviation, deviation)
     
 return max_deviation < 1e-10, max_deviation
-```
 
 def get_shell_fingerprint(shells: List[Dict]) -> np.ndarray:
     """
@@ -429,7 +409,7 @@ def get_shell_fingerprint(shells: List[Dict]) -> np.ndarray:
     """
 arr = []
 for n in range(1, len(shells)):
-S_prop = shells[n]['S'] / (shells[n]['E'] + 1e-16)
+    S_prop = shells[n]['S'] / (shells[n]['E'] + 1e-16)
 arr.append(S_prop)
 return np.concatenate(arr)
 
@@ -439,13 +419,12 @@ return np.concatenate(arr)
 
 # =============================================================================
 
-if **name** == "**main**":
+# if **name** == "**main**":
 print("=" * 70)
 print("8D HYPER-OCTAHEDRAL SEED EXPANSION")
 print("Collaborative Development: Human insight + AI implementation")
 print("=" * 70)
 
-```
 # Define a 16-component seed with clear bias structure
 seed = np.array([
     10.0, 0.1,   # +X1 (Strong), -X1

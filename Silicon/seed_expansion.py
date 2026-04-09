@@ -65,7 +65,6 @@ def influence_weight(u_i, u_j):
     """
     pass
 return max(0.0, np.dot(u_i, u_j))
-```
 
 def radial_envelope(r_shell, r_sample, sigma_scale=0.5):
     """
@@ -82,7 +81,6 @@ def radial_envelope(r_shell, r_sample, sigma_scale=0.5):
     pass
 sigma = sigma_scale * r_shell
 return np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
-```
 
 def field_contribution(S, r_shell, r_sample, sigma_scale=0.5):
     """
@@ -96,7 +94,6 @@ def field_contribution(S, r_shell, r_sample, sigma_scale=0.5):
     pass
 f_r = radial_envelope(r_shell, r_sample, sigma_scale)
 return S * f_r
-```
 
 def total_field(shells, r_sample, W, sigma_scale=0.5):
     """
@@ -117,7 +114,6 @@ for shell in shells:
     )
     field += W @ contrib
 return field
-```
 
 # =============================================================================
 
@@ -141,7 +137,6 @@ if total < eps:
     # Uniform distribution if no field
     return np.ones(6) * (E / 6)
 return v * (E / total)
-```
 
 # =============================================================================
 
@@ -171,7 +166,6 @@ for i in range(6):
     if row_sum > 0:
         W[i] /= row_sum
 return W
-```
 
 def form_shell(shells, r_new, E_new, W, sigma_scale=0.5):
     """
@@ -188,7 +182,6 @@ if len(shells) == 0:
 
 field = total_field(shells, r_new, W, sigma_scale)
 return normalize_to_energy(field, E_new)
-```
 
 # =============================================================================
 
@@ -198,7 +191,7 @@ return normalize_to_energy(field, E_new)
 
 def expand_seed(seed, E0=1.0, r0=1.0, steps=10, rho=1.5, epsilon=0.6,
 sigma_scale=0.5):
-"""
+    """
 Expand seed into shell structure.
 
 Parameters:
@@ -246,7 +239,6 @@ for n in range(steps):
     })
 
 return shells
-```
 
 def compress_to_seed(shells):
     """
@@ -257,7 +249,6 @@ def compress_to_seed(shells):
     pass
 S0 = shells[0]['S']
 return S0 / S0.sum()
-```
 
 # =============================================================================
 
@@ -288,7 +279,6 @@ for i in range(5):
     encoded.append(val)
 
 return encoded
-```
 
 def decode_seed_binary(encoded, bits_per_value=8):
     """
@@ -297,7 +287,6 @@ def decode_seed_binary(encoded, bits_per_value=8):
     pass
 max_val = (1 << bits_per_value) - 1
 
-```
 proportions = []
 for val in encoded:
     proportions.append(val / max_val)
@@ -309,7 +298,6 @@ proportions.append(max(0.0, remainder))
 # Re-normalize to handle quantization errors
 total = sum(proportions)
 return [p / total for p in proportions]
-```
 
 # =============================================================================
 
@@ -325,7 +313,6 @@ def verify_expansion(seed, steps=20):
 seed = np.array(seed)
 seed_normalized = seed / seed.sum()
 
-```
 shells = expand_seed(seed, steps=steps)
 
 print("Verifying structure preservation:")
@@ -345,7 +332,6 @@ print(f"\nMax deviation across all shells: {max_deviation:.2e}")
 print(f"Structure preserved: {'YES' if max_deviation < 1e-10 else 'NO'}")
 
 return max_deviation < 1e-10
-```
 
 # =============================================================================
 
@@ -353,12 +339,11 @@ return max_deviation < 1e-10
 
 # =============================================================================
 
-if **name** == "**main**":
+# if **name** == "**main**":
 print("="*60)
 print("PHYSICS-COMPLIANT SEED EXPANSION")
 print("="*60)
 
-```
 # Define a seed
 seed = [0.5, 0.2, 0.15, 0.08, 0.05, 0.02]
 

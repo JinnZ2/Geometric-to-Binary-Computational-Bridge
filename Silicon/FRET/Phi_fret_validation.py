@@ -56,7 +56,6 @@ def K_classical(r: float, R0: float) -> float:
     """
     pass
 return (R0 / r) ** 6
-```
 
 def F_phi(r: float, R0: float, n_harmonics: int = 5) -> float:
     """
@@ -80,7 +79,6 @@ for n in range(1, n_harmonics + 1):
     enhancement += resonance / n
 
 return 1.0 + enhancement
-```
 
 def K_phi(r: float, R0: float) -> float:
     """
@@ -90,7 +88,6 @@ def K_phi(r: float, R0: float) -> float:
     """
     pass
 return K_classical(r, R0) * F_phi(r, R0)
-```
 
 def delta_K(r: float, R0: float) -> float:
     """
@@ -103,7 +100,6 @@ def delta_K(r: float, R0: float) -> float:
     """
     pass
 return K_phi(r, R0) - K_classical(r, R0)
-```
 
 def enhancement_ratio(r: float, R0: float) -> float:
     """
@@ -115,7 +111,6 @@ def enhancement_ratio(r: float, R0: float) -> float:
     """
     pass
 return F_phi(r, R0)
-```
 
 # =============================================================================
 
@@ -131,11 +126,10 @@ def phi_optimal_distances(R0: float, n_max: int = 5) -> List[float]:
     """
     pass
 return [R0 * (PHI ** n) for n in range(1, n_max + 1)]
-```
 
 def find_enhancement_peaks(R0: float, r_min: float, r_max: float,
 n_points: int = 1000) -> List[Dict]:
-"""
+    """
 Find local maxima of enhancement factor F(r).
 
 Returns list of peak locations and values.
@@ -154,7 +148,6 @@ for i in range(1, len(r_values) - 1):
         })
 
 return peaks
-```
 
 # =============================================================================
 
@@ -172,7 +165,6 @@ def V_classical(r: float, R0: float, V0: float = 1.0) -> float:
     """
     pass
 return V0 * (R0 / r) ** 6
-```
 
 def M_phi(r: float, R0: float) -> float:
     """
@@ -185,7 +177,6 @@ def M_phi(r: float, R0: float) -> float:
     """
     pass
 return F_phi(r, R0) - 1.0
-```
 
 def V_phi(r: float, R0: float, V0: float = 1.0) -> float:
     """
@@ -198,7 +189,6 @@ def V_phi(r: float, R0: float, V0: float = 1.0) -> float:
     """
     pass
 return V_classical(r, R0, V0) * (1.0 + M_phi(r, R0))
-```
 
 # =============================================================================
 
@@ -242,11 +232,10 @@ for n in range(1, 6):
     metrics['predictions'].append(prediction)
 
 return metrics
-```
 
 def invalidation_test(measured_K: float, r: float, R0: float,
 sigma_measurement: float) -> Dict:
-"""
+    """
 Test whether measured transfer rate validates or invalidates theory.
 
 Args:
@@ -285,7 +274,6 @@ result = {
 }
 
 return result
-```
 
 # =============================================================================
 
@@ -296,7 +284,7 @@ return result
 def photosynthetic_complex_test(pigment_distances: List[float],
 measured_rates: List[float],
 R0: float) -> Dict:
-"""
+    """
 Test photosynthetic complex data against phi-enhanced predictions.
 
 Searches for correlation between φ-ratio distances and anomalously
@@ -351,7 +339,6 @@ return {
     'enhancement_correlation': enhancement_correlation,
     'supports_theory': enhancement_correlation is not None and enhancement_correlation > 1.2
 }
-```
 
 # =============================================================================
 
@@ -362,7 +349,7 @@ return {
 def quasicrystal_phonon_coupling(atomic_distances: List[float],
 coupling_strength: List[float],
 characteristic_length: float) -> Dict:
-"""
+    """
 Test quasicrystal phonon transmission data.
 
 Hypothesis: Atoms separated by φ-ratio distances show enhanced
@@ -400,7 +387,6 @@ for d, strength in zip(atomic_distances, coupling_strength):
     })
 
 return {'results': results}
-```
 
 # =============================================================================
 
@@ -412,73 +398,73 @@ return {'results': results}
 
 # CORE TEST EQUATIONS FOR PHI-ENHANCED FRET VALIDATION
 
-1. CLASSICAL TRANSFER SCALING FACTOR
-   K_Class = (R_0/r)⁶
+# 1. CLASSICAL TRANSFER SCALING FACTOR
+   # K_Class = (R_0/r)⁶
    
-   Standard FRET rate normalized by donor decay rate.
-1. PHI-GEOMETRIC RESONANCE ENHANCEMENT
-   F(r) = 1 + Σₙ exp(-(r/R_0 - φⁿ)² / 2σₙ²) / n
+# Standard FRET rate normalized by donor decay rate.
+# 1. PHI-GEOMETRIC RESONANCE ENHANCEMENT
+   # F(r) = 1 + Σₙ exp(-(r/R_0 - φⁿ)² / 2σₙ²) / n
    
-   where σₙ = 0.1 × φⁿ and φ = (√5 - 1)/2 ≈ 0.618
-1. PHI-ENHANCED TRANSFER SCALING FACTOR
-   K_φ = K_Class × F(r) = (R_0/r)⁶ × F(r)
-1. LOCAL RATE ENHANCEMENT (VALIDATION CRITERION)
-   ΔK(r) = K_φ(r) - K_Class(r)
+   # where σₙ = 0.1 × φⁿ and φ = (√5 - 1)/2 ≈ 0.618
+# 1. PHI-ENHANCED TRANSFER SCALING FACTOR
+   # K_φ = K_Class × F(r) = (R_0/r)⁶ × F(r)
+# 1. LOCAL RATE ENHANCEMENT (VALIDATION CRITERION)
+# ΔK(r) = K_φ(r) - K_Class(r)
    
-   MUST HAVE: ΔK > 0 at r = R_0φⁿ for theory to be valid
-1. CROSS-DOMAIN FORCE FIELD
-   V_φ(r) = V_Class(r) × [1 + M(r)]
+# MUST HAVE: ΔK > 0 at r = R_0φⁿ for theory to be valid
+# 1. CROSS-DOMAIN FORCE FIELD
+   # V_φ(r) = V_Class(r) × [1 + M(r)]
    
-   where M(r) = F(r) - 1 is the structural modulation factor
-1. PHI-OPTIMAL DISTANCES
-   r_opt(n) = R_0 × φⁿ for n = 1, 2, 3, …
+# where M(r) = F(r) - 1 is the structural modulation factor
+# 1. PHI-OPTIMAL DISTANCES
+   # r_opt(n) = R_0 × φⁿ for n = 1, 2, 3, …
    
-   φ¹ ≈ 0.618 R_0
-   φ² ≈ 0.382 R_0  
-   φ³ ≈ 0.236 R_0
-   φ⁴ ≈ 0.146 R_0
-   φ⁵ ≈ 0.090 R_0
+   # φ¹ ≈ 0.618 R_0
+   # φ² ≈ 0.382 R_0  
+   # φ³ ≈ 0.236 R_0
+   # φ⁴ ≈ 0.146 R_0
+   # φ⁵ ≈ 0.090 R_0
 
 # ================================================================================
-INVALIDATION CRITERION
+# INVALIDATION CRITERION
 
-The φ-enhancement theory is INVALIDATED if:
+# The φ-enhancement theory is INVALIDATED if:
 
-- Experimental k_T measurements at r = R_0φⁿ
-- Are NOT significantly higher than k_T^Class = (1/τ_D)(R_0/r)⁶
-- Within measurement uncertainty
+# - Experimental k_T measurements at r = R_0φⁿ
+# - Are NOT significantly higher than k_T^Class = (1/τ_D)(R_0/r)⁶
+# - Within measurement uncertainty
 
-The M(r) factor MUST arise from fundamental mechanism:
+# The M(r) factor MUST arise from fundamental mechanism:
 
-- Non-local QED effects
-- Structured vacuum / metamaterial effects
-- Collective excitonic coupling
-- Topological protection
+# - Non-local QED effects
+# - Structured vacuum / metamaterial effects
+# - Collective excitonic coupling
+# - Topological protection
 
-NOT merely an ad hoc multiplier.
+# NOT merely an ad hoc multiplier.
 
 # ================================================================================
-NATURAL VALIDATION CANDIDATES
+# NATURAL VALIDATION CANDIDATES
 
-1. PHOTOSYNTHESIS (LHC-II, FMO complex)
-- Search pigment pair distances for φ-ratio spacing
-- Compare transfer rates at φ vs non-φ distances
-- Prediction: k_T(φ-pairs) > k_T(non-φ pairs)
-1. PROTEIN FOLDING / CHAPERONE BINDING
-- Engineer binding sites with φ-ratio contact spacing
-- Measure activation energy ΔG‡
-- Prediction: Lower ΔG‡ for φ-configured sites
-1. QUASICRYSTAL PHONON TRANSMISSION
-- Measure stress-strain coupling at atomic φ-distances
-- Compare to non-φ atomic separations
-- Prediction: Enhanced transmission at φ-distances
-1. NANOSTRUCTURE PERMITTIVITY
-- Measure local ε_eff in φ-structured materials
-- Compare to Maxwell-Garnett / Bruggeman predictions
-- Prediction: Anomalous ε_eff at φ-geometric configurations
+# 1. PHOTOSYNTHESIS (LHC-II, FMO complex)
+# - Search pigment pair distances for φ-ratio spacing
+# - Compare transfer rates at φ vs non-φ distances
+# - Prediction: k_T(φ-pairs) > k_T(non-φ pairs)
+# 1. PROTEIN FOLDING / CHAPERONE BINDING
+# - Engineer binding sites with φ-ratio contact spacing
+# - Measure activation energy ΔG‡
+# - Prediction: Lower ΔG‡ for φ-configured sites
+# 1. QUASICRYSTAL PHONON TRANSMISSION
+# - Measure stress-strain coupling at atomic φ-distances
+# - Compare to non-φ atomic separations
+# - Prediction: Enhanced transmission at φ-distances
+# 1. NANOSTRUCTURE PERMITTIVITY
+# - Measure local ε_eff in φ-structured materials
+# - Compare to Maxwell-Garnett / Bruggeman predictions
+# - Prediction: Anomalous ε_eff at φ-geometric configurations
 
-================================================================================
-"""
+# ================================================================================
+# """
 
 # =============================================================================
 
@@ -486,13 +472,12 @@ NATURAL VALIDATION CANDIDATES
 
 # =============================================================================
 
-if **name** == "**main**":
-print("=" * 70)
+if __name__ == "__main__":
+    print("=" * 70)
 print("PHI-ENHANCED FRET VALIDATION FRAMEWORK")
 print("Core Test Equations for Cross-Domain Validation")
 print("=" * 70)
 
-```
 # Standard Förster radius
 R0 = 5e-9  # 5 nm
 
@@ -543,4 +528,3 @@ print("\n" + "-" * 70)
 print("4. CORE EQUATIONS")
 print("-" * 70)
 print(CORE_EQUATIONS)
-```

@@ -77,19 +77,16 @@ def generate_random_seed_dirichlet(alpha: float = 0.8) -> np.ndarray:
     Higher alpha values produce more uniform seeds.
     """
 return np.random.dirichlet(np.ones(N_VERTICES) * alpha)
-```
 
 def generate_seed_batch(n_seeds: int, alpha: float = 0.8,
 seed: int = None) -> List[np.ndarray]:
-"""
+    """
 Generate batch of random seeds.
 """
 if seed is not None:
-np.random.seed(seed)
+    np.random.seed(seed)
 
-```
 return [generate_random_seed_dirichlet(alpha) for _ in range(n_seeds)]
-```
 
 # =============================================================================
 
@@ -113,11 +110,10 @@ for i in range(n):
         distances[j, i] = dist
         
 return distances
-```
 
 def find_collisions(distances: np.ndarray,
 tol: float = 1e-10) -> List[Tuple[int, int, float]]:
-"""
+    """
 Find pairs of seeds with nearly identical fingerprints.
 
 Returns list of (i, j, distance) tuples for collisions.
@@ -131,7 +127,6 @@ for i in range(n):
             collisions.append((i, j, distances[i, j]))
             
 return collisions
-```
 
 # =============================================================================
 
@@ -424,16 +419,14 @@ return results
 def save_results(results: Dict, filename: str = None):
     """Save results to JSON file."""
 if filename is None:
-timestamp = int(time.time())
+    timestamp = int(time.time())
 filename = f"uniqueness_results_{timestamp}.json"
 
-```
 with open(filename, 'w') as f:
     json.dump(results, f, indent=2)
 
 print(f"Results saved to {filename}")
 return filename
-```
 
 # =============================================================================
 
@@ -443,7 +436,7 @@ return filename
 
 def quick_test(n_seeds: int = 10, steps: int = 5,
 use_dynamic: bool = True) -> bool:
-"""
+    """
 Quick validation test with minimal configuration.
 
 Returns True if all seeds recovered successfully.
@@ -456,7 +449,6 @@ config['use_dynamic'] = use_dynamic
 results = run_uniqueness_test(config, verbose=True)
 
 return results['summary']['overall_success_rate'] == 1.0
-```
 
 # =============================================================================
 
@@ -464,7 +456,7 @@ return results['summary']['overall_success_rate'] == 1.0
 
 # =============================================================================
 
-if **name** == "**main**":
+# if **name** == "**main**":
 print("=" * 70)
 print("8D SEED EXPANSION: UNIQUENESS VALIDATION")
 print("=" * 70)
@@ -475,7 +467,6 @@ print("2. Original seeds can be recovered from structures (reversibility)")
 print("3. The mapping seed ↔ structure is bijective")
 print()
 
-```
 # Run with default config (40 seeds)
 results = run_uniqueness_test(verbose=True)
 
@@ -505,7 +496,7 @@ is MINIMAL for the information content.
 
 """)
 else:
-print(f"""
+    print(f"""
 ⚠ SOME TESTS FAILED
 
 Success rate: {100*success_rate:.1f}%

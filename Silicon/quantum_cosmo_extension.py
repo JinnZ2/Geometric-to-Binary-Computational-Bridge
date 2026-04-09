@@ -47,71 +47,70 @@ PHI_INV = (np.sqrt(5) + 1) / 2  # ≈ 1.618034
 
 # CURRENT RESEARCH STATUS: ANOMALOUS TRANSPORT IN QUASIPERIODIC STRUCTURES
 
-KEY FINDING: Disorder-Enhanced Transport in Photonic Quasicrystals
-Source: Levi et al., Science 332, 1541-1544 (2011)
+# KEY FINDING: Disorder-Enhanced Transport in Photonic Quasicrystals
+# Source: Levi et al., Science 332, 1541-1544 (2011)
 
 """Here, we present direct experimental observation of disorder-enhanced wave
 transport in quasicrystals, which contrasts directly with the characteristic
 suppression of transport by disorder."""
 
-SIGNIFICANCE: This directly contradicts classical expectations. In periodic
-systems, disorder suppresses transport (Anderson localization). In quasicrystals,
-disorder initially ENHANCES transport before eventually causing localization.
+# SIGNIFICANCE: This directly contradicts classical expectations. In periodic
+# systems, disorder suppresses transport (Anderson localization). In quasicrystals,
+# disorder initially ENHANCES transport before eventually causing localization.
 
-THE OPEN QUESTION: Does this enhancement correlate specifically with φ-ratio
-distances, or is it a more general quasicrystalline effect?
+# THE OPEN QUESTION: Does this enhancement correlate specifically with φ-ratio
+# distances, or is it a more general quasicrystalline effect?
 
------
+# -----
 
-## RELATED FINDINGS:
+# RELATED FINDINGS:
 
-1. FIBONACCI OPTICAL LATTICES (Singh et al., Phys. Rev. A 92, 063426, 2015)
-- Created tunable quasiperiodic potentials using optical lattice cut-and-project
-- Observed multifractal energy spectrum
-- Demonstrated "singular continuous" momentum-space structure
-- Edge states controllable through lattice geometry
-1. TOPOLOGICAL PHOTONIC QUASICRYSTALS (Phys. Rev. X 6, 011016, 2016)
-- 2D photonic Penrose tiling exhibits topological insulating phase
-- Protected unidirectional edge transport
-- Fractal topological spectrum emerges with system size
+# 1. FIBONACCI OPTICAL LATTICES (Singh et al., Phys. Rev. A 92, 063426, 2015)
+# - Created tunable quasiperiodic potentials using optical lattice cut-and-project
+# - Observed multifractal energy spectrum
+# - Demonstrated "singular continuous" momentum-space structure
+# - Edge states controllable through lattice geometry
+# 1. TOPOLOGICAL PHOTONIC QUASICRYSTALS (Phys. Rev. X 6, 011016, 2016)
+# - 2D photonic Penrose tiling exhibits topological insulating phase
+# - Protected unidirectional edge transport
+# - Fractal topological spectrum emerges with system size
 - "Topological structure emerges as function of system size"
-1. QUANTUM WALKS IN FIBONACCI FIBERS (Nature Scientific Reports, 2020)
-- First demonstration of quantum walks in Fibonacci-structured optical fibers
-- "Localized quantum walks in quasiperiodic photonic lattices are highly
-  controllable due to the deterministic disordered nature"
-- Provides platform for quantum information processing
-1. REENTRANT DELOCALIZATION (Phys. Rev. Research 5, 033170, 2023)
-- Localization in 1D photonic quasicrystals followed by SECOND delocalization
+# 1. QUANTUM WALKS IN FIBONACCI FIBERS (Nature Scientific Reports, 2020)
+# - First demonstration of quantum walks in Fibonacci-structured optical fibers
+# - "Localized quantum walks in quasiperiodic photonic lattices are highly
+  # controllable due to the deterministic disordered nature"
+# - Provides platform for quantum information processing
+# 1. REENTRANT DELOCALIZATION (Phys. Rev. Research 5, 033170, 2023)
+# - Localization in 1D photonic quasicrystals followed by SECOND delocalization
 - "Example of a reentrant transition"
-- Suggests complex interplay between quasiperiodicity and localization
-1. PHOTOSYNTHETIC ENERGY TRANSFER
-- LHC-II achieves ~95% quantum efficiency in energy transfer
-- Dense pigment packing with inter-pigment distances as short as 0.97 nm
-- Quantum coherence demonstrated (Engel et al., 2007)
-- Pigment spacing "optimized over millions of years"
+# - Suggests complex interplay between quasiperiodicity and localization
+# 1. PHOTOSYNTHETIC ENERGY TRANSFER
+# - LHC-II achieves ~95% quantum efficiency in energy transfer
+# - Dense pigment packing with inter-pigment distances as short as 0.97 nm
+# - Quantum coherence demonstrated (Engel et al., 2007)
+# - Pigment spacing "optimized over millions of years"
    
-   UNTESTED: Correlation between specific pigment pair distances and φ-ratios
+# UNTESTED: Correlation between specific pigment pair distances and φ-ratios
 
------
+# -----
 
-## CRITICAL GAP IN CURRENT RESEARCH:
+# CRITICAL GAP IN CURRENT RESEARCH:
 
-While anomalous transport in quasiperiodic structures is well-documented,
-NO STUDY HAS SPECIFICALLY TESTED whether the enhancement correlates with
-φ-ratio distances versus being a general effect of quasiperiodicity.
+# While anomalous transport in quasiperiodic structures is well-documented,
+# NO STUDY HAS SPECIFICALLY TESTED whether the enhancement correlates with
+# φ-ratio distances versus being a general effect of quasiperiodicity.
 
-PROPOSED TEST:
-Compare transfer rates between:
+# PROPOSED TEST:
+# Compare transfer rates between:
 
-- Pairs at r/R₀ ≈ φⁿ (φ-optimal distances)
-- Pairs at other distances in same quasicrystal
-- Pairs at same distances in periodic crystal
+# - Pairs at r/R₀ ≈ φⁿ (φ-optimal distances)
+# - Pairs at other distances in same quasicrystal
+# - Pairs at same distances in periodic crystal
 
-If φ-optimal pairs show statistically higher rates, the φ-enhancement
-hypothesis is supported.
+# If φ-optimal pairs show statistically higher rates, the φ-enhancement
+# hypothesis is supported.
 
-================================================================================
-"""
+# ================================================================================
 
 # =============================================================================
 
@@ -123,13 +122,11 @@ def entanglement_fidelity_classical(r: float, r_c: float, gamma: float) -> float
     """
     Classical model for entanglement fidelity decay with distance.
     
-    F = exp(-γ × (r/r_c)²)
+    # F = exp(-γ × (r/r_c)²)
     
     Standard exponential decay model.
     """
-    pass
-return np.exp(-gamma * (r / r_c) ** 2)
-```
+    return np.exp(-gamma * (r / r_c) ** 2)
 
 def entanglement_fidelity_phi_enhanced(r: float, r_c: float, gamma: float) -> float:
     """
@@ -153,13 +150,12 @@ for n in range(1, 5):
 
 # Enhanced fidelity (bounded by 1)
 return min(classical * enhancement, 1.0)
-```
 
 def anderson_localization_length(disorder: float, phi_structure: bool = False) -> float:
     """
     Localization length as function of disorder strength.
     
-    Classical: ξ ∝ 1/W² (localization length decreases with disorder)
+    # Classical: ξ ∝ 1/W² (localization length decreases with disorder)
     
     In quasicrystals: Initial increase then decrease (non-monotonic)
     """
@@ -179,16 +175,15 @@ if phi_structure:
 else:
     # Classical Anderson localization
     return 10 / disorder ** 2
-```
 
 def coherent_transport_efficiency(r: float, disorder: float,
-structure: str = 'periodic') -> float:
-"""
-Model coherent transport efficiency through different media.
+                                   structure: str = 'periodic') -> float:
+    """
+    Model coherent transport efficiency through different media.
 
-structure: 'periodic', 'random', 'fibonacci', 'penrose'
-"""
-base_decay = np.exp(-r / 100)  # Base exponential decay
+    structure: 'periodic', 'random', 'fibonacci', 'penrose'
+    """
+    base_decay = np.exp(-r / 100)  # Base exponential decay
 
 if structure == 'periodic':
     # Standard Bloch transport
@@ -215,7 +210,6 @@ elif structure in ['fibonacci', 'penrose']:
 
 else:
     return base_decay
-```
 
 # =============================================================================
 
@@ -225,7 +219,7 @@ else:
 
 def phi_qubit_array_1d(n_qubits: int, base_spacing: float) -> np.ndarray:
     """
-    Design 1D qubit array with φ-ratio spacing.
+    # Design 1D qubit array with φ-ratio spacing.
     
     Spacing follows Fibonacci pattern: L, S, L, S, L, L, S, ...
     where L/S = φ
@@ -253,11 +247,10 @@ for i in range(min(n_qubits - 1, len(fib))):
     positions.append(positions[-1] + spacing)
 
 return np.array(positions)
-```
 
 def qubit_coupling_matrix_phi(positions: np.ndarray,
 coupling_range: float) -> np.ndarray:
-"""
+    """
 Calculate coupling matrix for qubit array.
 
 Enhanced coupling at φ-ratio distances.
@@ -286,7 +279,6 @@ for i in range(n):
         C[i, j] = base * enhancement
 
 return C
-```
 
 # =============================================================================
 
@@ -298,11 +290,10 @@ def bao_scale_normalized_distance(d_physical: float, r_bao: float = 150.0) -> fl
     """
     Normalize distance by baryon acoustic oscillation scale.
     
-    r_BAO ≈ 150 Mpc (comoving)
+    # r_BAO ≈ 150 Mpc (comoving)
     """
     pass
 return d_physical / r_bao
-```
 
 def galaxy_correlation_phi_prediction(r: float, r_bao: float = 150.0) -> float:
     """
@@ -325,7 +316,6 @@ for n in range(1, 4):
     phi_excess += 0.1 * np.exp(-((ratio - phi_n) ** 2) / (2 * sigma_n ** 2))
 
 return xi_standard * (1 + phi_excess)
-```
 
 def spin_alignment_correlation(theta: float, phi_separation: bool = False) -> float:
     """
@@ -342,7 +332,6 @@ if phi_separation:
     return base * 1.2  # 20% enhancement
 else:
     return base
-```
 
 # =============================================================================
 
@@ -402,73 +391,73 @@ return {
 
 # EXPERIMENTAL PROPOSALS FOR PHI-ENHANCEMENT VALIDATION
 
-1. SUPERCONDUCTING QUBIT ARRAY
+# 1. SUPERCONDUCTING QUBIT ARRAY
 
------
+# -----
 
-Design: Fabricate qubit array with Fibonacci-sequence spacing
-Compare to uniform spacing array with same average density
+# Design: Fabricate qubit array with Fibonacci-sequence spacing
+# Compare to uniform spacing array with same average density
 
-Measurement: Two-qubit gate fidelity as function of pair separation
-Entanglement generation rate between non-adjacent qubits
+# Measurement: Two-qubit gate fidelity as function of pair separation
+# Entanglement generation rate between non-adjacent qubits
 
-Prediction: Pairs at r = r_c × φⁿ show higher fidelity than
-non-φ pairs at similar distances
+# Prediction: Pairs at r = r_c × φⁿ show higher fidelity than
+# non-φ pairs at similar distances
 
-Resources: Standard transmon fabrication, ~20 qubits sufficient
-Timeline: 6-12 months with existing facilities
+# Resources: Standard transmon fabrication, ~20 qubits sufficient
+# Timeline: 6-12 months with existing facilities
 
-1. PHOTOSYNTHETIC COMPLEX ANALYSIS
+# 1. PHOTOSYNTHETIC COMPLEX ANALYSIS
 
------
+# -----
 
-Design: Statistical analysis of existing LHC-II crystal structures
-Extract all pigment pair distances
-Correlate with measured energy transfer rates
+# Design: Statistical analysis of existing LHC-II crystal structures
+# Extract all pigment pair distances
+# Correlate with measured energy transfer rates
 
-Analysis: Plot k_T(r) vs r/R₀
-Test for excess clustering of high-k_T pairs at φⁿ ratios
-Compare to null hypothesis (random distribution)
+# Analysis: Plot k_T(r) vs r/R₀
+# Test for excess clustering of high-k_T pairs at φⁿ ratios
+# Compare to null hypothesis (random distribution)
 
-Prediction: Pigment pairs at φ-ratio distances show statistically
-higher transfer rates
+# Prediction: Pigment pairs at φ-ratio distances show statistically
+# higher transfer rates
 
-Resources: Computational analysis of PDB structures
-Timeline: 3-6 months
+# Resources: Computational analysis of PDB structures
+# Timeline: 3-6 months
 
-1. FIBONACCI OPTICAL LATTICE TRANSPORT
+# 1. FIBONACCI OPTICAL LATTICE TRANSPORT
 
------
+# -----
 
-Design: Create 1D Fibonacci optical lattice (existing technology)
-Measure local transmission between specific sites
+# Design: Create 1D Fibonacci optical lattice (existing technology)
+# Measure local transmission between specific sites
 
-Measurement: Probe transport between sites at φ-ratio separations
-vs sites at non-φ separations
-Vary disorder strength to map transition
+# Measurement: Probe transport between sites at φ-ratio separations
+# vs sites at non-φ separations
+# Vary disorder strength to map transition
 
-Prediction: φ-separated sites maintain coherent transport to higher
-disorder levels than non-φ sites
+# Prediction: φ-separated sites maintain coherent transport to higher
+# disorder levels than non-φ sites
 
-Resources: Cold atom apparatus with optical lattice capability
-Timeline: 6-12 months
+# Resources: Cold atom apparatus with optical lattice capability
+# Timeline: 6-12 months
 
-1. PENROSE TILING PHONONIC CRYSTAL
+# 1. PENROSE TILING PHONONIC CRYSTAL
 
------
+# -----
 
-Design: Fabricate phononic crystal with Penrose tiling geometry
-Measure acoustic transmission between selected node pairs
+# Design: Fabricate phononic crystal with Penrose tiling geometry
+# Measure acoustic transmission between selected node pairs
 
-Measurement: Transmission coefficient T(r) for specific distances
-Map correlation between T and proximity to φⁿ×L₀
+# Measurement: Transmission coefficient T(r) for specific distances
+# Map correlation between T and proximity to φⁿ×L₀
 
-Prediction: Enhanced transmission at φ-ratio distances
+# Prediction: Enhanced transmission at φ-ratio distances
 
-Resources: Standard lithography for phononic fabrication
-Timeline: 6-12 months
+# Resources: Standard lithography for phononic fabrication
+# Timeline: 6-12 months
 
-================================================================================
+# ================================================================================
 """
 
 # =============================================================================
@@ -483,7 +472,6 @@ print("QUANTUM-COSMOLOGICAL EXTENSION")
 print("Phi-Enhanced Coupling Across Scales")
 print("=" * 70)
 
-```
 print(RESEARCH_STATUS)
 
 print("\n" + "-" * 70)
@@ -564,23 +552,23 @@ print("SUMMARY")
 print("=" * 70)
 print("""
 
-KEY FINDINGS FROM LITERATURE REVIEW:
+# KEY FINDINGS FROM LITERATURE REVIEW:
 
-1. DISORDER-ENHANCED TRANSPORT is experimentally confirmed in photonic
-   quasicrystals (Science 2011). This anomalous behavior contrasts with
-   classical Anderson localization.
-1. TOPOLOGICAL PROTECTION in quasicrystalline structures provides robust
-   edge states (Phys. Rev. X 2016).
-1. QUANTUM COHERENCE in photosynthesis achieves ~95% efficiency through
-   optimized pigment geometry (multiple studies).
-1. FIBONACCI OPTICAL LATTICES create controllable quasiperiodic potentials
-   for quantum simulation (Phys. Rev. A 2015).
+# 1. DISORDER-ENHANCED TRANSPORT is experimentally confirmed in photonic
+# quasicrystals (Science 2011). This anomalous behavior contrasts with
+# classical Anderson localization.
+# 1. TOPOLOGICAL PROTECTION in quasicrystalline structures provides robust
+# edge states (Phys. Rev. X 2016).
+# 1. QUANTUM COHERENCE in photosynthesis achieves ~95% efficiency through
+# optimized pigment geometry (multiple studies).
+# 1. FIBONACCI OPTICAL LATTICES create controllable quasiperiodic potentials
+# for quantum simulation (Phys. Rev. A 2015).
 
-CRITICAL GAP:
-No study has specifically tested whether the observed anomalous effects
-correlate with φ-ratio distances. This is the key validation test for
-the phi-enhanced coupling hypothesis.
+# CRITICAL GAP:
+# No study has specifically tested whether the observed anomalous effects
+# correlate with φ-ratio distances. This is the key validation test for
+# the phi-enhanced coupling hypothesis.
 
-The experimental proposals above would directly address this gap using
-existing technology platforms.
-""")
+# The experimental proposals above would directly address this gap using
+# existing technology platforms.
+# """)

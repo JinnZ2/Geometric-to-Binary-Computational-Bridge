@@ -30,7 +30,6 @@ class CoDopingConfig:
 # Optimal strain from single-dopant analysis
 optimal_strain: float = 1.5  # % (to be determined from Er-only DFT)
 
-```
 # Distance scan parameters
 distance_min: float = 3.0  # Å (nearest neighbor Si distance)
 distance_max: float = 10.0  # Å
@@ -45,7 +44,6 @@ base_dft_config: Optional[DFTConfig] = None
 # Analysis parameters
 temperature: float = 300.0  # K
 target_binding_energy: float = 0.5  # eV (minimum for stable complex at 300K)
-```
 
 @dataclass
 class CoDopingResult:
@@ -63,7 +61,6 @@ force_constants: np.ndarray  # 3x3 Hessian matrix at Er site (eV/Å²)
 class ErPCoDopingAnalyzer:
     """Analyzer for Er-P co-doping in strained Si"""
 
-```
 def __init__(self, config: CoDopingConfig):
     self.config = config
     self.results: List[CoDopingResult] = []
@@ -459,13 +456,11 @@ def export_results(self, filepath: str):
         json.dump(data, f, indent=2)
     
     print(f"✓ Exported co-doping results to {filepath}")
-```
 
 def generate_codoping_scan_inputs(config: CoDopingConfig, base_dir: str = "./codoping_inputs"):
     """Generate all DFT inputs for Er-P co-doping distance scan"""
 analyzer = ErPCoDopingAnalyzer(config)
 
-```
 distances = np.arange(
     config.distance_min,
     config.distance_max + config.distance_increment/2,
@@ -509,11 +504,10 @@ with open(ref_file, 'w') as f:
 print(f"✓ Written reference calculation instructions to {ref_file}\n")
 
 return analyzer
-```
 
-if **name** == "**main**":
+if __name__ == "__main__":
 # Example usage
-config = CoDopingConfig(
+    config = CoDopingConfig(
 optimal_strain=1.5,  # From single-dopant DFT
 distance_min=3.0,
 distance_max=10.0,
@@ -522,7 +516,6 @@ temperature=300.0,
 target_binding_energy=0.5
 )
 
-```
 print("\n🧪 Er-P Co-Doping Analysis")
 print("=" * 60)
 print(f"Goal: Find d* that maximizes E_b")
@@ -530,4 +523,3 @@ print(f"Target: E_b > {config.target_binding_energy:.2f} eV for {config.temperat
 print("=" * 60)
 
 analyzer = generate_codoping_scan_inputs(config)
-```

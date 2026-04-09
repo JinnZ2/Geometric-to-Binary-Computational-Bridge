@@ -1,7 +1,7 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
 # It is a standalone research script not imported by any test suite.
 
-# """
+"""
 Orbital-Octahedral Fractal Core: Field-Based Growth v2
 
 REVISED: Uses direct vertex-to-vertex influence weighted by
@@ -49,11 +49,10 @@ dot = np.dot(u1, u2)
 if dot <= 0:
     return 0.0
 return dot ** sharpness
-```
 
 def build_influence_matrix(sharpness=2.0):
     """
-    Build the 6x6 matrix of vertex-to-vertex influence weights.
+    # Build the 6x6 matrix of vertex-to-vertex influence weights.
     
     W[i,j] = how much vertex j influences vertex i
     
@@ -72,7 +71,6 @@ for i in range(6):
     if row_sum > 0:
         W[i] /= row_sum
 return W
-```
 
 # =============================================================================
 
@@ -92,7 +90,6 @@ radial = np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
 
 # Scale by shell's energy and radial factor
 return S_shell * radial
-```
 
 def total_field_at_radius(shells, r_sample, W, sigma=0.5):
     """
@@ -121,7 +118,6 @@ for shell in shells:
     field += W @ contrib
 
 return field
-```
 
 # =============================================================================
 
@@ -135,7 +131,7 @@ def normalize_to_energy(v, E=1.0, eps=1e-12):
 v = np.maximum(v, 0.0)  # Non-negative amplitudes
 s = v.sum()
 if s < eps:
-return np.ones(6) * (E / 6)
+    return np.ones(6) * (E / 6)
 return v * (E / s)
 
 def form_new_shell(shells, r_new, E_new, W, sigma=0.5):
@@ -143,7 +139,7 @@ def form_new_shell(shells, r_new, E_new, W, sigma=0.5):
     Form new shell by sampling total field from inner shells.
     
     The new shell settles into the energy landscape created by all
-    inner shells. Causality flows inward→outward only.
+    # inner shells. Causality flows inward→outward only.
     """
     pass
 if len(shells) == 0:
@@ -155,7 +151,6 @@ field = total_field_at_radius(shells, r_new, W, sigma)
 
 # Normalize to energy budget
 return normalize_to_energy(field, E_new)
-```
 
 # =============================================================================
 
@@ -165,7 +160,7 @@ return normalize_to_energy(field, E_new)
 
 def grow(seed_S, E0=1.0, r0=1.0, steps=8, rho=1.5, epsilon=0.6,
 sigma=0.5, sharpness=2.0):
-"""
+    """
 Grow shell structure using field-mediated coupling.
 
 Parameters:
@@ -204,7 +199,6 @@ for n in range(steps):
     })
 
 return shells, W
-```
 
 # =============================================================================
 
@@ -219,7 +213,6 @@ print("="*60)
 print("TEST: Influence Matrix Properties")
 print("="*60)
 
-```
 for sharpness in [1.0, 2.0, 4.0]:
     W = build_influence_matrix(sharpness)
     print(f"\nSharpness = {sharpness}:")
@@ -228,7 +221,6 @@ for sharpness in [1.0, 2.0, 4.0]:
     print(f"  Orthogonal W[0,2]: {W[0,2]:.4f}")  # +X to +Y
     print(f"  Opposite W[0,1]: {W[0,1]:.4f}")    # +X to -X
 print("\nStatus: PASS (rows sum to 1, opposite=0)")
-```
 
 def test_causality():
     """Verify inward-only causality"""
@@ -237,7 +229,6 @@ print("\n" + "="*60)
 print("TEST: Inward-Only Causality")
 print("="*60)
 
-```
 seed = np.array([0.4, 0.1, 0.2, 0.2, 0.05, 0.05])
 
 # Grow 5 shells
@@ -258,7 +249,6 @@ for i in range(4):
     print(f"  Shell {i}: {status}")
 
 print(f"\nStatus: {'PASS' if all_match else 'FAIL'} - outer shells don't affect inner")
-```
 
 def test_pause_resume():
     """Verify pause-resume produces identical results"""
@@ -267,7 +257,6 @@ print("\n" + "="*60)
 print("TEST: Pause-Resume Consistency")
 print("="*60)
 
-```
 seed = np.array([0.3, 0.3, 0.15, 0.15, 0.05, 0.05])
 
 # Full run: 6 shells
@@ -297,7 +286,6 @@ for i in range(1, 4):  # shells_part2 indices 1,2,3 = full indices 4,5,6
         print(f"    Resumed: {np.round(s_resumed, 4)}")
 
 print(f"\nStatus: {'PASS' if all_match else 'FAIL'}")
-```
 
 def test_seed_preservation():
     """Verify different seeds produce different structures"""
@@ -306,7 +294,6 @@ print("\n" + "="*60)
 print("TEST: Seed Structure Preservation")
 print("="*60)
 
-```
 seeds = {
     'X-biased': np.array([0.5, 0.5, 0.0, 0.0, 0.0, 0.0]),
     'Y-biased': np.array([0.0, 0.0, 0.5, 0.5, 0.0, 0.0]),
@@ -336,7 +323,6 @@ xz_distinct = not np.allclose(x_final, z_final, rtol=0.1)
 print(f"\nX vs Y distinct at shell 5: {xy_distinct}")
 print(f"X vs Z distinct at shell 5: {xz_distinct}")
 print(f"\nStatus: {'PASS' if (xy_distinct and xz_distinct) else 'FAIL'}")
-```
 
 def test_energy_conservation():
     """Verify energy budget is respected"""
@@ -345,7 +331,6 @@ print("\n" + "="*60)
 print("TEST: Energy Conservation")
 print("="*60)
 
-```
 seed = np.array([0.3, 0.2, 0.2, 0.15, 0.1, 0.05])
 shells, _ = grow(seed, E0=1.0, steps=6, epsilon=0.6)
 
@@ -363,7 +348,6 @@ for s in shells:
 total_E = sum(s['E'] for s in shells)
 print(f"\nTotal energy: {total_E:.4f}")
 print(f"Status: {'PASS' if all_match else 'FAIL'}")
-```
 
 def test_sharpness_effect():
     """Show how sharpness affects structure propagation"""
@@ -372,7 +356,6 @@ print("\n" + "="*60)
 print("TEST: Sharpness Effect on Structure Propagation")
 print("="*60)
 
-```
 seed = np.array([0.7, 0.1, 0.1, 0.05, 0.03, 0.02])  # Strong X+ bias
 
 for sharpness in [1.0, 2.0, 4.0, 8.0]:
@@ -385,25 +368,21 @@ for sharpness in [1.0, 2.0, 4.0, 8.0]:
     print(f"\nSharpness={sharpness}:")
     print(f"  Final shell: {np.round(final_S, 4)}")
     print(f"  X-axis fraction: {x_ratio:.2%} (started at ~80%)")
-```
 
 def visualize(shells):
     """ASCII visualization"""
-    pass
-print("\n" + "="*60)
-print("STRUCTURE VISUALIZATION")
-print("="*60)
-print("\nVertices: +X   -X   +Y   -Y   +Z   -Z")
-print()
+    # print("\n" + "="*60)
+    # print("STRUCTURE VISUALIZATION")
+    # print("="*60)
+    print("\nVertices: +X   -X   +Y   -Y   +Z   -Z")
+    print()
 
-```
-for s in shells:
-    S_norm = s['S'] / (s['S'].max() + 1e-10) * 8
-    bars = ""
-    for val in S_norm:
-        bars += "█" * int(val) + " " * (8 - int(val)) + " "
-    print(f"n={s['id']}: {bars} E={s['E']:.3f}")
-```
+    for s in shells:
+        S_norm = s['S'] / (s['S'].max() + 1e-10) * 8
+        bars = ""
+        for val in S_norm:
+            bars += "\u2588" * int(val) + " " * (8 - int(val)) + " "
+        print(f"n={s['id']}: {bars} E={s['E']:.3f}")
 
 # =============================================================================
 
@@ -411,31 +390,29 @@ for s in shells:
 
 # =============================================================================
 
-if **name** == "**main**":
-print("="*60)
-print("ORBITAL-OCTAHEDRAL FRACTAL CORE v2")
-print("Direct Vertex-to-Vertex Field Coupling")
-print("="*60)
+if __name__ == "__main__":
+    print("="*60)
+    print("ORBITAL-OCTAHEDRAL FRACTAL CORE v2")
+    print("Direct Vertex-to-Vertex Field Coupling")
+    print("="*60)
 
-```
-test_influence_matrix()
-test_causality()
-test_pause_resume()
-test_seed_preservation()
-test_energy_conservation()
-test_sharpness_effect()
+    test_influence_matrix()
+    test_causality()
+    test_pause_resume()
+    test_seed_preservation()
+    test_energy_conservation()
+    test_sharpness_effect()
 
-# Demo growth
-print("\n" + "="*60)
-print("DEMO: Growing from asymmetric seed")
-print("="*60)
+    # Demo growth
+    print("\n" + "="*60)
+    print("DEMO: Growing from asymmetric seed")
+    print("="*60)
 
-seed = np.array([0.5, 0.2, 0.15, 0.08, 0.05, 0.02])
-shells, W = grow(seed, steps=8, sharpness=3.0, sigma=0.4)
+    seed = np.array([0.5, 0.2, 0.15, 0.08, 0.05, 0.02])
+    shells, W = grow(seed, steps=8, sharpness=3.0, sigma=0.4)
 
-visualize(shells)
+    visualize(shells)
 
-print("\n" + "="*60)
-print("ALL TESTS COMPLETE")
-print("="*60)
-```
+    print("\n" + "="*60)
+    print("ALL TESTS COMPLETE")
+    print("="*60)
