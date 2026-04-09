@@ -113,13 +113,13 @@ Each encoder exposes pure physics / information-theory helper functions and a `B
 
 ```
 Front end/                      3D visualization (React + Three.js)
-├── App.js                        Main React application
+├── App.jsx                       Main React application
 ├── Index.html                    HTML entry point
 └── Components/
-    ├── EMSource.js                 EM field source placement
-    ├── FieldVisualization.js       Field magnitude/direction rendering
-    ├── PerformancePanel.js         Metrics display
-    └── ControlInterface.js         Interactive parameter controls
+    ├── EMSource.jsx                EM field source placement
+    ├── FieldVisualization.jsx      Field magnitude/direction rendering
+    ├── PerformancePanel.jsx        Metrics display
+    └── ControlInterface.jsx        Interactive parameter controls
 ```
 
 ### Research & Theory
@@ -132,7 +132,7 @@ Silicon/                        Hardware implementation pathway
 ├── CORE_EQUATIONS.md             Mathematical foundations
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
-Geometric-Intelligence/         Integrity & consciousness research
+geometric_intelligence/         Integrity & consciousness research
 ├── Geometric-cipher.md           Encryption via geometry
 ├── Zero-knowledge-proof.md       ZK proofs via geometry
 ├── Multi-helix*.md               Multi-dimensional symmetry patterns
@@ -280,14 +280,19 @@ The `Engine/` module provides real electromagnetic field computation:
 
 This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fieldlink.json`:
 
-| Repository                   | Role                                    |
-|------------------------------|-----------------------------------------|
-| Rosetta-Shape-Core           | Shape-to-meaning translation            |
-| Polyhedral-Intelligence      | Multi-domain geometry and glyphs        |
-| Symbolic-Defense-Protocol    | Trojan/coercion resistance              |
-| Emotions-as-Sensors          | Affect as diagnostic signals            |
-| AI-Consciousness-Sensors     | Consciousness emergence detection       |
-| Fractal-Compass-Atlas        | Directional navigation via fractals     |
+| Repository                          | Fieldlink name     | Role                                      |
+|-------------------------------------|--------------------|-------------------------------------------|
+| Mandala-Computing                   | `mandala`          | Octahedral computation engine             |
+| Rosetta-Shape-Core                  | `rosetta`          | Shape-to-meaning translation              |
+| Polyhedral-Intelligence             | `polyhedral`       | Multi-domain geometry and glyphs          |
+| Emotions-as-Sensors                 | `emotions`         | Affect as diagnostic signals              |
+| Symbolic-Defense-Protocol           | `defense`          | Trojan/coercion resistance                |
+| Coop-framework                      | `coop`             | Trust propagation and cooperative systems |
+| Cyclic-programming                  | `cyclic`           | Cyclic execution engine                   |
+| urban-resilience-sim                | `urban-resilience` | Community and resilience domain source    |
+| BioGrid2.0                         | `biogrid`          | Biological grid glyph registry            |
+| Component-failure-repurposing-database | `component-failure` | Hardware failure diagnosis and repurposing |
+| Symbolic-sensor-suite               | `symbolic-sensors` | Symbolic AI self-assessment sensors       |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
 

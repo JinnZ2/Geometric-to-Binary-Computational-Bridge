@@ -89,12 +89,10 @@
         "ref": "main",
         "paths": [
           "glyphs/**/*.json",
-          "atlas/shapes.json",
           "scrolls/*.md"
         ],
-        "mounts": [
-          { "remote": "atlas/shapes.json", "as": "atlas/remote/polyhedral/shapes.json" }
-        ],
+        "mounts": [],
+        "_note": "atlas/shapes.json does not exist upstream; removed stale mount",
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
       },
       {
@@ -211,6 +209,45 @@
           { "remote": "registry/atlas.glyphs.json", "as": "atlas/remote/biogrid/registry.json" }
         ],
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
+      },
+      {
+        "name": "component-failure",
+        "repo": "https://github.com/JinnZ2/Component-failure-repurposing-database",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "hardware_diagnostics",
+        "paths": [
+          "geometric_failure_diagnosis.py",
+          "geometric_failure_repurposing_system.py",
+          "hardware_bridge_encoder.py",
+          "geometric_monitoring_engine.py",
+          "components/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["HARDWARE.FAILURE_MODE", "HARDWARE.COMPONENT", "DIAG.GEOMETRIC"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "symbolic-sensors",
+        "repo": "https://github.com/JinnZ2/Symbolic-sensor-suite",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "sensor_framework",
+        "paths": [
+          "sensors/**/*.py",
+          "sensors/**/*.json",
+          "glyphs/**/*.json",
+          "atlas/**/*.json"
+        ],
+        "mounts": [
+          { "remote": "atlas/rosetta/bridges.json", "as": "atlas/remote/symbolic-sensors/bridges.json" }
+        ],
+        "exports": [],
+        "entities_consumed": ["SENSOR.SYMBOLIC", "SENSOR.RELATIONAL", "GLYPH.BRAID"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
       }
     ],
 
@@ -221,7 +258,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors"],
       "strategy": "deep-merge"
     },
 
