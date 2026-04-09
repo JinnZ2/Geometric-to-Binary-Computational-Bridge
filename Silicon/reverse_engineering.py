@@ -466,7 +466,7 @@ return {
 
 # =============================================================================
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 print("=" * 70)
 print("REVERSE ENGINEERING: Seed Recovery from Expanded Structure")
 print("Proving bidirectional (bijective) mapping")

@@ -94,7 +94,7 @@ def phi_resonance_factor(r: float, R0: float) -> float:
     # Sum over phi harmonics
     enhancement = 0.0
     for n in range(1, 6):
-    phi_n = PHI ** n
+        phi_n = PHI ** n
     # Resonance peaks at phi-ratio distances
     width = 0.1 * phi_n
     resonance = np.exp(-((ratio - phi_n)**2) / (2 * width**2))
@@ -171,7 +171,7 @@ def substrate_coupling_matrix(substrate_A: Dict, substrate_B: Dict,
 
     # Normalize rows
     for i in range(6):
-    row_sum = M[i].sum()
+        row_sum = M[i].sum()
     if row_sum > 0:
         M[i] /= row_sum
 
@@ -242,8 +242,8 @@ def simulate_transfer(S_initial: np.ndarray,
     fidelity = []
     S_A0_norm = S_A0 / np.linalg.norm(S_A0)
     for i in range(len(sol.t)):
-    S_B_norm = S_B[:, i] / (np.linalg.norm(S_B[:, i]) + 1e-12)
-    fidelity.append(np.dot(S_A0_norm, S_B_norm))
+        S_B_norm = S_B[:, i] / (np.linalg.norm(S_B[:, i]) + 1e-12)
+        fidelity.append(np.dot(S_A0_norm, S_B_norm))
 
     return {
     't': sol.t,
@@ -345,8 +345,8 @@ def network_transfer_efficiency(S_in: np.ndarray, C: np.ndarray,
     S = S_in.copy()
 
     for _ in range(n_hops):
-    S = C @ S
-    S = S / S.sum()  # Renormalize
+        S = C @ S
+        S = S / S.sum()  # Renormalize
 
     # Efficiency: pattern preservation
     efficiency = np.dot(S_in / np.linalg.norm(S_in), 

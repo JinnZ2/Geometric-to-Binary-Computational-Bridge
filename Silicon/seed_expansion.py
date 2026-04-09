@@ -339,7 +339,7 @@ return max_deviation < 1e-10
 
 # =============================================================================
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 print("="*60)
 print("PHYSICS-COMPLIANT SEED EXPANSION")
 print("="*60)

@@ -335,7 +335,7 @@ print("=" * 70)
 
 # =============================================================================
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 print("Testing with embedded signal (should detect)…")
 pairs_signal = generate_lhcii_pigment_data(seed=42, embed_signal=True)
 results_signal = run_complete_analysis(pairs_signal)

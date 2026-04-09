@@ -419,7 +419,7 @@ return np.concatenate(arr)
 
 # =============================================================================
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 print("=" * 70)
 print("8D HYPER-OCTAHEDRAL SEED EXPANSION")
 print("Collaborative Development: Human insight + AI implementation")

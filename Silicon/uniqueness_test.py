@@ -456,7 +456,7 @@ return results['summary']['overall_success_rate'] == 1.0
 
 # =============================================================================
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 print("=" * 70)
 print("8D SEED EXPANSION: UNIQUENESS VALIDATION")
 print("=" * 70)

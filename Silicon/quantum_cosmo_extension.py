@@ -466,7 +466,7 @@ return {
 
 # =============================================================================
 
-if **name** == "**main**":
+if __name__ == "__main__":
 print("=" * 70)
 print("QUANTUM-COSMOLOGICAL EXTENSION")
 print("Phi-Enhanced Coupling Across Scales")

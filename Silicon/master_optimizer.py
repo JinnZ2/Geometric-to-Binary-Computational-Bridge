@@ -505,7 +505,7 @@ print("\n# Generate final report")
 print("optimizer.generate_master_report()")
 print("=" * 70 + "\n")
 
-# if **name** == "**main**":
+# if __name__ == "__main__":
 main()
 
 
