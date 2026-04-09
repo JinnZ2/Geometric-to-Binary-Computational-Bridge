@@ -101,3 +101,29 @@ If too short, increase rate headroom (lower \(\mathcal F\), raise \(R_0\)) befor
 
 *Originated by **JinnZ2 (bioswarm)** and co-created with AI systems.  
 License: CC BY-SA 4.0 (text), MIT (code).*
+
+
+Research validation:
+
+
+## 2.5 Research Validation of Control Architectures
+
+### Geometry Lock
+- DNA origami allosteric arrays with tunable energy barriers (Langecker et al., Nat. Commun. 2024)[reference:9]
+- κ² > 0.9 for engineered nonfullerene acceptors (Benatto et al., J. Mater. Chem. A 2026)[reference:10]
+
+### Spectral Servo
+- Single‑molecule Stark tuning with 1–5 nm shift and spectral diffusion suppression (Duquennoy et al., ACS Nano 2024)[reference:11]
+
+### Photonic Branching
+- 18‑fold phonon‑induced decoherence suppression in phononic crystals (Phys. Dept. UoC, Nat. Phys. 2024)[reference:12]
+- RLDOS modulation in 3D photonic band‑gap crystals (Vreman et al., 2025)[reference:13]
+
+### Triplet Reservoir
+- Triplet mitigation strategies for FRET recovery (Pati et al., Nat. Methods 2024)[reference:14]
+- Exothermic rISC in INVEST emitters (Rivera Blair et al., RSC 2025)[reference:15]
+
+### Fractal Implementation
+- Rotaxane‑branched dendrimers with 42+ chromophores (Angew. Chem. 2024–2025)[reference:16]
+
+- 
