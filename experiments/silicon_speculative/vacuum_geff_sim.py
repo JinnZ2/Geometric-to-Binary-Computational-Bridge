@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — vacuum effective coupling simulation
 """
 vacuum_geff_sim.py
 ==================

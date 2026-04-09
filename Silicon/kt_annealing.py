@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — kT annealing simulation
 """
 kt_annealing.py
 ===============

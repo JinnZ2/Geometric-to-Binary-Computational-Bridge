@@ -1,0 +1,98 @@
+{
+  "_comment": "Machine-readable index for AI navigation. Read this first.",
+  "project": "Geometric-to-Binary Computational Bridge",
+  "core_angle": "109.47° (tetrahedral bond angle, silicon sp3 hybridization)",
+  "encoding_unit": "1 octahedron = 8 states = 3 bits",
+
+  "verify_in_60_seconds": {
+    "description": "Run these to confirm the repo works.",
+    "commands": [
+      {"cmd": "cd GEIS && python test_simple.py", "expect": "116/116 passed"},
+      {"cmd": "python tests/test_engine.py", "expect": "58/58 passed"},
+      {"cmd": "cd experiments/c && make test", "expect": "36/36 passed"}
+    ]
+  },
+
+  "entry_points": {
+    "geis_demo": "GEIS/demo.py",
+    "bridge_convert": "scripts/bridge_convert.py",
+    "nfs_factorization": "experiments/geometric_nfs.py",
+    "c_acceleration": "experiments/c/gnfs_ctypes.py",
+    "frontend": "Front end/App.jsx"
+  },
+
+  "test_suites": {
+    "geis": {"file": "GEIS/test_simple.py", "tests": 116, "run_from": "GEIS/"},
+    "bridges": {"file": "tests/test_bridges.py", "tests": 231, "run_with": "PYTHONPATH=."},
+    "engine": {"file": "tests/test_engine.py", "tests": 58},
+    "silicon": {"file": "tests/test_silicon_modules.py"},
+    "c_nfs": {"file": "experiments/c/test_nfs.c", "tests": 36, "build": "cd experiments/c && make test"}
+  },
+
+  "bridges": {
+    "_pattern": "All inherit from bridges/abstract_encoder.py, implement from_geometry() + to_binary()",
+    "magnetic":      {"file": "bridges/magnetic_encoder.py",      "bits": 43},
+    "light":         {"file": "bridges/light_encoder.py",         "bits": 31},
+    "sound":         {"file": "bridges/sound_encoder.py",         "bits": 31},
+    "gravity":       {"file": "bridges/gravity_encoder.py",       "bits": 39},
+    "electric":      {"file": "bridges/electric_encoder.py",      "bits": 39},
+    "wave":          {"file": "bridges/wave_encoder.py",          "bits": 39},
+    "thermal":       {"file": "bridges/thermal_encoder.py",       "bits": 39},
+    "pressure":      {"file": "bridges/pressure_encoder.py",      "bits": 39},
+    "chemical":      {"file": "bridges/chemical_encoder.py",      "bits": 39},
+    "consciousness": {"file": "bridges/consciousness_encoder.py", "bits": 39},
+    "emotion":       {"file": "bridges/emotion_encoder.py",       "bits": 39}
+  },
+
+  "silicon_modules": {
+    "_note": "STATUS tag in first lines of each file. 'validated' = tested or predictions verified. 'infrastructure' = working code, used by pipeline. 'speculative' = moved to experiments/silicon_speculative/.",
+    "validated": [
+      "Silicon/core_equations.py",
+      "Silicon/magnetic_bridge_protocol.py",
+      "Silicon/octahedral_tensor.py",
+      "Silicon/tetrahedral_symmetry.py",
+      "Silicon/crystalline_storage.py",
+      "Silicon/lcea_analysis.py",
+      "Silicon/crystalline_nn_sim.py",
+      "Silicon/prototaxites_sim.py",
+      "Silicon/topological_memory.py",
+      "Silicon/hardware_bridge.py"
+    ],
+    "infrastructure": [
+      "Silicon/er_dft_framework.py",
+      "Silicon/codoping_framework.py",
+      "Silicon/master_optimizer.py",
+      "Silicon/pipeline.py",
+      "Silicon/gies_encoder.py",
+      "Silicon/octahedral_sim.py",
+      "Silicon/energy_framework.py",
+      "Silicon/thermal_coupling.py",
+      "Silicon/field_propulsion.py",
+      "Silicon/fret_coulomb_analysis.py",
+      "Silicon/fret_ecosystem.py",
+      "Silicon/kt_annealing.py",
+      "Silicon/expansion_8d.py",
+      "Silicon/orbital_octa.py",
+      "Silicon/reverse_engineering.py",
+      "Silicon/seed_expansion.py",
+      "Silicon/uniqueness_test.py"
+    ],
+    "speculative_moved_to": "experiments/silicon_speculative/"
+  },
+
+  "ecosystem": {
+    "_note": "35 sibling repos connected via .fieldlink.json. See DEPENDENCIES.md for the directed graph.",
+    "hub_repos": ["Geometric-to-Binary-Computational-Bridge", "Rosetta-Shape-Core"],
+    "fieldlink_file": ".fieldlink.json",
+    "sync_script": "fieldlink-sync.sh",
+    "atlas_mounts": "atlas/remote/"
+  },
+
+  "key_files": {
+    "CLAUDE.md": "Full project documentation and conventions",
+    "AI_INDEX.json": "This file — machine-readable navigation",
+    ".fieldlink.json": "Cross-repo sync manifest (35 repos)",
+    "DEPENDENCIES.md": "Ecosystem dependency graph",
+    "fieldlink-sync.sh": "Pulls atlas mounts from upstream repos"
+  }
+}

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — Case A demonstration script
 """
 case_a_demo.py
 ==============

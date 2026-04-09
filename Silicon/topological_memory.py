@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: validated — imported by bridges/vortex_bridge.py
 """
 topological_memory.py
 =====================

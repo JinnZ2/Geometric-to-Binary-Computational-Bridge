@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — 6D octahedral seed expansion
 # It is a standalone research script not imported by any test suite.
 
 """
@@ -63,9 +64,7 @@ def influence_weight(u_i, u_j):
     direction i if they point in compatible directions.
     Opposite directions have zero influence.
     """
-    pass
-return max(0.0, np.dot(u_i, u_j))
-```
+    return max(0.0, np.dot(u_i, u_j))
 
 def radial_envelope(r_shell, r_sample, sigma_scale=0.5):
     """
@@ -79,10 +78,8 @@ def radial_envelope(r_shell, r_sample, sigma_scale=0.5):
     to distance from origin. This ensures consistent behavior
     across all scales.
     """
-    pass
-sigma = sigma_scale * r_shell
-return np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
-```
+    sigma = sigma_scale * r_shell
+    return np.exp(-((r_sample - r_shell)**2) / (2 * sigma**2))
 
 def field_contribution(S, r_shell, r_sample, sigma_scale=0.5):
     """
@@ -93,10 +90,8 @@ def field_contribution(S, r_shell, r_sample, sigma_scale=0.5):
     
     Returns 6-vector of field values at each octahedral direction.
     """
-    pass
-f_r = radial_envelope(r_shell, r_sample, sigma_scale)
-return S * f_r
-```
+    f_r = radial_envelope(r_shell, r_sample, sigma_scale)
+    return S * f_r
 
 def total_field(shells, r_sample, W, sigma_scale=0.5):
     """
@@ -107,17 +102,15 @@ def total_field(shells, r_sample, W, sigma_scale=0.5):
     where W is the angular influence matrix.
     Only shells with r < r_sample contribute (causality).
     """
-    pass
-field = np.zeros(6)
-for shell in shells:
-    if shell['r'] >= r_sample:
-        continue  # Causality: only inner shells contribute
-    contrib = field_contribution(
-        shell['S'], shell['r'], r_sample, sigma_scale
-    )
-    field += W @ contrib
-return field
-```
+    field = np.zeros(6)
+    for shell in shells:
+        if shell['r'] >= r_sample:
+            continue  # Causality: only inner shells contribute
+        contrib = field_contribution(
+            shell['S'], shell['r'], r_sample, sigma_scale
+        )
+        field += W @ contrib
+    return field
 
 # =============================================================================
 
@@ -134,14 +127,12 @@ def normalize_to_energy(v, E, eps=1e-12):
     Ensures Σ S_i = E exactly.
     Non-negative constraint enforced.
     """
-    pass
-v = np.maximum(v, 0.0)
-total = v.sum()
-if total < eps:
-    # Uniform distribution if no field
-    return np.ones(6) * (E / 6)
-return v * (E / total)
-```
+    v = np.maximum(v, 0.0)
+    total = v.sum()
+    if total < eps:
+        # Uniform distribution if no field
+        return np.ones(6) * (E / 6)
+    return v * (E / total)
 
 # =============================================================================
 
@@ -161,17 +152,15 @@ def build_influence_matrix():
     
     Rows normalized to sum to 1.
     """
-    pass
-W = np.zeros((6, 6))
-for i in range(6):
-    for j in range(6):
-        W[i, j] = influence_weight(U[i], U[j])
-    # Normalize row
-    row_sum = W[i].sum()
-    if row_sum > 0:
-        W[i] /= row_sum
-return W
-```
+    W = np.zeros((6, 6))
+    for i in range(6):
+        for j in range(6):
+            W[i, j] = influence_weight(U[i], U[j])
+        # Normalize row
+        row_sum = W[i].sum()
+        if row_sum > 0:
+            W[i] /= row_sum
+    return W
 
 def form_shell(shells, r_new, E_new, W, sigma_scale=0.5):
     """
@@ -182,13 +171,11 @@ def form_shell(shells, r_new, E_new, W, sigma_scale=0.5):
     
     New shell settles into energy landscape created by inner shells.
     """
-    pass
-if len(shells) == 0:
-    return np.ones(6) * (E_new / 6)
+    if len(shells) == 0:
+        return np.ones(6) * (E_new / 6)
 
-field = total_field(shells, r_new, W, sigma_scale)
-return normalize_to_energy(field, E_new)
-```
+    field = total_field(shells, r_new, W, sigma_scale)
+    return normalize_to_energy(field, E_new)
 
 # =============================================================================
 
@@ -197,8 +184,8 @@ return normalize_to_energy(field, E_new)
 # =============================================================================
 
 def expand_seed(seed, E0=1.0, r0=1.0, steps=10, rho=1.5, epsilon=0.6,
-sigma_scale=0.5):
-"""
+    sigma_scale=0.5):
+    """
 Expand seed into shell structure.
 
 Parameters:
@@ -223,30 +210,29 @@ Returns:
 shells : list of dicts
     Each shell has 'id', 'r', 'E', 'S'
 """
-W = build_influence_matrix()
+    W = build_influence_matrix()
 
-# Seed becomes shell 0
-shells = [{
-    'id': 0,
-    'r': r0,
-    'E': E0,
-    'S': normalize_to_energy(np.array(seed, dtype=float), E0)
-}]
+    # Seed becomes shell 0
+    shells = [{
+        'id': 0,
+        'r': r0,
+        'E': E0,
+        'S': normalize_to_energy(np.array(seed, dtype=float), E0)
+    }]
 
-# Grow additional shells
-for n in range(steps):
-    r_new = rho * shells[-1]['r']
-    E_new = epsilon * shells[-1]['E']
-    S_new = form_shell(shells, r_new, E_new, W, sigma_scale)
-    shells.append({
-        'id': n + 1,
-        'r': r_new,
-        'E': E_new,
-        'S': S_new
-    })
+    # Grow additional shells
+    for n in range(steps):
+        r_new = rho * shells[-1]['r']
+        E_new = epsilon * shells[-1]['E']
+        S_new = form_shell(shells, r_new, E_new, W, sigma_scale)
+        shells.append({
+            'id': n + 1,
+            'r': r_new,
+            'E': E_new,
+            'S': S_new
+        })
 
-return shells
-```
+    return shells
 
 def compress_to_seed(shells):
     """
@@ -254,10 +240,8 @@ def compress_to_seed(shells):
     
     Returns proportional amplitudes (normalized to sum to 1).
     """
-    pass
-S0 = shells[0]['S']
-return S0 / S0.sum()
-```
+    S0 = shells[0]['S']
+    return S0 / S0.sum()
 
 # =============================================================================
 
@@ -274,42 +258,38 @@ def encode_seed_binary(proportions, bits_per_value=8):
     
     With 8 bits per value, total = 40 bits = 5 bytes
     """
-# Validate
-proportions = np.array(proportions)
-proportions = proportions / proportions.sum()  # Normalize
+    # Validate
+    proportions = np.array(proportions)
+    proportions = proportions / proportions.sum()  # Normalize
 
-# Encode first 5 values
-max_val = (1 << bits_per_value) - 1
-encoded = []
-for i in range(5):
-    # Clamp and quantize
-    val = int(proportions[i] * max_val)
-    val = max(0, min(max_val, val))
-    encoded.append(val)
+    # Encode first 5 values
+    max_val = (1 << bits_per_value) - 1
+    encoded = []
+    for i in range(5):
+        # Clamp and quantize
+        val = int(proportions[i] * max_val)
+        val = max(0, min(max_val, val))
+        encoded.append(val)
 
-return encoded
-```
+    return encoded
 
 def decode_seed_binary(encoded, bits_per_value=8):
     """
     Decode binary to 6 proportional values.
     """
-    pass
-max_val = (1 << bits_per_value) - 1
+    max_val = (1 << bits_per_value) - 1
 
-```
-proportions = []
-for val in encoded:
-    proportions.append(val / max_val)
+    proportions = []
+    for val in encoded:
+        proportions.append(val / max_val)
 
-# 6th value is remainder
-remainder = 1.0 - sum(proportions)
-proportions.append(max(0.0, remainder))
+    # 6th value is remainder
+    remainder = 1.0 - sum(proportions)
+    proportions.append(max(0.0, remainder))
 
-# Re-normalize to handle quantization errors
-total = sum(proportions)
-return [p / total for p in proportions]
-```
+    # Re-normalize to handle quantization errors
+    total = sum(proportions)
+    return [p / total for p in proportions]
 
 # =============================================================================
 
@@ -321,31 +301,28 @@ def verify_expansion(seed, steps=20):
     """
     Verify that expansion preserves seed structure.
     """
-    pass
-seed = np.array(seed)
-seed_normalized = seed / seed.sum()
+    seed = np.array(seed)
+    seed_normalized = seed / seed.sum()
 
-```
-shells = expand_seed(seed, steps=steps)
+    shells = expand_seed(seed, steps=steps)
 
-print("Verifying structure preservation:")
-print(f"Seed proportions: {np.round(seed_normalized, 4)}")
-print()
+    print("Verifying structure preservation:")
+    print(f"Seed proportions: {np.round(seed_normalized, 4)}")
+    print()
 
-max_deviation = 0.0
-for s in shells:
-    S_prop = s['S'] / s['S'].sum()
-    deviation = np.max(np.abs(S_prop - seed_normalized))
-    max_deviation = max(max_deviation, deviation)
+    max_deviation = 0.0
+    for s in shells:
+        S_prop = s['S'] / s['S'].sum()
+        deviation = np.max(np.abs(S_prop - seed_normalized))
+        max_deviation = max(max_deviation, deviation)
     
-    if s['id'] <= 5 or s['id'] == steps:
-        print(f"Shell {s['id']:2d}: {np.round(S_prop, 4)} (dev: {deviation:.2e})")
+        if s['id'] <= 5 or s['id'] == steps:
+            print(f"Shell {s['id']:2d}: {np.round(S_prop, 4)} (dev: {deviation:.2e})")
 
-print(f"\nMax deviation across all shells: {max_deviation:.2e}")
-print(f"Structure preserved: {'YES' if max_deviation < 1e-10 else 'NO'}")
+    print(f"\nMax deviation across all shells: {max_deviation:.2e}")
+    print(f"Structure preserved: {'YES' if max_deviation < 1e-10 else 'NO'}")
 
-return max_deviation < 1e-10
-```
+    return max_deviation < 1e-10
 
 # =============================================================================
 
@@ -353,12 +330,11 @@ return max_deviation < 1e-10
 
 # =============================================================================
 
-if **name** == "**main**":
+# if __name__ == "__main__":
 print("="*60)
 print("PHYSICS-COMPLIANT SEED EXPANSION")
 print("="*60)
 
-```
 # Define a seed
 seed = [0.5, 0.2, 0.15, 0.08, 0.05, 0.02]
 

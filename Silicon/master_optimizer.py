@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — multi-phase optimization pipeline (DFT → codoping → coherence)
 # It is a standalone research script not imported by any test suite.
 
 # #!/usr/bin/env python3
@@ -43,17 +44,16 @@ TARGET_T2_MS = 100.0  # ms (target coherence time)
 
 @dataclass
 class OptimizationState:
-"""Track optimization progress"""
-iteration: int = 0
-current_strain: float = 0.0
-current_distance: float = 0.0
-current_T2: float = 0.0
-best_strain: float = 0.0
-best_distance: float = 0.0
-best_T2: float = 0.0
-converged: bool = False
+    """Track optimization progress"""
+    iteration: int = 0
+    current_strain: float = 0.0
+    current_distance: float = 0.0
+    current_T2: float = 0.0
+    best_strain: float = 0.0
+    best_distance: float = 0.0
+    best_T2: float = 0.0
+    converged: bool = False
 
-```
 def update(self, strain: float, distance: float, T2: float):
     """Update state with new result"""
     self.iteration += 1
@@ -70,12 +70,10 @@ def check_convergence(self, target_T2: float) -> bool:
     """Check if target is achieved"""
     self.converged = self.best_T2 >= target_T2
     return self.converged
-```
 
 class OctahedralOptimizer:
-"""Master optimizer for octahedral encoding architecture"""
+    """Master optimizer for octahedral encoding architecture"""
 
-```
 def __init__(self, work_dir: str = "./optimization_workspace"):
     self.work_dir = Path(work_dir)
     self.work_dir.mkdir(exist_ok=True)
@@ -484,51 +482,48 @@ def run_complete_workflow_demo(self):
     print(f"{'='*70}")
     print(f"Check {self.work_dir.absolute()} for all outputs")
     print(f"{'='*70}\n")
-```
 
 def main():
-"""Main entry point"""
-optimizer = OctahedralOptimizer(work_dir="./optimization_workspace")
+    """Main entry point"""
+    optimizer = OctahedralOptimizer(work_dir="./optimization_workspace")
 
-```
-# For demonstration, run with synthetic data
-optimizer.run_complete_workflow_demo()
+    # For demonstration, run with synthetic data
+    optimizer.run_complete_workflow_demo()
 
-print("\n📋 USAGE FOR REAL DFT CALCULATIONS")
-print("=" * 70)
-print("\n# Phase 1: Strain optimization")
-print("optimizer.phase1_strain_optimization()")
-print("# ... run VASP calculations ...")
-print("optimizer.load_dft_results('dft_results.json')")
-print("\n# Phase 2: Co-doping")
-print("optimizer.phase2_codoping_optimization()")
-print("# ... run VASP calculations ...")
-print("optimizer.load_codoping_results('codoping_results.json')")
-print("\n# Phase 3: Coherence prediction")
-print("optimizer.phase3_coherence_prediction(efg_tensor, force_constants)")
-print("\n# Generate final report")
-print("optimizer.generate_master_report()")
-print("=" * 70 + "\n")
-```
+    print("\n📋 USAGE FOR REAL DFT CALCULATIONS")
+    print("=" * 70)
+    print("\n# Phase 1: Strain optimization")
+    print("optimizer.phase1_strain_optimization()")
+    print("# ... run VASP calculations ...")
+    print("optimizer.load_dft_results('dft_results.json')")
+    print("\n# Phase 2: Co-doping")
+    print("optimizer.phase2_codoping_optimization()")
+    print("# ... run VASP calculations ...")
+    print("optimizer.load_codoping_results('codoping_results.json')")
+    print("\n# Phase 3: Coherence prediction")
+    print("optimizer.phase3_coherence_prediction(efg_tensor, force_constants)")
+    print("\n# Generate final report")
+    print("optimizer.generate_master_report()")
+    print("=" * 70 + "\n")
 
-if **name** == "**main**":
-main()
+    # if __name__ == "__main__":
+    main()
 
 
-OctahedralOptimizer
-+- initialize_configs()          # Sets up default DFT, co-doping, and quantum configs
-+- phase1_strain_optimization() # Generates DFT inputs & optionally runs analysis
-+- load_dft_results(file)       # Loads actual DFT results for ε* selection
-+- phase2_codoping_optimization() # Generates co-doping inputs & optionally runs analysis
-+- load_codoping_results(file)  # Loads actual co-doping results for d* selection
-+- phase3_coherence_prediction() # Runs QuTip simulations for T₂
-+- run_complete_workflow_demo()  # Simulates full optimization for testing
-+- generate_master_report()      # Consolidates all results
-+- plot_sensitivity_maps()       # Optional: strain vs T₂ or distance vs E_b
-\- _save_checkpoint(name,obj)    # Saves analyzer objects for resuming workflow
+    OctahedralOptimizer
+    +- initialize_configs()          # Sets up default DFT, co-doping, and quantum configs
+    +- phase1_strain_optimization() # Generates DFT inputs & optionally runs analysis
+    +- load_dft_results(file)       # Loads actual DFT results for ε* selection
+    +- phase2_codoping_optimization() # Generates co-doping inputs & optionally runs analysis
+    +- load_codoping_results(file)  # Loads actual co-doping results for d* selection
+    +- phase3_coherence_prediction() # Runs QuTip simulations for T₂
+    +- run_complete_workflow_demo()  # Simulates full optimization for testing
+    +- generate_master_report()      # Consolidates all results
+    +- plot_sensitivity_maps()       # Optional: strain vs T₂ or distance vs E_b
+    # \- _save_checkpoint(name,obj)    # Saves analyzer objects for resuming workflow
 
 
-sensitivity plotting:
+    # sensitivity plotting:
 
 def plot_sensitivity_maps(self):
     """Generate quick overview plots for ε* vs T2 and d* vs E_b"""
@@ -553,7 +548,7 @@ def plot_sensitivity_maps(self):
         plt.close()
 
 
-Automated Phase Excecution:
+# Automated Phase Excecution:
 
 def run_full_workflow(self, use_synthetic=True):
     self.initialize_configs()
@@ -590,8 +585,8 @@ def run_full_workflow(self, use_synthetic=True):
     self.plot_sensitivity_maps()
 
 
-Checkpointing & Logging Improvements:
+# Checkpointing & Logging Improvements:
 
-	•	Store phase1_analyzer and phase2_analyzer using pickle for automatic resumption.
-	•	Console logging with timestamps for each major step.
-	•	Optional CSV export of all T₂ predictions for future ML surrogate modeling.
+ # •	Store phase1_analyzer and phase2_analyzer using pickle for automatic resumption.
+ # •	Console logging with timestamps for each major step.
+ # •	Optional CSV export of all T₂ predictions for future ML surrogate modeling.

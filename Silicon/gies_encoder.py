@@ -1,3 +1,4 @@
+# STATUS: infrastructure — GIES encoding pipeline
 # gies_encoder.py
 # Geometric Information Encoding System (GIES) — Silicon-level reference
 # OctahedralState, GeometricEncoder, StateTensor

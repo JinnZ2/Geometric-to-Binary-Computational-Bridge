@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — Er-P co-doping DFT workflow
 # It is a standalone research script not imported by any test suite.
 
 # #!/usr/bin/env python3
@@ -27,43 +28,40 @@ SI_LATTICE_CONST = 5.431  # Å
 @dataclass
 class CoDopingConfig:
     """Configuration for Er-P co-doping calculations"""
-# Optimal strain from single-dopant analysis
-optimal_strain: float = 1.5  # % (to be determined from Er-only DFT)
+    # Optimal strain from single-dopant analysis
+    optimal_strain: float = 1.5  # % (to be determined from Er-only DFT)
 
-```
-# Distance scan parameters
-distance_min: float = 3.0  # Å (nearest neighbor Si distance)
-distance_max: float = 10.0  # Å
-distance_increment: float = 1.0  # Å
+    # Distance scan parameters
+    distance_min: float = 3.0  # Å (nearest neighbor Si distance)
+    distance_max: float = 10.0  # Å
+    distance_increment: float = 1.0  # Å
 
-# P dopant positioning
-p_site_type: str = "substitutional"  # P replaces Si atom
+    # P dopant positioning
+    p_site_type: str = "substitutional"  # P replaces Si atom
 
-# DFT parameters (inherit from base config)
-base_dft_config: Optional[DFTConfig] = None
+    # DFT parameters (inherit from base config)
+    base_dft_config: Optional[DFTConfig] = None
 
-# Analysis parameters
-temperature: float = 300.0  # K
-target_binding_energy: float = 0.5  # eV (minimum for stable complex at 300K)
-```
+    # Analysis parameters
+    temperature: float = 300.0  # K
+    target_binding_energy: float = 0.5  # eV (minimum for stable complex at 300K)
 
 @dataclass
 class CoDopingResult:
     """Results from Er-P co-doping calculation"""
-distance: float  # Er-P separation (Å)
-binding_energy: float  # eV
-er_position: np.ndarray  # Er relaxed position (Cartesian, Å)
-p_position: np.ndarray  # P position (Cartesian, Å)
-er_displacement: float  # Displacement from ideal O site (Å)
-total_energy: float  # Total system energy (eV)
-er_charge_state: float  # Bader charge on Er
-efg_tensor: np.ndarray  # Electric field gradient at Er site (V/Å²)
-force_constants: np.ndarray  # 3x3 Hessian matrix at Er site (eV/Å²)
+    distance: float  # Er-P separation (Å)
+    binding_energy: float  # eV
+    er_position: np.ndarray  # Er relaxed position (Cartesian, Å)
+    p_position: np.ndarray  # P position (Cartesian, Å)
+    er_displacement: float  # Displacement from ideal O site (Å)
+    total_energy: float  # Total system energy (eV)
+    er_charge_state: float  # Bader charge on Er
+    efg_tensor: np.ndarray  # Electric field gradient at Er site (V/Å²)
+    force_constants: np.ndarray  # 3x3 Hessian matrix at Er site (eV/Å²)
 
 class ErPCoDopingAnalyzer:
     """Analyzer for Er-P co-doping in strained Si"""
 
-```
 def __init__(self, config: CoDopingConfig):
     self.config = config
     self.results: List[CoDopingResult] = []
@@ -459,75 +457,70 @@ def export_results(self, filepath: str):
         json.dump(data, f, indent=2)
     
     print(f"✓ Exported co-doping results to {filepath}")
-```
 
 def generate_codoping_scan_inputs(config: CoDopingConfig, base_dir: str = "./codoping_inputs"):
     """Generate all DFT inputs for Er-P co-doping distance scan"""
-analyzer = ErPCoDopingAnalyzer(config)
+    analyzer = ErPCoDopingAnalyzer(config)
 
-```
-distances = np.arange(
-    config.distance_min,
-    config.distance_max + config.distance_increment/2,
-    config.distance_increment
-)
+    distances = np.arange(
+        config.distance_min,
+        config.distance_max + config.distance_increment/2,
+        config.distance_increment
+    )
 
-print(f"\n{'='*60}")
-print("GENERATING ER-P CO-DOPING DFT INPUT FILES")
-print(f"{'='*60}\n")
-print(f"Optimal strain: {config.optimal_strain:.2f}%")
-print(f"Distance range: {config.distance_min:.1f} Å to {config.distance_max:.1f} Å")
-print(f"Increment: {config.distance_increment:.1f} Å")
-print(f"Total calculations: {len(distances)}\n")
+    print(f"\n{'='*60}")
+    print("GENERATING ER-P CO-DOPING DFT INPUT FILES")
+    print(f"{'='*60}\n")
+    print(f"Optimal strain: {config.optimal_strain:.2f}%")
+    print(f"Distance range: {config.distance_min:.1f} Å to {config.distance_max:.1f} Å")
+    print(f"Increment: {config.distance_increment:.1f} Å")
+    print(f"Total calculations: {len(distances)}\n")
 
-for distance in distances:
-    output_dir = f"{base_dir}/distance_{distance:.1f}A"
-    analyzer.generate_vasp_input_codoping(distance, output_dir)
-    print()
+    for distance in distances:
+        output_dir = f"{base_dir}/distance_{distance:.1f}A"
+        analyzer.generate_vasp_input_codoping(distance, output_dir)
+        print()
 
-print(f"{'='*60}")
-print(f"✓ Generated {len(distances)} co-doping input directories")
-print(f"{'='*60}\n")
+    print(f"{'='*60}")
+    print(f"✓ Generated {len(distances)} co-doping input directories")
+    print(f"{'='*60}\n")
 
-# Generate reference calculation instructions
-ref_file = f"{base_dir}/REFERENCE_CALCULATIONS.txt"
-with open(ref_file, 'w') as f:
-    f.write("REFERENCE ENERGY CALCULATIONS\n")
-    f.write("==============================\n\n")
-    f.write("Before analyzing co-doping results, calculate:\n\n")
-    f.write("1. E(Er-only): Er dopant at O site, no P\n")
-    f.write("   - Use strain ε* from single-dopant optimization\n")
-    f.write("   - Extract final energy from OSZICAR\n\n")
-    f.write("2. E(P-only): P dopant substitutional, no Er\n")
-    f.write("   - Same supercell size\n")
-    f.write("   - Extract final energy from OSZICAR\n\n")
-    f.write("3. E(host): Pure Si supercell\n")
-    f.write("   - No dopants\n")
-    f.write("   - Extract final energy from OSZICAR\n\n")
-    f.write("Then use: analyzer.set_reference_energies(E_Er, E_P, E_host)\n")
+    # Generate reference calculation instructions
+    ref_file = f"{base_dir}/REFERENCE_CALCULATIONS.txt"
+    with open(ref_file, 'w') as f:
+        f.write("REFERENCE ENERGY CALCULATIONS\n")
+        f.write("==============================\n\n")
+        f.write("Before analyzing co-doping results, calculate:\n\n")
+        f.write("1. E(Er-only): Er dopant at O site, no P\n")
+        f.write("   - Use strain ε* from single-dopant optimization\n")
+        f.write("   - Extract final energy from OSZICAR\n\n")
+        f.write("2. E(P-only): P dopant substitutional, no Er\n")
+        f.write("   - Same supercell size\n")
+        f.write("   - Extract final energy from OSZICAR\n\n")
+        f.write("3. E(host): Pure Si supercell\n")
+        f.write("   - No dopants\n")
+        f.write("   - Extract final energy from OSZICAR\n\n")
+        f.write("Then use: analyzer.set_reference_energies(E_Er, E_P, E_host)\n")
 
-print(f"✓ Written reference calculation instructions to {ref_file}\n")
+    print(f"✓ Written reference calculation instructions to {ref_file}\n")
 
-return analyzer
-```
+    return analyzer
 
-if **name** == "**main**":
-# Example usage
-config = CoDopingConfig(
-optimal_strain=1.5,  # From single-dopant DFT
-distance_min=3.0,
-distance_max=10.0,
-distance_increment=1.0,
-temperature=300.0,
-target_binding_energy=0.5
-)
+if __name__ == "__main__":
+    # Example usage
+    config = CoDopingConfig(
+        optimal_strain=1.5,  # From single-dopant DFT
+        distance_min=3.0,
+        distance_max=10.0,
+        distance_increment=1.0,
+        temperature=300.0,
+        target_binding_energy=0.5
+    )
 
-```
-print("\n🧪 Er-P Co-Doping Analysis")
-print("=" * 60)
-print(f"Goal: Find d* that maximizes E_b")
-print(f"Target: E_b > {config.target_binding_energy:.2f} eV for {config.temperature:.0f}K stability")
-print("=" * 60)
+    print("\n🧪 Er-P Co-Doping Analysis")
+    print("=" * 60)
+    print(f"Goal: Find d* that maximizes E_b")
+    print(f"Target: E_b > {config.target_binding_energy:.2f} eV for {config.temperature:.0f}K stability")
+    print("=" * 60)
 
-analyzer = generate_codoping_scan_inputs(config)
-```
+    analyzer = generate_codoping_scan_inputs(config)

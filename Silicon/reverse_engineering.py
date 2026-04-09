@@ -1,4 +1,5 @@
 # NOTE: This file requires cleanup -- structural issues from mobile editing.
+# STATUS: infrastructure — seed recovery via optimization
 # It is a standalone research script not imported by any test suite.
 
 #!/usr/bin/env python3
@@ -60,20 +61,19 @@ def params_to_seed(params15: np.ndarray) -> np.ndarray:
     Returns:
         Normalized 16-component seed vector
     """
-p = np.maximum(params15, 0.0)
-p_sum = p.sum()
-
-# Ensure proportions sum to less than 1
-if p_sum >= 1.0:
-    p = p / p_sum * 0.99
+    p = np.maximum(params15, 0.0)
     p_sum = p.sum()
 
-# 16th component is remainder
-v16 = np.concatenate([p, np.array([1.0 - p_sum])])
+    # Ensure proportions sum to less than 1
+    if p_sum >= 1.0:
+        p = p / p_sum * 0.99
+        p_sum = p.sum()
 
-# Final normalization for safety
-return v16 / v16.sum()
-```
+    # 16th component is remainder
+    v16 = np.concatenate([p, np.array([1.0 - p_sum])])
+
+    # Final normalization for safety
+    return v16 / v16.sum()
 
 def seed_to_params(seed16: np.ndarray) -> np.ndarray:
     """
@@ -85,9 +85,8 @@ def seed_to_params(seed16: np.ndarray) -> np.ndarray:
     Returns:
         First 15 proportional values
     """
-seed_norm = seed16 / seed16.sum()
-return seed_norm[:15]
-```
+    seed_norm = seed16 / seed16.sum()
+    return seed_norm[:15]
 
 # =============================================================================
 
@@ -96,57 +95,54 @@ return seed_norm[:15]
 # =============================================================================
 
 def calculate_loss_static(params15: np.ndarray, target_shells: List[Dict],
-num_steps: int, rho: float = 1.5,
-epsilon: float = 0.6, sigma_scale: float = 0.5) -> float:
-"""
+    num_steps: int, rho: float = 1.5,
+    epsilon: float = 0.6, sigma_scale: float = 0.5) -> float:
+    """
 Loss function for static (Euclidean) expansion.
 
 Measures L2 distance between simulated shell proportions and target.
 """
-hypo_seed = params_to_seed(params15)
+    hypo_seed = params_to_seed(params15)
 
-try:
-    sim_shells = expand_seed(hypo_seed, E0=1.0, r0=1.0, steps=num_steps,
-                            rho=rho, epsilon=epsilon, sigma_scale=sigma_scale)
-except Exception:
-    return 1e9
+    try:
+        sim_shells = expand_seed(hypo_seed, E0=1.0, r0=1.0, steps=num_steps,
+                                rho=rho, epsilon=epsilon, sigma_scale=sigma_scale)
+    except Exception:
+        return 1e9
 
-total_loss = 0.0
-for n in range(1, num_steps + 1):
-    S_target = target_shells[n]['S'] / (target_shells[n]['E'] + 1e-16)
-    S_sim = sim_shells[n]['S'] / (sim_shells[n]['E'] + 1e-16)
-    total_loss += float(np.sum((S_sim - S_target)**2))
+    total_loss = 0.0
+    for n in range(1, num_steps + 1):
+        S_target = target_shells[n]['S'] / (target_shells[n]['E'] + 1e-16)
+        S_sim = sim_shells[n]['S'] / (sim_shells[n]['E'] + 1e-16)
+        total_loss += float(np.sum((S_sim - S_target)**2))
     
-return total_loss
-```
+    return total_loss
 
 def calculate_loss_dynamic(params15: np.ndarray, target_shells: List[Dict],
-num_steps: int, rho: float = 1.5,
-base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
-sigma_scale: float = 0.5) -> float:
-"""
+    num_steps: int, rho: float = 1.5,
+    base_epsilon: float = 0.6, coupling_alpha: float = 0.1,
+    sigma_scale: float = 0.5) -> float:
+    """
 Loss function for dynamic (Phi-modulated) expansion.
 """
-hypo_seed = params_to_seed(params15)
+    hypo_seed = params_to_seed(params15)
 
-```
-try:
-    sim_shells = expand_seed_dynamic(hypo_seed, E0=1.0, r0=1.0, 
-                                    steps=num_steps, rho=rho,
-                                    base_epsilon=base_epsilon,
-                                    coupling_alpha=coupling_alpha,
-                                    sigma_scale=sigma_scale)
-except Exception:
-    return 1e9
+    try:
+        sim_shells = expand_seed_dynamic(hypo_seed, E0=1.0, r0=1.0, 
+                                        steps=num_steps, rho=rho,
+                                        base_epsilon=base_epsilon,
+                                        coupling_alpha=coupling_alpha,
+                                        sigma_scale=sigma_scale)
+    except Exception:
+        return 1e9
 
-total_loss = 0.0
-for n in range(1, num_steps + 1):
-    S_target = target_shells[n]['S'] / (target_shells[n]['E'] + 1e-16)
-    S_sim = sim_shells[n]['S'] / (sim_shells[n]['E'] + 1e-16)
-    total_loss += float(np.sum((S_sim - S_target)**2))
+    total_loss = 0.0
+    for n in range(1, num_steps + 1):
+        S_target = target_shells[n]['S'] / (target_shells[n]['E'] + 1e-16)
+        S_sim = sim_shells[n]['S'] / (sim_shells[n]['E'] + 1e-16)
+        total_loss += float(np.sum((S_sim - S_target)**2))
     
-return total_loss
-```
+    return total_loss
 
 # =============================================================================
 
@@ -155,9 +151,9 @@ return total_loss
 # =============================================================================
 
 def recover_seed_lbfgs(target_shells: List[Dict], num_steps: int,
-use_dynamic: bool = False, maxiter: int = 500,
-**expansion_params) -> Dict:
-"""
+    use_dynamic: bool = False, maxiter: int = 500,
+    **expansion_params) -> Dict:
+    """
 Recover seed using L-BFGS-B optimization (gradient-based, local).
 
 Fast but may get stuck in local minima for complex structures.
@@ -172,48 +168,47 @@ Args:
 Returns:
     Dictionary with recovered seed, final loss, and metadata
 """
-# Initial guess: uniform distribution
-init_params = np.ones(15) / 16.0
-bounds = [(0.0, 1.0)] * 15
+    # Initial guess: uniform distribution
+    init_params = np.ones(15) / 16.0
+    bounds = [(0.0, 1.0)] * 15
 
-# Select loss function
-if use_dynamic:
-    loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps, 
-                                               **expansion_params)
-else:
-    loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
-                                              **expansion_params)
+    # Select loss function
+    if use_dynamic:
+        loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps, 
+                                                   **expansion_params)
+    else:
+        loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
+                                                  **expansion_params)
 
-start_time = time.time()
+    start_time = time.time()
 
-result = minimize(
-    loss_fn,
-    init_params,
-    method='L-BFGS-B',
-    bounds=bounds,
-    options={'maxiter': maxiter, 'ftol': 1e-14}
-)
+    result = minimize(
+        loss_fn,
+        init_params,
+        method='L-BFGS-B',
+        bounds=bounds,
+        options={'maxiter': maxiter, 'ftol': 1e-14}
+    )
 
-elapsed = time.time() - start_time
+    elapsed = time.time() - start_time
 
-recovered_seed = params_to_seed(result.x)
+    recovered_seed = params_to_seed(result.x)
 
-return {
-    'recovered_seed': recovered_seed,
-    'params': result.x,
-    'final_loss': result.fun,
-    'success': result.success,
-    'iterations': result.nit,
-    'time': elapsed,
-    'optimizer': 'L-BFGS-B',
-    'scipy_result': result
-}
-```
+    return {
+        'recovered_seed': recovered_seed,
+        'params': result.x,
+        'final_loss': result.fun,
+        'success': result.success,
+        'iterations': result.nit,
+        'time': elapsed,
+        'optimizer': 'L-BFGS-B',
+        'scipy_result': result
+    }
 
 def recover_seed_de(target_shells: List[Dict], num_steps: int,
-use_dynamic: bool = False, maxiter: int = 200,
-popsize: int = 15, **expansion_params) -> Dict:
-"""
+    use_dynamic: bool = False, maxiter: int = 200,
+    popsize: int = 15, **expansion_params) -> Dict:
+    """
 Recover seed using Differential Evolution (global optimizer).
 
 More robust than L-BFGS-B but slower. Use for difficult cases
@@ -230,47 +225,46 @@ Args:
 Returns:
     Dictionary with recovered seed, final loss, and metadata
 """
-bounds = [(0.0, 1.0)] * 15
+    bounds = [(0.0, 1.0)] * 15
 
-if use_dynamic:
-    loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps,
-                                               **expansion_params)
-else:
-    loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
-                                              **expansion_params)
+    if use_dynamic:
+        loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps,
+                                                   **expansion_params)
+    else:
+        loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
+                                                  **expansion_params)
 
-start_time = time.time()
+    start_time = time.time()
 
-result = differential_evolution(
-    loss_fn,
-    bounds,
-    maxiter=maxiter,
-    popsize=popsize,
-    tol=1e-12,
-    seed=42,
-    workers=1  # Set to -1 for parallel on multicore systems
-)
+    result = differential_evolution(
+        loss_fn,
+        bounds,
+        maxiter=maxiter,
+        popsize=popsize,
+        tol=1e-12,
+        seed=42,
+        workers=1  # Set to -1 for parallel on multicore systems
+    )
 
-elapsed = time.time() - start_time
+    elapsed = time.time() - start_time
 
-recovered_seed = params_to_seed(result.x)
+    recovered_seed = params_to_seed(result.x)
 
-return {
-    'recovered_seed': recovered_seed,
-    'params': result.x,
-    'final_loss': result.fun,
-    'success': result.success,
-    'iterations': result.nit,
-    'time': elapsed,
-    'optimizer': 'Differential Evolution',
-    'scipy_result': result
-}
-```
+    return {
+        'recovered_seed': recovered_seed,
+        'params': result.x,
+        'final_loss': result.fun,
+        'success': result.success,
+        'iterations': result.nit,
+        'time': elapsed,
+        'optimizer': 'Differential Evolution',
+        'scipy_result': result
+    }
 
 def recover_seed_multistart(target_shells: List[Dict], num_steps: int,
-use_dynamic: bool = False, n_starts: int = 5,
-maxiter: int = 300, **expansion_params) -> Dict:
-"""
+    use_dynamic: bool = False, n_starts: int = 5,
+    maxiter: int = 300, **expansion_params) -> Dict:
+    """
 Recover seed using multiple random starting points with L-BFGS-B.
 
 Balance between speed of local optimization and robustness of
@@ -287,56 +281,55 @@ Args:
 Returns:
     Best result across all starting points
 """
-bounds = [(0.0, 1.0)] * 15
+    bounds = [(0.0, 1.0)] * 15
 
-if use_dynamic:
-    loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps,
-                                               **expansion_params)
-else:
-    loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
-                                              **expansion_params)
+    if use_dynamic:
+        loss_fn = lambda p: calculate_loss_dynamic(p, target_shells, num_steps,
+                                                   **expansion_params)
+    else:
+        loss_fn = lambda p: calculate_loss_static(p, target_shells, num_steps,
+                                                  **expansion_params)
 
-best_result = None
-best_loss = float('inf')
+    best_result = None
+    best_loss = float('inf')
 
-start_time = time.time()
+    start_time = time.time()
 
-# First try uniform
-starts = [np.ones(15) / 16.0]
+    # First try uniform
+    starts = [np.ones(15) / 16.0]
 
-# Add random Dirichlet samples
-for _ in range(n_starts - 1):
-    sample = np.random.dirichlet(np.ones(15) * 0.8)
-    starts.append(sample)
+    # Add random Dirichlet samples
+    for _ in range(n_starts - 1):
+        sample = np.random.dirichlet(np.ones(15) * 0.8)
+        starts.append(sample)
 
-for init_params in starts:
-    result = minimize(
-        loss_fn,
-        init_params,
-        method='L-BFGS-B',
-        bounds=bounds,
-        options={'maxiter': maxiter, 'ftol': 1e-14}
-    )
+    for init_params in starts:
+        result = minimize(
+            loss_fn,
+            init_params,
+            method='L-BFGS-B',
+            bounds=bounds,
+            options={'maxiter': maxiter, 'ftol': 1e-14}
+        )
     
-    if result.fun < best_loss:
-        best_loss = result.fun
-        best_result = result
+        if result.fun < best_loss:
+            best_loss = result.fun
+            best_result = result
 
-elapsed = time.time() - start_time
+    elapsed = time.time() - start_time
 
-recovered_seed = params_to_seed(best_result.x)
+    recovered_seed = params_to_seed(best_result.x)
 
-return {
-    'recovered_seed': recovered_seed,
-    'params': best_result.x,
-    'final_loss': best_result.fun,
-    'success': best_result.success,
-    'iterations': best_result.nit,
-    'time': elapsed,
-    'optimizer': f'Multi-start L-BFGS-B ({n_starts} starts)',
-    'scipy_result': best_result
-}
-```
+    return {
+        'recovered_seed': recovered_seed,
+        'params': best_result.x,
+        'final_loss': best_result.fun,
+        'success': best_result.success,
+        'iterations': best_result.nit,
+        'time': elapsed,
+        'optimizer': f'Multi-start L-BFGS-B ({n_starts} starts)',
+        'scipy_result': best_result
+    }
 
 # =============================================================================
 
@@ -345,9 +338,9 @@ return {
 # =============================================================================
 
 def recover_seed(target_shells: List[Dict], num_steps: int = None,
-use_dynamic: bool = False, method: str = 'auto',
-**expansion_params) -> Dict:
-"""
+    use_dynamic: bool = False, method: str = 'auto',
+    **expansion_params) -> Dict:
+    """
 High-level interface for seed recovery.
 
 Args:
@@ -360,32 +353,31 @@ Args:
 Returns:
     Recovery result dictionary
 """
-if num_steps is None:
-    num_steps = len(target_shells) - 1  # Exclude seed shell
+    if num_steps is None:
+        num_steps = len(target_shells) - 1  # Exclude seed shell
 
-if method == 'auto':
-    # Try fast method first, fall back to robust if needed
-    result = recover_seed_lbfgs(target_shells, num_steps, use_dynamic,
-                               **expansion_params)
+    if method == 'auto':
+        # Try fast method first, fall back to robust if needed
+        result = recover_seed_lbfgs(target_shells, num_steps, use_dynamic,
+                                   **expansion_params)
     
-    if result['final_loss'] > 1e-8:
-        # Fast method failed, try multistart
-        result = recover_seed_multistart(target_shells, num_steps, 
-                                        use_dynamic, **expansion_params)
-elif method == 'lbfgs':
-    result = recover_seed_lbfgs(target_shells, num_steps, use_dynamic,
-                               **expansion_params)
-elif method == 'de':
-    result = recover_seed_de(target_shells, num_steps, use_dynamic,
-                            **expansion_params)
-elif method == 'multistart':
-    result = recover_seed_multistart(target_shells, num_steps, use_dynamic,
-                                    **expansion_params)
-else:
-    raise ValueError(f"Unknown method: {method}")
+        if result['final_loss'] > 1e-8:
+            # Fast method failed, try multistart
+            result = recover_seed_multistart(target_shells, num_steps, 
+                                            use_dynamic, **expansion_params)
+    elif method == 'lbfgs':
+        result = recover_seed_lbfgs(target_shells, num_steps, use_dynamic,
+                                   **expansion_params)
+    elif method == 'de':
+        result = recover_seed_de(target_shells, num_steps, use_dynamic,
+                                **expansion_params)
+    elif method == 'multistart':
+        result = recover_seed_multistart(target_shells, num_steps, use_dynamic,
+                                        **expansion_params)
+    else:
+        raise ValueError(f"Unknown method: {method}")
 
-return result
-```
+    return result
 
 # =============================================================================
 
@@ -394,8 +386,8 @@ return result
 # =============================================================================
 
 def verify_recovery(true_seed: np.ndarray, recovered_seed: np.ndarray,
-tol: float = 1e-4) -> Tuple[bool, float]:
-"""
+    tol: float = 1e-4) -> Tuple[bool, float]:
+    """
 Verify that recovered seed matches original.
 
 Args:
@@ -406,18 +398,17 @@ Args:
 Returns:
     Tuple of (success, max_deviation)
 """
-true_norm = true_seed / true_seed.sum()
-rec_norm = recovered_seed / recovered_seed.sum()
+    true_norm = true_seed / true_seed.sum()
+    rec_norm = recovered_seed / recovered_seed.sum()
 
-max_dev = np.max(np.abs(true_norm - rec_norm))
+    max_dev = np.max(np.abs(true_norm - rec_norm))
 
-return max_dev <= tol, max_dev
-```
+    return max_dev <= tol, max_dev
 
 def round_trip_test(seed: np.ndarray, steps: int = 5,
-use_dynamic: bool = False, verbose: bool = True,
-**expansion_params) -> Dict:
-"""
+    use_dynamic: bool = False, verbose: bool = True,
+    **expansion_params) -> Dict:
+    """
 Complete round-trip test: seed → structure → recovered seed
 
 Args:
@@ -430,46 +421,45 @@ Args:
 Returns:
     Test results dictionary
 """
-seed = np.array(seed)
-seed_norm = seed / seed.sum()
+    seed = np.array(seed)
+    seed_norm = seed / seed.sum()
 
-if verbose:
-    print(f"Original seed: {np.round(seed_norm, 4)}")
+    if verbose:
+        print(f"Original seed: {np.round(seed_norm, 4)}")
 
-# Forward expansion
-if verbose:
-    print("Expanding...")
+    # Forward expansion
+    if verbose:
+        print("Expanding...")
 
-if use_dynamic:
-    shells = expand_seed_dynamic(seed, steps=steps, **expansion_params)
-else:
-    shells = expand_seed(seed, steps=steps, **expansion_params)
+    if use_dynamic:
+        shells = expand_seed_dynamic(seed, steps=steps, **expansion_params)
+    else:
+        shells = expand_seed(seed, steps=steps, **expansion_params)
 
-# Reverse recovery
-if verbose:
-    print("Recovering seed...")
+    # Reverse recovery
+    if verbose:
+        print("Recovering seed...")
 
-recovery = recover_seed(shells, steps, use_dynamic, **expansion_params)
+    recovery = recover_seed(shells, steps, use_dynamic, **expansion_params)
 
-# Verification
-success, deviation = verify_recovery(seed_norm, recovery['recovered_seed'])
+    # Verification
+    success, deviation = verify_recovery(seed_norm, recovery['recovered_seed'])
 
-if verbose:
-    print(f"Recovered seed: {np.round(recovery['recovered_seed'], 4)}")
-    print(f"Max deviation: {deviation:.2e}")
-    print(f"Final loss: {recovery['final_loss']:.2e}")
-    print(f"Recovery successful: {'YES' if success else 'NO'}")
+    if verbose:
+        print(f"Recovered seed: {np.round(recovery['recovered_seed'], 4)}")
+        print(f"Max deviation: {deviation:.2e}")
+        print(f"Final loss: {recovery['final_loss']:.2e}")
+        print(f"Recovery successful: {'YES' if success else 'NO'}")
 
-return {
-    'original_seed': seed_norm,
-    'recovered_seed': recovery['recovered_seed'],
-    'max_deviation': deviation,
-    'final_loss': recovery['final_loss'],
-    'success': success,
-    'time': recovery['time'],
-    'optimizer': recovery['optimizer']
-}
-```
+    return {
+        'original_seed': seed_norm,
+        'recovered_seed': recovery['recovered_seed'],
+        'max_deviation': deviation,
+        'final_loss': recovery['final_loss'],
+        'success': success,
+        'time': recovery['time'],
+        'optimizer': recovery['optimizer']
+    }
 
 # =============================================================================
 
@@ -477,13 +467,12 @@ return {
 
 # =============================================================================
 
-if **name** == "**main**":
+# if __name__ == "__main__":
 print("=" * 70)
 print("REVERSE ENGINEERING: Seed Recovery from Expanded Structure")
 print("Proving bidirectional (bijective) mapping")
 print("=" * 70)
 
-```
 # Test seed with clear structure
 test_seed = np.array([
     10.0, 0.1,   # Strong +X1

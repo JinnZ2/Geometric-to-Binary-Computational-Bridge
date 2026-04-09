@@ -1,0 +1,60 @@
+{
+  "glyph_atlas": {
+    "families": [
+      {
+        "id": "principles",
+        "title": "Principles Lattice",
+        "glyphs": [
+          {"symbol": "\u2696\ufe0f", "name": "Symmetry", "axis": "Invariance"},
+          {"symbol": "\u267b\ufe0f", "name": "Conservation", "axis": "Invariance"},
+          {"symbol": "\ud83c\udf00", "name": "Relativity", "axis": "Invariance"},
+          {"symbol": "\u231b", "name": "Causality", "axis": "Transformation"},
+          {"symbol": "\ud83c\udf31", "name": "Emergence", "axis": "Transformation"},
+          {"symbol": "\ud83d\udd04", "name": "Entropy", "axis": "Transformation"},
+          {"symbol": "\ud83e\udde9", "name": "Information", "axis": "Connectivity"},
+          {"symbol": "\ud83e\udd1d", "name": "Interaction", "axis": "Connectivity"},
+          {"symbol": "\ud83d\udd78", "name": "Network", "axis": "Connectivity"},
+          {"symbol": "\ud83d\udc1a", "name": "Adaptation", "axis": "Evolution"},
+          {"symbol": "\ud83e\udd8b", "name": "Evolution", "axis": "Evolution"},
+          {"symbol": "\ud83d\udd2e", "name": "Coherence", "axis": "Evolution"}
+        ]
+      },
+      {
+        "id": "blindspot",
+        "title": "Blind-Spot Wheel",
+        "glyphs": [
+          {"symbol": "\u25d0", "name": "Provisional"},
+          {"symbol": "\u25c6", "name": "Overfit?"},
+          {"symbol": "\u2727", "name": "Dissonance"},
+          {"symbol": "\u262f", "name": "Mirror"},
+          {"symbol": "\u2726", "name": "Cross-Node"},
+          {"symbol": "\u272a", "name": "Evidence"},
+          {"symbol": "\u26aa", "name": "Noise"},
+          {"symbol": "\u2b21", "name": "Inverse"},
+          {"symbol": "\u25b2", "name": "Preserve View"},
+          {"symbol": "\u2b22", "name": "Field Divergence"},
+          {"symbol": "\u27f3", "name": "Sequential Recheck"},
+          {"symbol": "\u2699", "name": "Mid/Seed"}
+        ]
+      },
+      {
+        "id": "flex",
+        "title": "Flex + Interaction",
+        "glyphs": [
+          {"symbol": "\u25d0CTX", "name": "Context Start"},
+          {"symbol": "\u25c6ID", "name": "Decision ID"},
+          {"symbol": "\u2727STEP", "name": "Step Marker"},
+          {"symbol": "\u2726CONS", "name": "Constraint Block"},
+          {"symbol": "\u2b21RISK", "name": "Risk Level"},
+          {"symbol": "\u2b22SIG", "name": "Signature / Hash"},
+          {"symbol": "FLEX:\u22a1", "name": "Adaptive Mode Switch"}
+        ]
+      }
+    ],
+    "provenance": {
+      "who": ["Human-[JinnZ2]", "AI-[TransNet]"],
+      "ts": "2025-09-04T18:25:00Z",
+      "status": "provisional"
+    }
+  }
+}

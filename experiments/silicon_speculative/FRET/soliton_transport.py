@@ -1,3 +1,4 @@
+# STATUS: speculative — soliton antenna coherent transport framework
 """
 Soliton Antenna — Supramolecular Coherent Transport Framework
 =============================================================

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: validated — phi-spaced octahedral NN, Storage.md predictions verified
 """
 crystalline_nn_sim.py
 =====================

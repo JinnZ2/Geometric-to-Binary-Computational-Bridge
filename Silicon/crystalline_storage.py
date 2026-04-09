@@ -1,3 +1,4 @@
+# STATUS: validated — tested by tests/test_silicon_modules.py
 """
 Crystalline Storage Encoding — 5D+ encoding with phi-scaled lattice
 ====================================================================

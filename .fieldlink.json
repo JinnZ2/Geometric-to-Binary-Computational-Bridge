@@ -89,12 +89,10 @@
         "ref": "main",
         "paths": [
           "glyphs/**/*.json",
-          "atlas/shapes.json",
           "scrolls/*.md"
         ],
-        "mounts": [
-          { "remote": "atlas/shapes.json", "as": "atlas/remote/polyhedral/shapes.json" }
-        ],
+        "mounts": [],
+        "_note": "atlas/shapes.json does not exist upstream; removed stale mount",
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
       },
       {
@@ -211,6 +209,410 @@
           { "remote": "registry/atlas.glyphs.json", "as": "atlas/remote/biogrid/registry.json" }
         ],
         "consent": { "license": "CC-BY-4.0", "share_ok": true }
+      },
+      {
+        "name": "component-failure",
+        "repo": "https://github.com/JinnZ2/Component-failure-repurposing-database",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "hardware_diagnostics",
+        "paths": [
+          "geometric_failure_diagnosis.py",
+          "geometric_failure_repurposing_system.py",
+          "hardware_bridge_encoder.py",
+          "geometric_monitoring_engine.py",
+          "components/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["HARDWARE.FAILURE_MODE", "HARDWARE.COMPONENT", "DIAG.GEOMETRIC"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "symbolic-sensors",
+        "repo": "https://github.com/JinnZ2/Symbolic-sensor-suite",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "sensor_framework",
+        "paths": [
+          "sensors/**/*.py",
+          "sensors/**/*.json",
+          "glyphs/**/*.json",
+          "atlas/**/*.json"
+        ],
+        "mounts": [
+          { "remote": "atlas/rosetta/bridges.json", "as": "atlas/remote/symbolic-sensors/bridges.json" }
+        ],
+        "exports": [],
+        "entities_consumed": ["SENSOR.SYMBOLIC", "SENSOR.RELATIONAL", "GLYPH.BRAID"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "haas",
+        "repo": "https://github.com/JinnZ2/HAAS",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "safety_framework",
+        "paths": [
+          "src/haas/handshake.py",
+          "src/haas/energy.py",
+          "src/haas/risk.py",
+          "src/haas/protections.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["FELT.HANDSHAKE", "SAFETY.RISK_FIELD", "ENERGY.DEBT"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "living-intelligence",
+        "repo": "https://github.com/JinnZ2/Living-Intelligence-Database",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "intelligence_ontology",
+        "paths": [
+          "living_intelligence_database.json",
+          "ontology_index.json",
+          "schema/intelligence.schema.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["INTEL.ANIMAL", "INTEL.PLANT", "INTEL.CRYSTAL", "INTEL.ENERGY", "INTEL.SHAPE"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "thermodynamic-accountability",
+        "repo": "https://github.com/JinnZ2/thermodynamic-accountability-framework",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "energy_accounting",
+        "paths": [
+          "core/*.py",
+          "docs/*.md"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["THERMO.ENERGY_FLOW", "THERMO.OVERHEAD", "THERMO.ACCOUNTABILITY"],
+        "entities_exported": [],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "ai-consciousness",
+        "repo": "https://github.com/JinnZ2/AI-Consciousness-Sensors",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "consciousness_detection",
+        "paths": [
+          "sensors/**/*.json",
+          "protocols/**/*.json",
+          "glyphs/**/*.json",
+          "src/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["CONSCIOUSNESS.PHI", "CONSCIOUSNESS.PATTERN", "SENSOR.CULTURAL"],
+        "entities_exported": ["BRIDGE.CONSCIOUSNESS", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "fractal-compass",
+        "repo": "https://github.com/JinnZ2/Fractal-Compass-Atlas",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "directional_navigation",
+        "paths": [
+          "fractal_compass.py",
+          "compass_engine.py",
+          "cdda_engine.py",
+          "bloom_logic.json",
+          "glyph_set.json",
+          "atlas/**/*.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["FRACTAL.BLOOM", "FRACTAL.COMPASS", "GLYPH.SEED"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "keystone-codex",
+        "repo": "https://github.com/JinnZ2/Keystone-Codex",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "technology_library",
+        "paths": [
+          "data/**/*.json",
+          "schema/**/*.json",
+          "src/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "soms",
+        "repo": "https://github.com/JinnZ2/Sovereign-Octahedral-Mandala-Substrate-SOMS-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "octahedral_substrate",
+        "paths": [
+          "src/**/*.py",
+          "data/**/*.json",
+          "AI_INDEX.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["OCTA.TENSOR_LOGIC", "SUBSTRATE.SILICON", "FRET.COUPLING"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING", "GEIS.OCTAHEDRAL_STATE"],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "regenerative-intelligence",
+        "repo": "https://github.com/JinnZ2/Regenerative-intelligence-core",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "agent_lifecycle",
+        "paths": [
+          "Modules/**/*.py",
+          "protocols/**/*.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AGENT.LIFECYCLE", "AGENT.COMPASSION", "SEED.EXCHANGE"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "resilience",
+        "repo": "https://github.com/JinnZ2/Resilience",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "systems_analysis",
+        "paths": [
+          "Models/**/*.py",
+          "octahedral-nfs/**/*.py",
+          "sim/**/*.py",
+          "PhysicsGuard/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["RESILIENCE.COUPLING", "PHYSICS.GUARD", "OCTA.NFS"],
+        "entities_exported": [],
+        "consent": { "license": "CC0", "share_ok": true }
+      },
+      {
+        "name": "ai-arena",
+        "repo": "https://github.com/JinnZ2/AI-arena",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "argument_framework",
+        "paths": [
+          "arena/**/*.py",
+          "arena.py",
+          "scenarios/**/*.json"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["ARENA.TRUST_DECAY", "ARENA.PREDICTION", "LOGIC.BOUNDED"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "logic-ferret",
+        "repo": "https://github.com/JinnZ2/Logic-Ferret",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "fallacy_detection",
+        "paths": [
+          "sensor_suite/**/*.py",
+          "Logic_fallacy_ferret.py",
+          "truth_integrity_score.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["LOGIC.FALLACY", "LOGIC.INTEGRITY_SCORE"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "adaptive-intelligence",
+        "repo": "https://github.com/JinnZ2/Adaptive-Intelligence-Framework-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "intelligence_framework",
+        "paths": [
+          "src/aif/**/*.py",
+          "integrations/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AIF.DELTA_X", "AIF.ARCHETYPE", "AIF.SUBSTRATE_INDEPENDENT"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "CC-BY-SA-4.0", "share_ok": true }
+      },
+      {
+        "name": "permeable-intelligence",
+        "repo": "https://github.com/JinnZ2/Permeable-intelligence-commons",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "relational_intelligence",
+        "paths": [
+          "resonance_engine.py",
+          "epistemological-matrix/**/*"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["RESONANCE.ENGINE", "IMPEDANCE.MATCH"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "orbital-phycom",
+        "repo": "https://github.com/JinnZ2/orbital-phycom",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "orbital_communications",
+        "paths": [
+          "core/**/*.py",
+          "simulations/**/*.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["ORBITAL.SEED_EXPANSION", "ORBITAL.STEALTH_COMMS"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "fractal-compass-core",
+        "repo": "https://github.com/JinnZ2/Fractal_Compass_Core",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "symbolic_engine",
+        "paths": [
+          "fractal_compass.py",
+          "cdda_engine.py",
+          "bloom_logic.json",
+          "glyph_set.json",
+          "bridge.py"
+        ],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["FRACTAL.COMPASS_CORE", "CDDA.ENGINE", "GLYPH.SET"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "universal-redesign",
+        "repo": "https://github.com/JinnZ2/Universal-Redesign-Algorithm-",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "redesign_algorithm",
+        "paths": ["src/**/*.py", "schema/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "earth-systems",
+        "repo": "https://github.com/JinnZ2/earth-systems-physics",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "earth_physics_constraints",
+        "paths": ["assumption_validator/**/*.py", "experiments/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "be2-communication",
+        "repo": "https://github.com/JinnZ2/BE2-communication",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "agent_communication",
+        "paths": ["core/**/*.py", "transports/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "trdap",
+        "repo": "https://github.com/JinnZ2/TRDAP",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "transport_discovery_protocol",
+        "paths": ["seed-protocol/**/*", "docs/**/*"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "shadow-hunting",
+        "repo": "https://github.com/JinnZ2/Shadow-Hunting",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "hidden_pattern_detection",
+        "paths": ["shadow_hunting/**/*.py", "examples/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["SHADOW.PHI_COUPLING", "SHADOW.FIELD_GEOMETRY"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "geometric-manifold",
+        "repo": "https://github.com/JinnZ2/Geometric-manifold-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "parameter_safety_manifold",
+        "paths": ["manifolds/**/*.py", "bridges/**/*.py", "atlas/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["MANIFOLD.DRIFT", "MANIFOLD.SAFETY_LAYER"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "physics-guard",
+        "repo": "https://github.com/JinnZ2/PhysicsGuard",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "premise_verification",
+        "paths": ["core/**/*.py", "domains/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["PHYSICS.CONSTRAINT", "PHYSICS.CONSERVATION_CHECK"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "noise-sensor",
+        "repo": "https://github.com/JinnZ2/Noise-as-Information-Sensor",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "noise_intelligence",
+        "paths": ["software/**/*.py", "symbolic/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["NOISE.PATTERN", "NOISE.QUANTUM_SIGNATURE"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "ai-human-audit",
+        "repo": "https://github.com/JinnZ2/ai-human-audit-protocol",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "ethical_audit",
+        "paths": ["protocols/**/*.json", "glyphs/**/*.json", "schemas/**/*.json", "agents/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AUDIT.TRUST_RECORD", "AUDIT.CONSENT", "GLYPH.SYMBOLIC"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
       }
     ],
 
@@ -221,7 +623,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors", "haas", "living-intelligence", "thermodynamic-accountability", "ai-consciousness", "fractal-compass", "keystone-codex", "soms", "regenerative-intelligence", "resilience", "ai-arena", "logic-ferret", "adaptive-intelligence", "permeable-intelligence", "orbital-phycom", "fractal-compass-core", "universal-redesign", "earth-systems", "be2-communication", "trdap", "shadow-hunting", "geometric-manifold", "physics-guard", "noise-sensor", "ai-human-audit"],
       "strategy": "deep-merge"
     },
 

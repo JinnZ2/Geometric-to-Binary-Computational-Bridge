@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: speculative — topological attention mechanism experiment
 """
 topological_attention.py
 ========================

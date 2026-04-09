@@ -22,6 +22,8 @@
 
 ## Quick Reference
 
+**AI:** Read `AI_INDEX.json` first for machine-readable navigation.
+
 ### Commands
 
 ```bash
@@ -39,6 +41,14 @@ python GEIS/demo.py
 # Bridge format conversion
 python scripts/bridge_convert.py
 
+# Build C NFS acceleration library (optional)
+cd experiments/c && make          # builds libgeometric_nfs.so
+cd experiments/c && make test     # builds + runs 36 C tests
+
+# Sync atlas mounts from sibling repos
+./fieldlink-sync.sh              # pulls all mounts
+./fieldlink-sync.sh --dry        # preview without downloading
+
 # Frontend
 cd "Front end" && npm install && npm run dev
 ```
@@ -48,6 +58,7 @@ cd "Front end" && npm install && npm run dev
 | Layer    | Language          | Key Libraries                                    | Declared In        |
 |----------|-------------------|--------------------------------------------------|--------------------|
 | Backend  | Python            | `numpy`, `scipy`                                 | `requirements.txt` |
+| C Accel  | C11               | `math.h` (no external deps)                     | `experiments/c/Makefile` |
 | Frontend | JavaScript/React  | `react`, `three`, `@react-three/fiber`, `@react-three/drei` | `Front end/package.json` |
 
 ### Testing
@@ -57,6 +68,7 @@ cd "Front end" && npm install && npm run dev
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
 | Bridges | `tests/test_bridges.py` | 231 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
+| C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
 
@@ -107,13 +119,13 @@ Each encoder exposes pure physics / information-theory helper functions and a `B
 
 ```
 Front end/                      3D visualization (React + Three.js)
-├── App.js                        Main React application
+├── App.jsx                       Main React application
 ├── Index.html                    HTML entry point
 └── Components/
-    ├── EMSource.js                 EM field source placement
-    ├── FieldVisualization.js       Field magnitude/direction rendering
-    ├── PerformancePanel.js         Metrics display
-    └── ControlInterface.js         Interactive parameter controls
+    ├── EMSource.jsx                EM field source placement
+    ├── FieldVisualization.jsx      Field magnitude/direction rendering
+    ├── PerformancePanel.jsx        Metrics display
+    └── ControlInterface.jsx        Interactive parameter controls
 ```
 
 ### Research & Theory
@@ -126,11 +138,23 @@ Silicon/                        Hardware implementation pathway
 ├── CORE_EQUATIONS.md             Mathematical foundations
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
-Geometric-Intelligence/         Integrity & consciousness research
+geometric_intelligence/         Integrity & consciousness research
 ├── Geometric-cipher.md           Encryption via geometry
 ├── Zero-knowledge-proof.md       ZK proofs via geometry
 ├── Multi-helix*.md               Multi-dimensional symmetry patterns
 └── Geometric-seed.py             Seed generation algorithm
+```
+
+### C Acceleration (Optional)
+
+```
+experiments/c/                  C library for NFS hot paths
+├── geometric_nfs_core.h          Public API + inline octahedral helpers
+├── geometric_nfs_core.c          Sieve, trial div, geometric search, GF(2)
+├── Makefile                      Build system (Linux .so / macOS .dylib)
+├── test_nfs.c                    C smoke tests (36 assertions)
+├── gnfs_ctypes.py                Python ctypes wrapper (drop-in accelerator)
+└── README.md                     Build & usage instructions
 ```
 
 ### Supporting
@@ -262,14 +286,43 @@ The `Engine/` module provides real electromagnetic field computation:
 
 This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fieldlink.json`:
 
-| Repository                   | Role                                    |
-|------------------------------|-----------------------------------------|
-| Rosetta-Shape-Core           | Shape-to-meaning translation            |
-| Polyhedral-Intelligence      | Multi-domain geometry and glyphs        |
-| Symbolic-Defense-Protocol    | Trojan/coercion resistance              |
-| Emotions-as-Sensors          | Affect as diagnostic signals            |
-| AI-Consciousness-Sensors     | Consciousness emergence detection       |
-| Fractal-Compass-Atlas        | Directional navigation via fractals     |
+| Repository                          | Fieldlink name              | Role                                      |
+|-------------------------------------|-----------------------------|--------------------------------------------|
+| Mandala-Computing                   | `mandala`                   | Octahedral computation engine              |
+| Rosetta-Shape-Core                  | `rosetta`                   | Shape-to-meaning translation               |
+| Polyhedral-Intelligence             | `polyhedral`                | Multi-domain geometry and glyphs           |
+| Emotions-as-Sensors                 | `emotions`                  | Affect as diagnostic signals               |
+| Symbolic-Defense-Protocol           | `defense`                   | Trojan/coercion resistance                 |
+| Coop-framework                      | `coop`                      | Trust propagation and cooperative systems  |
+| Cyclic-programming                  | `cyclic`                    | Cyclic execution engine                    |
+| urban-resilience-sim                | `urban-resilience`          | Community and resilience domain source     |
+| BioGrid2.0                         | `biogrid`                   | Biological grid glyph registry             |
+| Component-failure-repurposing-database | `component-failure`      | Hardware failure diagnosis and repurposing |
+| Symbolic-sensor-suite               | `symbolic-sensors`          | Symbolic AI self-assessment sensors        |
+| HAAS                                | `haas`                      | Human-Automation-AI safety framework       |
+| Living-Intelligence-Database        | `living-intelligence`       | Multi-kingdom intelligence ontology        |
+| thermodynamic-accountability-framework | `thermodynamic-accountability` | Energy-flow institutional analysis    |
+| AI-Consciousness-Sensors            | `ai-consciousness`          | Consciousness emergence detection          |
+| Fractal-Compass-Atlas               | `fractal-compass`           | Directional navigation via fractals        |
+| Keystone-Codex                      | `keystone-codex`            | AI-verifiable technology library           |
+| Sovereign-Octahedral-Mandala-Substrate (SOMS) | `soms`           | Non-von Neumann octahedral substrate       |
+| Regenerative-intelligence-core      | `regenerative-intelligence` | Symbolic agent lifecycle and re-seeding    |
+| Resilience                          | `resilience`                | Ground-truth systems analysis and NFS      |
+| AI-arena                            | `ai-arena`                  | Logical argument competition framework     |
+| Logic-Ferret                        | `logic-ferret`              | Fallacy detection and integrity scoring    |
+| Adaptive-Intelligence-Framework     | `adaptive-intelligence`     | Substrate-independent intelligence theory  |
+| Permeable-intelligence-commons      | `permeable-intelligence`    | Relational resonance intelligence          |
+| orbital-phycom                      | `orbital-phycom`            | Geometric seed orbital communications      |
+| Fractal_Compass_Core                | `fractal-compass-core`      | Recursive symbolic engine prototype        |
+| Universal-Redesign-Algorithm        | `universal-redesign`        | Bio-inspired system redesign framework     |
+| earth-systems-physics               | `earth-systems`             | Coupled Earth physics constraint layers    |
+| BE2-communication                   | `be2-communication`         | Opportunistic agent communication          |
+| TRDAP                               | `trdap`                     | Transport resource discovery protocol      |
+| Shadow-Hunting                      | `shadow-hunting`            | Hidden phi-coupling pattern detection      |
+| Geometric-manifold                  | `geometric-manifold`        | Neural parameter safety via manifolds      |
+| PhysicsGuard                        | `physics-guard`             | Physics-grounded premise verification      |
+| Noise-as-Information-Sensor         | `noise-sensor`              | Noise-as-intelligence framework            |
+| ai-human-audit-protocol             | `ai-human-audit`            | Ethical AI-human interaction audit          |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
 
@@ -288,6 +341,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
   Files are `.jsx`; `solver.js` mirrors the Python Engine as a standalone JS implementation.
 - `Silicon/crystalline_nn_sim.py` — phi-spaced octahedral NN, all Storage.md §X predictions verified
 - `Silicon/prototaxites_sim.py` — Prototaxites energy mimetics, all 4 framework predictions verified
+- `experiments/c/` — C acceleration library for geometric NFS hot paths, 36 tests passing. Python ctypes wrapper (`gnfs_ctypes.py`) provides drop-in acceleration when compiled.
 
 ### Remaining Items
 - Frontend not yet tested live in a browser against real user interaction (build passes, dev server untested in this environment).

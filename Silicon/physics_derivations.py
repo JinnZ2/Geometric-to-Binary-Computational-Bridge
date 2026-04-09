@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — physics derivation computations
 """
 Silicon/physics_derivations.py
 ================================

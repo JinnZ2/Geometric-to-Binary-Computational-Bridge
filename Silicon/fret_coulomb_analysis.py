@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# STATUS: infrastructure — FRET vs Coulomb regime analysis
 """
 fret_coulomb_analysis.py
 ========================

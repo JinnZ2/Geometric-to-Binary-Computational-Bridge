@@ -1,3 +1,4 @@
+# STATUS: infrastructure — field propulsion shape computation
 """
 Field Propulsion Shape -- computational module.
 

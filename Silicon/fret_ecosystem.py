@@ -1,3 +1,4 @@
+# STATUS: infrastructure — FRET ecosystem coupling models
 """
 FRET Ecosystem Coupling Framework — energy transfer models for biological systems.
 
