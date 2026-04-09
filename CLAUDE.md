@@ -308,6 +308,15 @@ This repository is a hub in a larger multi-repo ecosystem, synchronized via `.fi
 | Permeable-intelligence-commons      | `permeable-intelligence`    | Relational resonance intelligence          |
 | orbital-phycom                      | `orbital-phycom`            | Geometric seed orbital communications      |
 | Fractal_Compass_Core                | `fractal-compass-core`      | Recursive symbolic engine prototype        |
+| Universal-Redesign-Algorithm        | `universal-redesign`        | Bio-inspired system redesign framework     |
+| earth-systems-physics               | `earth-systems`             | Coupled Earth physics constraint layers    |
+| BE2-communication                   | `be2-communication`         | Opportunistic agent communication          |
+| TRDAP                               | `trdap`                     | Transport resource discovery protocol      |
+| Shadow-Hunting                      | `shadow-hunting`            | Hidden phi-coupling pattern detection      |
+| Geometric-manifold                  | `geometric-manifold`        | Neural parameter safety via manifolds      |
+| PhysicsGuard                        | `physics-guard`             | Physics-grounded premise verification      |
+| Noise-as-Information-Sensor         | `noise-sensor`              | Noise-as-intelligence framework            |
+| ai-human-audit-protocol             | `ai-human-audit`            | Ethical AI-human interaction audit          |
 
 Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strategy with SHA256 integrity verification.
 

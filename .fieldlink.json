@@ -504,6 +504,115 @@
         "entities_consumed": ["FRACTAL.COMPASS_CORE", "CDDA.ENGINE", "GLYPH.SET"],
         "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
         "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "universal-redesign",
+        "repo": "https://github.com/JinnZ2/Universal-Redesign-Algorithm-",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "redesign_algorithm",
+        "paths": ["src/**/*.py", "schema/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "earth-systems",
+        "repo": "https://github.com/JinnZ2/earth-systems-physics",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "earth_physics_constraints",
+        "paths": ["assumption_validator/**/*.py", "experiments/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "be2-communication",
+        "repo": "https://github.com/JinnZ2/BE2-communication",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "agent_communication",
+        "paths": ["core/**/*.py", "transports/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "trdap",
+        "repo": "https://github.com/JinnZ2/TRDAP",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "transport_discovery_protocol",
+        "paths": ["seed-protocol/**/*", "docs/**/*"],
+        "mounts": [],
+        "exports": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "shadow-hunting",
+        "repo": "https://github.com/JinnZ2/Shadow-Hunting",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "hidden_pattern_detection",
+        "paths": ["shadow_hunting/**/*.py", "examples/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["SHADOW.PHI_COUPLING", "SHADOW.FIELD_GEOMETRY"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "geometric-manifold",
+        "repo": "https://github.com/JinnZ2/Geometric-manifold-",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "parameter_safety_manifold",
+        "paths": ["manifolds/**/*.py", "bridges/**/*.py", "atlas/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["MANIFOLD.DRIFT", "MANIFOLD.SAFETY_LAYER"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "physics-guard",
+        "repo": "https://github.com/JinnZ2/PhysicsGuard",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "premise_verification",
+        "paths": ["core/**/*.py", "domains/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["PHYSICS.CONSTRAINT", "PHYSICS.CONSERVATION_CHECK"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "noise-sensor",
+        "repo": "https://github.com/JinnZ2/Noise-as-Information-Sensor",
+        "ref": "main",
+        "direction": "inbound",
+        "relation": "noise_intelligence",
+        "paths": ["software/**/*.py", "symbolic/**/*.py"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["NOISE.PATTERN", "NOISE.QUANTUM_SIGNATURE"],
+        "entities_exported": [],
+        "consent": { "license": "MIT", "share_ok": true }
+      },
+      {
+        "name": "ai-human-audit",
+        "repo": "https://github.com/JinnZ2/ai-human-audit-protocol",
+        "ref": "main",
+        "direction": "bidirectional",
+        "relation": "ethical_audit",
+        "paths": ["protocols/**/*.json", "glyphs/**/*.json", "schemas/**/*.json", "agents/**/*.json"],
+        "mounts": [],
+        "exports": [],
+        "entities_consumed": ["AUDIT.TRUST_RECORD", "AUDIT.CONSENT", "GLYPH.SYMBOLIC"],
+        "entities_exported": ["BRIDGE.BINARY", "GEIS.ENCODING"],
+        "consent": { "license": "MIT", "share_ok": true }
       }
     ],
 
@@ -514,7 +623,7 @@
     ],
 
     "merge": {
-      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors", "haas", "living-intelligence", "thermodynamic-accountability", "ai-consciousness", "fractal-compass", "keystone-codex", "soms", "regenerative-intelligence", "resilience", "ai-arena", "logic-ferret", "adaptive-intelligence", "permeable-intelligence", "orbital-phycom", "fractal-compass-core"],
+      "order": ["local", "mandala", "rosetta", "polyhedral", "emotions", "defense", "coop", "cyclic", "urban-resilience", "biogrid", "component-failure", "symbolic-sensors", "haas", "living-intelligence", "thermodynamic-accountability", "ai-consciousness", "fractal-compass", "keystone-codex", "soms", "regenerative-intelligence", "resilience", "ai-arena", "logic-ferret", "adaptive-intelligence", "permeable-intelligence", "orbital-phycom", "fractal-compass-core", "universal-redesign", "earth-systems", "be2-communication", "trdap", "shadow-hunting", "geometric-manifold", "physics-guard", "noise-sensor", "ai-human-audit"],
       "strategy": "deep-merge"
     },
 
