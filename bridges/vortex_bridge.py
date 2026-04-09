@@ -17,7 +17,7 @@ Plug into SensorSuite via memory_to_suite().
 
 Usage
 -----
-    from Silicon.topological_memory import VortexMemory
+    from Silicon.core.topological_memory import VortexMemory
     from bridges.vortex_bridge import VortexBridgeEncoder, memory_to_suite
 
     mem = VortexMemory(grid_size=64)
