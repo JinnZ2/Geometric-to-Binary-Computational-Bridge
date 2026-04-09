@@ -345,3 +345,23 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 
 ### Remaining Items
 - Frontend not yet tested live in a browser against real user interaction (build passes, dev server untested in this environment).
+
+
+
+
+ToDo:
+
+# Add at top of file:
+G = 6.67430e-11  # Gravitational constant (m³/kg·s²)
+e = 1.602e-19    # Elementary charge (C)
+m_e = 9.109e-31  # Electron mass (kg)
+epsilon_0 = 8.854e-12  # Vacuum permittivity (F/m)
+
+# Remove the duplicate EntropicLinker import (line 23)
+# OR rename to clarify they're different:
+from thermal_fret import EntropicLinker as ThermalEntropicLinker
+from entropy_fret import EntropicLinker as InfoEntropicLinker
+
+# Rename R0 local variable to avoid shadowing
+R0_silicon = 5.0  # nm - specify this is for silicon substrate
+in /silicon/FRET
