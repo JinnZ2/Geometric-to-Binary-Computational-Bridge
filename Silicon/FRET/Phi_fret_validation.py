@@ -378,88 +378,10 @@ stress-strain transmission (analogous to enhanced FRET coupling).
 
     return {'results': results}
 
-# =============================================================================
-
-# SUMMARY EQUATIONS (FOR DOCUMENTATION)
+# Core equations and validation criteria: see Silicon/FRET/phi_fret_equations.md
 
 # =============================================================================
-
-# CORE_EQUATIONS = """
-
-# CORE TEST EQUATIONS FOR PHI-ENHANCED FRET VALIDATION
-
-# 1. CLASSICAL TRANSFER SCALING FACTOR
-   # K_Class = (R_0/r)⁶
-   
-# Standard FRET rate normalized by donor decay rate.
-# 1. PHI-GEOMETRIC RESONANCE ENHANCEMENT
-   # F(r) = 1 + Σₙ exp(-(r/R_0 - φⁿ)² / 2σₙ²) / n
-   
-   # where σₙ = 0.1 × φⁿ and φ = (√5 - 1)/2 ≈ 0.618
-# 1. PHI-ENHANCED TRANSFER SCALING FACTOR
-   # K_φ = K_Class × F(r) = (R_0/r)⁶ × F(r)
-# 1. LOCAL RATE ENHANCEMENT (VALIDATION CRITERION)
-# ΔK(r) = K_φ(r) - K_Class(r)
-   
-# MUST HAVE: ΔK > 0 at r = R_0φⁿ for theory to be valid
-# 1. CROSS-DOMAIN FORCE FIELD
-   # V_φ(r) = V_Class(r) × [1 + M(r)]
-   
-# where M(r) = F(r) - 1 is the structural modulation factor
-# 1. PHI-OPTIMAL DISTANCES
-   # r_opt(n) = R_0 × φⁿ for n = 1, 2, 3, …
-   
-   # φ¹ ≈ 0.618 R_0
-   # φ² ≈ 0.382 R_0  
-   # φ³ ≈ 0.236 R_0
-   # φ⁴ ≈ 0.146 R_0
-   # φ⁵ ≈ 0.090 R_0
-
-# ================================================================================
-# INVALIDATION CRITERION
-
-# The φ-enhancement theory is INVALIDATED if:
-
-# - Experimental k_T measurements at r = R_0φⁿ
-# - Are NOT significantly higher than k_T^Class = (1/τ_D)(R_0/r)⁶
-# - Within measurement uncertainty
-
-# The M(r) factor MUST arise from fundamental mechanism:
-
-# - Non-local QED effects
-# - Structured vacuum / metamaterial effects
-# - Collective excitonic coupling
-# - Topological protection
-
-# NOT merely an ad hoc multiplier.
-
-# ================================================================================
-# NATURAL VALIDATION CANDIDATES
-
-# 1. PHOTOSYNTHESIS (LHC-II, FMO complex)
-# - Search pigment pair distances for φ-ratio spacing
-# - Compare transfer rates at φ vs non-φ distances
-# - Prediction: k_T(φ-pairs) > k_T(non-φ pairs)
-# 1. PROTEIN FOLDING / CHAPERONE BINDING
-# - Engineer binding sites with φ-ratio contact spacing
-# - Measure activation energy ΔG‡
-# - Prediction: Lower ΔG‡ for φ-configured sites
-# 1. QUASICRYSTAL PHONON TRANSMISSION
-# - Measure stress-strain coupling at atomic φ-distances
-# - Compare to non-φ atomic separations
-# - Prediction: Enhanced transmission at φ-distances
-# 1. NANOSTRUCTURE PERMITTIVITY
-# - Measure local ε_eff in φ-structured materials
-# - Compare to Maxwell-Garnett / Bruggeman predictions
-# - Prediction: Anomalous ε_eff at φ-geometric configurations
-
-# ================================================================================
-# """
-
-# =============================================================================
-
 # DEMO
-
 # =============================================================================
 
 if __name__ == "__main__":
