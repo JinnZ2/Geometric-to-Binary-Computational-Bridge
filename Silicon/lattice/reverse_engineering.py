@@ -36,7 +36,7 @@ import time
 
 # Import expansion functions
 
-from expansion_8d import (
+from Silicon.lattice.expansion_8d import (
 N_DIM, N_VERTICES, U_8D,
 expand_seed, expand_seed_dynamic,
 normalize_to_energy, get_shell_fingerprint

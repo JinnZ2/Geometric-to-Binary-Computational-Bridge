@@ -21,6 +21,10 @@ import matplotlib.pyplot as plt
 import json
 import os
 
+# Import CLI extensions
+from extended_cli import register_extended_subcommands
+from frontier_cli import register_frontier_subcommands
+
 # Import simulation modules
 from fret_core import R0, k_FRET, E_FRET
 import geometry_lock
@@ -460,7 +464,13 @@ def main():
     # ----- all -----
     all_parser = subparsers.add_parser('all', help='Run all simulations and generate summary report')
     all_parser.add_argument('--outdir', '-d', default='fret_sim_output', help='Output directory [fret_sim_output]')
-    
+
+    # ----- extended subcommands (acoustic, thermal, entropy) -----
+    register_extended_subcommands(subparsers)
+
+    # ----- frontier subcommands (time, vacuum, thermo, axion, radical, qet, unified) -----
+    register_frontier_subcommands(subparsers)
+
     args = parser.parse_args()
     
     # Dispatch to appropriate handler

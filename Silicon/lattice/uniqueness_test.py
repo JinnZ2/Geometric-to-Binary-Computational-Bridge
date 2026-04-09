@@ -35,12 +35,12 @@ import json
 
 # Import from other modules
 
-from expansion_8d import (
+from Silicon.lattice.expansion_8d import (
 N_DIM, N_VERTICES,
 expand_seed, expand_seed_dynamic,
 get_shell_fingerprint
 )
-from reverse_engineering import (
+from Silicon.lattice.reverse_engineering import (
 recover_seed, verify_recovery, params_to_seed
 )
 

@@ -44,7 +44,7 @@ from bridges.magnetic_encoder import (
     _gray_bits,
     _B_BANDS,
 )
-from Silicon.octahedral_sim import (
+from Silicon.core.octahedral_sim import (
     STATES,
     predict_T2,
     k_well as k_well_fn,
