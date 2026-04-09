@@ -14,6 +14,7 @@
   },
 
   "entry_points": {
+    "solver_registry": "solver_registry.py — 25 solvers, any AI can call reg.solve(name, **params)",
     "geis_demo": "GEIS/demo.py",
     "bridge_convert": "scripts/bridge_convert.py",
     "nfs_factorization": "experiments/geometric_nfs.py",

@@ -119,6 +119,12 @@ def gamma_thermal() -> float:
     return GAMMA_TH_0
 
 
+def T2_from_kwell(kw: float, si29: float = 0.001, T: float = TEMP) -> float:
+    """T₂ (ms) directly from k_well, for use by solver_registry."""
+    g_total = gamma_phonon(kw, T) + gamma_bath(si29) + gamma_thermal()
+    return 1000.0 / g_total
+
+
 # ── T₂ prediction ─────────────────────────────────────────────────────────────
 
 def predict_T2(strain_pct: float, dist_ang: float,
