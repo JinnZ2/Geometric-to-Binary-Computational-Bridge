@@ -33,7 +33,8 @@ pip install -r requirements.txt
 # Run all tests
 cd GEIS && python test_simple.py        # GEIS (116 tests)
 python tests/test_bridges.py            # Bridge encoders (57 tests)
-python tests/test_engine.py             # Engine/solver (42 tests)
+python tests/test_engine.py             # Engine/solver (58 tests)
+python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -67,7 +68,8 @@ cd "Front end" && npm install && npm run dev
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
 | Bridges | `tests/test_bridges.py` | 231 | All 11 domain encoders — physics helpers + encoder I/O |
-| Engine | `tests/test_engine.py` | 42 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
+| Engine | `tests/test_engine.py` | 58 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
+| Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -88,7 +90,11 @@ Engine/                         Core computational engine
 ├── symmetry_detector.py          Symmetry detection for optimization
 ├── geometric_transformer_engine.py  Fixed-point Q16.16 transformer with symmetry detection + chunked attention
 ├── kt_annealer.py                Kosterlitz-Thouless phase annealer (used by magnetic bridge + geometric_intelligence)
-└── magnonic_sublayer.py          Spin-wave material presets and coupling states (used by magnetic_encoder)
+├── magnonic_sublayer.py          Spin-wave material presets and coupling states (used by magnetic_encoder)
+└── gaussian_splats/              Gaussian-splat field representation
+    ├── gaussian_4d.py              Gaussian4DSource + SIMDOptimizer4D + GeometricEMSolver4D + bhattacharyya_distance
+    ├── octahedral.py               8-state cube-corner encoder + Gaussian8FieldSource + ZeemanDynamics + ManifoldConstraint
+    └── rhombic.py                  32-state rhombic-triacontahedron encoder + Gaussian32FieldSource + dynamics
 
 GEIS/                           Geometric Information Encoding System
 ├── geometric_encoder.py          Token <-> binary converter
@@ -154,9 +160,11 @@ docs/gaussian_splats/           Design series: Gaussian-splat field representati
 └── 04_rhombic_triaconta_32state.md  Extension to 32-state rhombic triacontahedron (5 bits/splat)
 ```
 
-The `docs/gaussian_splats/` series contains design notes with draft Python
-(not yet extracted to modules). They form a coherent progression: 4D → 8-state
-octahedral → 32-state rhombic triacontahedron splat encoding.
+The `docs/gaussian_splats/` series contains the design notes; the
+corresponding implementations live in `Engine/gaussian_splats/` and are
+exercised by `tests/test_gaussian_splats.py` (63 tests). They form a
+coherent progression: 4D → 8-state octahedral → 32-state rhombic
+triacontahedron splat encoding.
 
 ### C Acceleration (Optional)
 

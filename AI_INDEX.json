@@ -9,6 +9,7 @@
     "commands": [
       {"cmd": "cd GEIS && python test_simple.py", "expect": "116/116 passed"},
       {"cmd": "python tests/test_engine.py", "expect": "58/58 passed"},
+      {"cmd": "PYTHONPATH=. python tests/test_gaussian_splats.py", "expect": "63/63 passed"},
       {"cmd": "cd experiments/c && make test", "expect": "36/36 passed"}
     ]
   },
@@ -26,6 +27,7 @@
     "geis": {"file": "GEIS/test_simple.py", "tests": 116, "run_from": "GEIS/"},
     "bridges": {"file": "tests/test_bridges.py", "tests": 231, "run_with": "PYTHONPATH=."},
     "engine": {"file": "tests/test_engine.py", "tests": 58},
+    "gaussian_splats": {"file": "tests/test_gaussian_splats.py", "tests": 63, "run_with": "PYTHONPATH=."},
     "silicon": {"file": "tests/test_silicon_modules.py"},
     "c_nfs": {"file": "experiments/c/test_nfs.c", "tests": 36, "build": "cd experiments/c && make test"}
   },
@@ -84,13 +86,21 @@
 
   "design_docs": {
     "gaussian_splats": {
-      "_note": "Design series on Gaussian-splat field representation with draft Python (not yet extracted to modules).",
+      "_note": "Design series on Gaussian-splat field representation. Implementations live in Engine/gaussian_splats/, tested by tests/test_gaussian_splats.py (63 tests).",
       "files": [
         "docs/gaussian_splats/01_4d_splats.md",
         "docs/gaussian_splats/02_octahedral_encoder.md",
         "docs/gaussian_splats/03_8field_zeeman_manifold.md",
         "docs/gaussian_splats/04_rhombic_triaconta_32state.md"
-      ]
+      ],
+      "implementation": {
+        "package": "Engine/gaussian_splats/",
+        "modules": {
+          "gaussian_4d.py": "Gaussian4DSource, SIMDOptimizer4D, GeometricEMSolver4D, bhattacharyya_distance",
+          "octahedral.py": "OctahedralStateEncoder, Gaussian8FieldSource, ZeemanDynamics, ManifoldConstraint",
+          "rhombic.py": "RhombicTriacontaEncoder, Gaussian32FieldSource, ZeemanDynamics32, SphericalManifoldConstraint"
+        }
+      }
     }
   },
 
