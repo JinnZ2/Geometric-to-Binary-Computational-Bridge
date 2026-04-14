@@ -1,0 +1,74 @@
+# pyproject.toml
+#
+# Central Python tooling config for the Geometric-to-Binary Computational
+# Bridge. Kept minimal: no build system, no packaging — just ruff's lint
+# configuration so that CI can catch real bugs without drowning in style
+# churn.
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+# Directories that ruff should not walk into.
+# - experiments/silicon_speculative/ : explicitly tagged speculative
+# - "Front end/"                     : JavaScript/React, not Python
+# - atlas/                           : external mounts from sibling repos
+# - Bridge.py                        : invalid syntax on line 28 (`0xGB` —
+#                                      an orphaned prototype that nothing
+#                                      imports). Exclude until someone
+#                                      decides whether to delete or fix it.
+extend-exclude = [
+    "Bridge.py",
+    "experiments/silicon_speculative",
+    "Front end",
+    "atlas",
+]
+
+[tool.ruff.lint]
+# Only enable Pyflakes (F) rules. These catch real bugs — undefined
+# names, redefined functions, unused star imports — without imposing
+# style preferences. When the codebase is ready for more, add E/W
+# (pycodestyle) or I (isort) rules in a separate pass.
+select = ["F"]
+
+# Noise rules from the F family that we deliberately do not enforce yet:
+#   F401 — unused imports (215 instances; cleanup, not bugs)
+#   F541 — f-strings with no placeholders (96 instances; purely cosmetic)
+#   F841 — unused local variables (40 instances; cleanup)
+# Turn these on once the real bugs (F821) are fixed and the repo is clean.
+ignore = ["F401", "F541", "F841"]
+
+# Pre-existing F821 (undefined name) findings on main. Each line is a
+# real bug that should be fixed in a follow-up pass — not suppressed
+# forever. When you fix one, delete its entry here so ruff starts
+# enforcing the rule on that file again.
+[tool.ruff.lint.per-file-ignores]
+# U_8D used as module-level name but never defined (5 refs).
+"Silicon/lattice/expansion_8d.py" = ["F821"]
+
+# Orphan docstring text after main() references `file` as a bare name.
+"Silicon/lattice/master_optimizer.py" = ["F821"]
+
+# MultiBridgeNode is defined in Silicon/lattice/multi_bridge.py but never
+# imported into these two files that reference it.
+"Silicon/lattice/multi_bridge_node.py" = ["F821"]
+"Silicon/lattice/multi_bridge_neural_lattice.py" = ["F821"]
+
+# Missing `import numpy as np` + missing import of E_FRET from fret_core.
+"Silicon/FRET/handler_functions.py" = ["F821"]
+
+# `k_theta` defined inside a nested function but used in an outer
+# lambda — closure scoping bug.
+"Silicon/FRET/geometry_lock.py" = ["F821"]
+
+# References `find_geometric_dependencies` without importing it.
+"GEIS/phone_sensing_sim.py" = ["F821"]
+
+# Pre-existing F811 (redefined-while-unused) findings. Most are parameter
+# names shadowing module-level imports — technically not bugs but worth
+# revisiting during a dedicated cleanup pass.
+"Silicon/FRET/gravity_fret.py" = ["F811"]
+"Silicon/FRET/plasma_fret.py" = ["F811"]
+"Silicon/FRET/triage_diagnosis.py" = ["F811"]
+"experiments/factorization_landscape.py" = ["F811"]
+"experiments/sim.py" = ["F811"]
