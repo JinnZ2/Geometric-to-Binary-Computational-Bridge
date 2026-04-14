@@ -85,7 +85,10 @@ Engine/                         Core computational engine
 ├── geometric_solver.py           EM field solver with SIMD optimization
 ├── simd_optimizer.py             Auto-vectorization engine
 ├── spatial_grid.py               Spatial data structures
-└── symmetry_detector.py          Symmetry detection for optimization
+├── symmetry_detector.py          Symmetry detection for optimization
+├── geometric_transformer_engine.py  Fixed-point Q16.16 transformer with symmetry detection + chunked attention
+├── kt_annealer.py                Kosterlitz-Thouless phase annealer (used by magnetic bridge + geometric_intelligence)
+└── magnonic_sublayer.py          Spin-wave material presets and coupling states (used by magnetic_encoder)
 
 GEIS/                           Geometric Information Encoding System
 ├── geometric_encoder.py          Token <-> binary converter
@@ -143,7 +146,17 @@ geometric_intelligence/         Integrity & consciousness research
 ├── Zero-knowledge-proof.md       ZK proofs via geometry
 ├── Multi-helix*.md               Multi-dimensional symmetry patterns
 └── Geometric-seed.py             Seed generation algorithm
+
+docs/gaussian_splats/           Design series: Gaussian-splat field representation
+├── 01_4d_splats.md               4D (space+time) splats — Gaussian4DSource, SIMDOptimizer4D, GeometricEMSolver4D
+├── 02_octahedral_encoder.md      Bridging 4D splats to the 8 sp³ octahedral states
+├── 03_8field_zeeman_manifold.md  6D Gaussian8FieldSource with Zeeman dynamics + manifold constraint
+└── 04_rhombic_triaconta_32state.md  Extension to 32-state rhombic triacontahedron (5 bits/splat)
 ```
+
+The `docs/gaussian_splats/` series contains design notes with draft Python
+(not yet extracted to modules). They form a coherent progression: 4D → 8-state
+octahedral → 32-state rhombic triacontahedron splat encoding.
 
 ### C Acceleration (Optional)
 
