@@ -47,38 +47,51 @@
 
   "silicon_modules": {
     "_note": "STATUS tag in first lines of each file. 'validated' = tested or predictions verified. 'infrastructure' = working code, used by pipeline. 'speculative' = moved to experiments/silicon_speculative/.",
+    "_layout": "Silicon/ was reorganized into core/ (foundations), lattice/ (crystal + multi-bridge simulations), and FRET/ (fluorescence resonance energy transfer).",
     "validated": [
-      "Silicon/core_equations.py",
-      "Silicon/magnetic_bridge_protocol.py",
-      "Silicon/octahedral_tensor.py",
-      "Silicon/tetrahedral_symmetry.py",
-      "Silicon/crystalline_storage.py",
-      "Silicon/lcea_analysis.py",
-      "Silicon/crystalline_nn_sim.py",
-      "Silicon/prototaxites_sim.py",
-      "Silicon/topological_memory.py",
-      "Silicon/hardware_bridge.py"
+      "Silicon/core/core_equations.py",
+      "Silicon/core/magnetic_bridge_protocol.py",
+      "Silicon/core/octahedral_tensor.py",
+      "Silicon/core/tetrahedral_symmetry.py",
+      "Silicon/core/crystalline_storage.py",
+      "Silicon/core/lcea_analysis.py",
+      "Silicon/core/topological_memory.py",
+      "Silicon/core/hardware_bridge.py",
+      "Silicon/lattice/crystalline_nn_sim.py",
+      "Silicon/lattice/prototaxites_sim.py"
     ],
     "infrastructure": [
-      "Silicon/er_dft_framework.py",
-      "Silicon/codoping_framework.py",
-      "Silicon/master_optimizer.py",
-      "Silicon/pipeline.py",
-      "Silicon/gies_encoder.py",
-      "Silicon/octahedral_sim.py",
-      "Silicon/energy_framework.py",
-      "Silicon/thermal_coupling.py",
-      "Silicon/field_propulsion.py",
-      "Silicon/fret_coulomb_analysis.py",
-      "Silicon/fret_ecosystem.py",
-      "Silicon/kt_annealing.py",
-      "Silicon/expansion_8d.py",
-      "Silicon/orbital_octa.py",
-      "Silicon/reverse_engineering.py",
-      "Silicon/seed_expansion.py",
-      "Silicon/uniqueness_test.py"
+      "Silicon/core/pipeline.py",
+      "Silicon/core/gies_encoder.py",
+      "Silicon/core/octahedral_sim.py",
+      "Silicon/core/energy_framework.py",
+      "Silicon/core/thermal_coupling.py",
+      "Silicon/core/field_propulsion.py",
+      "Silicon/core/fret_coulomb_analysis.py",
+      "Silicon/lattice/er_dft_framework.py",
+      "Silicon/lattice/codoping_framework.py",
+      "Silicon/lattice/master_optimizer.py",
+      "Silicon/lattice/kt_annealing.py",
+      "Silicon/lattice/expansion_8d.py",
+      "Silicon/lattice/orbital_octa.py",
+      "Silicon/lattice/reverse_engineering.py",
+      "Silicon/lattice/seed_expansion.py",
+      "Silicon/lattice/uniqueness_test.py",
+      "Silicon/FRET/fret_ecosystem.py"
     ],
     "speculative_moved_to": "experiments/silicon_speculative/"
+  },
+
+  "design_docs": {
+    "gaussian_splats": {
+      "_note": "Design series on Gaussian-splat field representation with draft Python (not yet extracted to modules).",
+      "files": [
+        "docs/gaussian_splats/01_4d_splats.md",
+        "docs/gaussian_splats/02_octahedral_encoder.md",
+        "docs/gaussian_splats/03_8field_zeeman_manifold.md",
+        "docs/gaussian_splats/04_rhombic_triaconta_32state.md"
+      ]
+    }
   },
 
   "ecosystem": {
