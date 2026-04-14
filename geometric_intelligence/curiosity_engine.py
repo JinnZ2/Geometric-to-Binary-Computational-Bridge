@@ -312,7 +312,7 @@ class CuriosityEngine:
         # Emotion binary representation
         emotion_bits = ""
         try:
-            from bridges.emotion_encoder import EmotionBridgeEncoder
+            from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
             enc = EmotionBridgeEncoder()
             enc.from_geometry({
                 "valence":   P,

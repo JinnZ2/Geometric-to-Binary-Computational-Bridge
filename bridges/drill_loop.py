@@ -17,7 +17,7 @@ This module receives that signal and completes the loop:
                  action='no_target'  → drill target unknown or unregistered
 
 This closes the loop opened at:
-  bridges/emotion_encoder.py line 320 — target_name = drill_target(bridge_grads)
+  bridges/cognitive/emotion_encoder.py line 320 — target_name = drill_target(bridge_grads)
 
 Architecture position
 ---------------------
@@ -32,7 +32,7 @@ Usage
 -----
     from bridges.drill_loop import DrillLoop
     from bridges.thermal_encoder import ThermalBridgeEncoder
-    from bridges.consciousness_encoder import ConsciousnessBridgeEncoder
+    from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
 
     loop = DrillLoop(
         encoder_registry={
@@ -149,7 +149,7 @@ if __name__ == "__main__":
     # Minimal self-contained demo using the emotion encoder to fire the drill
     # and the drill loop to close the circuit.
 
-    from bridges.emotion_encoder import EmotionBridgeEncoder, drill_target
+    from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder, drill_target
     from bridges.physics_guard import PhysicsGuard
 
     print("=" * 60)

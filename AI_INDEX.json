@@ -43,8 +43,8 @@
     "thermal":       {"file": "bridges/thermal_encoder.py",       "bits": 39},
     "pressure":      {"file": "bridges/pressure_encoder.py",      "bits": 39},
     "chemical":      {"file": "bridges/chemical_encoder.py",      "bits": 39},
-    "consciousness": {"file": "bridges/consciousness_encoder.py", "bits": 39},
-    "emotion":       {"file": "bridges/emotion_encoder.py",       "bits": 39}
+    "consciousness": {"file": "bridges/cognitive/consciousness_encoder.py", "bits": 39, "subpackage": "cognitive"},
+    "emotion":       {"file": "bridges/cognitive/emotion_encoder.py",       "bits": 39, "subpackage": "cognitive"}
   },
 
   "silicon_modules": {

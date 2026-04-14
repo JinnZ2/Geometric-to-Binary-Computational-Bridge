@@ -25,7 +25,7 @@ Mapping: Seed-physics shells → bridge layers
 """
 
 import math
-from bridges.consciousness_encoder import fisher_information
+from bridges.cognitive.consciousness_encoder import fisher_information
 
 PHI     = (1.0 + math.sqrt(5.0)) / 2.0   # golden ratio  ≈ 1.618
 PHI_INV = 1.0 / PHI                        # 1/φ           ≈ 0.618

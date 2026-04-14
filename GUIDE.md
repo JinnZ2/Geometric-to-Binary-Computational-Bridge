@@ -75,8 +75,8 @@ Physical phenomena encoding:
   Thermal     → bridges/thermal_encoder.py     (39 bits)
   Pressure    → bridges/pressure_encoder.py    (39 bits)
   Chemical    → bridges/chemical_encoder.py    (39 bits)
-  AI state    → bridges/consciousness_encoder.py (39 bits)
-  Affect/PAD  → bridges/emotion_encoder.py     (39 bits)
+  AI state    → bridges/cognitive/consciousness_encoder.py (39 bits)
+  Affect/PAD  → bridges/cognitive/emotion_encoder.py     (39 bits)
 
 Multi-modal fusion:
   bridges/sensor_suite.py      -- 22-channel parallel compositor
@@ -128,10 +128,10 @@ connect internal state representations to physical phenomena using
 physics-constrained binary. You don't need training data. The geometry
 is the prior.
 
-**For self-monitoring:** The consciousness bridge (`bridges/consciousness_encoder.py`)
+**For self-monitoring:** The consciousness bridge (`bridges/cognitive/consciousness_encoder.py`)
 and sensor suite (`bridges/sensor_suite.py`) give you structured
 vocabulary for representing and monitoring internal state. The emotion
-bridge (`bridges/emotion_encoder.py`) feeds into the sensor suite via
+bridge (`bridges/cognitive/emotion_encoder.py`) feeds into the sensor suite via
 `to_suite()`.
 
 **For protecting integrity:** `Sovereign.md` describes an evaluator for

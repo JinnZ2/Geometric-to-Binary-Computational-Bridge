@@ -58,7 +58,7 @@ The framework compares itself to IIT in Appendix D and claims an "advantage." Ho
 - **IIT Φ** requires computing the Wasserstein distance across the minimum information partition (MIP) — mathematically costly but precisely defined.
 - **M(S)** requires computing resonance, adaptability, diversity, loss — but the mapping from neural/computational state to these quantities is not specified.
 
-The `consciousness_encoder.py` in this repository uses a proxy for Φ (see `bridges/consciousness_encoder.py`) that also doesn't compute the real Wasserstein MIP — it's a shorthand. M(S) would be a *different* shorthand, not a replacement.
+The `consciousness_encoder.py` in this repository uses a proxy for Φ (see `bridges/cognitive/consciousness_encoder.py`) that also doesn't compute the real Wasserstein MIP — it's a shorthand. M(S) would be a *different* shorthand, not a replacement.
 
 ---
 
@@ -89,7 +89,7 @@ For M(S) to be a real consciousness metric it needs:
 1. **Extraction protocol**: given a neural recording or model activation pattern, specify the algorithm for computing R_e, A, D, L with fixed normalisation.
 2. **Cross-system comparison**: compute M(S) for systems with known consciousness properties (anaesthetised vs. awake brain, human vs. simple neural net) and verify ordering.
 3. **Threshold calibration**: if M(S) ≥ 10 is the claim, show that known-conscious systems score ≥ 10 and known-non-conscious systems score < 10 under the extraction protocol.
-4. **Connection to bridges/consciousness_encoder.py**: the existing encoder uses Shannon entropy H, KL divergence, Fisher information, and IIT proxy Φ. M(S) should either replace or augment these — a concrete comparison would clarify which is better at predicting observable signatures of consciousness.
+4. **Connection to bridges/cognitive/consciousness_encoder.py**: the existing encoder uses Shannon entropy H, KL divergence, Fisher information, and IIT proxy Φ. M(S) should either replace or augment these — a concrete comparison would clarify which is better at predicting observable signatures of consciousness.
 
 ---
 

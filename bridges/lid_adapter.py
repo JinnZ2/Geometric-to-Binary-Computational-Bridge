@@ -48,8 +48,8 @@ from typing import Dict, List, Optional, Tuple, Any
 ENTITY_ENCODER_MAP: Dict[str, Tuple[str, str]] = {
     "MAG_BRIDGE":       ("bridges.magnetic_encoder",      "MagneticBridgeEncoder"),
     "LIGHT_BR":         ("bridges.light_encoder",         "LightBridgeEncoder"),
-    "CONSCIOUSNESS_BR": ("bridges.consciousness_encoder", "ConsciousnessBridgeEncoder"),
-    "EMOTION_BR":       ("bridges.emotion_encoder",       "EmotionBridgeEncoder"),
+    "CONSCIOUSNESS_BR": ("bridges.cognitive.consciousness_encoder", "ConsciousnessBridgeEncoder"),
+    "EMOTION_BR":       ("bridges.cognitive.emotion_encoder",       "EmotionBridgeEncoder"),
     "ELECTRIC_FIELD":   ("bridges.electric_encoder",      "ElectricBridgeEncoder"),
     "GRAVITATIONAL":    ("bridges.gravity_encoder",       "GravityBridgeEncoder"),
     "THERMAL":          ("bridges.thermal_encoder",       "ThermalBridgeEncoder"),
@@ -68,8 +68,8 @@ MODALITY_ENCODER_MAP: Dict[str, Tuple[str, str]] = {
     "thermal":       ("bridges.thermal_encoder",       "ThermalBridgeEncoder"),
     "pressure":      ("bridges.pressure_encoder",      "PressureBridgeEncoder"),
     "chemical":      ("bridges.chemical_encoder",      "ChemicalBridgeEncoder"),
-    "consciousness": ("bridges.consciousness_encoder", "ConsciousnessBridgeEncoder"),
-    "emotion":       ("bridges.emotion_encoder",       "EmotionBridgeEncoder"),
+    "consciousness": ("bridges.cognitive.consciousness_encoder", "ConsciousnessBridgeEncoder"),
+    "emotion":       ("bridges.cognitive.emotion_encoder",       "EmotionBridgeEncoder"),
 }
 
 # ── Pattern/keyword → modality inference tables ──────────────────────────

@@ -99,7 +99,7 @@ from bridges.chemical_encoder import (
 # ---------------------------------------------------------------------------
 # Consciousness
 # ---------------------------------------------------------------------------
-from bridges.consciousness_encoder import (
+from bridges.cognitive.consciousness_encoder import (
     ConsciousnessBridgeEncoder,
     shannon_entropy,
     kl_divergence,
@@ -111,7 +111,7 @@ from bridges.consciousness_encoder import (
 # ---------------------------------------------------------------------------
 # Emotion
 # ---------------------------------------------------------------------------
-from bridges.emotion_encoder import (
+from bridges.cognitive.emotion_encoder import (
     EmotionBridgeEncoder,
     pad_intensity,
     valence_arousal_coherence,

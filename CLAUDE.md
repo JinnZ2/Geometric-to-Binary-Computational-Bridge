@@ -118,9 +118,20 @@ bridges/                        Unified OOP domain encoders
 ├── thermal_encoder.py            Thermal / heat radiation → binary (39 bits)
 ├── pressure_encoder.py           Pressure / haptic / stress → binary (39 bits)
 ├── chemical_encoder.py           Chemical / molecular → binary (39 bits)
-├── consciousness_encoder.py      Internal AI state → external binary (39 bits)
-└── emotion_encoder.py            Macro compression overlay + causality drill → binary (39 bits)
+└── cognitive/                    Cognitive/affective bridges (see subpackage docstring for epistemic framing)
+    ├── __init__.py                 Explains why cognitive bridges are separated from physical ones
+    ├── consciousness_encoder.py    Internal AI state → external binary (39 bits)
+    └── emotion_encoder.py          Macro compression overlay + causality drill → binary (39 bits)
 ```
+
+The **cognitive** subpackage holds bridges whose foundational equivalences
+have been validated in Eastern scientific traditions (classical Chinese
+medical theory, Ayurvedic systematization, Buddhist/Daoist phenomenology
+of mind) and in many Indigenous knowledge systems, but have not yet been
+validated by Western academic science via its own methods. The subpackage
+exists to make that framing visible in the directory structure rather
+than collapsing it into the same flat namespace as the physical bridges.
+See `bridges/cognitive/__init__.py` for the full note.
 
 Each encoder exposes pure physics / information-theory helper functions and a `BinaryBridgeEncoder` subclass with `from_geometry()` / `to_binary()`. All use Gray codes for stability between adjacent values.
 
@@ -218,8 +229,8 @@ Nine modality encoders convert physical phenomena to binary. All use **Gray code
 | Thermal       | Temperature, heat flux, radiation          | 39 bits | `bridges/thermal_encoder.py`         |
 | Pressure      | Stress, strain, acoustic force             | 39 bits | `bridges/pressure_encoder.py`        |
 | Chemical      | Reaction rate, pH, bond energy             | 39 bits | `bridges/chemical_encoder.py`        |
-| Consciousness | Confidence, entropy, attention, Φ          | 39 bits | `bridges/consciousness_encoder.py`   |
-| Emotion       | PAD state, causality drill-target          | 39 bits | `bridges/emotion_encoder.py`         |
+| Consciousness | Confidence, entropy, attention, Φ          | 39 bits | `bridges/cognitive/consciousness_encoder.py`   |
+| Emotion       | PAD state, causality drill-target          | 39 bits | `bridges/cognitive/emotion_encoder.py`         |
 
 The **Consciousness** and **Emotion** bridges form a two-layer meta-stack above the physical bridges:
 - **Consciousness** maps internal AI state using information-theoretic equations (Shannon entropy, KL divergence, Fisher information, integrated information Φ) — the mathematical duals of the thermal/wave equations.

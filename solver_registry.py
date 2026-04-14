@@ -238,8 +238,8 @@ class Registry:
         from bridges.electric_encoder import ElectricBridgeEncoder
         from bridges.pressure_encoder import PressureBridgeEncoder
         from bridges.chemical_encoder import ChemicalBridgeEncoder
-        from bridges.consciousness_encoder import ConsciousnessBridgeEncoder
-        from bridges.emotion_encoder import EmotionBridgeEncoder
+        from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
+        from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 
         bridge_map = {
             'magnetic':      (MagneticBridgeEncoder,      43),

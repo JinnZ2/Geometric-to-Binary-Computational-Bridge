@@ -51,7 +51,7 @@ attention, integrated information Phi) to a 39-bit binary string.
 Uses information-theoretic equations (Shannon entropy, KL divergence,
 Fisher information, integrated information Phi) -- the mathematical
 duals of the physical bridge equations.
-See: `bridges/consciousness_encoder.py`
+See: `bridges/cognitive/consciousness_encoder.py`
 
 ## dense mode (GEIS)
 The full geometric token format: `[vertex_bits][operator][symbol]`
@@ -70,7 +70,7 @@ The bridge encoder that maps PAD (Pleasure-Arousal-Dominance)
 emotional state to a 39-bit binary string. Also includes a causality
 drill mechanism that fires when PAD intensity exceeds a threshold,
 pointing to the specific physical bridge that should be re-examined.
-See: `bridges/emotion_encoder.py`, `bridges/emotion_encoder.py` (`to_suite()`)
+See: `bridges/cognitive/emotion_encoder.py`, `bridges/cognitive/emotion_encoder.py` (`to_suite()`)
 
 ## field adapter
 The module that connects Engine (GeometricEMSolver) output to
@@ -151,7 +151,7 @@ A three-dimensional model of affective state. Pleasure (valence):
 negative to positive. Arousal: calm to activated. Dominance:
 submissive to in-control. Used as the input geometry for the
 emotion bridge encoder.
-See: `bridges/emotion_encoder.py`
+See: `bridges/cognitive/emotion_encoder.py`
 
 ## participation ratio (PR)
 A measure of how spatially spread an eigenmode is across a network.

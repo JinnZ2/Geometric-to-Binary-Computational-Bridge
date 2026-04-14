@@ -4,7 +4,7 @@ PAD → Resonance Bridge
 Maps the Pleasure-Arousal-Dominance (PAD) emotional state space to the
 6-state consciousness scale used in Geometric-Intelligence/Resonance-sensors.md.
 
-This bridge closes the gap between the emotion encoder (bridges/emotion_encoder.py)
+This bridge closes the gap between the emotion encoder (bridges/cognitive/emotion_encoder.py)
 and the resonance sensor framework by providing a principled, φ-derived mapping.
 
 PAD → Resonance metric mapping
@@ -36,7 +36,7 @@ PAD → Resonance metric mapping
 Wiring
 ------
   from bridges.pad_resonance import pad_to_consciousness_state
-  from bridges.emotion_encoder import pad_intensity, surprise_factor
+  from bridges.cognitive.emotion_encoder import pad_intensity, surprise_factor
 
   state, confidence, metrics = pad_to_consciousness_state(
       valence=0.7, arousal=0.6, dominance=0.4,
