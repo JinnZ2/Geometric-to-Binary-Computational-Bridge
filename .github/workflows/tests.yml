@@ -1,0 +1,87 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Python test suites. Kept as separate steps so it's obvious from
+  # the GitHub Actions log which suite failed without re-running
+  # anything. Each step runs exactly the same command as the
+  # "Verify in 60 seconds" section of AI_INDEX.json.
+  # ─────────────────────────────────────────────────────────────────
+  python-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: GEIS (116 tests)
+        working-directory: GEIS
+        run: python test_simple.py
+
+      - name: Engine (58 tests)
+        run: PYTHONPATH=. python tests/test_engine.py
+
+      - name: Bridges
+        run: PYTHONPATH=. python tests/test_bridges.py
+
+      - name: Silicon modules
+        run: PYTHONPATH=. python tests/test_silicon_modules.py
+
+      # The gaussian_splats test file lives on the
+      # claude/extract-gaussian-splats branch and may not exist yet
+      # on main. Run it conditionally so this workflow works on
+      # both branches without edits.
+      - name: Gaussian splats (63 tests, conditional)
+        if: hashFiles('tests/test_gaussian_splats.py') != ''
+        run: PYTHONPATH=. python tests/test_gaussian_splats.py
+
+  # ─────────────────────────────────────────────────────────────────
+  # Pyflakes-only linting via ruff. Configured in pyproject.toml
+  # to catch real bugs (undefined names, unused-then-redefined) and
+  # ignore style noise. Files with known pre-existing issues are
+  # listed in pyproject.toml under [tool.ruff.lint.per-file-ignores].
+  # ─────────────────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install ruff
+        run: pip install ruff
+
+      - name: Ruff
+        run: ruff check .
+
+  # ─────────────────────────────────────────────────────────────────
+  # C NFS acceleration library test suite (36 assertions).
+  # Isolated in its own job so the Python tests are not blocked by
+  # a missing C toolchain on non-Linux runners.
+  # ─────────────────────────────────────────────────────────────────
+  c-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and run C NFS tests
+        working-directory: experiments/c
+        run: make test
