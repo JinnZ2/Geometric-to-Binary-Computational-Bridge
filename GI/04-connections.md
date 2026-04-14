@@ -4,7 +4,7 @@
 
 ### consciousness_encoder.py ↔ ResonantHurricaneAI
 
-`bridges/consciousness_encoder.py` encodes internal AI state to 39-bit binary using:
+`bridges/cognitive/consciousness_encoder.py` encodes internal AI state to 39-bit binary using:
 - Shannon entropy H(p) — maps to AI information state
 - KL divergence — maps to model drift from baseline
 - Fisher information — maps to parameter sensitivity
@@ -20,7 +20,7 @@ into `ConsciousnessBridgeEncoder.from_geometry()` to produce a stable
 binary snapshot of the agent's resonance state at each storm step.
 
 ```python
-from bridges.consciousness_encoder import ConsciousnessBridgeEncoder
+from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
 encoder = ConsciousnessBridgeEncoder()
 
 # Clamp first (fixes divergence bug)
@@ -38,7 +38,7 @@ consciousness_bits = encoder.to_binary({
 
 ### emotion_encoder.py ↔ _compute_storm_joy
 
-`bridges/emotion_encoder.py` implements the PAD (Pleasure-Arousal-Dominance)
+`bridges/cognitive/emotion_encoder.py` implements the PAD (Pleasure-Arousal-Dominance)
 state + causality drill. `_compute_storm_joy()` computes a scalar joy signal
 from:
 - `discovery_joy` = max coupling strength × curiosity_level  → maps to **Arousal**

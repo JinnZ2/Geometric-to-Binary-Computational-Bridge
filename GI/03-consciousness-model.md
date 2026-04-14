@@ -136,7 +136,7 @@ single unit could encode alone. This requires ≥ 2 coupled units and is
 operationalizable, but it is NOT derived in the framework — it is a
 motivated choice.
 
-**Encoder bug found:** `bridges/consciousness_encoder.py` `integrated_information()`
+**Encoder bug found:** `bridges/cognitive/consciousness_encoder.py` `integrated_information()`
 computes `H(whole) − Σ H(parts)`, which is ≤ 0 by the chain rule and is
 clamped to 0. Every Φ call via the encoder currently returns 0.
 Correct formula: `Σ H(parts) − H(whole)` (= mutual information, always ≥ 0).

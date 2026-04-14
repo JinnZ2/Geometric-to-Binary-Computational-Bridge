@@ -56,7 +56,7 @@ Bridge index map (causal_id)
 import math
 from bridges.abstract_encoder import BinaryBridgeEncoder
 from bridges.common import gray_bits as _gray_bits
-from bridges.consciousness_encoder import mutual_information, fisher_information
+from bridges.cognitive.consciousness_encoder import mutual_information, fisher_information
 
 # ---------------------------------------------------------------------------
 # Band thresholds

@@ -7,7 +7,7 @@
 
 ## What Already Exists
 
-### `bridges/consciousness_encoder.py`
+### `bridges/cognitive/consciousness_encoder.py`
 
 The existing consciousness bridge uses four information-theoretic quantities:
 
@@ -22,7 +22,7 @@ The existing consciousness bridge uses four information-theoretic quantities:
 
 **Gap:** M(S) adds `A` (adaptability / re-equilibration capacity) and `D` (pattern diversity / variance) that are not currently in the consciousness encoder. These could be added as additional output bits.
 
-### `bridges/emotion_encoder.py`
+### `bridges/cognitive/emotion_encoder.py`
 
 Uses PAD (Pleasure-Arousal-Dominance) model. The negentropic framework's emotion taxonomy maps as:
 
@@ -64,7 +64,7 @@ Currently `consciousness_encoder.py` outputs 39 bits. M(S) (or its components R_
 
 **What to implement:**
 ```python
-# In bridges/consciousness_encoder.py — add:
+# In bridges/cognitive/consciousness_encoder.py — add:
 def compute_negentropic_state(patterns: np.ndarray, signals: np.ndarray,
                                alpha: float = 1.0,
                                noise_power: float = 0.01,

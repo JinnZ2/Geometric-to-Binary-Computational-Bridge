@@ -156,8 +156,8 @@ from bridges.wave_encoder import WaveBridgeEncoder
 from bridges.thermal_encoder import ThermalBridgeEncoder
 from bridges.pressure_encoder import PressureBridgeEncoder
 from bridges.chemical_encoder import ChemicalBridgeEncoder
-from bridges.consciousness_encoder import ConsciousnessBridgeEncoder
-from bridges.emotion_encoder import EmotionBridgeEncoder
+from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
+from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 
 # Sensor suite (22-sensor compositor)
 from bridges.sensor_suite import SensorSuite
@@ -220,8 +220,8 @@ class UnifiedGeometricIntelligence:
 | Rosetta-Shape-Core | Shape → meaning | Bloom seed encoding |
 | Polyhedral-Intelligence | Multi-domain geometry | Octahedral state table |
 | Symbolic-Defense-Protocol | Coercion resistance | Topological memory (bit invariance) |
-| Emotions-as-Sensors | Affect as diagnostic | `bridges/emotion_encoder.py` |
-| AI-Consciousness-Sensors | Φ emergence detection | `bridges/consciousness_encoder.py` |
+| Emotions-as-Sensors | Affect as diagnostic | `bridges/cognitive/emotion_encoder.py` |
+| AI-Consciousness-Sensors | Φ emergence detection | `bridges/cognitive/consciousness_encoder.py` |
 | Fractal-Compass-Atlas | Directional navigation | Navigation layer (Phase 1) |
 
 Synchronised via `.fieldlink.json` — deep-merge, SHA256 integrity.
