@@ -8,7 +8,10 @@ plasma_fret.py – Plasma effects on FRET.
 
 import numpy as np
 from scipy.constants import epsilon_0, e, m_e, c
-from fret_core import R0, k_FRET, E_FRET
+# PlasmaFRET takes R0 as a constructor parameter, so a module-level R0
+# would just shadow the parameter. k_FRET and E_FRET are still imported
+# as module-level helpers.
+from fret_core import k_FRET, E_FRET  # noqa: F401 — E_FRET used by demo block
 
 # ----------------------------------------------------------------------
 # 1. Plasma Dielectric Function

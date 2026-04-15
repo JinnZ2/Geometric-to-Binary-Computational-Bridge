@@ -1,8 +1,5 @@
-# NOTE: This file requires cleanup -- structural issues from mobile editing.
-# STATUS: infrastructure — 8D hyper-octahedral seed expansion
-# It is a standalone research script not imported by any test suite.
-
 #!/usr/bin/env python3
+# STATUS: infrastructure — 8D hyper-octahedral seed expansion
 """
 expansion_8d.py
 
@@ -49,12 +46,12 @@ N_VERTICES = 2 * N_DIM  # 16 directions for 8D hyper-octahedron
 def build_hyper_octahedral_vertices(n_dim: int) -> np.ndarray:
     """
     Generate unit vectors for n-dimensional cross-polytope (hyper-octahedron).
-    
+
     For N dimensions, creates 2N unit vectors corresponding to +/-Xi directions.
-    
+
     Args:
         n_dim: Number of dimensions
-        
+
     Returns:
         Array of shape (2*n_dim, n_dim) containing unit direction vectors
     """
@@ -64,9 +61,11 @@ def build_hyper_octahedral_vertices(n_dim: int) -> np.ndarray:
         U[2 * i + 1, i] = -1.0  # -Xi direction
     return U
 
-    # Global geometry for 8D system
 
-    U_8D = build_hyper_octahedral_vertices(N_DIM)
+# Global geometry for 8D system — used by get_phi_torsion_tensor,
+# expand_seed, etc. Previously this line was indented inside the
+# function above, so U_8D was never actually bound at module scope.
+U_8D = build_hyper_octahedral_vertices(N_DIM)
 
 # =============================================================================
 
@@ -411,7 +410,7 @@ def get_shell_fingerprint(shells: List[Dict]) -> np.ndarray:
     arr = []
     for n in range(1, len(shells)):
         S_prop = shells[n]['S'] / (shells[n]['E'] + 1e-16)
-    arr.append(S_prop)
+        arr.append(S_prop)
     return np.concatenate(arr)
 
 # =============================================================================
@@ -420,73 +419,78 @@ def get_shell_fingerprint(shells: List[Dict]) -> np.ndarray:
 
 # =============================================================================
 
-# if __name__ == "__main__":
-print("=" * 70)
-print("8D HYPER-OCTAHEDRAL SEED EXPANSION")
-print("Collaborative Development: Human insight + AI implementation")
-print("=" * 70)
+def _run_demo() -> None:
+    """Run the standalone expansion demonstration."""
+    print("=" * 70)
+    print("8D HYPER-OCTAHEDRAL SEED EXPANSION")
+    print("Collaborative Development: Human insight + AI implementation")
+    print("=" * 70)
 
-# Define a 16-component seed with clear bias structure
-seed = np.array([
-    10.0, 0.1,   # +X1 (Strong), -X1
-    5.0, 0.1,    # +X2 (Medium), -X2
-    1.0, 0.1,    # +X3 (Weak), -X3
-    0.5, 0.1,    # +X4, -X4
-    0.2, 0.1,    # +X5, -X5
-    0.1, 0.1,    # +X6, -X6
-    0.1, 0.1,    # +X7, -X7
-    0.1, 0.1     # +X8, -X8
-])
+    # Define a 16-component seed with clear bias structure
+    seed = np.array([
+        10.0, 0.1,   # +X1 (Strong), -X1
+        5.0, 0.1,    # +X2 (Medium), -X2
+        1.0, 0.1,    # +X3 (Weak), -X3
+        0.5, 0.1,    # +X4, -X4
+        0.2, 0.1,    # +X5, -X5
+        0.1, 0.1,    # +X6, -X6
+        0.1, 0.1,    # +X7, -X7
+        0.1, 0.1     # +X8, -X8
+    ])
 
-print(f"\nSeed (normalized): {np.round(seed / seed.sum(), 4)}")
+    print(f"\nSeed (normalized): {np.round(seed / seed.sum(), 4)}")
 
-# Test static expansion
-print("\n" + "-" * 70)
-print("STATIC EXPANSION (Euclidean Physics)")
-print("-" * 70)
+    # Test static expansion
+    print("\n" + "-" * 70)
+    print("STATIC EXPANSION (Euclidean Physics)")
+    print("-" * 70)
 
-passed, deviation = verify_expansion(seed, steps=15, use_dynamic=False)
-print(f"Structure preserved: {'YES' if passed else 'NO'}")
-print(f"Max deviation: {deviation:.2e}")
+    passed, deviation = verify_expansion(seed, steps=15, use_dynamic=False)
+    print(f"Structure preserved: {'YES' if passed else 'NO'}")
+    print(f"Max deviation: {deviation:.2e}")
 
-# Test dynamic expansion
-print("\n" + "-" * 70)
-print("DYNAMIC EXPANSION (Phi-modulated Physics)")
-print("-" * 70)
+    # Test dynamic expansion
+    print("\n" + "-" * 70)
+    print("DYNAMIC EXPANSION (Phi-modulated Physics)")
+    print("-" * 70)
 
-passed, deviation = verify_expansion(seed, steps=15, use_dynamic=True)
-print(f"Structure preserved: {'YES' if passed else 'NO'}")
-print(f"Max deviation: {deviation:.2e}")
+    passed, deviation = verify_expansion(seed, steps=15, use_dynamic=True)
+    print(f"Structure preserved: {'YES' if passed else 'NO'}")
+    print(f"Max deviation: {deviation:.2e}")
 
-# Binary encoding test
-print("\n" + "-" * 70)
-print("BINARY ENCODING (120 bits)")
-print("-" * 70)
+    # Binary encoding test
+    print("\n" + "-" * 70)
+    print("BINARY ENCODING (120 bits)")
+    print("-" * 70)
 
-encoded = encode_seed_binary(seed)
-decoded = decode_seed_binary(encoded)
+    encoded = encode_seed_binary(seed)
+    decoded = decode_seed_binary(encoded)
 
-print(f"Encoded (15 × 8-bit): {encoded}")
-print(f"Total bits: {len(encoded) * 8}")
-print(f"Decoded: {np.round(decoded, 4)}")
+    print(f"Encoded (15 × 8-bit): {encoded}")
+    print(f"Total bits: {len(encoded) * 8}")
+    print(f"Decoded: {np.round(decoded, 4)}")
 
-encoding_error = np.max(np.abs(decoded - seed / seed.sum()))
-print(f"Quantization error: {encoding_error:.4f}")
+    encoding_error = np.max(np.abs(decoded - seed / seed.sum()))
+    print(f"Quantization error: {encoding_error:.4f}")
 
-print("\n" + "=" * 70)
-print("SUMMARY")
-print("=" * 70)
-print("""
+    print("\n" + "=" * 70)
+    print("SUMMARY")
+    print("=" * 70)
+    print("""
 
 8D Expansion achieves:
 
 1. MINIMAL SEED: 120 bits encodes complete 16-direction structure
-1. PHYSICS-COMPLIANT: Energy conservation exact at every shell
-1. DYNAMIC PHYSICS: Phi-algorithms modulate influence matrix
-1. PAUSE-ANYWHERE: Every shell is valid stable state
-1. RESUME-WITHOUT-LOSS: Inner shells fully determine outer
-1. SCALE-INVARIANT: Structure preserved indefinitely
+2. PHYSICS-COMPLIANT: Energy conservation exact at every shell
+3. DYNAMIC PHYSICS: Phi-algorithms modulate influence matrix
+4. PAUSE-ANYWHERE: Every shell is valid stable state
+5. RESUME-WITHOUT-LOSS: Inner shells fully determine outer
+6. SCALE-INVARIANT: Structure preserved indefinitely
 
 The seed IS the structure at minimum energy.
 The expansion rules are physics itself.
 """)
+
+
+if __name__ == "__main__":
+    _run_demo()

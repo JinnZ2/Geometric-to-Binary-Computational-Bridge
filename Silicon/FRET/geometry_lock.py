@@ -4,9 +4,11 @@ geometry_lock.py – Modeling distance distribution and orientation factor under
 """
 
 import numpy as np
-from scipy.stats import boltzmann
 import matplotlib.pyplot as plt
-from fret_core import R0, E_FRET
+
+# Flat sibling imports match the rest of the Silicon/FRET stack. Run from
+# inside Silicon/FRET (via cli.py) so fret_core resolves as a top-level module.
+from fret_core import R0, E_FRET  # noqa: F401 — used by demo block
 
 def U_linker(r, r_eq, k_spring, r_hard_min=0.0):
     """
@@ -42,12 +44,15 @@ def effective_kappa2(phi0, sigma_phi, T=298.0, U_barrier=5.0):
     # <cos²θ> ≈ 1 - sigma_phi² (for small sigma)
     # More accurately: use numerical integration.
     from scipy.integrate import quad
-    
+
+    # Set barrier to correspond to 0.1 rad confinement, shared across
+    # both the integrand and the normalisation integral below.
+    k_theta = U_barrier / (0.1 ** 2)
+
     def integrand(theta):
         # Boltzmann weight exp(-U(theta)/kT) with U = (1/2) k_theta theta²
-        k_theta = U_barrier / (0.1**2)  # set barrier to correspond to 0.1 rad confinement
         return np.exp(-0.5 * k_theta * theta**2) * (np.cos(theta)**2) * np.sin(theta)
-    
+
     norm = quad(lambda t: np.exp(-0.5 * k_theta * t**2) * np.sin(t), 0, np.pi)[0]
     avg_cos2 = quad(integrand, 0, np.pi)[0] / norm
     return 4.0 * avg_cos2

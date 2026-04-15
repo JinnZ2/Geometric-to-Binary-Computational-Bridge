@@ -32,7 +32,7 @@ import geometry_lock
 import spectral_servo
 import photonic_branching
 import triplet_reservoir
-import triage_diagnostics
+import triage_diagnosis
 
 # ----------------------------------------------------------------------
 # Common utilities
@@ -280,10 +280,10 @@ def cmd_triage(args):
         # we'll skip for demo.
         pass
     
-    tau, E, rss = triage_diagnostics.simulate_measurements(
+    tau, E, rss = triage_diagnosis.simulate_measurements(
         r, R0_nom, F, noise_level=args.noise
     )
-    diag = triage_diagnostics.triage_decision(tau, E, rss, thresholds)
+    diag = triage_diagnosis.triage_decision(tau, E, rss, thresholds)
     
     print(f"Condition: {fault_desc}")
     print(f"Measured tau_DA = {tau:.3f}, E = {E:.3f}, r_ss = {rss:.3f}")
