@@ -1,14 +1,28 @@
 # STATUS: infrastructure -- phone termux-sensor integration to 3D cube
-import subprocess
+"""
+phone_sensing_sim
+=================
+Run-time driver that reads accelerometer data from a phone (via Termux's
+``termux-sensor``) and streams each reading through the octahedral
+vector→token encoder, accumulating tokens into a 3D cube until
+:func:`find_geometric_dependencies` detects a cancellation — indicating a
+repeated or symmetric gesture.
+
+``vector_to_token`` and ``find_geometric_dependencies`` are defined once
+in sibling modules (originally drafted in the same chat session) and
+imported here so this file is an importable module rather than a stub.
+"""
+
 import json
+import subprocess
 import time
-import numpy as np
 from collections import deque
 
-# Reuse vector_to_token from earlier
-def vector_to_token(x, y, z, phase=0):
-    # ... same as before, but phase can be angle from gyro or just 0
-    pass
+import numpy as np
+
+from GEIS.geometric_sense import vector_to_token
+from GEIS.cube_sim_3d import find_geometric_dependencies
+
 
 def read_accelerometer(seconds=1):
     """Run termux-sensor and return list of (x,y,z) tuples."""

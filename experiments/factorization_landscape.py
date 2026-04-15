@@ -414,13 +414,18 @@ def scaling_comparison(semiprimes: List[Tuple[int, int, int]],
 
 
 def fit_scaling_exponent(data: List[ScalingDataPoint],
-                          field: str = "anneal_evals_median") -> Tuple[float, float]:
+                          field_name: str = "anneal_evals_median") -> Tuple[float, float]:
     """
     Fit log(metric) = alpha * log(N) + c.
     Returns (alpha, R^2).
+
+    ``field_name`` selects which attribute of :class:`ScalingDataPoint`
+    to regress against. It is named ``field_name`` rather than ``field``
+    so it does not shadow :func:`dataclasses.field` imported at module
+    scope.
     """
     log_N = np.array([math.log(d.N) for d in data])
-    log_y = np.array([math.log(max(getattr(d, field), 1)) for d in data])
+    log_y = np.array([math.log(max(getattr(d, field_name), 1)) for d in data])
 
     # Linear regression in log space
     coeffs = np.polyfit(log_N, log_y, 1)

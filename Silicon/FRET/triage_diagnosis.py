@@ -5,7 +5,9 @@ triage_diagnostics.py – Simulated fault injection and hierarchical diagnosis.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from fret_core import E_FRET, R0
+# simulate_measurements takes R0 as a parameter (each call has its own
+# Förster radius), so a module-level R0 would just shadow the parameter.
+from fret_core import E_FRET
 
 def simulate_measurements(r, R0, F=1.0, noise_level=0.02):
     """

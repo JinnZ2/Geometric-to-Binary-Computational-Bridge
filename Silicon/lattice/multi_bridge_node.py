@@ -2,10 +2,15 @@
 """
 Tensor-Constrained Octahedral Encoder (JSON Specification)
 Implements the formal 8-state encoding with eigenvalue constraints.
+
+Companion to :mod:`Silicon.lattice.multi_bridge`: defines the JSON-spec
+tensor encoder used to drive ``MultiBridgeNode`` through its 8 discrete
+octahedral states.
 """
 
 import numpy as np
-from scipy.optimize import minimize
+
+from Silicon.lattice.multi_bridge import MultiBridgeNode
 
 class TensorOctahedronEncoder:
     """

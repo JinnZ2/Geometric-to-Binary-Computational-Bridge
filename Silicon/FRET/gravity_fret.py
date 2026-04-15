@@ -8,7 +8,12 @@ gravity_fret.py – Gravitational effects on FRET.
 
 import numpy as np
 from scipy.constants import G, c, h, k as kB
-from fret_core import R0, k_FRET, E_FRET
+# NOTE: We deliberately do NOT import R0 from fret_core here. The
+# GravitationalFRET class takes R0 as a constructor parameter (each
+# instance carries its own Förster radius), so a module-level R0 would
+# only shadow the parameter and confuse readers. k_FRET and E_FRET are
+# still imported as module-level helpers.
+from fret_core import k_FRET, E_FRET  # noqa: F401 — E_FRET used by demo block
 
 # ----------------------------------------------------------------------
 # 1. Gravitational Redshift: Spectral Overlap Tuning

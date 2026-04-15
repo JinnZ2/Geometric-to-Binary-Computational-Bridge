@@ -1,8 +1,29 @@
-# STATUS: infrastructure -- handler functions for acoustic simulation
+# STATUS: infrastructure -- handler functions for acoustic and thermal FRET CLI commands
+"""
+handler_functions
+=================
+CLI command handlers for the FRET simulation suite. Each ``cmd_*``
+function is invoked by :mod:`cli` after ``argparse`` binds its
+subcommand arguments.
+
+The whole ``Silicon/FRET`` stack uses flat, sibling-style imports
+(``from fret_core import ...`` rather than
+``from Silicon.FRET.fret_core import ...``) because the CLI is designed
+to be run from inside the ``Silicon/FRET`` directory. See ``cli.py``
+for the entry point.
+"""
+
+import json
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from fret_core import E_FRET
+
+
 def cmd_acoustic(args):
     """Run acoustic modulation simulation."""
-    import matplotlib.pyplot as plt
-    from acoustic_fret import AcousticModulator, saw_fret_efficiency
+    from acoustic_fret import AcousticModulator  # noqa: F401
 
     if args.sweep_amplitude:
         mod = AcousticModulator(args.r0, 0.1, args.frequency, args.R0, args.tau_D)
@@ -37,7 +58,6 @@ def cmd_acoustic(args):
         plt.title('Instantaneous FRET Efficiency')
 
     if args.output:
-        import json
         with open(args.output, 'w') as f:
             json.dump(results, f, indent=2)
     if args.plot:
@@ -47,9 +67,12 @@ def cmd_acoustic(args):
 
 def cmd_thermal(args):
     """Run thermal simulation."""
-    import matplotlib.pyplot as plt
-    from thermal_fret import (ThermalSpectralShift, ThermalSwitch,
-                              PhononAssistedFRET, ThermalFRETSystem)
+    from thermal_fret import (
+        ThermalSpectralShift,
+        ThermalSwitch,
+        PhononAssistedFRET,
+        ThermalFRETSystem,
+    )
     T_vals = np.linspace(args.T_min, args.T_max, args.T_points)
     eff = np.zeros_like(T_vals)
 
@@ -98,7 +121,6 @@ def cmd_thermal(args):
     plt.grid(True)
     results = {'T_vals': T_vals.tolist(), 'efficiency': eff.tolist()}
     if args.output:
-        import json
         with open(args.output, 'w') as f:
             json.dump(results, f, indent=2)
     if args.plot:

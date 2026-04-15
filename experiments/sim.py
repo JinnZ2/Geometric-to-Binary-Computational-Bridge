@@ -58,7 +58,7 @@ for step in range(1000):
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 — registers 3D projection
 
 # -----------------------------
 # 1. Parameters
@@ -146,10 +146,6 @@ ax.set_title('Octahedral φ-Spaced Lattice - Node Phases')
 plt.show()
 
 
-
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # ----------------------------
 # Simulation Parameters

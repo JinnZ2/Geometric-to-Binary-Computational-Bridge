@@ -5,22 +5,39 @@ Multi-Bridge Neural Lattice
 Demonstrates self-organization, pattern storage, and recall through energy minimization.
 """
 
+import warnings
+
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
-from itertools import product
-import warnings
-warnings.filterwarnings('ignore')
+
+# The node classes used by this lattice are defined once in
+# Silicon.lattice.multi_bridge and imported here so the lattice and the
+# standalone node module stay in sync. SiliconOctahedron, ErPSpinSystem,
+# and OpticalBridge are re-exported for callers that expect to pull them
+# from this module (the chat-paste legacy).
+from Silicon.lattice.multi_bridge import (  # noqa: F401
+    SiliconOctahedron,
+    ErPSpinSystem,
+    OpticalBridge,
+    MultiBridgeNode,
+)
+
+warnings.filterwarnings("ignore")
+
+# Re-export so ``from multi_bridge_neural_lattice import MultiBridgeNode``
+# still works for callers that used the earlier pasted-in-place layout.
+__all__ = [
+    "SiliconOctahedron",
+    "ErPSpinSystem",
+    "OpticalBridge",
+    "MultiBridgeNode",
+    "LatticeCouplings",
+    "MultiBridgeLattice",
+]
 
 # ============================================================
-# 1. REUSE MULTI-BRIDGE NODE DEFINITION (abbreviated for brevity)
-#    In practice, paste the full class from previous code.
-# ============================================================
-# (Include SiliconOctahedron, ErPSpinSystem, OpticalBridge, MultiBridgeNode here)
-# For compactness, I'll assume they are defined as before.
-
-# ============================================================
-# 2. LATTICE COUPLING CONSTANTS (Phi-Scaled)
+# 1. LATTICE COUPLING CONSTANTS (Phi-Scaled)
 # ============================================================
 class LatticeCouplings:
     def __init__(self, base_strain=2.0, base_spin=0.05, base_opt=0.01, phi=(1+np.sqrt(5))/2):
@@ -35,7 +52,7 @@ class LatticeCouplings:
         self.g_opt_nn = base_opt                            # coupling strength (unitless)
 
 # ============================================================
-# 3. MULTI-BRIDGE LATTICE
+# 2. MULTI-BRIDGE LATTICE
 # ============================================================
 class MultiBridgeLattice:
     def __init__(self, N, couplings=None, node_class=None):
