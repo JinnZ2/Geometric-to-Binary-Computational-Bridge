@@ -7,15 +7,24 @@ an integrated workflow that combines three elements:
 
 1. a multi-analyte LMR spectrum model,
 2. temperature-dependent ohmic damping in the lossy TiO2 layer, and
-3. a Bayesian diagnostic stage that maps biomarker-like measurements to simple
-   disease hypotheses.
+3. a Bayesian inference stage that maps biomarker-like measurements to simple
+   latent-state hypotheses.
 
 The model is intentionally exploratory rather than clinically validated. Its
 purpose is to provide a self-contained computational experiment inside the
 repository's `experiments` collection.
+
+Model status
+------------
+
+This script should be read as an **optics-plus-inference sandbox**. The optical
+portion is a qualitative multilayer approximation, while the Bayesian stage uses
+synthetic disease profiles and assumed covariance structures. The posterior
+probabilities are therefore demonstration outputs, not clinical predictions.
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, List, Tuple
 import warnings
 
@@ -265,7 +274,7 @@ class MultiAnalyteLMRSensor:
 
 
 class MultiAnalyteBayesianDiagnostic:
-    """Simple Bayesian diagnostic model for simultaneous biomarker readings."""
+    """Simple Bayesian inference sandbox for simultaneous biomarker-like readings."""
 
     def __init__(self, analytes: List[str], disease_prevalences: Dict[str, float]):
         self.analytes = analytes
@@ -385,7 +394,7 @@ class MultiAnalyteBayesianDiagnostic:
         return float(kl_value)
 
 
-def run_simulation() -> None:
+def run_simulation(save_figure: bool = True) -> None:
     """Run the full multi-analyte optical and Bayesian demonstration."""
     print("=" * 70)
     print("MULTI-ANALYTE LMR SENSOR WITH TEMPERATURE-DEPENDENT DAMPING")
@@ -447,7 +456,7 @@ def run_simulation() -> None:
         print(f"  Dip area: {features_310k['dip_areas'][0]:.3f}")
 
     print("\n" + "-" * 50)
-    print("BAYESIAN MULTI-ANALYTE DIAGNOSIS")
+    print("BAYESIAN MULTI-ANALYTE INFERENCE SANDBOX")
     print("-" * 50)
 
     disease_prevalences = {"Inflammation": 0.08, "Prostate Cancer": 0.02, "Heart Failure": 0.03}
@@ -465,7 +474,7 @@ def run_simulation() -> None:
             if probability > 0.01:
                 print(f"  {disease}: {probability:.3f}")
 
-    print("\nDifferential Diagnosis (threshold > 0.05):")
+    print("\nRanked synthetic state inference (threshold > 0.05):")
     diff_diag = diagnostic.differential_diagnosis(patient_measurements, 298, threshold=0.05)
     for disease, probability in diff_diag:
         print(f"  {disease}: {probability:.3f}")
@@ -549,7 +558,7 @@ def run_simulation() -> None:
     ax5.set_xticks(range(len(disease_labels)))
     ax5.set_xticklabels(disease_labels, rotation=45, ha="right", fontsize=8)
     ax5.set_ylabel("Posterior Probability")
-    ax5.set_title("Disease Probabilities at 298K")
+    ax5.set_title("Synthetic State Probabilities at 298K")
     ax5.set_ylim(0, 1)
     ax5.axhline(0.05, color="gray", linestyle="--", alpha=0.5)
 
@@ -559,7 +568,7 @@ def run_simulation() -> None:
     ax6.axhline(0.5, color="orange", linestyle="--", alpha=0.5, label="Decision boundary")
     ax6.set_xlabel("Temperature (°C)")
     ax6.set_ylabel("Max Posterior Probability")
-    ax6.set_title("Temperature Effect on Confidence")
+    ax6.set_title("Temperature Effect on Posterior Concentration")
     ax6.legend(fontsize=8)
     ax6.grid(True, alpha=0.3)
 
@@ -600,7 +609,7 @@ def run_simulation() -> None:
     ax9.plot([0, 1], [0, 1], "k--", alpha=0.5)
     ax9.set_xlabel("1 - Specificity")
     ax9.set_ylabel("Sensitivity")
-    ax9.set_title("Multi-Analyte Detection Performance")
+    ax9.set_title("Illustrative Threshold Sweep")
     ax9.grid(True, alpha=0.3)
 
     ax10 = fig.add_subplot(3, 4, 10)
@@ -678,12 +687,18 @@ def run_simulation() -> None:
     ax12.axhline(0.5, color="gray", linestyle="--", alpha=0.5)
     ax12.set_xlabel("Measurement Number")
     ax12.set_ylabel("Posterior Probability")
-    ax12.set_title("Sequential Diagnostic Update")
+    ax12.set_title("Sequential Posterior Update")
     ax12.legend(fontsize=8)
     ax12.set_ylim(0, 1)
     ax12.grid(True, alpha=0.3)
 
     plt.tight_layout()
+
+    if save_figure:
+        output_path = Path(__file__).with_name("multi_analyte_lmr_bayesian_example.png")
+        plt.savefig(output_path, dpi=160)
+        print(f"Saved example figure to: {output_path}")
+
     plt.show()
 
     print("\n" + "=" * 70)
@@ -700,9 +715,9 @@ def run_simulation() -> None:
     primary_probability = diff_diag[0][1] if diff_diag else 0.0
     print(f"1. Ohmic damping increases by {increase_pct:.1f}% from 25°C to 47°C")
     print(f"2. Multi-analyte detection achieved {features_298k['n_dips']} distinct LMR dips")
-    print(f"3. Diagnostic confidence drops by {confidence_drop_pct_points:.1f} percentage points at elevated temperature")
+    print(f"3. Posterior concentration drops by {confidence_drop_pct_points:.1f} percentage points at elevated temperature")
     print(f"4. Information gain from 5-analyte panel: {information_gain:.3f} bits")
-    print(f"5. Primary suspected condition: {primary_condition} (probability: {primary_probability:.3f})")
+    print(f"5. Highest-ranked synthetic state: {primary_condition} (probability: {primary_probability:.3f})")
 
 
 if __name__ == "__main__":

@@ -2,14 +2,25 @@
 Ohmic Damping and Stochastic Resonance Simulation
 ================================================
 
-This experiment explores a simple lossy resonance model in which ohmic
-damping broadens an LMR-style transmission dip while also introducing
+This file is the repository's **conceptual entry-point** for the recent LMR
+thread. It explores a deliberately simplified lossy-resonance model in which
+ohmic damping broadens an LMR-style transmission dip while also introducing
 measurement noise. A weak signal shift is then assessed probabilistically
 through repeated noisy sampling.
+
+Model status
+------------
+
+This script is best read as a **toy mechanism sketch**. It is useful for
+building intuition about how loss, noise, and probabilistic detection can be
+coupled, but it is not a full optical model and should not be interpreted as a
+calibrated prediction for a physical sensor.
 """
 
-import numpy as np
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.stats import norm
 
 
@@ -70,7 +81,12 @@ def analytical_detection_probability(signal_shift: float, damping_factor: float)
     return float(1.0 - norm.cdf(z_score))
 
 
-def run_simulation(samples: int = 1000, signal_shift: float = 0.8, seed: int = 42) -> None:
+def run_simulation(
+    samples: int = 1000,
+    signal_shift: float = 0.8,
+    seed: int = 42,
+    save_figure: bool = True,
+) -> None:
     """
     Run the damping sweep and visualize both resonance broadening and
     probabilistic detection performance.
@@ -122,6 +138,12 @@ def run_simulation(samples: int = 1000, signal_shift: float = 0.8, seed: int = 4
     axes[1].grid(True, alpha=0.3)
 
     fig.tight_layout()
+
+    if save_figure:
+        output_path = Path(__file__).with_name("ohmic_stochastic_resonance_example.png")
+        fig.savefig(output_path, dpi=160)
+        print(f"Saved example figure to: {output_path}")
+
     plt.show()
 
 

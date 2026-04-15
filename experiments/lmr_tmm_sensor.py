@@ -1,22 +1,38 @@
 """
-Lossy Mode Resonance Sensor via Transfer Matrix Method
-======================================================
+Compact Baseline LMR Sensor via Fresnel / Transfer-Matrix Recursion
+==================================================================
 
-This experiment models a simple TiO2/PSS LMR sensor using a transfer-matrix
-approach. The imaginary part of the refractive index represents ohmic damping,
-which broadens the resonance and influences the detectable spectral shift when
-an analyte perturbs the surrounding refractive index.
+This file is the repository's **baseline physical optics experiment** for the
+LMR thread. It is intentionally compact and is meant for qualitative
+exploration, not for device calibration or performance claims.
+
+Model status
+------------
+
+This script should be interpreted as a **small, semi-physical baseline**. It
+captures p-polarized multilayer interference with a lossy TiO2 film and a PSS
+biolayer, but it still uses simplified dispersion, fixed geometry, and a small
+set of layers. The printed sensitivity numbers are therefore best treated as a
+visual demonstration that surrounding-index perturbations can shift a modeled
+resonance, not as validated sensor specifications.
 """
 
-import numpy as np
+from __future__ import annotations
+
+from pathlib import Path
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 class LMRSensor:
     """
-    Lossy Mode Resonance sensor simulator using a transfer-matrix method.
+    Compact LMR sensor simulator using TM Fresnel recursion.
 
-    The loss channel is encoded in the imaginary part of the refractive index.
+    The lossy channel is encoded in the imaginary part of the TiO2 refractive
+    index. The surrounding refractive index enters explicitly through the final
+    boundary condition, which makes the example suitable for qualitative
+    refractive-index sensitivity demonstrations.
     """
 
     def __init__(self, wavelength_range: tuple[float, float] = (400, 2000), points: int = 2000):
@@ -24,32 +40,28 @@ class LMRSensor:
         self.theta = np.radians(75.0)
 
     def refractive_index_tio2(self, wavelength_nm: float) -> complex:
-        """
-        Approximate TiO2 dispersion with an adjustable imaginary part.
-        """
+        """Approximate TiO2 dispersion with a lossy extinction term."""
         wl_um = wavelength_nm / 1000.0
-
         a1, a2, a3 = 4.896, 0.244, 0.197
         b1, b2, b3 = 0.048, 0.076, 13.0
         n_real = np.sqrt(
-            1
+            1.0
             + a1 * wl_um**2 / (wl_um**2 - b1)
             + a2 * wl_um**2 / (wl_um**2 - b2)
             + a3 * wl_um**2 / (wl_um**2 - b3)
         )
-
         k_ext = 0.008 + 0.002 * np.exp(-((wl_um - 0.8) ** 2) / 0.1)
         return n_real + 1j * k_ext
 
     def refractive_index_pss(self, wavelength_nm: float) -> complex:
-        """Approximate dispersion for a PSS biolayer."""
+        """Approximate dispersion for a thin PSS biolayer."""
         wl_um = wavelength_nm / 1000.0
         n_real = 1.48 + 0.01 / (wl_um + 0.1)
-        k_ext = 0.0001
+        k_ext = 1e-4
         return n_real + 1j * k_ext
 
     def refractive_index_surrounding(self, wavelength_nm: float, analyte_ri: float = 1.33) -> complex:
-        """Surrounding medium such as water with an analyte perturbation."""
+        """Surrounding medium such as water with a refractive-index perturbation."""
         _ = wavelength_nm
         return analyte_ri + 0j
 
@@ -57,41 +69,38 @@ class LMRSensor:
         """Approximate fused-silica fiber-core refractive index."""
         wl_um = wavelength_nm / 1000.0
         n_real = np.sqrt(
-            1
+            1.0
             + 0.6961663 * wl_um**2 / (wl_um**2 - 0.0684043**2)
             + 0.4079426 * wl_um**2 / (wl_um**2 - 0.1162414**2)
             + 0.8974794 * wl_um**2 / (wl_um**2 - 9.896161**2)
         )
         return n_real + 0j
 
-    def transfer_matrix_layer(
-        self,
-        n_layer: complex,
-        n_substrate: complex,
-        thickness_nm: float,
-        wavelength_nm: float,
-        polarization: str = "TM",
-    ) -> tuple[np.ndarray, complex]:
-        """Calculate the transfer matrix for a single layer."""
-        theta_t = np.arcsin(n_substrate * np.sin(self.theta) / n_layer)
-        kz = (2.0 * np.pi / wavelength_nm) * n_layer * np.cos(theta_t)
+    def layer_admittance(self, n_medium: complex, beta_parallel: complex, wavelength_nm: float, polarization: str = "TM") -> complex:
+        """Return the optical admittance-like term for the chosen polarization."""
+        k0 = 2.0 * np.pi / wavelength_nm
+        kz = k0 * np.sqrt(n_medium**2 - beta_parallel**2)
+        if np.imag(kz) < 0:
+            kz = -kz
 
         if polarization == "TM":
-            q = (n_layer**2) / kz
-            q_sub = (n_substrate**2) / ((2.0 * np.pi / wavelength_nm) * n_substrate * np.cos(self.theta))
-        else:
-            q = kz
-            q_sub = (2.0 * np.pi / wavelength_nm) * n_substrate * np.cos(self.theta)
+            return kz / (n_medium**2)
+        if polarization == "TE":
+            return kz
+        raise ValueError(f"Unsupported polarization: {polarization}")
 
-        delta = kz * thickness_nm
-        matrix = np.array(
-            [
-                [np.cos(delta), -1j / q * np.sin(delta)],
-                [-1j * q * np.sin(delta), np.cos(delta)],
-            ],
-            dtype=complex,
-        )
-        return matrix, q_sub
+    def layer_phase(self, n_medium: complex, thickness_nm: float, beta_parallel: complex, wavelength_nm: float) -> complex:
+        """Phase accumulation through a layer."""
+        k0 = 2.0 * np.pi / wavelength_nm
+        kz = k0 * np.sqrt(n_medium**2 - beta_parallel**2)
+        if np.imag(kz) < 0:
+            kz = -kz
+        return kz * thickness_nm
+
+    @staticmethod
+    def fresnel_reflection(q_left: complex, q_right: complex) -> complex:
+        """Interface reflection coefficient expressed through optical admittances."""
+        return (q_left - q_right) / (q_left + q_right)
 
     def calculate_reflectance(
         self,
@@ -105,11 +114,10 @@ class LMRSensor:
         for i, wavelength_nm in enumerate(self.wavelengths):
             n_core = self.refractive_index_fiber_core(wavelength_nm)
             n_surr = self.refractive_index_surrounding(wavelength_nm, analyte_ri)
-            q_0 = (2.0 * np.pi / wavelength_nm) * n_core * np.cos(self.theta)
+            beta_parallel = n_core * np.sin(self.theta)
 
-            total_matrix = np.eye(2, dtype=complex)
-            n_current = n_core
-
+            media = [n_core]
+            phases = []
             for layer in layer_stack:
                 material = layer["material"]
                 if material == "TiO2":
@@ -118,26 +126,20 @@ class LMRSensor:
                     n_layer = self.refractive_index_pss(wavelength_nm)
                 else:
                     raise ValueError(f"Unknown material: {material}")
+                media.append(n_layer)
+                phases.append(self.layer_phase(n_layer, float(layer["thickness_nm"]), beta_parallel, wavelength_nm))
+            media.append(n_surr)
 
-                thickness_nm = float(layer["thickness_nm"])
-                layer_matrix, _ = self.transfer_matrix_layer(
-                    n_layer,
-                    n_current,
-                    thickness_nm,
-                    wavelength_nm,
-                    polarization,
-                )
-                total_matrix = total_matrix @ layer_matrix
-                n_current = n_layer
+            q_values = [self.layer_admittance(n_medium, beta_parallel, wavelength_nm, polarization) for n_medium in media]
+            r_interfaces = [self.fresnel_reflection(q_values[j], q_values[j + 1]) for j in range(len(media) - 1)]
 
-            _, q_n = self.transfer_matrix_layer(n_surr, n_current, 0.0, wavelength_nm, polarization)
-            numerator = (total_matrix[0, 0] + total_matrix[0, 1] * q_n) * q_0 - (
-                total_matrix[1, 0] + total_matrix[1, 1] * q_n
-            )
-            denominator = (total_matrix[0, 0] + total_matrix[0, 1] * q_n) * q_0 + (
-                total_matrix[1, 0] + total_matrix[1, 1] * q_n
-            )
-            reflectance[i] = np.abs(numerator / denominator) ** 2
+            n_layers = len(layer_stack)
+            r_eff = r_interfaces[n_layers]
+            for j in range(n_layers - 1, -1, -1):
+                phase_factor = np.exp(2j * phases[j])
+                r_eff = (r_interfaces[j] + r_eff * phase_factor) / (1.0 + r_interfaces[j] * r_eff * phase_factor)
+
+            reflectance[i] = np.abs(r_eff) ** 2
 
         return reflectance
 
@@ -147,65 +149,77 @@ class LMRSensor:
         dip_wavelength = float(self.wavelengths[min_idx])
         dip_depth = float(1.0 - reflectance[min_idx])
 
-        half_max = (1.0 + reflectance[min_idx]) / 2.0
-        above = np.where(reflectance > half_max)[0]
-
-        if len(above) >= 2:
-            left_candidates = above[above < min_idx]
-            right_candidates = above[above > min_idx]
-            left_idx = int(left_candidates[-1]) if len(left_candidates) else 0
-            right_idx = int(right_candidates[0]) if len(right_candidates) else len(self.wavelengths) - 1
-            fwhm = float(self.wavelengths[right_idx] - self.wavelengths[left_idx])
-        else:
-            fwhm = 50.0
+        half_level = reflectance[min_idx] + 0.5 * (np.max(reflectance) - reflectance[min_idx])
+        left_idx = min_idx
+        while left_idx > 0 and reflectance[left_idx] < half_level:
+            left_idx -= 1
+        right_idx = min_idx
+        while right_idx < len(self.wavelengths) - 1 and reflectance[right_idx] < half_level:
+            right_idx += 1
+        fwhm = float(self.wavelengths[right_idx] - self.wavelengths[left_idx]) if right_idx > left_idx else 0.0
 
         return {
             "wavelength": dip_wavelength,
             "depth": dip_depth,
             "fwhm": fwhm,
-            "q_factor": float(dip_wavelength / fwhm) if fwhm > 0 else 0.0,
+            "q_factor": float(dip_wavelength / fwhm) if fwhm > 0 else float("inf"),
         }
 
 
-def run_simulation() -> None:
-    """Run a baseline/analyte comparison and visualize the spectrum."""
-    sensor = LMRSensor(wavelength_range=(600, 1800))
-    layer_stack = [
-        {"material": "TiO2", "thickness_nm": 120.0},
-        {"material": "PSS", "thickness_nm": 15.0},
-    ]
+def run_simulation(save_figure: bool = True) -> None:
+    """
+    Run a baseline/analyte comparison and visualize the spectrum.
 
-    reflectance_baseline = sensor.calculate_reflectance(layer_stack, analyte_ri=1.330)
-    reflectance_analyte = sensor.calculate_reflectance(layer_stack, analyte_ri=1.335)
+    The demonstration uses a slightly thicker TiO2 layer and a modest surrounding
+    refractive-index perturbation so that the modeled resonance shift is visible
+    without claiming that the chosen geometry is optimized.
+    """
+    sensor = LMRSensor(wavelength_range=(800, 1800), points=2400)
+    layer_stack = [
+        {"material": "TiO2", "thickness_nm": 220.0},
+        {"material": "PSS", "thickness_nm": 30.0},
+    ]
+    baseline_ri = 1.330
+    analyte_ri = 1.340
+
+    reflectance_baseline = sensor.calculate_reflectance(layer_stack, analyte_ri=baseline_ri)
+    reflectance_analyte = sensor.calculate_reflectance(layer_stack, analyte_ri=analyte_ri)
 
     dip_baseline = sensor.find_resonance_dip(reflectance_baseline)
     dip_analyte = sensor.find_resonance_dip(reflectance_analyte)
+    spectral_shift = dip_analyte["wavelength"] - dip_baseline["wavelength"]
+    depth_change = dip_analyte["depth"] - dip_baseline["depth"]
+    sensitivity = spectral_shift / (analyte_ri - baseline_ri)
 
-    print("=" * 50)
-    print("LMR SENSOR SIMULATION RESULTS")
-    print("=" * 50)
-    print(
-        f"Baseline Dip: {dip_baseline['wavelength']:.1f} nm, "
-        f"FWHM: {dip_baseline['fwhm']:.1f} nm"
-    )
-    print(
-        f"Analyte Dip:  {dip_analyte['wavelength']:.1f} nm, "
-        f"FWHM: {dip_analyte['fwhm']:.1f} nm"
-    )
-    print(f"Spectral Shift: {dip_analyte['wavelength'] - dip_baseline['wavelength']:.2f} nm")
-    print(f"Q-Factor (Loss Metric): {dip_baseline['q_factor']:.1f}")
+    print("=" * 60)
+    print("COMPACT LMR BASELINE SIMULATION")
+    print("=" * 60)
+    print("Interpretation: qualitative baseline only, not a calibrated sensor claim.")
+    print(f"Layer stack: TiO2 {layer_stack[0]['thickness_nm']:.0f} nm / PSS {layer_stack[1]['thickness_nm']:.0f} nm")
+    print(f"Baseline Dip: {dip_baseline['wavelength']:.2f} nm, depth {dip_baseline['depth']:.4f}, FWHM {dip_baseline['fwhm']:.2f} nm")
+    print(f"Analyte Dip:  {dip_analyte['wavelength']:.2f} nm, depth {dip_analyte['depth']:.4f}, FWHM {dip_analyte['fwhm']:.2f} nm")
+    print(f"Spectral Shift: {spectral_shift:.3f} nm for Δn = {analyte_ri - baseline_ri:.3f}")
+    print(f"Approximate modeled sensitivity: {sensitivity:.1f} nm / RIU")
+    print(f"Depth change: {depth_change:.4f}")
+    print(f"Baseline Q-Factor: {dip_baseline['q_factor']:.1f}")
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(sensor.wavelengths, reflectance_baseline, label="Baseline (n = 1.330)")
-    plt.plot(sensor.wavelengths, reflectance_analyte, label="Analyte (n = 1.335)", linestyle="--")
-    plt.axvline(dip_baseline["wavelength"], color="tab:blue", alpha=0.3)
-    plt.axvline(dip_analyte["wavelength"], color="tab:orange", alpha=0.3)
-    plt.xlabel("Wavelength (nm)")
-    plt.ylabel("Reflectance")
-    plt.title("LMR Sensor Response from Transfer Matrix Simulation")
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(sensor.wavelengths, reflectance_baseline, label=f"Baseline (n = {baseline_ri:.3f})")
+    ax.plot(sensor.wavelengths, reflectance_analyte, linestyle="--", label=f"Perturbed surrounding (n = {analyte_ri:.3f})")
+    ax.axvline(dip_baseline["wavelength"], color="tab:blue", alpha=0.3)
+    ax.axvline(dip_analyte["wavelength"], color="tab:orange", alpha=0.3)
+    ax.set_xlabel("Wavelength (nm)")
+    ax.set_ylabel("Reflectance")
+    ax.set_title("Compact LMR Baseline: Surrounding-Index-Induced Shift")
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+
+    if save_figure:
+        output_path = Path(__file__).with_name("lmr_tmm_sensor_example.png")
+        fig.savefig(output_path, dpi=160)
+        print(f"Saved example figure to: {output_path}")
+
     plt.show()
 
 
