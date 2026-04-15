@@ -1,0 +1,772 @@
+"""
+Quantum Fisher Bounds and ML Spectral Deconvolution for LMR Sensing
+==================================================================
+
+This experiment extends the repository's recent LMR work in two directions.
+First, it estimates quantum Fisher information (QFI) bounds for concentration
+sensing under a simplified phase-and-loss channel model. Second, it generates
+synthetic multi-analyte spectra and compares a compact neural regressor against
+an SVD-based linear baseline for spectral deconvolution.
+
+The script is exploratory and intended as a computational thought experiment.
+It reuses the repository's previously added multi-analyte LMR sensor model as
+its optical backend.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Tuple
+import importlib.util
+import warnings
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+warnings.filterwarnings("ignore")
+
+
+_THIS_FILE = Path(__file__).resolve()
+_LMR_BACKEND_PATH = _THIS_FILE.with_name("multi_analyte_lmr_bayesian.py")
+_spec = importlib.util.spec_from_file_location("multi_analyte_lmr_bayesian", _LMR_BACKEND_PATH)
+if _spec is None or _spec.loader is None:
+    raise ImportError(f"Unable to load LMR backend from {_LMR_BACKEND_PATH}")
+_lmr_backend = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_lmr_backend)
+MultiAnalyteLMRSensor = _lmr_backend.MultiAnalyteLMRSensor
+
+
+@dataclass
+class LMRSensorParameters:
+    """Physical parameters for a simplified QFI calculation."""
+
+    wavelength: float = 1200.0  # nm
+    n_core: complex = 1.45 + 0j
+    n_tio2_real: float = 2.3
+    n_tio2_imag_base: float = 0.008
+    n_pss_real: float = 1.48
+    d_tio2: float = 120.0  # nm
+    d_pss: float = 15.0  # nm
+    theta_inc: float = 75.0  # degrees
+    temperature: float = 298.15  # K
+    input_power: float = 1e-3  # W
+    measurement_time: float = 1.0  # s
+
+
+class QuantumFisherLMR:
+    """
+    Estimate QFI bounds for a compact LMR sensing model.
+
+    The implementation separates phase and loss contributions under a coherent
+    probe assumption and uses finite differences with respect to analyte
+    concentration.
+    """
+
+    def __init__(self, params: LMRSensorParameters):
+        self.params = params
+        self.h = 6.626e-34
+        self.c = 2.998e8
+        photon_energy = self.h * self.c / (params.wavelength * 1e-9)
+        self.photon_flux = params.input_power / photon_energy
+        self.n_photons = self.photon_flux * params.measurement_time
+
+    def temperature_dependent_damping(self, temperature: float) -> float:
+        """Approximate TiO2 damping versus temperature."""
+        t_ref = 298.15
+        wl_um = self.params.wavelength / 1000.0
+        k0 = self.params.n_tio2_imag_base
+        k_phonon = k0 * (1.0 + 0.002 * (temperature - t_ref))
+        e_g = 3.2
+        e_photon = 1.24 / wl_um
+        e_u = 0.05 * (temperature / t_ref)
+        if e_photon < e_g:
+            k_urbach = k_phonon * (1.0 + 0.1 * np.exp((e_photon - e_g) / e_u))
+        else:
+            k_urbach = k_phonon * 1.1
+        k_carrier = k_urbach * (1.0 + 0.001 * (temperature / t_ref) ** 1.5)
+        return float(k_carrier)
+
+    def analyte_induced_ri_change(self, concentration: float, analyte_name: str = "CRP") -> Tuple[float, float]:
+        """Map concentration to a small complex refractive-index perturbation."""
+        kd = {"CRP": 5.0, "IL6": 2.0, "PSA": 3.0}.get(analyte_name, 5.0)
+        max_fraction = 0.15
+        fraction = max_fraction * concentration / (kd + concentration)
+        delta_n_real = 0.18 * fraction * 0.01
+        delta_k_imag = 1e-6 * fraction
+        return float(delta_n_real), float(delta_k_imag)
+
+    def compute_reflectance(self, delta_n: float, delta_k: float, temperature: float) -> complex:
+        """Compute a simplified complex reflectance amplitude."""
+        n_tio2 = complex(self.params.n_tio2_real, self.temperature_dependent_damping(temperature))
+        n_pss = complex(self.params.n_pss_real + delta_n, delta_k)
+        n_core = self.params.n_core
+        n_surr = 1.33 + 0j
+
+        theta_rad = np.radians(self.params.theta_inc)
+        k0 = 2.0 * np.pi / (self.params.wavelength * 1e-9)
+
+        kz_core = k0 * n_core * np.cos(theta_rad)
+        kz_tio2 = k0 * np.sqrt(n_tio2**2 - (n_core * np.sin(theta_rad)) ** 2)
+        kz_pss = k0 * np.sqrt(n_pss**2 - (n_core * np.sin(theta_rad)) ** 2)
+        kz_surr = k0 * np.sqrt(n_surr**2 - (n_core * np.sin(theta_rad)) ** 2)
+
+        r01 = (kz_core / n_core**2 - kz_tio2 / n_tio2**2) / (kz_core / n_core**2 + kz_tio2 / n_tio2**2)
+        r12 = (kz_tio2 / n_tio2**2 - kz_pss / n_pss**2) / (kz_tio2 / n_tio2**2 + kz_pss / n_pss**2)
+        r23 = (kz_pss / n_pss**2 - kz_surr / n_surr**2) / (kz_pss / n_pss**2 + kz_surr / n_surr**2)
+
+        phi_tio2 = kz_tio2 * self.params.d_tio2 * 1e-9
+        phi_pss = kz_pss * self.params.d_pss * 1e-9
+
+        r_012 = (r01 + r12 * np.exp(2j * phi_tio2)) / (1.0 + r01 * r12 * np.exp(2j * phi_tio2))
+        r_total = (r_012 + r23 * np.exp(2j * phi_pss)) / (1.0 + r_012 * r23 * np.exp(2j * phi_pss))
+        return r_total
+
+    def quantum_fisher_information(
+        self,
+        concentration: float,
+        temperature: float = 298.15,
+        analyte: str = "CRP",
+    ) -> Dict[str, float]:
+        """Compute phase, loss, and total QFI for one analyte."""
+        dc = max(0.01 * concentration, 0.01)
+        delta_n_c, delta_k_c = self.analyte_induced_ri_change(concentration, analyte)
+        delta_n_plus, delta_k_plus = self.analyte_induced_ri_change(concentration + dc, analyte)
+        delta_n_minus, delta_k_minus = self.analyte_induced_ri_change(max(0.0, concentration - dc), analyte)
+
+        r_c = self.compute_reflectance(delta_n_c, delta_k_c, temperature)
+        r_plus = self.compute_reflectance(delta_n_plus, delta_k_plus, temperature)
+        r_minus = self.compute_reflectance(delta_n_minus, delta_k_minus, temperature)
+
+        dr_dc = (r_plus - r_minus) / (2.0 * dc)
+        eta_c = float(np.abs(r_c) ** 2)
+        phi_c = float(np.angle(r_c))
+        deta_dc = float(2.0 * np.real(np.conj(r_c) * dr_dc))
+        dphi_dc = float(np.imag(dr_dc / r_c)) if np.abs(r_c) > 0 else 0.0
+
+        alpha = np.sqrt(self.n_photons)
+        qfi_phase = float(4.0 * alpha**2 * eta_c * dphi_dc**2)
+        qfi_loss = float(alpha**2 * deta_dc**2 / eta_c) if eta_c > 0 else 0.0
+        qfi_total = qfi_phase + qfi_loss
+        delta_c_min = float(1.0 / np.sqrt(qfi_total)) if qfi_total > 0 else float("inf")
+
+        return {
+            "concentration": float(concentration),
+            "reflectance": eta_c,
+            "phase_shift": phi_c,
+            "deta_dc": deta_dc,
+            "dphi_dc": dphi_dc,
+            "QFI_phase": qfi_phase,
+            "QFI_loss": qfi_loss,
+            "QFI_total": qfi_total,
+            "delta_c_min": delta_c_min,
+            "loss_fraction": float(qfi_loss / qfi_total) if qfi_total > 0 else 0.0,
+        }
+
+    def multi_parameter_qfi(
+        self,
+        concentrations: List[float],
+        analytes: List[str],
+        temperature: float = 298.15,
+    ) -> Dict[str, np.ndarray | List[str] | List[float] | float]:
+        """Compute a multi-parameter QFI matrix and its CRB-derived correlations."""
+        n_params = len(analytes)
+        qfi_matrix = np.zeros((n_params, n_params), dtype=float)
+        dc = [max(0.01 * concentration, 0.01) for concentration in concentrations]
+
+        delta_n_base = []
+        delta_k_base = []
+        for concentration, analyte in zip(concentrations, analytes):
+            dn, dk = self.analyte_induced_ri_change(concentration, analyte)
+            delta_n_base.append(dn)
+            delta_k_base.append(dk)
+
+        total_dn = float(sum(delta_n_base))
+        total_dk = float(sum(delta_k_base))
+        r_base = self.compute_reflectance(total_dn, total_dk, temperature)
+        eta = float(np.abs(r_base) ** 2)
+
+        grad_eta = np.zeros(n_params, dtype=float)
+        grad_phi = np.zeros(n_params, dtype=float)
+
+        for i, (concentration, analyte) in enumerate(zip(concentrations, analytes)):
+            dn_plus, dk_plus = self.analyte_induced_ri_change(concentration + dc[i], analyte)
+            dn_minus, dk_minus = self.analyte_induced_ri_change(max(0.0, concentration - dc[i]), analyte)
+
+            total_dn_plus = total_dn - delta_n_base[i] + dn_plus
+            total_dk_plus = total_dk - delta_k_base[i] + dk_plus
+            total_dn_minus = total_dn - delta_n_base[i] + dn_minus
+            total_dk_minus = total_dk - delta_k_base[i] + dk_minus
+
+            r_plus = self.compute_reflectance(total_dn_plus, total_dk_plus, temperature)
+            r_minus = self.compute_reflectance(total_dn_minus, total_dk_minus, temperature)
+            dr_dc_i = (r_plus - r_minus) / (2.0 * dc[i])
+
+            grad_eta[i] = float(2.0 * np.real(np.conj(r_base) * dr_dc_i))
+            grad_phi[i] = float(np.imag(dr_dc_i / r_base)) if np.abs(r_base) > 0 else 0.0
+
+        alpha = np.sqrt(self.n_photons)
+        for i in range(n_params):
+            for j in range(n_params):
+                qfi_phase_ij = 4.0 * alpha**2 * eta * grad_phi[i] * grad_phi[j]
+                qfi_loss_ij = alpha**2 * grad_eta[i] * grad_eta[j] / eta if eta > 0 else 0.0
+                qfi_matrix[i, j] = qfi_phase_ij + qfi_loss_ij
+
+        try:
+            crb_matrix = np.linalg.pinv(qfi_matrix)
+            delta_c_min = np.sqrt(np.clip(np.diag(crb_matrix), 0.0, None))
+            inv_sqrt_diag = np.diag(1.0 / np.sqrt(np.clip(np.diag(crb_matrix), 1e-12, None)))
+            correlation = inv_sqrt_diag @ crb_matrix @ inv_sqrt_diag
+        except np.linalg.LinAlgError:
+            crb_matrix = np.full_like(qfi_matrix, np.nan)
+            delta_c_min = np.full(n_params, np.inf)
+            correlation = np.eye(n_params)
+
+        return {
+            "analytes": analytes,
+            "concentrations": concentrations,
+            "QFI_matrix": qfi_matrix,
+            "CRB_matrix": crb_matrix,
+            "delta_c_min": delta_c_min,
+            "correlation_matrix": correlation,
+            "reflectance": eta,
+        }
+
+    def temperature_effect_on_qfi(
+        self,
+        concentration: float,
+        t_range: Tuple[float, float] = (280, 320),
+        n_points: int = 50,
+    ) -> Dict[str, np.ndarray]:
+        """Sweep temperature and record QFI metrics."""
+        temperatures = np.linspace(t_range[0], t_range[1], n_points)
+        results = {
+            "T": temperatures,
+            "QFI_total": [],
+            "QFI_phase": [],
+            "QFI_loss": [],
+            "delta_c_min": [],
+            "reflectance": [],
+        }
+        for temperature in temperatures:
+            qfi = self.quantum_fisher_information(concentration, float(temperature))
+            results["QFI_total"].append(qfi["QFI_total"])
+            results["QFI_phase"].append(qfi["QFI_phase"])
+            results["QFI_loss"].append(qfi["QFI_loss"])
+            results["delta_c_min"].append(qfi["delta_c_min"])
+            results["reflectance"].append(qfi["reflectance"])
+        return {key: np.asarray(value) for key, value in results.items()}
+
+
+class LMRSpectralDataset:
+    """Generate synthetic spectra from the repository's multi-analyte LMR backend."""
+
+    def __init__(self, sensor: MultiAnalyteLMRSensor, rng: np.random.Generator | None = None):
+        self.sensor = sensor
+        self.wavelengths = sensor.wavelengths
+        self.rng = rng or np.random.default_rng(42)
+
+    def generate_spectrum(
+        self,
+        concentrations: Dict[str, float],
+        temperature: float = 298.15,
+        noise_level: float = 0.01,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate one noisy spectrum and its clean counterpart."""
+        bound = {}
+        for name, concentration in concentrations.items():
+            if name in self.sensor.analytes:
+                kd = self.sensor.analytes[name].binding_affinity
+                bound[name] = 0.15 * concentration / (kd + concentration) if concentration > 0 else 0.0
+
+        ideal = self.sensor.calculate_multi_analyte_spectrum(bound, temperature)
+        noise = noise_level * self.rng.normal(size=len(ideal)) * np.sqrt(np.clip(ideal, 1e-9, None))
+        noisy = np.clip(ideal + noise, 0.0, 1.0)
+        return noisy, ideal
+
+    def generate_dataset(
+        self,
+        n_samples: int = 1500,
+        analytes: List[str] | None = None,
+        conc_range: Tuple[float, float] = (0, 50),
+        temp_range: Tuple[float, float] = (295, 315),
+    ) -> Tuple[np.ndarray, np.ndarray, Dict[str, np.ndarray | List[str]]]:
+        """Generate a labeled dataset of spectra and concentrations."""
+        if analytes is None:
+            analytes = ["CRP", "IL6", "PSA"]
+
+        n_features = len(self.wavelengths)
+        x = np.zeros((n_samples, n_features), dtype=float)
+        y = np.zeros((n_samples, len(analytes)), dtype=float)
+        temperatures = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            concentrations = {}
+            for j, analyte in enumerate(analytes):
+                concentration = float(self.rng.uniform(*conc_range)) if self.rng.random() < 0.7 else 0.0
+                concentrations[analyte] = concentration
+                y[i, j] = concentration
+            temperature = float(self.rng.uniform(*temp_range))
+            temperatures[i] = temperature
+            noisy_spectrum, _ = self.generate_spectrum(concentrations, temperature)
+            x[i, :] = noisy_spectrum
+
+        metadata = {
+            "analytes": analytes,
+            "wavelengths": self.wavelengths,
+            "temperatures": temperatures,
+            "conc_range": np.asarray(conc_range, dtype=float),
+            "temp_range": np.asarray(temp_range, dtype=float),
+        }
+        return x, y, metadata
+
+
+class LMRNeuralDeconvolver:
+    """Compact NumPy neural network for multi-analyte regression."""
+
+    def __init__(
+        self,
+        n_wavelengths: int,
+        n_analytes: int,
+        hidden_layers: List[int] | None = None,
+        seed: int = 42,
+    ):
+        self.n_wavelengths = n_wavelengths
+        self.n_analytes = n_analytes
+        self.hidden_layers = hidden_layers or [256, 128, 64]
+        self.rng = np.random.default_rng(seed)
+        self.weights: List[np.ndarray] = []
+        self.biases: List[np.ndarray] = []
+        self._build_model()
+
+    def _build_model(self) -> None:
+        dims = [self.n_wavelengths + 1] + self.hidden_layers + [self.n_analytes]
+        for in_dim, out_dim in zip(dims[:-1], dims[1:]):
+            weight = self.rng.normal(size=(in_dim, out_dim)) * np.sqrt(2.0 / in_dim)
+            bias = np.zeros(out_dim, dtype=float)
+            self.weights.append(weight)
+            self.biases.append(bias)
+
+    @staticmethod
+    def _relu(x: np.ndarray) -> np.ndarray:
+        return np.maximum(0.0, x)
+
+    @staticmethod
+    def _relu_derivative(x: np.ndarray) -> np.ndarray:
+        return (x > 0.0).astype(float)
+
+    def _normalize_temperature(self, temperatures: np.ndarray) -> np.ndarray:
+        return (temperatures - 300.0) / 20.0
+
+    def forward(self, x_spectra: np.ndarray, temperatures: np.ndarray) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        temp_feature = self._normalize_temperature(temperatures).reshape(-1, 1)
+        activation = np.concatenate([x_spectra, temp_feature], axis=1)
+        activations = [activation]
+        preactivations: List[np.ndarray] = []
+
+        for i, (weight, bias) in enumerate(zip(self.weights, self.biases)):
+            z = activations[-1] @ weight + bias
+            preactivations.append(z)
+            if i < len(self.weights) - 1:
+                a = self._relu(z)
+            else:
+                a = z
+            activations.append(a)
+        return activations, preactivations
+
+    def predict(self, x_spectra: np.ndarray, temperatures: np.ndarray) -> np.ndarray:
+        activations, _ = self.forward(x_spectra, temperatures)
+        return np.maximum(activations[-1], 0.0)
+
+    def train(
+        self,
+        x_train: np.ndarray,
+        y_train: np.ndarray,
+        t_train: np.ndarray,
+        x_val: np.ndarray | None = None,
+        y_val: np.ndarray | None = None,
+        t_val: np.ndarray | None = None,
+        epochs: int = 30,
+        batch_size: int = 64,
+        learning_rate: float = 1e-3,
+    ) -> Dict[str, List[float]]:
+        """Train with mini-batch gradient descent."""
+        n_samples = x_train.shape[0]
+        history: Dict[str, List[float]] = {"loss": [], "val_loss": []}
+
+        for epoch in range(epochs):
+            indices = self.rng.permutation(n_samples)
+            x_shuffled = x_train[indices]
+            y_shuffled = y_train[indices]
+            t_shuffled = t_train[indices]
+            batch_losses = []
+
+            for start in range(0, n_samples, batch_size):
+                end = min(start + batch_size, n_samples)
+                x_batch = x_shuffled[start:end]
+                y_batch = y_shuffled[start:end]
+                t_batch = t_shuffled[start:end]
+                current_batch = max(1, end - start)
+
+                activations, preactivations = self.forward(x_batch, t_batch)
+                y_pred = activations[-1]
+                batch_losses.append(float(np.mean((y_pred - y_batch) ** 2)))
+
+                delta = 2.0 * (y_pred - y_batch) / current_batch
+                grad_w_list: List[np.ndarray] = []
+                grad_b_list: List[np.ndarray] = []
+
+                for layer in range(len(self.weights) - 1, -1, -1):
+                    a_prev = activations[layer]
+                    grad_w = a_prev.T @ delta
+                    grad_b = np.sum(delta, axis=0)
+                    grad_w_list.append(grad_w)
+                    grad_b_list.append(grad_b)
+                    if layer > 0:
+                        delta = (delta @ self.weights[layer].T) * self._relu_derivative(preactivations[layer - 1])
+
+                grad_w_list.reverse()
+                grad_b_list.reverse()
+                for layer in range(len(self.weights)):
+                    self.weights[layer] -= learning_rate * grad_w_list[layer]
+                    self.biases[layer] -= learning_rate * grad_b_list[layer]
+
+            history["loss"].append(float(np.mean(batch_losses)))
+            if x_val is not None and y_val is not None and t_val is not None:
+                y_val_pred = self.predict(x_val, t_val)
+                history["val_loss"].append(float(np.mean((y_val_pred - y_val) ** 2)))
+
+            if epoch % 10 == 0 or epoch == epochs - 1:
+                if history["val_loss"]:
+                    print(
+                        f"Epoch {epoch}: loss = {history['loss'][-1]:.6f}, "
+                        f"val_loss = {history['val_loss'][-1]:.6f}"
+                    )
+                else:
+                    print(f"Epoch {epoch}: loss = {history['loss'][-1]:.6f}")
+
+        return history
+
+
+class SVDLinearDeconvolver:
+    """Truncated-SVD-style linear baseline for concentration prediction."""
+
+    def __init__(self, regularization: float = 1e-3):
+        self.regularization = regularization
+        self.mean_spectrum: np.ndarray | None = None
+        self.weight_matrix: np.ndarray | None = None
+
+    def fit(self, x_train: np.ndarray, y_train: np.ndarray) -> None:
+        self.mean_spectrum = x_train.mean(axis=0)
+        x_centered = x_train - self.mean_spectrum
+        u, s, vh = np.linalg.svd(x_centered, full_matrices=False)
+        s_inv = s / (s**2 + self.regularization)
+        self.weight_matrix = vh.T @ np.diag(s_inv) @ u.T @ y_train
+
+    def predict(self, x_test: np.ndarray) -> np.ndarray:
+        if self.mean_spectrum is None or self.weight_matrix is None:
+            raise RuntimeError("The linear deconvolver must be fit before prediction.")
+        x_centered = x_test - self.mean_spectrum
+        return np.maximum(x_centered @ self.weight_matrix, 0.0)
+
+
+def run_simulation(
+    dataset_size: int = 1200,
+    training_epochs: int = 25,
+    wavelength_points: int = 300,
+    seed: int = 42,
+) -> None:
+    """Run the QFI analysis and the ML deconvolution comparison."""
+    rng = np.random.default_rng(seed)
+
+    print("=" * 80)
+    print("QUANTUM FISHER INFORMATION BOUNDS + ML DECONVOLUTION")
+    print("=" * 80)
+
+    sensor = MultiAnalyteLMRSensor(wavelength_range=(600, 1800), points=wavelength_points)
+    params = LMRSensorParameters()
+    qfi_calc = QuantumFisherLMR(params)
+
+    print("\n" + "-" * 60)
+    print("QUANTUM FISHER INFORMATION ANALYSIS")
+    print("-" * 60)
+
+    concentrations = np.array([0.1, 0.5, 1, 2, 5, 10, 20, 50], dtype=float)
+    qfi_results = []
+    print("\nSingle Analyte (CRP) QFI Analysis:")
+    print(f"{'Conc (nM)':<12} {'QFI_phase':<15} {'QFI_loss':<15} {'Loss Fraction':<15} {'Δc_min (nM)':<15}")
+    print("-" * 72)
+    for concentration in concentrations:
+        result = qfi_calc.quantum_fisher_information(float(concentration), temperature=298.15, analyte="CRP")
+        qfi_results.append(result)
+        print(
+            f"{concentration:<12.2f} {result['QFI_phase']:<15.2e} {result['QFI_loss']:<15.2e} "
+            f"{result['loss_fraction']:<15.3f} {result['delta_c_min']:<15.4f}"
+        )
+
+    print("\n" + "-" * 60)
+    print("TEMPERATURE EFFECT ON QUANTUM PRECISION BOUNDS")
+    print("-" * 60)
+    temp_analysis = qfi_calc.temperature_effect_on_qfi(5.0, t_range=(280, 320), n_points=20)
+    idx_298 = int(np.argmin(np.abs(temp_analysis["T"] - 298.15)))
+    print("\nAt 5 nM CRP:")
+    print(
+        f"  T=280K: QFI_total = {temp_analysis['QFI_total'][0]:.2e}, "
+        f"Δc_min = {temp_analysis['delta_c_min'][0]:.4f} nM"
+    )
+    print(
+        f"  T≈298K: QFI_total = {temp_analysis['QFI_total'][idx_298]:.2e}, "
+        f"Δc_min = {temp_analysis['delta_c_min'][idx_298]:.4f} nM"
+    )
+    print(
+        f"  T=320K: QFI_total = {temp_analysis['QFI_total'][-1]:.2e}, "
+        f"Δc_min = {temp_analysis['delta_c_min'][-1]:.4f} nM"
+    )
+    precision_degradation = (temp_analysis["delta_c_min"][-1] / temp_analysis["delta_c_min"][idx_298] - 1.0) * 100.0
+    print(f"  Precision degradation at fever temp: {precision_degradation:.1f}%")
+
+    print("\n" + "-" * 60)
+    print("MULTI-ANALYTE QUANTUM FISHER INFORMATION MATRIX")
+    print("-" * 60)
+    multi_conc = [5.0, 2.0, 1.0]
+    multi_analytes = ["CRP", "IL6", "PSA"]
+    multi_qfi = qfi_calc.multi_parameter_qfi(multi_conc, multi_analytes)
+    print("\nQFI Matrix:")
+    print(multi_qfi["QFI_matrix"])
+    print("\nMinimum Detectable Concentrations (Δc_min in nM):")
+    for analyte, bound in zip(multi_analytes, multi_qfi["delta_c_min"]):
+        print(f"  {analyte}: {bound:.4f} nM")
+    print("\nParameter Correlation Matrix:")
+    print(multi_qfi["correlation_matrix"])
+
+    print("\n" + "-" * 60)
+    print("MACHINE LEARNING SPECTRAL DECONVOLUTION")
+    print("-" * 60)
+    dataset_gen = LMRSpectralDataset(sensor, rng=rng)
+    print("Generating synthetic dataset...")
+    x, y, metadata = dataset_gen.generate_dataset(
+        n_samples=dataset_size,
+        analytes=["CRP", "IL6", "PSA"],
+        conc_range=(0, 50),
+        temp_range=(295, 310),
+    )
+
+    n_train = int(0.8 * dataset_size)
+    x_train, x_test = x[:n_train], x[n_train:]
+    y_train, y_test = y[:n_train], y[n_train:]
+    t_train, t_test = metadata["temperatures"][:n_train], metadata["temperatures"][n_train:]
+    print(f"Training set: {x_train.shape[0]} samples")
+    print(f"Test set: {x_test.shape[0]} samples")
+
+    print("\nTraining Neural Network...")
+    nn_model = LMRNeuralDeconvolver(
+        n_wavelengths=x.shape[1],
+        n_analytes=y.shape[1],
+        hidden_layers=[128, 64, 32],
+        seed=seed,
+    )
+    history = nn_model.train(
+        x_train,
+        y_train,
+        t_train,
+        x_test,
+        y_test,
+        t_test,
+        epochs=training_epochs,
+        batch_size=64,
+        learning_rate=1e-3,
+    )
+
+    y_pred_nn = nn_model.predict(x_test, t_test)
+    mse_nn = float(np.mean((y_pred_nn - y_test) ** 2))
+    mae_nn = float(np.mean(np.abs(y_pred_nn - y_test)))
+    print("\nNeural Network Test Performance:")
+    print(f"  MSE: {mse_nn:.6f}")
+    print(f"  MAE: {mae_nn:.4f} nM")
+    for i, analyte in enumerate(["CRP", "IL6", "PSA"]):
+        mae_i = float(np.mean(np.abs(y_pred_nn[:, i] - y_test[:, i])))
+        print(f"  {analyte} MAE: {mae_i:.4f} nM")
+
+    print("\nTraining Linear SVD Baseline...")
+    linear_model = SVDLinearDeconvolver(regularization=1e-2)
+    linear_model.fit(x_train, y_train)
+    y_pred_linear = linear_model.predict(x_test)
+    mse_linear = float(np.mean((y_pred_linear - y_test) ** 2))
+    mae_linear = float(np.mean(np.abs(y_pred_linear - y_test)))
+    print("Linear SVD Test Performance:")
+    print(f"  MSE: {mse_linear:.6f}")
+    print(f"  MAE: {mae_linear:.4f} nM")
+
+    print("\n" + "-" * 60)
+    print("COMPARISON: ML PERFORMANCE vs QUANTUM BOUND")
+    print("-" * 60)
+    test_conc = 5.0
+    mask_crp = np.abs(y_test[:, 0] - test_conc) < 0.5
+    qfi_at_conc = qfi_calc.quantum_fisher_information(test_conc, temperature=298.15)
+    qfi_bound = qfi_at_conc["delta_c_min"]
+    if np.sum(mask_crp) > 5:
+        empirical_std = float(np.std(y_pred_nn[mask_crp, 0] - y_test[mask_crp, 0]))
+        empirical_std_linear = float(np.std(y_pred_linear[mask_crp, 0] - y_test[mask_crp, 0]))
+        print(f"\nAt CRP concentration ~{test_conc} nM:")
+        print(f"  Quantum Cramér-Rao bound: {qfi_bound:.4f} nM")
+        print(f"  Neural Network empirical RMSE: {empirical_std:.4f} nM")
+        print(f"  Efficiency (bound / empirical): {qfi_bound / empirical_std:.3f}")
+        print(f"  Gap to theoretical optimum: {(empirical_std / qfi_bound - 1.0) * 100.0:.1f}%")
+    else:
+        empirical_std = float("nan")
+        empirical_std_linear = float("nan")
+        print("\nNot enough test samples near 5 nM to compute an empirical precision comparison.")
+
+    fig = plt.figure(figsize=(18, 14))
+
+    ax1 = fig.add_subplot(3, 4, 1)
+    qfi_total = [result["QFI_total"] for result in qfi_results]
+    qfi_phase = [result["QFI_phase"] for result in qfi_results]
+    qfi_loss = [result["QFI_loss"] for result in qfi_results]
+    ax1.loglog(concentrations, qfi_total, "k-", linewidth=2, label="Total QFI")
+    ax1.loglog(concentrations, qfi_phase, "b--", linewidth=1.5, label="Phase contribution")
+    ax1.loglog(concentrations, qfi_loss, "r--", linewidth=1.5, label="Loss contribution")
+    ax1.set_xlabel("CRP Concentration (nM)")
+    ax1.set_ylabel("Quantum Fisher Information")
+    ax1.set_title("QFI vs Concentration")
+    ax1.legend(fontsize=8)
+    ax1.grid(True, alpha=0.3)
+
+    ax2 = fig.add_subplot(3, 4, 2)
+    delta_c = [result["delta_c_min"] for result in qfi_results]
+    ax2.loglog(concentrations, delta_c, "o-", color="purple", linewidth=2)
+    ax2.set_xlabel("CRP Concentration (nM)")
+    ax2.set_ylabel("Δc_min (nM)")
+    ax2.set_title("Minimum Detectable Concentration")
+    ax2.grid(True, alpha=0.3)
+
+    ax3 = fig.add_subplot(3, 4, 3)
+    loss_frac = [result["loss_fraction"] for result in qfi_results]
+    ax3.semilogx(concentrations, loss_frac, "s-", color="orange", linewidth=2)
+    ax3.set_xlabel("CRP Concentration (nM)")
+    ax3.set_ylabel("Loss Fraction of QFI")
+    ax3.set_title("Information from Ohmic Damping")
+    ax3.set_ylim(0, 1)
+    ax3.grid(True, alpha=0.3)
+
+    ax4 = fig.add_subplot(3, 4, 4)
+    ax4.plot(temp_analysis["T"] - 273.15, temp_analysis["QFI_total"], "k-", linewidth=2, label="Total")
+    ax4.plot(temp_analysis["T"] - 273.15, temp_analysis["QFI_phase"], "b--", linewidth=1.5, label="Phase")
+    ax4.plot(temp_analysis["T"] - 273.15, temp_analysis["QFI_loss"], "r--", linewidth=1.5, label="Loss")
+    ax4.set_xlabel("Temperature (°C)")
+    ax4.set_ylabel("QFI")
+    ax4.set_title("Temperature Degrades Precision")
+    ax4.legend(fontsize=8)
+    ax4.grid(True, alpha=0.3)
+
+    ax5 = fig.add_subplot(3, 4, 5)
+    image5 = ax5.imshow(np.asarray(multi_qfi["correlation_matrix"]), cmap="RdBu_r", vmin=-1, vmax=1)
+    ax5.set_xticks(range(len(multi_analytes)))
+    ax5.set_yticks(range(len(multi_analytes)))
+    ax5.set_xticklabels(multi_analytes)
+    ax5.set_yticklabels(multi_analytes)
+    ax5.set_title("Parameter Correlation Matrix")
+    plt.colorbar(image5, ax=ax5)
+
+    ax6 = fig.add_subplot(3, 4, 6)
+    ax6.plot(history["loss"], "b-", label="Training Loss", alpha=0.7)
+    if history["val_loss"]:
+        ax6.plot(history["val_loss"], "r-", label="Validation Loss", alpha=0.7)
+    ax6.set_xlabel("Epoch")
+    ax6.set_ylabel("MSE Loss")
+    ax6.set_title("Neural Network Training")
+    ax6.set_yscale("log")
+    ax6.legend(fontsize=8)
+    ax6.grid(True, alpha=0.3)
+
+    ax7 = fig.add_subplot(3, 4, 7)
+    ax7.scatter(y_test[:, 0], y_pred_nn[:, 0], alpha=0.5, s=10)
+    ax7.plot([0, 50], [0, 50], "k--", alpha=0.5)
+    ax7.set_xlabel("True CRP (nM)")
+    ax7.set_ylabel("Predicted CRP (nM)")
+    ax7.set_title("Neural Network: CRP Prediction")
+    ax7.grid(True, alpha=0.3)
+
+    ax8 = fig.add_subplot(3, 4, 8)
+    ax8.scatter(y_test[:, 1], y_pred_nn[:, 1], alpha=0.5, s=10)
+    ax8.plot([0, 50], [0, 50], "k--", alpha=0.5)
+    ax8.set_xlabel("True IL6 (nM)")
+    ax8.set_ylabel("Predicted IL6 (nM)")
+    ax8.set_title("Neural Network: IL6 Prediction")
+    ax8.grid(True, alpha=0.3)
+
+    ax9 = fig.add_subplot(3, 4, 9)
+    methods = ["QFI Bound", "Neural Network", "Linear SVD"]
+    precisions = [qfi_bound, empirical_std if np.isfinite(empirical_std) else np.nan, empirical_std_linear if np.isfinite(empirical_std_linear) else np.nan]
+    bars = ax9.bar(methods, np.nan_to_num(precisions, nan=0.0), color=["green", "blue", "gray"], alpha=0.7)
+    ax9.set_ylabel("RMSE (nM)")
+    ax9.set_title(f"Precision Comparison at {test_conc} nM CRP")
+    ax9.axhline(qfi_bound, color="green", linestyle="--", alpha=0.5)
+    for bar, value in zip(bars, precisions):
+        label = "NA" if not np.isfinite(value) else f"{value:.3f}"
+        ax9.text(bar.get_x() + bar.get_width() / 2.0, bar.get_height() + 0.02, label, ha="center", va="bottom", fontsize=9)
+
+    ax10 = fig.add_subplot(3, 4, 10)
+    for i in range(min(5, len(x_train))):
+        ax10.plot(metadata["wavelengths"], x_train[i], alpha=0.5, linewidth=0.8)
+    ax10.set_xlabel("Wavelength (nm)")
+    ax10.set_ylabel("Reflectance")
+    ax10.set_title("Example Training Spectra")
+    ax10.grid(True, alpha=0.3)
+
+    ax11 = fig.add_subplot(3, 4, 11)
+    errors = (y_pred_nn[:, 0] - y_test[:, 0]).flatten()
+    ax11.hist(errors, bins=40, alpha=0.7, color="blue", edgecolor="black")
+    ax11.axvline(0, color="k", linestyle="--")
+    ax11.set_xlabel("Prediction Error (nM)")
+    ax11.set_ylabel("Frequency")
+    ax11.set_title("CRP Prediction Error Distribution")
+
+    ax12 = fig.add_subplot(3, 4, 12)
+    eigvals = np.linalg.eigvalsh(np.asarray(multi_qfi["QFI_matrix"]))
+    eigvals = eigvals[eigvals > 0]
+    ax12.semilogy(range(1, len(eigvals) + 1), eigvals, "o-", color="teal", linewidth=2)
+    ax12.set_xlabel("Parameter Index")
+    ax12.set_ylabel("Eigenvalue")
+    ax12.set_title("QFI Matrix Spectrum")
+    ax12.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+
+    print("\n" + "=" * 80)
+    print("ANALYSIS SUMMARY: CONSTRAINTS AND PROPER SCOPE")
+    print("=" * 80)
+    print("\n1. QUANTUM PRECISION BOUNDS (Theoretical Ceiling)")
+    print("-" * 50)
+    print(f"   • Single analyte (CRP) minimum detectable: {qfi_results[4]['delta_c_min']:.3f} nM at 5 nM")
+    print(f"   • Information from ohmic damping: {qfi_results[4]['loss_fraction'] * 100.0:.1f}% of total QFI")
+    print(f"   • Temperature penalty at 47°C: {precision_degradation:.1f}% precision loss")
+    print(f"   • Multi-analyte correlation CRP-IL6: {np.asarray(multi_qfi['correlation_matrix'])[0, 1]:.3f}")
+    print("\n2. MACHINE LEARNING PERFORMANCE (Practical Attainable)")
+    print("-" * 50)
+    print(f"   • Neural Network MAE: {mae_nn:.3f} nM (all analytes)")
+    print(f"   • Linear SVD MAE: {mae_linear:.3f} nM")
+    if np.isfinite(empirical_std):
+        print(f"   • ML efficiency relative to QFI bound: {qfi_bound / empirical_std:.1%}")
+        print(f"   • Gap to theoretical optimum: {(empirical_std / qfi_bound - 1.0) * 100.0:.1f}%")
+    else:
+        print("   • ML efficiency relative to QFI bound: insufficient local test samples")
+        print("   • Gap to theoretical optimum: insufficient local test samples")
+    print("\n3. KEY CONSTRAINTS IDENTIFIED")
+    print("-" * 50)
+    print("   • Ohmic damping contributes a measurable but secondary fraction of total Fisher information")
+    print("   • Temperature should be measured or inferred to avoid precision degradation")
+    print("   • Multi-analyte correlation limits independent quantification")
+    print("   • ML models remain bounded by the optical model and synthetic-data assumptions")
+    print("\n4. PROPER SCOPE RECOMMENDATIONS")
+    print("-" * 50)
+    print("   • Target concentration range: 1-50 nM")
+    print("   • Temperature control: include temperature as a modeled covariate")
+    print("   • Analyte panel: CRP + IL6 + PSA for this demonstration backend")
+    print("   • Measurement protocol: 1 s integration at 1 mW input power in the current model")
+    print("   • Treat the outputs as simulation-based guidance, not validated clinical performance")
+
+
+if __name__ == "__main__":
+    run_simulation()
