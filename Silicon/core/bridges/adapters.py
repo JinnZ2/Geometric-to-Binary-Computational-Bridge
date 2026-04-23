@@ -21,6 +21,9 @@ from bridges.thermal_encoder import ThermalBridgeEncoder
 from bridges.wave_encoder import WaveBridgeEncoder
 from bridges.chemical_encoder import ChemicalBridgeEncoder
 from bridges.resilience_encoder import ResilienceBridgeEncoder
+from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
+from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
+from Silicon.core.bridges.geometric_fiber_encoder import GeometricFiberEncoder
 
 from Silicon.core.octahedral_fiber_bundle import (
     OctahedralTorsor,
@@ -45,14 +48,17 @@ BRIDGE_ENCODERS: Dict[str, Type] = {
     "sound": SoundBridgeEncoder,
     "electric": ElectricBridgeEncoder,
     "gravity": GravityBridgeEncoder,
-    "community": CommunityBridgeEncoder,
-    "pressure": PressureBridgeEncoder,
-    "light": LightBridgeEncoder,
     "magnetic": MagneticBridgeEncoder,
+    "light": LightBridgeEncoder,
+    "pressure": PressureBridgeEncoder,
     "thermal": ThermalBridgeEncoder,
     "wave": WaveBridgeEncoder,
     "chemical": ChemicalBridgeEncoder,
+    "community": CommunityBridgeEncoder,
     "resilience": ResilienceBridgeEncoder,
+    "geometric_fiber": GeometricFiberEncoder,
+    "consciousness": ConsciousnessBridgeEncoder,
+    "emotion": EmotionBridgeEncoder,
 }
 
 BRIDGE_CATALOG: Dict[str, BridgeEntry] = {
@@ -71,6 +77,36 @@ BRIDGE_CATALOG: Dict[str, BridgeEntry] = {
         implementation_path="bridges.gravity_encoder.GravityBridgeEncoder",
         role="Couples to gravitational potential structure through curvature, tidal response, bound-state behavior, and balance points.",
     ),
+    "magnetic": BridgeEntry(
+        name="magnetic",
+        implementation_path="bridges.magnetic_encoder.MagneticBridgeEncoder",
+        role="Couples to magnetic field structure and comparative field geometry.",
+    ),
+    "light": BridgeEntry(
+        name="light",
+        implementation_path="bridges.light_encoder.LightBridgeEncoder",
+        role="Couples to optical wavelength, intensity, and radiative field structure.",
+    ),
+    "pressure": BridgeEntry(
+        name="pressure",
+        implementation_path="bridges.pressure_encoder.PressureBridgeEncoder",
+        role="Couples to pressure-state geometry and compressive field response.",
+    ),
+    "thermal": BridgeEntry(
+        name="thermal",
+        implementation_path="bridges.thermal_encoder.ThermalBridgeEncoder",
+        role="Couples to thermal gradients, dissipation, and heat-flow structure.",
+    ),
+    "wave": BridgeEntry(
+        name="wave",
+        implementation_path="bridges.wave_encoder.WaveBridgeEncoder",
+        role="Couples to generalized wave propagation, coherence, and interference structure.",
+    ),
+    "chemical": BridgeEntry(
+        name="chemical",
+        implementation_path="bridges.chemical_encoder.ChemicalBridgeEncoder",
+        role="Couples to concentration, reactivity, and chemical-state transition structure.",
+    ),
     "community": BridgeEntry(
         name="community",
         implementation_path="bridges.community_encoder.CommunityBridgeEncoder",
@@ -83,8 +119,18 @@ BRIDGE_CATALOG: Dict[str, BridgeEntry] = {
     ),
     "geometric_fiber": BridgeEntry(
         name="geometric_fiber",
-        implementation_path="Silicon.core.octahedral_fiber_bundle",
+        implementation_path="Silicon.core.bridges.geometric_fiber_encoder.GeometricFiberEncoder",
         role="Detects whether a globally consistent physical-to-computational mapping exists by probing fiber transport and holonomy.",
+    ),
+    "consciousness": BridgeEntry(
+        name="consciousness",
+        implementation_path="bridges.cognitive.consciousness_encoder.ConsciousnessBridgeEncoder",
+        role="Meta-layer encoder for consciousness-state structure and bridge-coupled internal state estimation.",
+    ),
+    "emotion": BridgeEntry(
+        name="emotion",
+        implementation_path="bridges.cognitive.emotion_encoder.EmotionBridgeEncoder",
+        role="Meta-layer encoder for affective state geometry and cross-bridge resonance / drill-down guidance.",
     ),
 }
 
@@ -95,6 +141,7 @@ def get_bridge_encoder(name: str):
     if key not in BRIDGE_ENCODERS:
         raise KeyError(f"Unknown bridge encoder '{name}'. Available: {', '.join(sorted(BRIDGE_ENCODERS))}")
     return BRIDGE_ENCODERS[key]
+
 
 
 def describe_bridge(name: str) -> BridgeEntry:
@@ -114,14 +161,17 @@ __all__ = [
     "SoundBridgeEncoder",
     "ElectricBridgeEncoder",
     "GravityBridgeEncoder",
-    "CommunityBridgeEncoder",
-    "PressureBridgeEncoder",
-    "LightBridgeEncoder",
     "MagneticBridgeEncoder",
+    "LightBridgeEncoder",
+    "PressureBridgeEncoder",
     "ThermalBridgeEncoder",
     "WaveBridgeEncoder",
     "ChemicalBridgeEncoder",
+    "CommunityBridgeEncoder",
     "ResilienceBridgeEncoder",
+    "GeometricFiberEncoder",
+    "ConsciousnessBridgeEncoder",
+    "EmotionBridgeEncoder",
     "OctahedralTorsor",
     "Connection",
     "HolonomyResult",
