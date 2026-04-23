@@ -74,7 +74,12 @@ BRIDGE_CATALOG: Dict[str, BridgeEntry] = {
     "community": BridgeEntry(
         name="community",
         implementation_path="bridges.community_encoder.CommunityBridgeEncoder",
-        role="Couples to thermodynamic population viability through reserves, redundancy, and resilience-domain structure.",
+        role="Concrete human-organism and settlement-scale instantiation of the substrate-independent resilience bridge, coupling to thermodynamic population viability through reserves, redundancy, and resilience-domain structure.",
+    ),
+    "resilience": BridgeEntry(
+        name="resilience",
+        implementation_path="bridges.resilience_encoder.ResilienceBridgeEncoder",
+        role="Substrate-independent resilience encoder for viability, reserves, cascade coupling, and sustainability-oriented mutual resilience across the shared six-axis model.",
     ),
     "geometric_fiber": BridgeEntry(
         name="geometric_fiber",

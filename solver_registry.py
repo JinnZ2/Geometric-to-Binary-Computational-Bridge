@@ -238,6 +238,7 @@ class Registry:
         from bridges.electric_encoder import ElectricBridgeEncoder
         from bridges.pressure_encoder import PressureBridgeEncoder
         from bridges.chemical_encoder import ChemicalBridgeEncoder
+        from bridges.community_encoder import CommunityBridgeEncoder
         from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
         from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 
@@ -251,6 +252,7 @@ class Registry:
             'thermal':       (ThermalBridgeEncoder,       39),
             'pressure':      (PressureBridgeEncoder,      39),
             'chemical':      (ChemicalBridgeEncoder,      39),
+            'community':     (CommunityBridgeEncoder,     39),
             'consciousness': (ConsciousnessBridgeEncoder, 39),
             'emotion':       (EmotionBridgeEncoder,       39),
         }
