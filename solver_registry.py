@@ -240,34 +240,42 @@ class Registry:
         from bridges.chemical_encoder import ChemicalBridgeEncoder
         from bridges.community_encoder import CommunityBridgeEncoder
         from bridges.resilience_encoder import ResilienceBridgeEncoder
+        from bridges.biomachine_encoder import BiomachineBridgeEncoder
+        from bridges.coop_encoder import CoopBridgeEncoder
+        from bridges.cyclic_encoder import CyclicBridgeEncoder
+        from bridges.vortex_bridge import VortexBridgeEncoder
         from Silicon.core.bridges.geometric_fiber_encoder import GeometricFiberEncoder
         from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
         from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 
         bridge_map = {
-            'magnetic':      (MagneticBridgeEncoder,      43),
-            'light':         (LightBridgeEncoder,         31),
-            'sound':         (SoundBridgeEncoder,         31),
-            'gravity':       (GravityBridgeEncoder,       39),
-            'electric':      (ElectricBridgeEncoder,      39),
-            'wave':          (WaveBridgeEncoder,           39),
-            'thermal':       (ThermalBridgeEncoder,       39),
-            'pressure':      (PressureBridgeEncoder,      39),
-            'chemical':        (ChemicalBridgeEncoder,      39),
-            'community':       (CommunityBridgeEncoder,     39),
-            'resilience':      (ResilienceBridgeEncoder,    39),
-            'geometric_fiber': (GeometricFiberEncoder,      39),
-            'consciousness':   (ConsciousnessBridgeEncoder, 39),
-            'emotion':       (EmotionBridgeEncoder,       39),
+            'magnetic':        (MagneticBridgeEncoder, '43-bit'),
+            'light':           (LightBridgeEncoder, '31-bit'),
+            'sound':           (SoundBridgeEncoder, '31-bit'),
+            'gravity':         (GravityBridgeEncoder, '39-bit'),
+            'electric':        (ElectricBridgeEncoder, '39-bit'),
+            'wave':            (WaveBridgeEncoder, '39-bit'),
+            'thermal':         (ThermalBridgeEncoder, '39-bit'),
+            'pressure':        (PressureBridgeEncoder, '39-bit'),
+            'chemical':        (ChemicalBridgeEncoder, '39-bit'),
+            'community':       (CommunityBridgeEncoder, '39-bit'),
+            'resilience':      (ResilienceBridgeEncoder, '39-bit'),
+            'biomachine':      (BiomachineBridgeEncoder, '39-bit'),
+            'coop':            (CoopBridgeEncoder, '39-bit'),
+            'cyclic':          (CyclicBridgeEncoder, '39-bit'),
+            'vortex':          (VortexBridgeEncoder, 'dynamic 4-bit-per-slot'),
+            'geometric_fiber': (GeometricFiberEncoder, '39-bit'),
+            'consciousness':   (ConsciousnessBridgeEncoder, '39-bit'),
+            'emotion':         (EmotionBridgeEncoder, '39-bit'),
         }
 
-        for domain, (cls, bits) in bridge_map.items():
+        for domain, (cls, payload_label) in bridge_map.items():
             self._register(Solver(
                 name=f'encode_{domain}',
                 category='bridge',
-                description=f'Encode {domain} field geometry to {bits}-bit binary (Gray coded)',
+                description=f'Encode {domain} field geometry to {payload_label} binary (Gray coded)',
                 inputs={'geometry': f'dict ({domain} field parameters)'},
-                outputs={'binary': f'str ({bits}-bit)', 'report': 'dict'},
+                outputs={'binary': f'str ({payload_label})', 'report': 'dict'},
                 func=self._make_bridge_func(cls),
             ))
 

@@ -21,6 +21,10 @@ from bridges.thermal_encoder import ThermalBridgeEncoder
 from bridges.wave_encoder import WaveBridgeEncoder
 from bridges.chemical_encoder import ChemicalBridgeEncoder
 from bridges.resilience_encoder import ResilienceBridgeEncoder
+from bridges.biomachine_encoder import BiomachineBridgeEncoder
+from bridges.coop_encoder import CoopBridgeEncoder
+from bridges.cyclic_encoder import CyclicBridgeEncoder
+from bridges.vortex_bridge import VortexBridgeEncoder
 from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
 from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 from Silicon.core.bridges.geometric_fiber_encoder import GeometricFiberEncoder
@@ -56,6 +60,10 @@ BRIDGE_ENCODERS: Dict[str, Type] = {
     "chemical": ChemicalBridgeEncoder,
     "community": CommunityBridgeEncoder,
     "resilience": ResilienceBridgeEncoder,
+    "biomachine": BiomachineBridgeEncoder,
+    "coop": CoopBridgeEncoder,
+    "cyclic": CyclicBridgeEncoder,
+    "vortex": VortexBridgeEncoder,
     "geometric_fiber": GeometricFiberEncoder,
     "consciousness": ConsciousnessBridgeEncoder,
     "emotion": EmotionBridgeEncoder,
@@ -117,6 +125,26 @@ BRIDGE_CATALOG: Dict[str, BridgeEntry] = {
         implementation_path="bridges.resilience_encoder.ResilienceBridgeEncoder",
         role="Substrate-independent resilience encoder for viability, reserves, cascade coupling, and sustainability-oriented mutual resilience across the shared six-axis model.",
     ),
+    "biomachine": BridgeEntry(
+        name="biomachine",
+        implementation_path="bridges.biomachine_encoder.BiomachineBridgeEncoder",
+        role="Couples seal stress, thermal headroom, material limits, and regenerative machine-state dynamics into a physical maintenance and recovery field.",
+    ),
+    "coop": BridgeEntry(
+        name="coop",
+        implementation_path="bridges.coop_encoder.CoopBridgeEncoder",
+        role="Couples cooperative trust propagation, resource circulation, and network growth into a thermal-style field of adoption and transfer.",
+    ),
+    "cyclic": BridgeEntry(
+        name="cyclic",
+        implementation_path="bridges.cyclic_encoder.CyclicBridgeEncoder",
+        role="Couples cyclic field evolution through resonance, regeneration, phase transitions, fractal spawning, and spatial gradient structure.",
+    ),
+    "vortex": BridgeEntry(
+        name="vortex",
+        implementation_path="bridges.vortex_bridge.VortexBridgeEncoder",
+        role="Couples topological memory winding structure into a dynamic per-slot binary payload, preserving vortex-side orientation and winding magnitude.",
+    ),
     "geometric_fiber": BridgeEntry(
         name="geometric_fiber",
         implementation_path="Silicon.core.bridges.geometric_fiber_encoder.GeometricFiberEncoder",
@@ -169,6 +197,10 @@ __all__ = [
     "ChemicalBridgeEncoder",
     "CommunityBridgeEncoder",
     "ResilienceBridgeEncoder",
+    "BiomachineBridgeEncoder",
+    "CoopBridgeEncoder",
+    "CyclicBridgeEncoder",
+    "VortexBridgeEncoder",
     "GeometricFiberEncoder",
     "ConsciousnessBridgeEncoder",
     "EmotionBridgeEncoder",

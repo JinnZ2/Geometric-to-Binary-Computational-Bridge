@@ -86,6 +86,30 @@ DOMAIN_BRIDGES: List[DomainBridgeRecord] = [
         silicon_entry_point="Silicon.core.bridges.adapters.ResilienceBridgeEncoder",
     ),
     DomainBridgeRecord(
+        name="biomachine",
+        coupling_model="Couples seal stress, material limits, thermal headroom, and regeneration-state dynamics as a physical maintenance and recovery field.",
+        top_level_module="bridges.biomachine_encoder.BiomachineBridgeEncoder",
+        silicon_entry_point="Silicon.core.bridges.adapters.BiomachineBridgeEncoder",
+    ),
+    DomainBridgeRecord(
+        name="coop",
+        coupling_model="Couples cooperative trust propagation, resource redistribution, and network growth as a thermal-style adoption and transport field.",
+        top_level_module="bridges.coop_encoder.CoopBridgeEncoder",
+        silicon_entry_point="Silicon.core.bridges.adapters.CoopBridgeEncoder",
+    ),
+    DomainBridgeRecord(
+        name="cyclic",
+        coupling_model="Couples cyclic field evolution through resonance, regeneration, phase transitions, fractal spawning, and spatial gradients.",
+        top_level_module="bridges.cyclic_encoder.CyclicBridgeEncoder",
+        silicon_entry_point="Silicon.core.bridges.adapters.CyclicBridgeEncoder",
+    ),
+    DomainBridgeRecord(
+        name="vortex",
+        coupling_model="Couples topological memory winding structure into a dynamic per-slot binary payload that preserves vortex orientation and winding magnitude.",
+        top_level_module="bridges.vortex_bridge.VortexBridgeEncoder",
+        silicon_entry_point="Silicon.core.bridges.adapters.VortexBridgeEncoder",
+    ),
+    DomainBridgeRecord(
         name="geometric_fiber",
         coupling_model="Detects whether a globally consistent physical-to-computational mapping exists by measuring fiber transport and holonomy.",
         top_level_module="Silicon.core.bridges.geometric_fiber_encoder.GeometricFiberEncoder",

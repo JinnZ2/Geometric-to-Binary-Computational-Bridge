@@ -118,6 +118,46 @@
       "notes": "Substrate-independent resilience encoder for viability, reserves, cascading risk, and mutual resilience across axes."
     },
     {
+      "name": "biomachine",
+      "solver_name": "encode_biomachine",
+      "payload_bits": 39,
+      "layer": "physical",
+      "top_level_encoder": "bridges.biomachine_encoder.BiomachineBridgeEncoder",
+      "silicon_entry_point": "Silicon.core.bridges.adapters.BiomachineBridgeEncoder",
+      "hardware_related": true,
+      "notes": "Couples seal stress, material limits, thermal headroom, and regenerative machine-state dynamics as a physical maintenance and recovery field."
+    },
+    {
+      "name": "coop",
+      "solver_name": "encode_coop",
+      "payload_bits": 39,
+      "layer": "contextual",
+      "top_level_encoder": "bridges.coop_encoder.CoopBridgeEncoder",
+      "silicon_entry_point": "Silicon.core.bridges.adapters.CoopBridgeEncoder",
+      "hardware_related": false,
+      "notes": "Couples cooperative trust propagation, resource redistribution, and network growth as a thermal-style adoption and transport field."
+    },
+    {
+      "name": "cyclic",
+      "solver_name": "encode_cyclic",
+      "payload_bits": 39,
+      "layer": "topological",
+      "top_level_encoder": "bridges.cyclic_encoder.CyclicBridgeEncoder",
+      "silicon_entry_point": "Silicon.core.bridges.adapters.CyclicBridgeEncoder",
+      "hardware_related": false,
+      "notes": "Couples cyclic field evolution through resonance, regeneration, phase transitions, fractal spawning, and spatial gradients."
+    },
+    {
+      "name": "vortex",
+      "solver_name": "encode_vortex",
+      "payload_bits": "dynamic: 4 bits per registered slot",
+      "layer": "topological",
+      "top_level_encoder": "bridges.vortex_bridge.VortexBridgeEncoder",
+      "silicon_entry_point": "Silicon.core.bridges.adapters.VortexBridgeEncoder",
+      "hardware_related": false,
+      "notes": "Couples topological memory winding structure into a dynamic per-slot binary payload, preserving vortex orientation and winding magnitude."
+    },
+    {
       "name": "geometric_fiber",
       "solver_name": "encode_geometric_fiber",
       "payload_bits": 39,
