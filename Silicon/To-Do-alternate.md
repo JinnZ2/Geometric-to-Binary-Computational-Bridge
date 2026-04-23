@@ -1047,3 +1047,251 @@ you want to push further, the next nontrivial step is:
 collapse S itself into a field S(x), so silicon is no longer a global parameter but a spatially varying medium interacting pointwise with geometry and computation.
 
 That produces a fully continuous computational material, not a model layered on top of silicon.
+
+
+
+compressed alternative too:
+
+REGIME ATLAS (Addon System Compression)
+
+1. State space (what exists)
+
+The system reduces to a 4-axis manifold:
+
+\mathcal{S} = (\Lambda,\ d,\ \sigma,\ \chi)
+
+* Λ → coupling strength (linearity ↔ nonlinearity)
+* d → effective dimension (stability of geometry)
+* σ → signature (Euclidean ↔ Lorentzian)
+* χ → topology (compact ↔ open)
+
+Everything else is derived.
+
+⸻
+
+2. Fundamental scalar field
+
+All behavior is controlled by one gate function:
+
+\Omega^2(x) = 1 + \alpha \psi(x)^2
+
+Interpretation:
+
+* Ω² > 0 → Riemannian / stable propagation
+* Ω² = 0 → degenerate boundary (transition surface)
+* Ω² < 0 → Lorentzian / instability + causal flip
+
+This is the only true phase boundary in the system.
+
+⸻
+
+3. Primary regime map
+
+A. Linear / Quantum-like regime
+
+Conditions:
+
+* Λ ≪ 1
+* Ω² > 0
+* d < 4
+
+Behavior:
+
+* superposition-like
+* weak curvature
+* near-separable dynamics
+* stable operator spectrum
+
+⸻
+
+B. Solitonic regime
+
+Conditions:
+
+* Λ ~ O(1)
+* moderate curvature
+* bounded Ω² > 0
+
+Behavior:
+
+* localized structures
+* persistent wave packets
+* nonlinear stability islands
+* recurrent attractors
+
+⸻
+
+C. Chaotic / turbulent regime
+
+Conditions:
+
+* Λ ≫ 1
+* strong coupling in kernel W
+* high sensitivity in ψ(x)
+
+Behavior:
+
+* exponential divergence
+* spectral broadening of operators
+* loss of coherence in field evolution
+
+⸻
+
+D. Topological regime
+
+Conditions:
+
+* χ < 0 or non-compact embedding
+* weak dependence on local geometry
+
+Behavior:
+
+* global constraints dominate local dynamics
+* invariants persist despite deformation
+* decoupling from metric fluctuations
+
+⸻
+
+E. Signature transition regime
+
+Condition:
+\Omega^2 = 0
+
+Behavior:
+
+* metric degeneracy
+* branch switching (Riemannian ↔ Lorentzian)
+* holonomy accumulation
+* irreversible path dependence
+
+This is the only non-reversible boundary in the atlas.
+
+⸻
+
+4. Operator structure (collapsed form)
+
+Your entire computation layer reduces to:
+
+y(x) = \sigma\!\left(\int W(x,x')\,\psi(x')\,dx'\right)
+
+with:
+
+* W(x,x') = geometry-dependent kernel
+* ψ(x) = state field
+* σ = saturation nonlinearity
+
+No discrete logic layer exists in the reduced model.
+
+⸻
+
+5. Kernel regimes (hidden structure of W)
+
+   Regime
+
+Kernel structure
+
+Effect
+
+Local
+
+diagonal-dominant
+
+diffusion-like
+
+Nonlocal
+
+broad coupling
+
+entanglement-like
+
+Oscillatory
+
+sign-changing
+
+interference
+
+Singular
+
+Ω² → 0
+
+breakdown / transition
+
+
+
+Entanglement = curvature identity
+
+From your system:
+
+* Off-diagonal kernel terms → coupling
+* Spatial variation of coupling → curvature
+
+F_{ent}(x) \sim \partial_x W(x,x’)
+
+Interpretation:
+
+* flat kernel → separable system
+* curved kernel → entangled system
+
+⸻
+
+7. Geometric evolution principle
+
+All dynamics reduce to:
+
+systems evolve along lowest-action paths in configuration space S
+
+Operationally:
+
+* trajectories = geodesics on S
+* constraints = potential barriers V(α, ψ)
+* transitions = crossing Ω² = 0 surfaces
+
+⸻
+
+8. Attractor taxonomy
+
+Three stable endpoints:
+
+* QM attractor: low Λ, stable Ω² > 0
+* Soliton attractor: intermediate Λ, localized stability
+* Lorentzian attractor: high coupling + Ω² < 0 instability basin
+
+Everything flows into one of these unless constrained.
+
+⸻
+
+9. Collapse rule (the whole system in one line)
+
+(\mathcal{S}, \psi) \rightarrow W \rightarrow y \rightarrow \mathcal{S}'
+
+Closed loop:
+
+* geometry defines kernel
+* kernel defines computation
+* computation updates geometry
+
+No external controller exists.
+
+⸻
+
+10. Practical reduction (what you can actually use)
+
+On a low-resource interface, everything reduces to:
+
+1. Identify Λ (weak / moderate / strong coupling)
+2. Check Ω² sign
+3. Determine d regime (<4 or ≥4)
+4. Classify topology (compact vs open)
+5. Assign regime label
+
+That’s the full “simulation” in evaluable form.
+
+⸻
+
+11. Key compression insight
+
+Your full codebase is doing this:
+
+generating continuous phase space structure over (Λ, d, σ, χ) with Ω² as the only hard boundary operator
+
+Everything else is implementation detail.
