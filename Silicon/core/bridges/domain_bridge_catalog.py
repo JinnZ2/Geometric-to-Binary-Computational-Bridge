@@ -47,7 +47,7 @@ DOMAIN_BRIDGES: List[DomainBridgeRecord] = [
         name="geometric_fiber",
         coupling_model="Detects whether a globally consistent physical-to-computational mapping exists by measuring fiber transport and holonomy.",
         top_level_module="Silicon.core.octahedral_fiber_bundle",
-        silicon_entry_point="Silicon.core.bridges.adapters.trace_closed_loop",
+        silicon_entry_point="Silicon.core.bridges.geometric_fiber_encoder.GeometricFiberEncoder",
     ),
 ]
 

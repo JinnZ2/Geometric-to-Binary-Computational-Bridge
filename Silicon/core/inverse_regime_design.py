@@ -828,4 +828,9 @@ if __name__ == "__main__":
     affinity_map = compute_regime_affinity_map()
     
     for regime, scored_states in affinity_map.items():
-        print(f"\n
+        print(f"\n{regime.upper()}")
+        for idx, score in scored_states[:3]:
+            print(f"  state {idx}: affinity={score:.3f}")
+
+    print("\nDemo complete.")
+

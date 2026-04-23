@@ -239,6 +239,7 @@ class Registry:
         from bridges.pressure_encoder import PressureBridgeEncoder
         from bridges.chemical_encoder import ChemicalBridgeEncoder
         from bridges.community_encoder import CommunityBridgeEncoder
+        from Silicon.core.bridges.geometric_fiber_encoder import GeometricFiberEncoder
         from bridges.cognitive.consciousness_encoder import ConsciousnessBridgeEncoder
         from bridges.cognitive.emotion_encoder import EmotionBridgeEncoder
 
@@ -251,9 +252,10 @@ class Registry:
             'wave':          (WaveBridgeEncoder,           39),
             'thermal':       (ThermalBridgeEncoder,       39),
             'pressure':      (PressureBridgeEncoder,      39),
-            'chemical':      (ChemicalBridgeEncoder,      39),
-            'community':     (CommunityBridgeEncoder,     39),
-            'consciousness': (ConsciousnessBridgeEncoder, 39),
+            'chemical':        (ChemicalBridgeEncoder,      39),
+            'community':       (CommunityBridgeEncoder,     39),
+            'geometric_fiber': (GeometricFiberEncoder,      39),
+            'consciousness':   (ConsciousnessBridgeEncoder, 39),
             'emotion':       (EmotionBridgeEncoder,       39),
         }
 

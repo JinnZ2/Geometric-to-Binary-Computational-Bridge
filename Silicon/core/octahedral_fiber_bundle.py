@@ -180,7 +180,7 @@ class Connection:
         2. Crossing regime boundaries discontinuously
         3. Breaking the "natural" state-regime affinity
         """
-        from inverse_regime_design import (
+        from Silicon.core.inverse_regime_design import (
             CANONICAL_EIGENVALUES, compute_structural_metrics
         )
 
@@ -401,7 +401,7 @@ def generate_loop_around_metallic_breakdown(
 
     Returns a closed loop: loop[0] ≈ loop[-1].
     """
-    from silicon_state import SiliconState
+    from Silicon.core.analysis.computational_phase_transition import SiliconState
 
     loop = []
 
@@ -452,7 +452,7 @@ def generate_loop_around_quantum_boundary(
     Varies effective dimension ℓ and coherent coupling κ —
     the two parameters that control the quantum confinement transition.
     """
-    from silicon_state import SiliconState
+    from Silicon.core.analysis.computational_phase_transition import SiliconState
 
     loop = []
 
@@ -498,7 +498,7 @@ def generate_loop_around_defect_singularity(
 
     Varies defect density and thermal coupling.
     """
-    from silicon_state import SiliconState
+    from Silicon.core.analysis.computational_phase_transition import SiliconState
 
     loop = []
 
@@ -578,7 +578,7 @@ def compute_holonomy_group(
     - Z₂ subgroup → bundle has a 2-fold twist
     - Full Z₂³ → maximally nontrivial topology
     """
-    from silicon_state import SiliconState
+    from Silicon.core.analysis.computational_phase_transition import SiliconState
 
     holonomy_elements = set()
 
@@ -843,7 +843,7 @@ if __name__ == "__main__":
     print("\n\n4. HOLONOMY GROUP (sampling random loops)")
     print("-" * 50)
 
-    from silicon_state import SiliconState
+    from Silicon.core.analysis.computational_phase_transition import SiliconState
 
     base_point = SiliconState(
         n=1e17, d=0.02, l=3.0,

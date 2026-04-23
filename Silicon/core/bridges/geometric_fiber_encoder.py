@@ -49,8 +49,8 @@ Per loop test (39 bits, compatible with Geometric Binary Bridge):
     [anomaly      3b]    anomaly detection bits
 
 Usage:
-    from bridges.geometric_fiber_encoder import GeometricFiberEncoder
-    
+    from Silicon.core.bridges.geometric_fiber_encoder import GeometricFiberEncoder
+
     encoder = GeometricFiberEncoder()
     encoder.from_fiber_bundle(holonomy_results)
     binary = encoder.to_binary()
@@ -65,10 +65,14 @@ from enum import IntEnum
 from bridges.abstract_encoder import BinaryBridgeEncoder
 from bridges.common import gray_bits as _gray_bits
 
-# Import the fiber bundle structure
-from octahedral_fiber_bundle import (
-    BitFlip, OctahedralTorsor, Connection, HolonomyResult,
-    compute_monodromy, compute_holonomy_group,
+# Import the fiber bundle structure from the silicon package root.
+from Silicon.core.octahedral_fiber_bundle import (
+    BitFlip,
+    OctahedralTorsor,
+    Connection,
+    HolonomyResult,
+    compute_monodromy,
+    compute_holonomy_group,
     generate_loop_around_metallic_breakdown,
     generate_loop_around_quantum_boundary,
     generate_loop_around_defect_singularity,
@@ -109,7 +113,7 @@ class GeometricFiberEncoder(BinaryBridgeEncoder):
         self.holonomy_group: Set[BitFlip] = set()
         self.bundle_topology: str = "unknown"
     
-    def from_fiber_bundle(self, 
+    def from_fiber_bundle(self,
                           holonomy_results: Dict[str, HolonomyResult],
                           holonomy_group: Set[BitFlip] = None):
         """
@@ -135,8 +139,31 @@ class GeometricFiberEncoder(BinaryBridgeEncoder):
         else:
             self.bundle_topology = f"subgroup_order_{group_order}"
         
+        self.input_geometry = {
+            "holonomy_results": holonomy_results,
+            "holonomy_group": holonomy_group,
+        }
         return self
-    
+
+    def from_geometry(self, geometry_data: Dict[str, Any]):
+        """
+        Registry-friendly loader.
+
+        Accepts either a raw ``{name: HolonomyResult}`` mapping or a dict with
+        explicit ``holonomy_results`` and optional ``holonomy_group`` keys.
+        """
+        if isinstance(geometry_data, dict) and "holonomy_results" in geometry_data:
+            return self.from_fiber_bundle(
+                geometry_data.get("holonomy_results", {}),
+                geometry_data.get("holonomy_group"),
+            )
+        if isinstance(geometry_data, dict):
+            return self.from_fiber_bundle(geometry_data)
+        raise TypeError(
+            "GeometricFiberEncoder.from_geometry expects a dict of HolonomyResult values "
+            "or a dict containing 'holonomy_results'."
+        )
+
     def to_binary(self) -> str:
         """
         Encode fiber bundle topology into 39-bit binary string.

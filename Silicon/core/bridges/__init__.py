@@ -31,6 +31,13 @@ from .adapters import (
 )
 
 from .domain_bridge_catalog import DomainBridgeRecord, DOMAIN_BRIDGES
+from .geometric_fiber_encoder import GeometricFiberEncoder, encode_fiber_bundle_topology
+from .hardware_modules import (
+    HardwareModuleEntry,
+    HARDWARE_MODULES,
+    list_hardware_modules,
+    choose_hardware_modules,
+)
 from .fret_coulomb_analysis import *
 from .gies_encoder import *
 from .hardware_bridge import *
@@ -44,6 +51,10 @@ __all__ = [
     "BRIDGE_CATALOG",
     "DomainBridgeRecord",
     "DOMAIN_BRIDGES",
+    "HardwareModuleEntry",
+    "HARDWARE_MODULES",
+    "list_hardware_modules",
+    "choose_hardware_modules",
     "get_bridge_encoder",
     "describe_bridge",
     "SoundBridgeEncoder",
@@ -57,6 +68,8 @@ __all__ = [
     "WaveBridgeEncoder",
     "ChemicalBridgeEncoder",
     "ResilienceBridgeEncoder",
+    "GeometricFiberEncoder",
+    "encode_fiber_bundle_topology",
     "OctahedralTorsor",
     "Connection",
     "HolonomyResult",
