@@ -7,9 +7,11 @@ to computational complexity classes. Detects phase boundaries where
 the set of physically realizable computations changes discontinuously.
 """
 
+from __future__ import annotations
+
 import numpy as np
 from typing import Dict, List, Tuple, Optional, Set
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
 from scipy.special import expit  # sigmoid
 
@@ -104,6 +106,65 @@ GATE_SETS = {
         error_rate=1.0,
     ),
 }
+
+
+@dataclass
+class SiliconState:
+    """Minimal self-contained silicon state used by this module.
+
+    The repository copy of this file referenced an external `silicon_state`
+    module that is not present in the current tree. Keeping a compact local
+    representation here avoids that broken dependency and makes the phase-diagram
+    demo importable again.
+    """
+
+    n: float
+    d: float
+    l: float
+    k: Dict[str, float]
+
+    def regime_weights(self, temperature: float = 0.1) -> Dict[str, float]:
+        """Compute smooth regime weights from the silicon coordinates.
+
+        The weights are normalized so downstream classification can treat them as
+        mixture coefficients over the named computational regimes.
+        """
+        log_n = np.log10(max(self.n, 1.0))
+        optical = float(self.k.get("optical", 0.0))
+        thermal = float(self.k.get("thermal", 0.0))
+        coherent = float(self.k.get("coherent", 0.0))
+        electrical = float(self.k.get("electrical", 0.0))
+        mechanical = float(self.k.get("mechanical", 0.0))
+
+        semiconductor = (
+            expit(4.0 - abs(log_n - 16.5) * 2.0)
+            * expit((0.25 - self.d) * 10.0)
+            * (0.5 + 0.5 * electrical)
+        )
+        metallic = expit((log_n - 19.0) * 3.0) * (0.5 + 0.5 * electrical)
+        quantum = (
+            expit((coherent - 0.25) * 8.0)
+            * expit((0.18 - self.d) * 14.0)
+            * expit((1.2 - self.l) * 4.0)
+            * expit((0.18 - temperature) * 12.0)
+        )
+        photonic = (0.2 + optical) * expit((self.l - 1.2) * 3.0)
+        defect_dominated = expit((self.d - 0.35) * 10.0) * (0.6 + 0.4 * thermal)
+        mechanical_regime = (0.2 + mechanical) * expit((self.l - 2.0) * 2.5)
+
+        raw_weights = {
+            "semiconductor": max(0.0, semiconductor),
+            "metallic": max(0.0, metallic),
+            "quantum": max(0.0, quantum),
+            "photonic": max(0.0, photonic),
+            "defect_dominated": max(0.0, defect_dominated),
+            "mechanical": max(0.0, mechanical_regime),
+        }
+
+        total = sum(raw_weights.values())
+        if total <= 0:
+            return {name: 0.0 for name in raw_weights}
+        return {name: value / total for name, value in raw_weights.items()}
 
 
 # ─── Core: Silicon State → Computational Class mapping ───
@@ -273,7 +334,7 @@ def detect_phase_transition(
     A transition is detected when:
     1. The computational class changes between consecutive points
     2. OR the coherence volume crosses the critical threshold (V_coh = 1)
-    3. OR the susceptibility shows a peak above threshold
+    3. OR either endpoint lies within `threshold` of a phase boundary
     """
     
     transitions = []
@@ -291,8 +352,14 @@ def detect_phase_transition(
             (phase_start.coherence_volume - 1.0) * 
             (phase_end.coherence_volume - 1.0) < 0
         )
+        near_boundary = (
+            min(
+                phase_start.phase_boundary_distance,
+                phase_end.phase_boundary_distance,
+            ) < threshold
+        )
         
-        if class_change or coherence_crossing:
+        if class_change or coherence_crossing or near_boundary:
             # Classify transition type
             order_jump = abs(phase_end.coherence_volume - phase_start.coherence_volume)
             susc_peak = max(phase_start.susceptibility(), phase_end.susceptibility())
@@ -395,7 +462,7 @@ def compute_phase_diagram(
     resolution: int = 100,
     l_fixed: float = 3.0,
     k_fixed: Dict[str, float] = None,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[int, ComputationalClass]]:
     """
     Compute the computational phase diagram over the (n, d) plane.
     
@@ -403,9 +470,8 @@ def compute_phase_diagram(
         class_map: (resolution, resolution) integer array of computational classes
         coherence_map: (resolution, resolution) coherence volume array
         susceptibility_map: (resolution, resolution) susceptibility array
+        int_to_class: mapping from integer labels back to enum values
     """
-    
-    from silicon_state import SiliconState
     
     if k_fixed is None:
         k_fixed = {"electrical": 0.5, "optical": 0.0, "thermal": 0.1, 
@@ -524,7 +590,7 @@ def plot_computational_phase_diagram(
 
 def benchmark_computational_phases(
     phases: List[ComputationalPhase],
-) -> pd.DataFrame:
+):
     """
     Compare the computational capabilities of different phases.
     """
@@ -560,8 +626,6 @@ if __name__ == "__main__":
     print("=" * 70)
     print("COMPUTATIONAL PHASE TRANSITIONS IN SILICON MANIFOLDS")
     print("=" * 70)
-    
-    from silicon_state import SiliconState
     
     # Create states across the phase diagram
     test_states = [
