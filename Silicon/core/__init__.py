@@ -1,3 +1,16 @@
-# Silicon/core/ — Validated physics, hardware bridge, and encoding pipeline.
-# These modules are tested by tests/test_silicon_modules.py and imported
-# by bridges/ and the main pipeline.
+"""Silicon core package.
+
+This package is organized by topic for easier navigation:
+
+- `analysis`: equations, derivations, and phase models
+- `geometry`: octahedral states, tensors, and symmetry utilities
+- `bridges`: hardware and encoding bridge layers
+- `systems`: subsystem models for storage, energy, thermal, and memory behavior
+"""
+
+__all__ = [
+    "analysis",
+    "geometry",
+    "bridges",
+    "systems",
+]

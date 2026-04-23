@@ -32,9 +32,26 @@ Physical mapping
 
 import sys
 import os
+import importlib.util
 
-# Allow running from repo root or from Silicon/
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+# Allow running from repo root or from the nested Silicon/core/bridges folder
+_REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+_BRIDGES_DIR = os.path.join(_REPO_ROOT, "bridges")
+for path_entry in (_REPO_ROOT, _BRIDGES_DIR):
+    if path_entry not in sys.path:
+        sys.path.insert(0, path_entry)
+
+bridges_pkg = sys.modules.get("bridges")
+if bridges_pkg is None or getattr(bridges_pkg, "__file__", "").startswith(os.path.dirname(__file__)):
+    spec = importlib.util.spec_from_file_location(
+        "bridges",
+        os.path.join(_BRIDGES_DIR, "__init__.py"),
+        submodule_search_locations=[_BRIDGES_DIR],
+    )
+    bridges_pkg = importlib.util.module_from_spec(spec)
+    sys.modules["bridges"] = bridges_pkg
+    assert spec.loader is not None
+    spec.loader.exec_module(bridges_pkg)
 
 from bridges.magnetic_encoder import (
     MagneticBridgeEncoder,
@@ -44,7 +61,7 @@ from bridges.magnetic_encoder import (
     _gray_bits,
     _B_BANDS,
 )
-from Silicon.core.octahedral_sim import (
+from Silicon.core.geometry.octahedral_sim import (
     STATES,
     predict_T2,
     k_well as k_well_fn,

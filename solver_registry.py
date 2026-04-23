@@ -277,12 +277,12 @@ class Registry:
     # --- Silicon Core ---
 
     def _register_silicon_core(self):
-        from Silicon.core.hardware_bridge import (
+        from Silicon.core.bridges.hardware_bridge import (
             dft_to_kwell, physical_magnetic_energy,
             fret_confinement_stiffness, total_kwell, dft_to_T2,
             fret_coupling_energy, DFTPoint,
         )
-        from Silicon.core.octahedral_sim import k_well, sigma_T, T2_from_kwell
+        from Silicon.core.geometry.octahedral_sim import k_well, sigma_T, T2_from_kwell
 
         self._register(Solver(
             name='dft_to_kwell',

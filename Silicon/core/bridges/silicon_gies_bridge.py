@@ -8,20 +8,107 @@ Connects three layers:
   3. SiliconState → GIES encoding strategy selection
 """
 
+from __future__ import annotations
+
 import numpy as np
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, field
 
-# Import from your existing modules
-from silicon_state import SiliconState
-from geometry_to_silicon_rigorous import (
-    geometry_to_silicon_rigorous,
-    SiliconConstants,
-    compute_carrier_density_from_field,
-    compute_defect_density_from_field,
-    compute_effective_dimension_from_field,
-    compute_coupling_vector_from_field,
-)
+
+@dataclass
+class SiliconState:
+    """Compact silicon state model used by the bridge pipeline."""
+
+    n: float
+    d: float
+    l: float
+    k: Dict[str, float]
+    _last_eigenvalues: Optional[np.ndarray] = None
+
+    def regime_weights(self, temperature: float = 0.1) -> Dict[str, float]:
+        log_n = np.log10(max(self.n, 1.0))
+        optical = float(self.k.get("optical", 0.0))
+        thermal = float(self.k.get("thermal", 0.0))
+        coherent = float(self.k.get("coherent", 0.0))
+        electrical = float(self.k.get("electrical", 0.0))
+        mechanical = float(self.k.get("mechanical", 0.0))
+        magnetic = float(self.k.get("magnetic", 0.0))
+
+        semiconductor = (
+            1.2 / (1.0 + np.exp(2.0 * abs(log_n - 16.5) - 4.0))
+            * 1.0 / (1.0 + np.exp((self.d - 0.25) * 10.0))
+            * (0.5 + 0.5 * electrical)
+        )
+        metallic = 1.0 / (1.0 + np.exp(-(log_n - 19.0) * 3.0)) * (0.5 + 0.5 * electrical)
+        quantum = (
+            1.0 / (1.0 + np.exp(-(coherent - 0.25) * 8.0))
+            * 1.0 / (1.0 + np.exp((self.d - 0.18) * 14.0))
+            * 1.0 / (1.0 + np.exp((self.l - 1.2) * 4.0))
+            * 1.0 / (1.0 + np.exp((temperature - 0.18) * 12.0))
+        )
+        photonic = (0.2 + optical) * (0.7 + 0.3 * np.tanh(self.l - 1.2))
+        defect_dominated = 1.0 / (1.0 + np.exp(-(self.d - 0.35) * 10.0)) * (0.6 + 0.4 * thermal)
+        mechanical_regime = (0.2 + mechanical + 0.2 * magnetic) * (0.7 + 0.3 * np.tanh(self.l - 2.0))
+
+        raw_weights = {
+            "semiconductor": max(0.0, float(semiconductor)),
+            "metallic": max(0.0, float(metallic)),
+            "quantum": max(0.0, float(quantum)),
+            "photonic": max(0.0, float(photonic)),
+            "defect_dominated": max(0.0, float(defect_dominated)),
+            "mechanical": max(0.0, float(mechanical_regime)),
+        }
+        total = sum(raw_weights.values())
+        if total <= 0:
+            return {name: 0.0 for name in raw_weights}
+        return {name: value / total for name, value in raw_weights.items()}
+
+    def dominant_regime(self, temperature: float = 0.1) -> str:
+        weights = self.regime_weights(temperature=temperature)
+        return max(weights, key=weights.get)
+
+    def stability_metric(self) -> float:
+        return float(np.exp(-self.d) * (1.0 + self.k.get("electrical", 0.0) + self.k.get("coherent", 0.0)) / (1.0 + self.k.get("thermal", 0.0)))
+
+    def coherence_metric(self) -> float:
+        return float((1.0 - min(self.d, 0.95)) * (0.5 + self.k.get("coherent", 0.0)) * (1.0 + 0.2 * self.k.get("optical", 0.0)))
+
+
+def geometry_to_silicon_rigorous(
+    field: np.ndarray,
+    grid_spacing: float = 2.5e-10,
+    temperature: float = 300.0,
+) -> SiliconState:
+    """Reduce a geometric field to a compact silicon manifold state."""
+    field = np.asarray(field, dtype=float)
+    centered = field - np.mean(field)
+    spectral_scale = float(np.linalg.norm(centered))
+    gradient_scale = float(np.mean(np.abs(np.gradient(field))))
+    variance = float(np.var(field))
+
+    carrier_density = 1e15 * (1.0 + 20.0 * spectral_scale + 5.0 * gradient_scale)
+    defect_density = float(np.clip(0.05 + 0.8 * variance + 0.1 * gradient_scale, 0.0, 1.0))
+    effective_dimension = float(np.clip(0.8 + 2.5 * spectral_scale + 0.5 * grid_spacing / 1e-10, 0.2, 6.0))
+
+    couplings = {
+        "electrical": float(np.clip(0.25 + 0.5 * spectral_scale, 0.0, 1.0)),
+        "optical": float(np.clip(0.15 + 0.6 * variance, 0.0, 1.0)),
+        "thermal": float(np.clip(temperature / 1200.0 + 0.2 * variance, 0.0, 1.0)),
+        "mechanical": float(np.clip(0.2 + 0.5 * gradient_scale, 0.0, 1.0)),
+        "coherent": float(np.clip(0.7 - defect_density * 0.6 - temperature / 900.0, 0.0, 1.0)),
+    }
+
+    total = sum(couplings.values())
+    if total > 1.0:
+        couplings = {key: value / total for key, value in couplings.items()}
+
+    return SiliconState(
+        n=float(carrier_density),
+        d=defect_density,
+        l=effective_dimension,
+        k=couplings,
+    )
+
 
 # GIES types (inline for self-containment, reference your actual modules)
 OCTAHEDRAL_POSITIONS = {
@@ -94,6 +181,7 @@ def octahedral_state_to_silicon_state(
         grid_spacing=2.5e-10,  # ~half lattice constant of Si
         temperature=temperature,
     )
+    silicon_state._last_eigenvalues = eigenvalues
     
     # ── Augment coupling vector with magnetic contribution ──
     if B_field is not None:

@@ -36,8 +36,8 @@ import numpy as np
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from Silicon.core.topological_memory import _make_grid, _add_vortex, _wrap, _winding_field
-from Silicon.core.topological_memory import _laplacian, _gradient
+from Silicon.core.systems.topological_memory import _make_grid, _add_vortex, _wrap, _winding_field
+from Silicon.core.systems.topological_memory import _laplacian, _gradient
 
 # ---------------------------------------------------------------------------
 # Task construction
