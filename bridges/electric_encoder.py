@@ -1,8 +1,8 @@
 """
 Electric Bridge Encoder
 =======================
-Encodes electrical field and circuit geometry into binary using physics equations
-and Gray-coded magnitude bands for all continuous quantities.
+Encodes coupling to electrical field and charge-flow geometry into binary using
+physics equations and Gray-coded magnitude bands for the continuous quantities.
 
 Equations implemented
 ---------------------
@@ -107,13 +107,13 @@ def skin_depth(frequency_hz: float, conductivity_S: float) -> float:
 
 class ElectricBridgeEncoder(BinaryBridgeEncoder):
     """
-    Encodes electrical field and circuit geometry into a binary bitstring.
+    Encodes electrical field coupling, charge transport, and threshold behavior into a binary bitstring.
 
     Input geometry dict keys
     ------------------------
     charge         : list of floats — electric charges (Coulombs).
     current_A      : list of floats — electric currents (Amperes).
-    voltage_V      : list of floats — voltages (Volts).
+    voltage_V      : list of floats — local potential differences (Volts).
     conductivity_S : list of floats — conductivities (Siemens/m).
 
     Parameters
@@ -140,7 +140,7 @@ class ElectricBridgeEncoder(BinaryBridgeEncoder):
 
     def to_binary(self) -> str:
         """
-        Convert loaded electrical geometry into a binary bitstring.
+        Convert loaded electrical coupling geometry into a binary bitstring.
 
         Returns
         -------

@@ -1,9 +1,9 @@
 """
 Community Bridge Encoder
 ========================
-Translates an urban-resilience-sim CommunityProfile dict into the
-6-domain capacity + buffer geometry consumed by ResilienceBridgeEncoder,
-then emits a 39-bit Gray-coded binary string.
+Translates a community resilience profile into the 6-domain capacity +
+buffer geometry consumed by ResilienceBridgeEncoder, then emits a 39-bit
+Gray-coded binary string.
 
 The CommunityProfile fields map onto the six octahedral resilience axes:
 
@@ -17,9 +17,9 @@ The CommunityProfile fields map onto the six octahedral resilience axes:
 Each domain is scored [0, 1] from the profile's boolean / numeric fields.
 The buffer is the "reserve" component — how many days / backup layers remain.
 
-This encoder is intentionally thin: it converts community observations to
-the canonical octahedral domain representation, then delegates all binary
-encoding to ResilienceBridgeEncoder.
+This encoder is intentionally thin: it converts community viability,
+redundancy, and reserve observations to the canonical octahedral domain
+representation, then delegates the binary encoding to ResilienceBridgeEncoder.
 
 Equations implemented
 ---------------------
@@ -66,9 +66,9 @@ def food_capacity(
     """
     Score food/water domain capacity [0, 1].
 
-    Combines retail buffer days, local production, and resilience assets.
-    A community is at capacity = 1.0 when it has 3+ weeks of retail stock
-    AND enough local farms/gardens to sustain itself without resupply.
+    Combines reserve days, local production, and resilience assets. The
+    quantity is intended as a thermodynamic viability proxy rather than a
+    demographic label.
     """
     # Retail buffer component (0.25 weight): normalise to 21-day ceiling
     retail_score = min(1.0, days_food_supply_retail / 21.0) * 0.25
@@ -394,8 +394,8 @@ def profile_to_buffers(p: dict) -> dict:
 
 class CommunityBridgeEncoder(BinaryBridgeEncoder):
     """
-    Encodes a CommunityProfile (urban-resilience-sim) into a 39-bit
-    Gray-coded binary string via the 6-domain octahedral resilience model.
+    Encodes a community resilience profile into a 39-bit Gray-coded binary
+    string via the 6-domain octahedral resilience model.
 
     Input geometry dict keys
     ------------------------

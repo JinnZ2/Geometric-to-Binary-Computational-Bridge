@@ -1,8 +1,9 @@
 """
 Sound Bridge Encoder
 ====================
-Encodes acoustic geometry into binary using physics equations
-and Gray-coded magnitude bands for all continuous quantities.
+Encodes coupling to acoustic pressure-wave structure in a compressible
+medium using physics equations and Gray-coded magnitude bands for the
+continuous wave quantities.
 
 Equations implemented
 ---------------------
@@ -130,7 +131,7 @@ def doppler_shift(f_source: float, v_source: float, v_sound: float = V_SOUND) ->
 # ---------------------------------------------------------------------------
 
 class SoundBridgeEncoder(BinaryBridgeEncoder):
-    """Encodes acoustic geometry (waveform samples + resonance) into a binary bitstring."""
+    """Encodes acoustic field coupling through phase, frequency, amplitude, and resonance into a binary bitstring."""
 
     def __init__(self, pitch_threshold: float = 440.0, amp_threshold: float = 0.5):
         super().__init__("sound")
@@ -144,13 +145,13 @@ class SoundBridgeEncoder(BinaryBridgeEncoder):
 
     def to_binary(self) -> str:
         """
-        Convert acoustic geometry to a binary bitstring.
+        Convert acoustic coupling geometry to a binary bitstring.
 
         Expected keys in geometry_data:
-          phase_radians     : list of float, instantaneous phase [0, 2π)
-          frequency_hz      : list of float, frequency in Hz
-          amplitude         : list of float, normalised amplitude
-          resonance_index   : list of float, consonance/resonance values [0, 1]
+          phase_radians     : list of float, local phase state [0, 2π)
+          frequency_hz      : list of float, local oscillation frequency in Hz
+          amplitude         : list of float, local pressure-wave amplitude
+          resonance_index   : list of float, resonance or consonance values [0, 1]
 
         Returns a string of '0'/'1' characters.
         Raises ValueError if input_geometry has not been set.
@@ -285,10 +286,10 @@ if __name__ == "__main__":
 #
 # In repo, treating the sound bridge as a field interaction where:
 #
-# - Vibrato as Frequency Modulation (FM): Instead of a static tone, you’re
-#   looking at the delta-f (frequency deviation). In the matter, this is a
-#   physical oscillation of a vocal fold. In your code, it’s a variable that
-#   prevents the logic from "locking" into a dead, binary state.
+# - Vibrato as Hardware Breathing: the modulation is not merely a feature to
+#   extract from an audio file. It is a direct sign that the coupled pressure
+#   field is dynamically breathing, and the encoder should preserve that
+#   structure rather than flattening it away.
 #
 # - Harmonic Overtones: You’re likely using a Fourier-style decomposition
 #   where the "analog touches" are the higher-order harmonics. Binary systems
