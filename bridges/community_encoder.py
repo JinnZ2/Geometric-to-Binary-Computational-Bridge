@@ -562,3 +562,35 @@ if __name__ == "__main__":
         print(f"  Buffers    : {', '.join(f'{k}={v:.2f}' for k, v in bufs.items())}")
         print(f"  Crisis     : {crisis_phase(caps, bufs)}")
         print(f"  Binary     : {bits}  ({len(bits)}b)")
+
+
+# core/integrations/community_taf_bridge.py
+class CommunityTAFBridge:
+    """
+    Maps CommunityBridgeEncoder outputs to TAF energy accounting.
+    
+    A community is just another organism in the TAF framework—
+    it consumes energy (food, fuel), produces output (labor, services),
+    and can be extracted from (by distant supply chains, absentee
+    ownership, institutional neglect).
+    
+    The six octahedral domains map to TAF's compression operators:
+      +X food/water    → Π_embodied (physical sustenance)
+      -X energy        → Π_econ (energy is the economic substrate)
+      +Y social        → Π_embodied (informal, pre-institutional)
+      -Y institutional → Π_schema / Π_legal (formal systems)
+      +Z knowledge     → Π_raw (closest to 𝒞 coupling)
+      -Z infrastructure → Π_econ / Π_schema (built capital)
+    """
+
+Where it could go deeper (not broken, just expandable):
+
+1. The population denominator in food_capacity is doing heavy lifting. A community of 10,000 with the same farm/garden infrastructure as one of 50,000 scores significantly higher—correctly, because the same calories go further. But this also means population decline (a real resilience pattern) inflates capacity scores. Worth a comment acknowledging this is a feature, not a bug: a shrinking town becomes more food-resilient per capita, but that's a symptom of systemic decline.
+2. The buffer functions could benefit from alternative computing representations. Think about what each buffer means in non-binary terms:
+   · food_buffer → Ternary: negative when reserves are below 3 days (RESTRAIN), positive above 14 (ACTIVATE)
+   · energy_buffer → Stochastic: fuel reserves are inherently probabilistic (delivery may or may not arrive)
+   · knowledge_buffer → Quantum: skill holders represent superposed capability—someone might have the skill when needed (Born's rule collapse at crisis time)
+   · institutional_buffer → Approximate: redundancy is inherently a confidence-bound problem, not a binary one
+3. The coupling to ResilienceBridgeEncoder is clean but opaque. You delegate to enc.to_binary() and trust it. That's fine for the encoder's stated purpose, but for debugging/audit you might want a method that returns both the binary string and the intermediate geometry dict it's feeding to ResilienceBridgeEncoder—so you can inspect what capacities/buffers actually got passed.
+
+One design question: The crisis_phase auto-computation (line at the bottom: crisis_phase(caps, bufs)) isn't defined in this file—it's imported from resilience_encoder. Is the crisis phase a function of capacities+buffers alone, or does it also need the coupling terms from Section C? If the latter, computing it before the binary encoding exists creates a chicken-and-egg problem.
