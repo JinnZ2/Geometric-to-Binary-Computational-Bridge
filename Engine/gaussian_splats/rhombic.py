@@ -151,6 +151,19 @@ class Gaussian32FieldSource:
         """Return the vertex index with the highest marginal mass."""
         return int(np.argmax(self.state_probabilities()))
 
+    def state_collapse(self):
+        """Return a :class:`DistributionCollapse` over the 32 vertices.
+
+        Non-breaking superset of :meth:`most_likely_state`: the returned
+        collapse's ``dominant_index`` equals the integer produced by
+        ``most_likely_state()``, but also carries the runner-up index,
+        the margin between them, the Shannon entropy of the full
+        32-state distribution, and the FOCUSED/MIXED/DIFFUSE regime.
+        """
+        from bridges.probability_collapse import collapse_distribution
+
+        return collapse_distribution(self.state_probabilities().tolist())
+
 
 class ZeemanDynamics32:
     """Soft magnetic coupling across the 32 rhombic vertices.

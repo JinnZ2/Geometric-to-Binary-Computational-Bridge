@@ -252,6 +252,19 @@ class Gaussian8FieldSource:
         """Return the integer state index with the highest marginal mass."""
         return int(np.argmax(self.state_probabilities()))
 
+    def state_collapse(self):
+        """Return a :class:`DistributionCollapse` over the 8 corners.
+
+        Preserves the full distribution shape (dominant index, runner-up,
+        entropy, ternary regime) instead of discarding everything but
+        the argmax. ``state_collapse().dominant_index`` matches
+        ``most_likely_state()`` exactly — this is a non-breaking
+        superset view.
+        """
+        from bridges.probability_collapse import collapse_distribution
+
+        return collapse_distribution(self.state_probabilities().tolist())
+
 
 class ZeemanDynamics:
     """Soft magnetic coupling for 6D octahedral splats: ``E = -m(s) . B_ext``.

@@ -34,6 +34,11 @@ from bridges.integration_pipeline import (
     run_all_bridges,
     run_full_bridge,
 )
+from bridges.probability_collapse import (
+    DistributionCollapse,
+    DistributionRegime,
+    collapse_distribution,
+)
 from bridges.state_graph import (
     Node,
     StateGraph,
@@ -375,6 +380,199 @@ class TestTernaryField(unittest.TestCase):
             for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]
         )
         self.assertTrue(activated)
+
+
+# ---------------------------------------------------------------------------
+# DistributionCollapse + splat state_collapse() extensions
+# ---------------------------------------------------------------------------
+
+class TestProbabilityCollapse(unittest.TestCase):
+
+    def test_focused_regime(self):
+        probs = [0.98, 0.01, 0.005, 0.005]
+        c = collapse_distribution(probs)
+        self.assertEqual(c.dominant_index, 0)
+        self.assertAlmostEqual(c.dominant_probability, 0.98, places=6)
+        self.assertEqual(c.runner_up_index, 1)
+        self.assertEqual(c.regime, DistributionRegime.FOCUSED)
+        self.assertLess(c.normalised_entropy, 0.35)
+
+    def test_diffuse_regime(self):
+        c = collapse_distribution([0.25] * 4)
+        self.assertEqual(c.regime, DistributionRegime.DIFFUSE)
+        self.assertAlmostEqual(c.normalised_entropy, 1.0, places=6)
+        self.assertAlmostEqual(c.margin, 0.0, places=6)
+
+    def test_mixed_regime(self):
+        # One state clearly dominant but with non-trivial tail mass —
+        # normalised entropy around 0.62 → MIXED with the default
+        # thresholds (0.35 / 0.75).
+        c = collapse_distribution([0.7, 0.2, 0.07, 0.03])
+        self.assertEqual(c.regime, DistributionRegime.MIXED)
+
+    def test_auto_normalisation(self):
+        c = collapse_distribution([10.0, 30.0, 60.0])
+        total = sum(c.probabilities)
+        self.assertAlmostEqual(total, 1.0, places=6)
+        self.assertEqual(c.dominant_index, 2)
+
+    def test_all_zero_treated_as_uniform(self):
+        c = collapse_distribution([0.0, 0.0, 0.0, 0.0])
+        self.assertEqual(c.regime, DistributionRegime.DIFFUSE)
+        for p in c.probabilities:
+            self.assertAlmostEqual(p, 0.25, places=6)
+
+    def test_rejects_negative(self):
+        with self.assertRaises(ValueError):
+            collapse_distribution([0.5, -0.1, 0.6])
+
+    def test_rejects_empty(self):
+        with self.assertRaises(ValueError):
+            collapse_distribution([])
+
+    def test_dominant_matches_argmax(self):
+        # Contract with existing argmax callers: dominant_index must
+        # equal int(np.argmax(...)) for any non-degenerate vector.
+        import numpy as np
+
+        rng = np.random.default_rng(seed=42)
+        for _ in range(5):
+            vec = rng.random(16).tolist()
+            c = collapse_distribution(vec)
+            self.assertEqual(c.dominant_index, int(np.argmax(vec)))
+
+    def test_top_k_is_sorted_descending(self):
+        c = collapse_distribution([0.1, 0.4, 0.2, 0.3])
+        ranked = c.top_k(4)
+        probs = [p for _, p in ranked]
+        self.assertEqual(probs, sorted(probs, reverse=True))
+
+
+class TestSplatStateCollapse(unittest.TestCase):
+    """The Gaussian splat sources must expose the ternary view while
+    preserving the old argmax contract from ``most_likely_state``."""
+
+    def _make_octa(self):
+        import numpy as np
+
+        from Engine.gaussian_splats.octahedral import Gaussian8FieldSource
+
+        mu = np.array([0.0, 0.0, 0.0, 0.9, 0.9, 0.9])
+        cov = np.eye(6) * 0.2
+        return Gaussian8FieldSource(mu=mu, cov=cov, charge=1.0)
+
+    def _make_rhombic(self):
+        import numpy as np
+
+        from Engine.gaussian_splats.rhombic import (
+            Gaussian32FieldSource,
+            RhombicTriacontaEncoder,
+        )
+
+        encoder = RhombicTriacontaEncoder()
+        mu = np.zeros(6)
+        mu[3:] = encoder.vertices[7]
+        cov = np.eye(6) * 0.1
+        return Gaussian32FieldSource(mu=mu, cov=cov, encoder=encoder)
+
+    def test_octa_state_collapse_returns_collapse(self):
+        src = self._make_octa()
+        c = src.state_collapse()
+        self.assertIsInstance(c, DistributionCollapse)
+        self.assertEqual(len(c.probabilities), 8)
+
+    def test_octa_dominant_matches_most_likely(self):
+        src = self._make_octa()
+        c = src.state_collapse()
+        self.assertEqual(c.dominant_index, src.most_likely_state())
+
+    def test_octa_focused_vs_diffuse(self):
+        import numpy as np
+
+        from Engine.gaussian_splats.octahedral import Gaussian8FieldSource
+
+        # Tight covariance around one corner → focused.
+        mu_focused = np.array([0.0, 0.0, 0.0, 0.95, 0.95, 0.95])
+        cov_focused = np.eye(6) * 0.1
+        focused = Gaussian8FieldSource(
+            mu=mu_focused, cov=cov_focused,
+        ).state_collapse()
+        self.assertEqual(focused.regime, DistributionRegime.FOCUSED)
+
+        # Broad covariance at the origin → diffuse.
+        mu_diffuse = np.zeros(6)
+        cov_diffuse = np.eye(6) * 5.0
+        diffuse = Gaussian8FieldSource(
+            mu=mu_diffuse, cov=cov_diffuse,
+        ).state_collapse()
+        self.assertEqual(diffuse.regime, DistributionRegime.DIFFUSE)
+
+    def test_rhombic_state_collapse(self):
+        src = self._make_rhombic()
+        c = src.state_collapse()
+        self.assertIsInstance(c, DistributionCollapse)
+        self.assertEqual(len(c.probabilities), 32)
+        self.assertEqual(c.dominant_index, src.most_likely_state())
+
+
+# ---------------------------------------------------------------------------
+# field_adapter — solver output → alternative dispatcher
+# ---------------------------------------------------------------------------
+
+class TestFieldAdapter(unittest.TestCase):
+
+    def _solver_output(self):
+        from Engine.geometric_solver import GeometricEMSolver
+
+        sources = [
+            {"type": "charge", "position": [0.0, 0.0, 0.0],
+             "charge": 1e-6},
+            {"type": "charge", "position": [0.1, 0.0, 0.0],
+             "charge": -1e-6, "conductivity": 5.96e7},
+        ]
+        bounds = {"min": [-0.2, -0.2, -0.2], "max": [0.2, 0.2, 0.2]}
+        data = GeometricEMSolver().calculateElectromagneticField(
+            sources, bounds, resolution=6,
+        )
+        data["sources"] = sources
+        return data
+
+    def test_field_to_geometry_shape(self):
+        from bridges.field_adapter import field_to_geometry
+
+        g = field_to_geometry(self._solver_output())
+        self.assertIn("voltage_V", g)
+        self.assertIn("current_A", g)
+        self.assertIn("charge", g)
+        self.assertEqual(len(g["voltage_V"]), len(g["current_A"]))
+        # Sign must be preserved so zero-crossings survive.
+        self.assertTrue(
+            any(v < 0 for v in g["current_A"])
+            or any(v > 0 for v in g["current_A"])
+        )
+
+    def test_field_to_alternative_dual(self):
+        from bridges.field_adapter import field_to_alternative
+
+        out = field_to_alternative(
+            self._solver_output(), mode="dual", frequency_hz=60.0,
+        )
+        self.assertIsInstance(out, dict)
+        self.assertIn("binary", out)
+        self.assertIn("alternative", out)
+        self.assertIsInstance(out["binary"], str)
+        self.assertIsNotNone(out["alternative"])
+        self.assertEqual(
+            type(out["alternative"]).__name__,
+            "ElectricAlternativeDiagnostic",
+        )
+
+    def test_field_to_alternative_binary_only(self):
+        from bridges.field_adapter import field_to_alternative
+
+        bits = field_to_alternative(self._solver_output(), mode="binary")
+        self.assertIsInstance(bits, str)
+        self.assertTrue(set(bits) <= {"0", "1"})
 
 
 if __name__ == "__main__":
