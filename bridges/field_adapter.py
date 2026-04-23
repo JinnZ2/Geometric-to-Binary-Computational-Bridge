@@ -1,31 +1,36 @@
 """
 field_adapter.py
 ================
-Thin adapter connecting Engine.GeometricEMSolver output to SensorSuite
-sensor readings.
+Thin adapter connecting Engine.GeometricEMSolver output to downstream
+interpreters — the binary SensorSuite and the dual-path alternative
+dispatcher.
 
 Architecture position
 ---------------------
   Engine.GeometricEMSolver
-      └→ field_to_suite()          ← this module
-              └→ SensorSuite.update()
-                      └→ SensorSuite.compose()
+      ├→ field_to_suite()          binary path → SensorSuite.update()
+      └→ field_to_alternative()    ternary path → encode_state(mode="dual")
 
-Usage
------
+Usage — binary path (unchanged)
+-------------------------------
   from Engine.geometric_solver import GeometricEMSolver
   from bridges.sensor_suite import SensorSuite
   from bridges.field_adapter import field_to_suite
 
   solver = GeometricEMSolver()
   suite  = SensorSuite()
-
   field_data = solver.calculateElectromagneticField(sources, bounds)
   field_to_suite(field_data, suite)
   output = suite.compose()
 
-Sensor mappings
----------------
+Usage — alternative path
+------------------------
+  from bridges.field_adapter import field_to_alternative
+  dual = field_to_alternative(field_data, mode="dual", frequency_hz=60.0)
+  # dual = {"binary": "...", "alternative": <ElectricAlternativeDiagnostic>}
+
+Sensor mappings (binary path)
+-----------------------------
   ambient_field        mean |E| + mean |B| across all grid points
   coherence            alignment of E-field vectors  (1 = all same direction)
   vigilance            spike ratio: max(|E|) / mean(|E|)  (1 = uniform)
@@ -34,6 +39,8 @@ Sensor mappings
 """
 
 from __future__ import annotations
+
+from typing import Any, Dict, Optional
 
 import numpy as np
 
@@ -159,3 +166,128 @@ def field_to_suite(field_data: dict,
                  signal_vector=bbox,
                  magnitude=active_frac,
                  confidence=confidence)
+
+
+# ===========================================================================
+# Alternative path — solver output → encode_state dispatcher
+# ===========================================================================
+
+def field_to_geometry(field_data: dict) -> Dict[str, Any]:
+    """
+    Project raw solver output into the ``geometry`` dict schema that
+    ``bridges.encode_state`` and the ``ElectricBridgeEncoder`` expect.
+
+    The solver returns per-point E and B vectors. The encoders want
+    lists of scalars in named physical slots. The mapping below is the
+    minimal, reversible projection:
+
+      charge          ← source charges from sources[].charge (if present)
+      current_A       ← radial component of E projected onto mean-E axis
+                        (signed scalar per grid point — preserves AC
+                        zero-crossing structure for the ternary analyser)
+      voltage_V       ← |E| at each point scaled by 1m (Volts per metre
+                        × nominal 1 m gauge length)
+      conductivity_S  ← pass-through from sources[].conductivity if any
+
+    This is a coarse projection, not a physics identity — it exists so
+    the ternary / stochastic / quantum analysers can operate on real
+    solver output without requiring callers to hand-craft geometry
+    dicts. Downstream interpretation should use the full field data
+    via ``field_to_suite`` when spatial structure matters.
+    """
+    E_raw = field_data.get("electricField", [])
+    B_raw = field_data.get("magneticField", [])
+    sources = field_data.get("sources", []) or []
+
+    geometry: Dict[str, Any] = {}
+
+    if E_raw:
+        E = np.asarray(E_raw, dtype=float)
+        E_mag = np.linalg.norm(E, axis=1)
+        # Signed scalar: project every E vector onto the mean-direction
+        # unit vector. Preserves sign so zero-crossings survive.
+        mean_E = E.mean(axis=0)
+        mean_norm = float(np.linalg.norm(mean_E))
+        if mean_norm > 0:
+            mean_unit = mean_E / mean_norm
+            signed = (E @ mean_unit).astype(float).tolist()
+            geometry["current_A"] = signed
+        else:
+            geometry["current_A"] = [0.0] * len(E_mag)
+
+        geometry["voltage_V"] = E_mag.astype(float).tolist()
+
+    # Source-level quantities (if the solver attached them).
+    charges = [
+        float(s["charge"]) for s in sources
+        if isinstance(s, dict) and "charge" in s
+    ]
+    if charges:
+        geometry["charge"] = charges
+
+    conductivities = [
+        float(s["conductivity"]) for s in sources
+        if isinstance(s, dict) and "conductivity" in s
+    ]
+    if conductivities:
+        geometry["conductivity_S"] = conductivities
+
+    # Surface magnetic magnitudes are occasionally useful for future
+    # magnetic-bridge wiring; attach as a non-standard key rather than
+    # polluting the electric encoder schema.
+    if B_raw:
+        B = np.asarray(B_raw, dtype=float)
+        geometry["_magnetic_magnitude"] = (
+            np.linalg.norm(B, axis=1).astype(float).tolist()
+        )
+
+    return geometry
+
+
+def field_to_alternative(
+    field_data: dict,
+    mode: str = "dual",
+    domain: str = "electric",
+    frequency_hz: Optional[float] = None,
+) -> Any:
+    """
+    Route Engine solver output through the alternative-computing dispatcher.
+
+    Parameters
+    ----------
+    field_data
+        Output of ``GeometricEMSolver.calculateElectromagneticField``.
+    mode
+        Forwarded to :func:`bridges.encode_state.encode_state` — one of
+        ``"binary"``, ``"ternary"``, or ``"dual"``.
+    domain
+        Target domain. Defaults to ``"electric"`` because solver output
+        is electromagnetic; pass ``"magnetic"`` once that domain's
+        alternative interpreter is wired up to route the B-field
+        component separately.
+    frequency_hz
+        Excitation frequency for skin-effect / zero-crossing analyses.
+
+    Returns
+    -------
+    str | object | dict
+        Shape depends on ``mode`` — see ``encode_state`` docstring.
+    """
+    # Import locally so this module stays usable in environments where
+    # only the binary-path half of the repo is available.
+    from bridges.encode_state import encode_state
+
+    geometry = field_to_geometry(field_data)
+    return encode_state(
+        geometry,
+        domain=domain,
+        mode=mode,
+        frequency_hz=frequency_hz,
+    )
+
+
+__all__ = [
+    "field_to_suite",
+    "field_to_geometry",
+    "field_to_alternative",
+]

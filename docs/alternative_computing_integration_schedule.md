@@ -178,6 +178,36 @@ that uncertainty instead of collapsing it to a confidence threshold.
 
 ---
 
+## Engine-layer collapse sites
+
+Separate from the per-bridge work, several Engine/ modules currently
+collapse distributions via `np.argmax` or hard thresholds. The shared
+tool is `bridges/probability_collapse.DistributionCollapse`, which
+preserves dominant / runner-up / entropy / ternary-regime while still
+exposing a `dominant_index` that matches the old argmax integer. New
+call sites should use `collapse_distribution(probs)` instead of
+`int(np.argmax(probs))`.
+
+| Site | Status | Method | Notes |
+|------|--------|--------|-------|
+| `Engine/gaussian_splats/octahedral.py` | ✅ done | `Gaussian8FieldSource.state_collapse()` | Non-breaking superset of `most_likely_state()` |
+| `Engine/gaussian_splats/rhombic.py` | ✅ done | `Gaussian32FieldSource.state_collapse()` | Ditto, 32 vertices |
+| `Engine/gaussian_splats/octahedral.py:170` | ⬜ scheduled | `OctahedralStateEncoder.decode_gaussian_to_state` | `(state_bits, confidence)` → add `(state_bits, collapse)` overload |
+| `Engine/kt_annealer.py` | ⬜ scheduled | Expose `phase_regime` (above / at / below T_KT) as a `DistributionRegime` derived from coherence-at-T_KT |
+| `Engine/geometric_transformer_engine.py:190` | ⬜ scheduled | `predict()` → add `predict_collapse()` that returns top-k + attention entropy |
+
+## Engine → dispatcher handoff
+
+| Site | Status | Method |
+|------|--------|--------|
+| `bridges/field_adapter.py` | ✅ done | `field_to_alternative(field_data, mode="dual")` projects solver output through `encode_state` |
+| `bridges/sensor_suite.py` | ⬜ scheduled | `AlternativeSensorSuite` parallel-compositor over every domain's ternary interpreter |
+| `bridges/vortex_bridge.py` | ⬜ scheduled | Replace `wp > threshold` with ternary winding classification |
+| `bridges/wave_encoder.py:205` | ⬜ scheduled | Replace `probability_density > 0.5` with `DistributionRegime` over the Born-rule mass |
+| `bridges/physics_guard.py` | ⬜ scheduled | Extend pass/fail to `satisfied / marginal / violated` |
+
+---
+
 ## Cross-cutting work (after all bridges are wired)
 
 1. **Field-level propagation.** `bridges/ternary_field.py` currently
