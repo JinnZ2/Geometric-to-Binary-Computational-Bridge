@@ -22,7 +22,6 @@ from .adapters import (
     WaveBridgeEncoder,
     ChemicalBridgeEncoder,
     ResilienceBridgeEncoder,
-    GeometricFiberEncoder,
     ConsciousnessBridgeEncoder,
     EmotionBridgeEncoder,
     OctahedralTorsor,
@@ -41,12 +40,18 @@ from .hardware_modules import (
     list_hardware_modules,
     choose_hardware_modules,
 )
-from .fret_coulomb_analysis import *
-from .gies_encoder import *
-from .hardware_bridge import *
-from .magnetic_bridge_protocol import *
-from .pipeline import *
-from .silicon_gies_bridge import *
+
+# Re-export everything from the silicon-native modules at the package
+# root so callers can do ``from Silicon.core.bridges import X``. Star
+# imports are the canonical Python pattern for package re-exports; the
+# noqa silences ruff's F403 (which is a style warning for non-package
+# code, not a bug indicator here).
+from .fret_coulomb_analysis import *       # noqa: F403
+from .gies_encoder import *                 # noqa: F403
+from .hardware_bridge import *              # noqa: F403
+from .magnetic_bridge_protocol import *     # noqa: F403
+from .pipeline import *                     # noqa: F403
+from .silicon_gies_bridge import *          # noqa: F403
 
 __all__ = [
     "BridgeEntry",
