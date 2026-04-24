@@ -8,8 +8,8 @@ arithmetic — no physics runs here. The individual
 responsible for grounding their signatures in real domain physics;
 ``resonate`` only asks whether those grounded signatures agree.
 
-Composition rules
------------------
+Two-signature composition rules
+-------------------------------
 * **Vector**: the coupled vector is the confidence-weighted sum of
   the source vectors, re-normalised. Heterogeneous vector lengths are
   zero-padded to the longest input so three-axis gravity and
@@ -28,10 +28,18 @@ Composition rules
   coupled confidence — sensor fusion should get *less* certain when
   its inputs fight, not more.
 
-* **Scalar strength**: weighted harmonic-style combination —
-  ``2 * a * b / (a + b)`` — so a pair where one domain is near-zero
-  contributes little, matching the intuition that a silent channel
-  cannot amplify its neighbour.
+* **Scalar strength**: harmonic combination ``2ab / (a + b)`` — a pair
+  where one domain is near-zero contributes little, matching the
+  intuition that a silent channel cannot amplify its neighbour.
+
+N-ary composition (``resonate_many``)
+-------------------------------------
+The N ≥ 3 path is a *direct* weighted mean across all inputs, not an
+iterative left-fold. The pair formulas above generalise straight to
+their N-ary analogs (single weighted mean, mean of pairwise dot
+products, N-ary geometric / harmonic means). The result is genuinely
+independent of the iteration order of the input sequence. See
+``resonate_many`` for the exact rules.
 """
 
 from __future__ import annotations
@@ -181,37 +189,136 @@ def resonate_many(
     signatures: Iterable[BasinSignature],
 ) -> CoupledSignature:
     """
-    Compose three or more signatures by left-folding :func:`resonate`.
+    Compose three or more signatures into a coupled basin.
 
-    The fold order is deterministic — whatever the caller iterates in.
-    Because :func:`resonate` is commutative in the pair sense (its
-    output depends only on the two inputs, not their order), the
-    fold is effectively N-ary even though each step is binary.
+    Computed as a *direct N-ary operation*, not an iterative fold.
+    An iterative left-fold is order-dependent (the intermediate
+    confidence of step ``k`` reweights step ``k+1``) and would produce
+    different outputs for different input orderings. The N-ary formula
+    uses a single weighted mean over all inputs at once, which makes
+    the result genuinely order-independent modulo floating-point tie
+    handling in the regime vote.
 
-    Unlike the pairwise :func:`resonate`, the returned coupled
-    signature's ``sources`` tuple is **flat** — it contains every
-    original :class:`BasinSignature` that participated in the fold,
-    so callers can trace the full lineage without walking the binary
-    reduction tree.
+    Composition rules for N signatures:
+
+    * **Vector** — confidence-weighted mean across all N input vectors,
+      zero-padded to the longest input.
+    * **Coupling strength** — mean of all :math:`\\binom{N}{2}` pairwise
+      dot products of unit-normalised input vectors. Reduces to the
+      pairwise ``resonate`` definition when N = 2.
+    * **Regime** — majority vote across all N regimes, with MIXED as
+      the tiebreaker.
+    * **Agreement regime** — the single shared regime if all N agree,
+      otherwise MIXED.
+    * **Confidence** — geometric mean of the N input confidences,
+      multiplied by the alignment factor ``(mean_coupling + 1) / 2``.
+    * **Scalar strength** — N-ary harmonic mean of the N input
+      scalars (returns 0 if any input is zero, matching the pairwise
+      rule that a silent channel cannot amplify its neighbours).
+
+    The returned coupled signature's ``sources`` tuple is a flat list
+    of every original :class:`BasinSignature` that participated, in
+    iteration order.
+
+    Parameters
+    ----------
+    signatures
+        Iterable of at least two :class:`BasinSignature` objects.
+        Elements may themselves be :class:`CoupledSignature` — every
+        BasinSignature attribute is delegated, so re-feeding coupled
+        outputs is a valid form of tree composition.
+
+    Raises
+    ------
+    ValueError
+        If fewer than two signatures are supplied, or any signature
+        has an empty vector.
     """
     sigs: List[BasinSignature] = list(signatures)
-    if len(sigs) < 2:
+    n = len(sigs)
+    if n < 2:
         raise ValueError(
             "resonate_many needs at least two signatures; "
-            f"got {len(sigs)}."
+            f"got {n}."
         )
+    if n == 2:
+        # Delegate so the two-signature path matches ``resonate`` exactly
+        # (and inherits its source-tuple semantics for pair composition).
+        return resonate(sigs[0], sigs[1])
 
-    acc = resonate(sigs[0], sigs[1])
-    for nxt in sigs[2:]:
-        acc = resonate(acc.basin, nxt)
+    for s in sigs:
+        if not s.vector:
+            raise ValueError(
+                "cannot resonate signatures with empty vectors"
+            )
 
-    # Replace the binary-tree sources tuple with the original flat list
-    # so downstream code sees every contributor.
+    # --- Vectors (padded + confidence-weighted mean) ---
+    length = max(len(s.vector) for s in sigs)
+    padded = [_pad(s.vector, length) for s in sigs]
+    weights = [float(s.confidence) for s in sigs]
+    w_sum = sum(weights)
+    if w_sum <= 0.0:
+        # All-zero confidence degenerates to an unweighted mean so the
+        # result is still well-defined.
+        weights = [1.0] * n
+        w_sum = float(n)
+
+    fused_vec = tuple(
+        sum(w * v[i] for w, v in zip(weights, padded)) / w_sum
+        for i in range(length)
+    )
+
+    # --- Coupling strength (mean of pairwise dot products) ---
+    units = [_normalise(v) for v in padded]
+    pair_dots: List[float] = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            pair_dots.append(_dot(units[i], units[j]))
+    mean_coupling = sum(pair_dots) / len(pair_dots) if pair_dots else 0.0
+    mean_coupling = max(-1.0, min(1.0, mean_coupling))
+
+    # --- Regimes ---
+    regimes = [s.regime for s in sigs]
+    regime = _combine_regimes(regimes)
+    all_agree = all(r == regimes[0] for r in regimes)
+    agreement_regime = regimes[0] if all_agree else DistributionRegime.MIXED
+
+    # --- Confidence (geometric mean × alignment) ---
+    w_product = 1.0
+    for w in weights:
+        w_product *= max(0.0, w)
+    base_confidence = w_product ** (1.0 / n) if w_product > 0.0 else 0.0
+    alignment_factor = (mean_coupling + 1.0) / 2.0
+    confidence = max(0.0, min(1.0, base_confidence * alignment_factor))
+
+    # --- Scalar strength (N-ary harmonic mean) ---
+    strengths = [float(s.scalar_strength) for s in sigs]
+    if all(x > 0.0 for x in strengths):
+        scalar = n / sum(1.0 / x for x in strengths)
+    else:
+        scalar = 0.0
+
+    composed_name = "⋈".join(s.domain for s in sigs)
+
+    coupled_basin = BasinSignature(
+        domain=composed_name,
+        regime=regime,
+        vector=fused_vec,
+        confidence=confidence,
+        scalar_strength=scalar,
+        metadata={
+            "coupling_strength": mean_coupling,
+            "agreement": agreement_regime.name,
+            "source_domains": tuple(s.domain for s in sigs),
+            "pair_dot_products": tuple(pair_dots),
+        },
+    )
+
     return CoupledSignature(
-        basin=acc.basin,
+        basin=coupled_basin,
         sources=tuple(sigs),
-        coupling_strength=acc.coupling_strength,
-        agreement_regime=acc.agreement_regime,
+        coupling_strength=mean_coupling,
+        agreement_regime=agreement_regime,
     )
 
 

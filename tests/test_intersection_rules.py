@@ -154,10 +154,11 @@ class TestIntersectionRuleABC(unittest.TestCase):
 
 class TestResonate(unittest.TestCase):
 
-    def _sig(self, domain, vec, regime=DistributionRegime.FOCUSED, conf=1.0):
+    def _sig(self, domain, vec, regime=DistributionRegime.FOCUSED, conf=1.0,
+             strength=1.0):
         return BasinSignature(
             domain=domain, regime=regime, vector=vec, confidence=conf,
-            scalar_strength=1.0,
+            scalar_strength=strength,
         )
 
     def test_perfect_alignment_gives_coupling_1(self):
@@ -223,6 +224,121 @@ class TestResonate(unittest.TestCase):
         b = self._sig("b", (0.0, 1.0), regime=DistributionRegime.DIFFUSE)
         c = resonate(a, b)
         self.assertEqual(c.regime, DistributionRegime.MIXED)
+
+    # ------------------------------------------------------------------
+    # Order-independence of resonate_many (regression for audit severe #1)
+    # ------------------------------------------------------------------
+
+    def test_resonate_many_is_order_independent(self):
+        """resonate_many must produce the same coupled basin regardless
+        of input ordering. The pre-fix iterative left-fold was
+        order-dependent because intermediate confidences re-weighted
+        subsequent pairs; the N-ary weighted-mean formulation is
+        associative to floating-point noise."""
+        a = self._sig("a", (1.0, 0.0), conf=1.0)
+        b = self._sig("b", (0.8, 0.2), conf=0.9)
+        c = self._sig("c", (0.5, 0.5), conf=0.5)
+        d = self._sig("d", (0.2, 0.8), conf=0.3)
+
+        forward  = resonate_many([a, b, c, d])
+        reverse  = resonate_many([d, c, b, a])
+        shuffled = resonate_many([c, a, d, b])
+
+        # Vectors agree componentwise up to float-precision tolerance.
+        for fv, rv, sv in zip(forward.vector, reverse.vector, shuffled.vector):
+            self.assertAlmostEqual(fv, rv, places=12)
+            self.assertAlmostEqual(fv, sv, places=12)
+
+        # Scalars computed from symmetric N-ary formulas must match exactly.
+        self.assertAlmostEqual(
+            forward.confidence, reverse.confidence, places=12,
+        )
+        self.assertAlmostEqual(
+            forward.confidence, shuffled.confidence, places=12,
+        )
+        self.assertAlmostEqual(
+            forward.coupling_strength, reverse.coupling_strength, places=12,
+        )
+        self.assertAlmostEqual(
+            forward.basin.scalar_strength,
+            reverse.basin.scalar_strength,
+            places=12,
+        )
+
+    def test_resonate_many_pair_matches_resonate(self):
+        # The two-signature path of resonate_many must be the pairwise
+        # resonate exactly so the API does not have two subtly-different
+        # behaviours at N=2.
+        a = self._sig("a", (1.0, 0.0, 0.0), conf=0.8)
+        b = self._sig("b", (0.0, 1.0, 0.0), conf=0.6)
+        pair = resonate(a, b)
+        many_of_two = resonate_many([a, b])
+        self.assertEqual(pair.basin.vector, many_of_two.basin.vector)
+        self.assertEqual(
+            pair.coupling_strength, many_of_two.coupling_strength,
+        )
+        self.assertEqual(pair.basin.confidence, many_of_two.basin.confidence)
+
+    # ------------------------------------------------------------------
+    # CoupledSignature direct reuse (regression for audit severe #2)
+    # ------------------------------------------------------------------
+
+    def test_coupled_signature_is_directly_re_feedable(self):
+        """CoupledSignature must implement every attribute resonate()
+        reads off a BasinSignature so ``resonate(coupled, x)`` composes
+        without manual ``.basin`` unwrapping."""
+        a = self._sig("a", (1.0, 0.0), conf=0.9)
+        b = self._sig("b", (0.0, 1.0), conf=0.9)
+        ab = resonate(a, b)
+        c = self._sig("c", (1.0, 1.0), conf=0.9)
+
+        # Direct re-feed — this was AttributeError before the fix.
+        abc = resonate(ab, c)
+        self.assertEqual(type(abc).__name__, "CoupledSignature")
+        # Domain name reflects the nested composition.
+        self.assertIn("a⋈b", abc.basin.domain)
+        self.assertIn("c", abc.basin.domain)
+
+    def test_coupled_signature_delegates_full_basin_surface(self):
+        a = self._sig("a", (1.0, 0.0), conf=0.9, strength=2.0)
+        b = self._sig("b", (0.0, 1.0), conf=0.9, strength=3.0)
+        coupled = resonate(a, b)
+        # Every field used by resonate() must be reachable directly.
+        for attr in (
+            "domain", "regime", "vector", "confidence",
+            "scalar_strength", "metadata", "vector_magnitude",
+        ):
+            self.assertTrue(
+                hasattr(coupled, attr),
+                f"CoupledSignature is missing delegated attribute {attr!r}",
+            )
+
+
+class TestBasinSignatureExtraValidation(unittest.TestCase):
+    """Regression tests for audit minor findings."""
+
+    def test_rejects_negative_scalar_strength(self):
+        # scalar_strength is documented as a magnitude; signed
+        # directional content belongs in ``vector``.
+        with self.assertRaises(ValueError):
+            BasinSignature(
+                domain="bad",
+                regime=DistributionRegime.MIXED,
+                vector=(1.0,),
+                confidence=0.5,
+                scalar_strength=-0.5,
+            )
+
+    def test_accepts_zero_scalar_strength(self):
+        # Silent channels are a legitimate signature state.
+        sig = BasinSignature(
+            domain="silent",
+            regime=DistributionRegime.DIFFUSE,
+            vector=(0.0, 0.0, 1.0),
+            confidence=0.1,
+            scalar_strength=0.0,
+        )
+        self.assertEqual(sig.scalar_strength, 0.0)
 
 
 # ---------------------------------------------------------------------------

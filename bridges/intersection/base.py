@@ -77,6 +77,13 @@ class BasinSignature:
             )
         if not self.vector:
             raise ValueError("vector must be non-empty")
+        if float(self.scalar_strength) < 0.0:
+            # ``scalar_strength`` is documented as a magnitude — it
+            # should never be negative. Signed directional content
+            # belongs in ``vector``.
+            raise ValueError(
+                f"scalar_strength must be non-negative; got {self.scalar_strength!r}"
+            )
 
     @property
     def vector_magnitude(self) -> float:
@@ -117,7 +124,9 @@ class CoupledSignature:
     agreement_regime: DistributionRegime
 
     # Convenience delegations so a CoupledSignature can be treated
-    # interchangeably with a BasinSignature by downstream code.
+    # interchangeably with a BasinSignature by downstream code. This is
+    # the "composition is closed" contract — every attribute that
+    # ``resonate`` reads off a BasinSignature must be delegated here.
     @property
     def domain(self) -> str:
         return self.basin.domain
@@ -133,6 +142,18 @@ class CoupledSignature:
     @property
     def confidence(self) -> float:
         return self.basin.confidence
+
+    @property
+    def scalar_strength(self) -> float:
+        return self.basin.scalar_strength
+
+    @property
+    def metadata(self) -> Mapping[str, Any]:
+        return self.basin.metadata
+
+    @property
+    def vector_magnitude(self) -> float:
+        return self.basin.vector_magnitude
 
 
 class IntersectionRule(ABC):
