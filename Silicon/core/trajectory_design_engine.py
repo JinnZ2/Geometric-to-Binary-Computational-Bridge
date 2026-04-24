@@ -19,6 +19,10 @@ Objective:
 This is a hybrid optimal control problem on a fiber bundle.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 from typing import Dict, Tuple, List, Optional, Callable, Union
 from dataclasses import dataclass, field
@@ -26,6 +30,14 @@ from enum import Enum, auto
 from scipy.optimize import minimize, differential_evolution
 from scipy.integrate import solve_ivp
 import warnings
+
+if TYPE_CHECKING:
+    # SiliconState and CodePerformance are annotation-only in this module.
+    # They are imported lazily inside the functions that actually use them
+    # so this module can load even when its heavy dependencies (QEC code,
+    # silicon-state physics) are unavailable.
+    from silicon_state import SiliconState
+    from Silicon.core.regime_mediated_qec import CodePerformance
 
 
 # ─── 1. Combined State Space ───

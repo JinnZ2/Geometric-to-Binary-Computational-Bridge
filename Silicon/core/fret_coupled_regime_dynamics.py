@@ -254,6 +254,8 @@ class CoupledTrajectory:
     interaction_type: RegimeInteractionType
     synchronization_metric: float       # 0-1, how synchronized
     regime_transitions: List[Dict]      # detected regime changes
+    d_ang: float = 4.8                  # FRET distance used for the run (Å)
+    temperature: float = 300.0          # simulation temperature (K)
     
     @property
     def n_regime_switches_1(self) -> int:
@@ -427,6 +429,8 @@ def simulate_coupled_dynamics(
         interaction_type=interaction_type,
         synchronization_metric=sync_metric,
         regime_transitions=transitions,
+        d_ang=d_ang,
+        temperature=temperature,
     )
 
 
@@ -836,8 +840,8 @@ def plot_coupled_dynamics(
             bbox=dict(boxstyle='round', facecolor='lightgray', alpha=0.3))
     
     fig.suptitle(
-        f'Coupled Regime Dynamics — FRET distance = {d_ang:.1f} Å, '
-        f'T = {temperature:.0f} K',
+        f'Coupled Regime Dynamics — FRET distance = {trajectory.d_ang:.1f} Å, '
+        f'T = {trajectory.temperature:.0f} K',
         fontsize=14, fontweight='bold'
     )
     

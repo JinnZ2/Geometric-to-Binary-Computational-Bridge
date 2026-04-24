@@ -11,9 +11,16 @@ the quantum-classical transition, just as the computational susceptibility
 diverges.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import numpy as np
 from typing import Dict, Tuple, Optional
 from dataclasses import dataclass
+
+if TYPE_CHECKING:  # pandas is optional — imported lazily in the one function that uses it
+    import pandas as pd
 
 
 # ─── Physical constants ───
