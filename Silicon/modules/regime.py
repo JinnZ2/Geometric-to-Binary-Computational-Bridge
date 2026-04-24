@@ -33,7 +33,7 @@ Attractor taxonomy
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import numpy as np
 from .state import SiliconState
 
@@ -54,6 +54,84 @@ ALL_REGIMES = [
 
 # ── Omega² threshold for signature transition ─────────────────────────────────
 OMEGA2_TRANSITION_TOL = 0.05   # |Ω²| < this → transition regime
+
+
+@dataclass
+class Omega2SignLog:
+    """
+    Record of Ω²(x) sign state and transition events at a single time step.
+
+    Attributes
+    ----------
+    time          : float       — simulation time of this record
+    omega2_mean   : float       — spatial mean of Ω²(x)
+    omega2_min    : float       — spatial minimum (most negative point)
+    omega2_max    : float       — spatial maximum
+    sign_positive : bool        — True if mean Ω² > 0 (Riemannian / stable)
+    transition    : bool        — True if a sign change occurred since last step
+    near_boundary : bool        — True if |mean Ω²| < OMEGA2_TRANSITION_TOL
+    fraction_negative : float   — fraction of spatial points where Ω²(x) < 0
+    """
+    time             : float
+    omega2_mean      : float
+    omega2_min       : float
+    omega2_max       : float
+    sign_positive    : bool
+    transition       : bool
+    near_boundary    : bool
+    fraction_negative: float
+
+    def __repr__(self) -> str:
+        flag = "TRANSITION" if self.transition else ("BOUNDARY" if self.near_boundary else "stable")
+        sign = "+" if self.sign_positive else "-"
+        return (
+            f"Ω²[t={self.time:.3f}] mean={self.omega2_mean:+.4f} "
+            f"sign={sign}  neg_frac={self.fraction_negative:.3f}  [{flag}]"
+        )
+
+
+def log_omega2(
+    omega2: np.ndarray,
+    time: float,
+    prev_sign_positive: bool | None = None,
+) -> Omega2SignLog:
+    """
+    Compute the Ω² sign log entry for a single time step.
+
+    Parameters
+    ----------
+    omega2            : np.ndarray — Ω²(x) field at current step
+    time              : float      — current simulation time
+    prev_sign_positive: bool|None  — sign state from previous step;
+                                     None means no previous step (no transition possible)
+
+    Returns
+    -------
+    Omega2SignLog
+    """
+    mean_o2 = float(omega2.mean())
+    min_o2  = float(omega2.min())
+    max_o2  = float(omega2.max())
+    frac_neg = float(np.mean(omega2 < 0))
+    sign_pos = mean_o2 > 0
+    near_bnd = abs(mean_o2) < OMEGA2_TRANSITION_TOL
+
+    # Transition: sign flipped since last step
+    if prev_sign_positive is None:
+        transition = False
+    else:
+        transition = (sign_pos != prev_sign_positive)
+
+    return Omega2SignLog(
+        time             = time,
+        omega2_mean      = mean_o2,
+        omega2_min       = min_o2,
+        omega2_max       = max_o2,
+        sign_positive    = sign_pos,
+        transition       = transition,
+        near_boundary    = near_bnd,
+        fraction_negative= frac_neg,
+    )
 
 
 @dataclass
