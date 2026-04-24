@@ -111,3 +111,117 @@
     "ETHK_reference": "001 • Resonance • Reciprocity • Mutual Benefit"
   }
 }
+
+
+- Silicon wafers: 4" P-type <100>, 1-10 Ω·cm, prime grade (University Wafer surplus, $15/wafer)
+- Boron spin-on dopant: Filmtronics B-153, 500mL ($200)
+- Phosphorus spin-on dopant: Filmtronics P-8545, 500mL ($200)
+- Contact metal: 99.99% aluminum wire for thermal evaporation ($50)
+- Tube furnace: SentroTech STF-1200 or homebuilt equivalent ($800-1500)
+- Mask aligner: Homebuilt UV-LED exposure system on linear stage ($400)
+- Photoresist: AZ 1512 or SU-8 depending on feature size ($100)
+- Wire bonder: Manual ball bonder or conductive epoxy alternative ($500 vs $50)
+
+
+
+The Scaling Principle
+
+The physics doesn't care about absolute size — it cares about ratios. If you scale the device up by 100× in XY, you need to scale voltages, doping densities, and thermal gradients accordingly. The octahedral encoding is a topological structure — the vertex relationships survive scaling as long as the ratios between n, d, ℓ, and κ are preserved.
+
+What this means for a buildable version:
+
+· Device area: 1 mm² instead of 1 µm²
+· Feature size: 5 µm instead of 50 nm
+· Coil diameter: 100 µm instead of 100 nm
+· Contacts: wire-bonded instead of nano-vias
+· Readout: oscilloscope instead of lock-in at THz
+
+The computational phase space (purity × entanglement) is scale-invariant. You'll hit the same vertices at different absolute values of n and d. The sim can be recalibrated for the scaled device.
+
+
+Stage 1: Substrate Prep (start with finished wafers, skip ingot)
+
+· Clean wafers in piranha etch (H₂SO₄:H₂O₂, 3:1) — do this outside, in PPE, with a fan
+· HF dip to remove native oxide — 2% HF, 30 seconds, DI water rinse
+· Spin dry on a 3D-printed spinner (brushless motor + chuck)
+
+Stage 2: Doping (spin-on + furnace drive, replaces implanter)
+
+· Spin dopant film at 3000 RPM for 30 seconds
+· Soft bake at 200°C for 15 minutes (hot plate)
+· Drive-in at 1000°C for 1-4 hours in tube furnace with N₂ flow
+· Strip oxide in HF, measure sheet resistance with 4-point probe
+
+Stage 3: Patterning (shadow mask or contact lithography)
+
+· Apply photoresist, expose through printed mask on transparency film
+· Develop, etch, strip
+· Repeat for each layer (doping, contacts, coils)
+
+Stage 4: Contact Deposition (thermal evaporation)
+
+· Homebuilt evaporator: bell jar + diffusion pump + tungsten boat
+· Deposit aluminum pads through shadow mask
+· Anneal contacts at 400°C for 30 minutes in forming gas
+
+Stage 5: Coil Formation (electroplating through mask)
+
+· Seed layer deposition (sputter or evaporate thin copper)
+· Pattern coil in thick photoresist (SU-8)
+· Electroplate copper into mold
+· Strip resist, etch seed layer
+
+Stage 6: Encapsulation (spin-on glass or silicone)
+
+· Spin coat protective layer
+· Open contact windows via lithography or mechanical probing
+
+Stage 7: Test and Calibrate
+
+· Probe station: XYZ micromanipulators + microscope ($500)
+· Source-measure unit: Keithley 2400 on eBay or homebuilt Arduino SMU ($300-800)
+· Oscilloscope for transient response
+· Temperature control: Peltier stage + thermocouple + PID controller ($200)
+
+3. Vertex Calibration Procedure
+
+This is the bridge from sim to physical operation:
+
+Step 1: Establish S0
+
+· Apply nominal biases. Measure I-V curve. Compare to sim prediction for default n, d.
+· If current is too high: n is above spec. Reduce drive-in time.
+· If current is too low: d is too high. Re-anneal to reduce defects.
+
+Step 2: Locate the 8 vertices
+
+· Sweep control voltages (gate, substrate bias, pump LED)
+· At each setting, measure the 6 observables that map to your S-vector
+· Compute vertex weights in real-time (microcontroller running your Python weight calculation or a simplified lookup table)
+· Identify the voltage setpoints that maximize weight for each of the 8 vertices
+· Record these as VERTEX_VOLTAGES[0] through VERTEX_VOLTAGES[7]
+
+Step 3: Map the computational phase space
+
+· Steer from vertex to vertex, recording purity and entanglement at each step
+· Verify the diagonal vertices host separable/solitonic computation (low off-diagonal kernel response)
+· Verify the axis vertices host entangled/nonlocal computation (high spatial correlation between contacts)
+· Locate Ω² ≈ 0 by finding the bias condition where signal becomes maximally sensitive to small perturbations
+
+Step 4: Tune feedback loop
+
+· Set PID gains for vertex steering based on measured response times
+· Verify the device can hold a vertex against drift for > 1 minute (minimum for computation)
+· Characterize noise floor — this sets your error rate
+
+The Single Most Important Calibration
+
+The Ω² sign transition is your only hard boundary. Everything else is continuous. In the physical device, Ω² is measured as:
+
+Ω² > 0: Device is in normal operating regime. Signal propagates, output is predictable.
+Ω² = 0: Device is at maximum sensitivity. Small input → large output. This is your readout point.
+Ω² < 0: Device is in unstable regime. Oscillation or latch-up possible. Avoid for steady computation, useful for reset.
+
+Finding this boundary physically: Sweep substrate bias while measuring gain. The point where gain spikes (diverging sensitivity) is Ω² ≈ 0. Mark this voltage. Stay 10-20% away from it except during intentional readout.
+
+
