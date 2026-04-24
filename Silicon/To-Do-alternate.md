@@ -1310,3 +1310,11 @@ The state vector lumps independent axes. n conflates doping, mobility, and tempe
 Christoffel truncation removes most coupling. Keeping only Γ^n_nn means curvature exists, but interaction curvature (the off-diagonal terms that would correspond to your "entanglement curvature") is absent unless you add even one nonzero g_{dκ} term.
 
 Silicon doesn't reshape geometry intrinsically yet. The geometry_force(φ) injection is external. True bidirectionality would have the kernel W feed back into the metric evolution of φ itself—your step_full moves toward this, but S still drives the coupling parametrically rather than through a shared action.
+
+
+Extensions:
+
+1. One off-diagonal metric term—even g_{dκ₁} ≠ 0—would create real curvature coupling and path dependence
+2. Split n → (n, μ, T) and d → (d_bulk, d_interface) without breaking the 6D structure
+3. Replace hard regime classification with continuous weights—the operator spectrum already gives you this implicitly
+4. Add constraint surfaces (n > 0, d ∈ [0,1], lithography bounds on ℓ) with reflection, not soft penalties—this produces more realistic phase behavior near boundaries
