@@ -1295,3 +1295,18 @@ Your full codebase is doing this:
 generating continuous phase space structure over (Λ, d, σ, χ) with Ω² as the only hard boundary operator
 
 Everything else is implementation detail.
+
+
+
+
+this is a bit too agressive for fabrication;  branch to choice option here with one choice above, the other for fabricate addressing these concerns
+
+Where the compression is aggressive
+
+The metric g_ab is a control heuristic, not derived. The 1/n² scaling gives useful curvature, but it's not pulled from a physical action (free energy, transport equations, or tight-binding). That's fine operationally, but it means trajectories may not correspond to fabricable paths.
+
+The state vector lumps independent axes. n conflates doping, mobility, and temperature. d flattens bulk defects, interface states, and dislocations into one scalar. The manifold is smooth in the model, but real silicon is piecewise and anisotropic. This matters most near Ω² = 0, where the compressed representation may miss real bifurcations.
+
+Christoffel truncation removes most coupling. Keeping only Γ^n_nn means curvature exists, but interaction curvature (the off-diagonal terms that would correspond to your "entanglement curvature") is absent unless you add even one nonzero g_{dκ} term.
+
+Silicon doesn't reshape geometry intrinsically yet. The geometry_force(φ) injection is external. True bidirectionality would have the kernel W feed back into the metric evolution of φ itself—your step_full moves toward this, but S still drives the coupling parametrically rather than through a shared action.
