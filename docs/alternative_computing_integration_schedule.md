@@ -22,24 +22,61 @@ list(domains_missing_alternative())  # scheduled below
 
 At time of writing:
 
-| Domain        | Binary encoder | Alternative interpreter | Integration entry |
-|---------------|----------------|--------------------------|---------------------|
-| electric      | ✅              | ✅                        | `electric_full_alternative_diagnostic` |
-| sound         | ✅              | ✅                        | `sound_full_alternative_diagnostic`    |
-| gravity       | ✅              | ✅                        | `gravity_full_alternative_diagnostic`  |
-| magnetic      | ✅              | ⬜ scheduled              | (pending)           |
-| light         | ✅              | ⬜ scheduled              | (pending)           |
-| wave          | ✅              | ⬜ scheduled              | (pending)           |
-| thermal       | ✅              | ⬜ scheduled              | (pending)           |
-| pressure      | ✅              | ⬜ scheduled              | (pending)           |
-| chemical      | ✅              | ⬜ scheduled              | (pending)           |
-| consciousness | ✅              | ⬜ scheduled              | (pending)           |
-| emotion       | ✅              | ⬜ scheduled              | (pending)           |
+| Domain           | Binary encoder | Per-domain alt interpreter | Integration entry |
+|------------------|----------------|-----------------------------|----------------------|
+| electric         | ✅              | ✅                            | `electric_full_alternative_diagnostic` |
+| sound            | ✅              | ✅                            | `sound_full_alternative_diagnostic`    |
+| gravity          | ✅              | ✅                            | `gravity_full_alternative_diagnostic`  |
+| community        | ✅              | ✅                            | `community_alternative_diagnostic`     |
+| magnetic         | ✅              | ⬜ scheduled                  | (pending)            |
+| light            | ✅              | ⬜ scheduled                  | (pending)            |
+| wave             | ✅              | ⬜ scheduled                  | (pending)            |
+| thermal          | ✅              | ⬜ scheduled                  | (pending)            |
+| pressure         | ✅              | ⬜ scheduled                  | (pending)            |
+| chemical         | ✅              | ⬜ scheduled                  | (pending)            |
+| consciousness    | ✅              | ⬜ scheduled                  | (pending)            |
+| emotion          | ✅              | ⬜ scheduled                  | (pending)            |
+| biomachine       | ✅              | ⬜ scheduled                  | (pending)            |
+| coop             | ✅              | ⬜ scheduled                  | (pending)            |
+| cyclic           | ✅              | ⬜ scheduled                  | (pending)            |
+| resilience       | ✅              | ⬜ scheduled                  | (pending)            |
+| vortex           | ✅              | ⬜ scheduled                  | (pending)            |
+| geometric_fiber  | ✅              | ⬜ scheduled                  | (pending)            |
 
-Registration lives in `bridges/adapters/ternary_adapter.py` in
-`_ALTERNATIVE_REGISTRY`. Flip a domain from `None` to
+Binary coverage is now driven by
+`Silicon/core/bridges/adapters.BRIDGE_ENCODERS`, so the binary path
+inherits new domains automatically. Registration for per-domain
+alternative interpreters lives in
+`bridges/adapters/ternary_adapter.py` (`_ALTERNATIVE_REGISTRY`). Flip
+a domain from `None` to
 `"bridges.<domain>_alternative_compute:<domain>_full_alternative_diagnostic"`
 once the module exists — no dispatcher changes required.
+
+## Paradigm coverage
+
+Seven paradigms from `bridges/unified_alternative_registry.PARADIGM_REGISTRY`:
+
+| Paradigm       | Family       | Dispatchable via `encode_state(mode=...)` | Implementation |
+|----------------|--------------|--------------------------------------------|----------------|
+| ternary        | per-domain   | ✅ `"ternary"` / `"alternative"` / `"alt"`  | per-domain diagnostic |
+| quantum        | per-domain   | ✅ `"quantum"`                              | per-domain diagnostic |
+| stochastic     | per-domain   | ✅ `"stochastic"`                           | per-domain diagnostic |
+| neuromorphic   | cross-domain | ✅ `"neuromorphic"` / `"spike"`             | `neuromorphic_wrap_encoder` |
+| memristive     | cross-domain | ✅ `"memristive"` / `"memristor"`           | `memristive_wrap_conductivity` |
+| reservoir      | cross-domain | ✅ `"reservoir"` / `"echo"`                 | `reservoir_wrap_geometries` (single-domain) |
+| approximate    | —            | ⬜ scheduled                                | `ApproximateInstitutionalRedundancy`, `ApproximateTAF` — no generic `*_wrap_*` entry yet |
+
+*Per-domain paradigms* are served by the single
+`<domain>_full_alternative_diagnostic` function, which already bundles
+ternary + quantum + stochastic views. The dispatcher returns the whole
+diagnostic object regardless of which of the three names was used;
+callers pick the relevant slice via the dataclass attributes.
+
+*Cross-domain paradigms* take any compatible geometry dict. For
+multi-domain reservoirs (the intended use — gravity ↔ electric ↔
+sound coupling), call `bridges.reservoir_bridge.reservoir_wrap_geometries`
+directly with `{domain: geometry, ...}`; the single-domain dispatcher
+shortcut is a convenience for unit-tests and simple pipelines.
 
 ---
 

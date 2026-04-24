@@ -1,29 +1,46 @@
 """
-encode_state — unified dispatcher for binary / ternary / dual encoding
-======================================================================
+encode_state — unified dispatcher for binary / ternary / dual / paradigm encoding
+=================================================================================
 
-This is the single entry point for the branch-point architecture
-described in ``alternative_computing_bridge.md``:
+The single entry point for the branch-point architecture described in
+``alternative_computing_bridge.md`` and ``alternative_computing_integration_schedule.md``.
 
-                     ┌── binary encoder  (deterministic bitstring)
-    geometry ────────┼── alternative interpreter (ternary + stochastic + quantum)
-                     └── dual             (both; returns {"binary": ..., "alternative": ...})
+Modes
+-----
+Seven alternative paradigms (plus the original binary path and a dual
+combination) are dispatchable here. Paradigm selection is orthogonal to
+domain selection:
 
-The function avoids hard-wiring any domain — it takes a ``domain``
-keyword and delegates to the matching adapter in
-``bridges.adapters``. Domains without an alternative interpreter raise
-a clear ``NotImplementedError`` rather than silently falling back to
-the binary path (silent fallback was explicitly the failure mode the
-alternative bridge was designed to eliminate).
+  binary                                  → run the registered binary encoder
+  ternary / alternative / stochastic /    → per-domain ternary+quantum+stochastic
+    quantum                                 diagnostic (ElectricAlternativeDiagnostic, etc.)
+  neuromorphic                            → spike-based interpretation of every
+                                             list-valued channel in geometry
+  memristive                              → hysteretic trace of conductivity/
+                                             voltage/current histories
+  reservoir                               → single-domain reservoir network
+                                             (for multi-domain reservoirs, use
+                                             bridges.reservoir_bridge.reservoir_wrap_geometries
+                                             directly)
+  dual / both / merge                     → return {"binary": ..., "alternative": ...}
 
-Basic usage
------------
->>> from bridges.encode_state import encode_state
+Domains without a registered interpreter for the selected paradigm
+raise ``NotImplementedError``. Binary always works for every registered
+encoder.
+
+Examples
+--------
 >>> encode_state({"charge": [1e-6]}, domain="electric", mode="binary")
 '1111'
 >>> diag = encode_state({"charge": [1e-6]}, domain="electric", mode="ternary")
 >>> type(diag).__name__
 'ElectricAlternativeDiagnostic'
+>>> encoding = encode_state(
+...     {"current_A": [0.5, -0.5, 0.0, 0.3]},
+...     domain="electric", mode="neuromorphic",
+... )
+>>> type(encoding).__name__
+'NeuromorphicEncoding'
 """
 
 from __future__ import annotations
@@ -31,28 +48,45 @@ from __future__ import annotations
 from typing import Any, Dict, Optional
 
 from bridges.adapters import AlternativeAdapter, BinaryAdapter
+from bridges.adapters.ternary_adapter import (
+    ALL_PARADIGMS,
+    CROSS_DOMAIN_PARADIGMS,
+    PER_DOMAIN_PARADIGMS,
+)
 
 
-# Accept several spellings for mode so callers can match the terminology
-# in the original spec without tripping on aliases.
-_MODE_ALIASES = {
-    "binary": "binary",
-    "bin":    "binary",
-    "b":      "binary",
+# Mode alias → (bucket, paradigm).  "bucket" picks the top-level
+# control-flow branch below; "paradigm" selects which alternative
+# interpreter runs when the bucket is "alternative".
+_MODE_ALIASES: Dict[str, tuple] = {
+    # binary
+    "binary": ("binary", None),
+    "bin":    ("binary", None),
+    "b":      ("binary", None),
 
-    "ternary":     "alternative",
-    "alternative": "alternative",
-    "alt":         "alternative",
-    "stochastic":  "alternative",
-    "quantum":     "alternative",
+    # per-domain alternative family
+    "ternary":     ("alternative", "ternary"),
+    "alternative": ("alternative", "ternary"),
+    "alt":         ("alternative", "ternary"),
+    "stochastic":  ("alternative", "stochastic"),
+    "quantum":     ("alternative", "quantum"),
 
-    "dual":  "dual",
-    "both":  "dual",
-    "merge": "dual",
+    # cross-domain paradigms
+    "neuromorphic": ("alternative", "neuromorphic"),
+    "spike":        ("alternative", "neuromorphic"),
+    "memristive":   ("alternative", "memristive"),
+    "memristor":    ("alternative", "memristive"),
+    "reservoir":    ("alternative", "reservoir"),
+    "echo":         ("alternative", "reservoir"),
+
+    # dual
+    "dual":  ("dual", "ternary"),
+    "both":  ("dual", "ternary"),
+    "merge": ("dual", "ternary"),
 }
 
 
-def _normalise_mode(mode: str) -> str:
+def _resolve_mode(mode: str) -> tuple:
     key = mode.lower().strip()
     if key not in _MODE_ALIASES:
         raise ValueError(
@@ -70,11 +104,18 @@ def binary_encode(geometry: Dict[str, Any], domain: str = "electric") -> str:
 def alternative_encode(
     geometry: Dict[str, Any],
     domain: str = "electric",
+    paradigm: str = "ternary",
     frequency_hz: Optional[float] = None,
     **extra: Any,
 ) -> Any:
-    """Shortcut: run the registered alternative interpreter for ``domain``."""
-    return AlternativeAdapter(domain).encode(
+    """
+    Shortcut: run a named alternative paradigm for ``domain``.
+
+    ``paradigm`` must be one of :data:`~bridges.adapters.ternary_adapter.ALL_PARADIGMS`.
+    Per-domain paradigms use ``frequency_hz``; cross-domain paradigms
+    ignore it.
+    """
+    return AlternativeAdapter(domain, paradigm=paradigm).encode(
         geometry, frequency_hz=frequency_hz, **extra
     )
 
@@ -92,23 +133,31 @@ def encode_state(
     Parameters
     ----------
     geometry
-        Input geometry dict (domain-specific schema).
+        Input geometry dict (domain-specific schema for binary and
+        per-domain paradigms; paradigm-specific for neuromorphic /
+        memristive / reservoir).
     domain
-        Domain key — one of ``electric``, ``magnetic``, ``light``,
-        ``sound``, ``gravity``, ``wave``, ``thermal``, ``pressure``,
-        ``chemical``, ``consciousness``, ``emotion``.
+        Domain key — see :func:`bridges.adapters.binary_adapter.known_domains`.
     mode
-        ``"binary"``  → return bitstring.
+        ``"binary"``            → return bitstring.
         ``"ternary"`` / ``"alternative"`` / ``"stochastic"`` / ``"quantum"``
-                      → return the domain diagnostic object.
-        ``"dual"`` / ``"both"``
-                      → return ``{"binary": ..., "alternative": ...}``.
+                                → return the domain diagnostic object
+                                  (all three share the same diagnostic type;
+                                  the dataclass exposes each view separately).
+        ``"neuromorphic"`` / ``"spike"``
+                                → :class:`~bridges.neuromorphic_bridge.NeuromorphicEncoding`.
+        ``"memristive"`` / ``"memristor"``
+                                → :class:`~bridges.memristive_bridge.MemristiveTrace`.
+        ``"reservoir"`` / ``"echo"``
+                                → :class:`~bridges.reservoir_bridge.ReservoirNetwork`.
+        ``"dual"`` / ``"both"`` / ``"merge"``
+                                → ``{"binary": ..., "alternative": <ternary diagnostic>}``.
     frequency_hz
-        Optional excitation frequency for skin-effect / zero-crossing
-        / Doppler analyses. Ignored by the binary path.
+        Optional excitation frequency. Used by per-domain paradigms
+        (ternary / quantum / stochastic) for skin-effect and zero-crossing
+        analysis; ignored by binary and cross-domain paradigms.
     **extra
-        Additional keyword arguments forwarded to the alternative
-        interpreter.
+        Forwarded verbatim to the alternative interpreter.
 
     Returns
     -------
@@ -120,23 +169,24 @@ def encode_state(
     ValueError
         If ``mode`` is not recognised.
     NotImplementedError
-        If ``mode`` selects the alternative path but the domain has no
-        registered alternative interpreter.
+        If the selected per-domain paradigm has no registered
+        interpreter for ``domain``.
     """
-    resolved = _normalise_mode(mode)
+    bucket, paradigm = _resolve_mode(mode)
 
-    if resolved == "binary":
+    if bucket == "binary":
         return binary_encode(geometry, domain=domain)
 
-    if resolved == "alternative":
+    if bucket == "alternative":
         return alternative_encode(
-            geometry, domain=domain, frequency_hz=frequency_hz, **extra
+            geometry, domain=domain, paradigm=paradigm,
+            frequency_hz=frequency_hz, **extra,
         )
 
     # dual: run both paths; fail soft on alternative so callers still
     # get the binary representation when the alt path is not wired up.
     binary = binary_encode(geometry, domain=domain)
-    alt_adapter = AlternativeAdapter(domain)
+    alt_adapter = AlternativeAdapter(domain, paradigm=paradigm)
     alternative: Any
     if alt_adapter.is_available:
         alternative = alt_adapter.encode(
@@ -160,10 +210,12 @@ def encode_alternative(
     geometry: Dict[str, Any],
     domain: str = "electric",
     frequency_hz: Optional[float] = None,
+    paradigm: str = "ternary",
 ) -> Any:
     """Alias preserved for the spec's ``encode_alternative()`` entry point."""
     return alternative_encode(
-        geometry, domain=domain, frequency_hz=frequency_hz
+        geometry, domain=domain, paradigm=paradigm,
+        frequency_hz=frequency_hz,
     )
 
 
@@ -173,4 +225,7 @@ __all__ = [
     "alternative_encode",
     "encode_binary",
     "encode_alternative",
+    "ALL_PARADIGMS",
+    "PER_DOMAIN_PARADIGMS",
+    "CROSS_DOMAIN_PARADIGMS",
 ]

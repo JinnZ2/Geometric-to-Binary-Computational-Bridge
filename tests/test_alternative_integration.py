@@ -147,6 +147,7 @@ class TestAdapters(unittest.TestCase):
         self.assertTrue(AlternativeAdapter("electric").is_available)
         self.assertTrue(AlternativeAdapter("sound").is_available)
         self.assertTrue(AlternativeAdapter("gravity").is_available)
+        self.assertTrue(AlternativeAdapter("community").is_available)
         self.assertFalse(AlternativeAdapter("magnetic").is_available)
 
     def test_alternative_adapter_encode(self):
@@ -156,6 +157,24 @@ class TestAdapters(unittest.TestCase):
         self.assertEqual(
             type(diag).__name__, "ElectricAlternativeDiagnostic"
         )
+
+    def test_binary_adapter_reaches_every_silicon_domain(self):
+        # After the registry merge, every domain the silicon adapter
+        # layer knows about must be resolvable. Only check that the
+        # class resolves — encoding itself needs domain-specific
+        # geometry and is tested elsewhere.
+        from bridges.adapters.binary_adapter import known_domains
+
+        from Silicon.core.bridges.adapters import BRIDGE_ENCODERS
+
+        for domain in BRIDGE_ENCODERS:
+            self.assertIn(domain, known_domains())
+            adapter = BinaryAdapter(domain)
+            self.assertIs(adapter._encoder_cls, BRIDGE_ENCODERS[domain])
+
+    def test_alternative_adapter_rejects_unknown_paradigm(self):
+        with self.assertRaises(ValueError):
+            AlternativeAdapter("electric", paradigm="quaternary")
 
 
 # ---------------------------------------------------------------------------
@@ -573,6 +592,109 @@ class TestFieldAdapter(unittest.TestCase):
         bits = field_to_alternative(self._solver_output(), mode="binary")
         self.assertIsInstance(bits, str)
         self.assertTrue(set(bits) <= {"0", "1"})
+
+
+# ---------------------------------------------------------------------------
+# Cross-domain paradigm dispatch (neuromorphic / memristive / reservoir)
+# ---------------------------------------------------------------------------
+
+class TestCrossDomainParadigms(unittest.TestCase):
+
+    def test_neuromorphic_returns_spike_encoding(self):
+        out = encode_state(
+            ELECTRIC_GEOMETRY, domain="electric", mode="neuromorphic",
+        )
+        self.assertEqual(type(out).__name__, "NeuromorphicEncoding")
+        # Every list-valued channel should produce a spike train.
+        self.assertIn("current_A", out.spike_trains)
+        self.assertIn("voltage_V", out.spike_trains)
+
+    def test_neuromorphic_spike_alias(self):
+        a = encode_state(ELECTRIC_GEOMETRY, domain="electric", mode="neuromorphic")
+        b = encode_state(ELECTRIC_GEOMETRY, domain="electric", mode="spike")
+        self.assertEqual(type(a).__name__, type(b).__name__)
+
+    def test_memristive_returns_trace(self):
+        out = encode_state(
+            ELECTRIC_GEOMETRY, domain="electric", mode="memristive",
+        )
+        self.assertEqual(type(out).__name__, "MemristiveTrace")
+        self.assertEqual(
+            list(out.conductivity), list(ELECTRIC_GEOMETRY["conductivity_S"]),
+        )
+
+    def test_memristive_requires_conductivity(self):
+        geometry_without_sigma = {
+            "charge": [1e-6],
+            "current_A": [0.5],
+            "voltage_V": [12.0],
+        }
+        with self.assertRaises(ValueError):
+            encode_state(
+                geometry_without_sigma, domain="electric", mode="memristive",
+            )
+
+    def test_reservoir_returns_network(self):
+        out = encode_state(
+            ELECTRIC_GEOMETRY, domain="electric", mode="reservoir",
+        )
+        self.assertEqual(type(out).__name__, "ReservoirNetwork")
+        # Every list-valued channel becomes a node namespaced as
+        # "<domain>/<key>".
+        expected = {
+            "electric/charge",
+            "electric/current_A",
+            "electric/voltage_V",
+            "electric/conductivity_S",
+        }
+        self.assertEqual(set(out.nodes), expected)
+
+    def test_cross_domain_works_on_domain_without_ternary(self):
+        # thermal has no per-domain diagnostic yet, but cross-domain
+        # paradigms do not depend on the domain registry at all.
+        thermal_geom = {"temperature_K": [300.0, 320.0, 290.0, 305.0]}
+        out = encode_state(
+            thermal_geom, domain="thermal", mode="neuromorphic",
+        )
+        self.assertEqual(type(out).__name__, "NeuromorphicEncoding")
+
+    def test_all_paradigms_exported(self):
+        from bridges.encode_state import (
+            ALL_PARADIGMS,
+            CROSS_DOMAIN_PARADIGMS,
+            PER_DOMAIN_PARADIGMS,
+        )
+        self.assertEqual(
+            PER_DOMAIN_PARADIGMS, frozenset({"ternary", "quantum", "stochastic"}),
+        )
+        self.assertEqual(
+            CROSS_DOMAIN_PARADIGMS,
+            frozenset({"neuromorphic", "memristive", "reservoir"}),
+        )
+        self.assertEqual(
+            ALL_PARADIGMS, PER_DOMAIN_PARADIGMS | CROSS_DOMAIN_PARADIGMS,
+        )
+
+
+class TestExpandedBinaryCoverage(unittest.TestCase):
+
+    def test_community_binary_path_reachable(self):
+        # Before the registry merge, 'community' was missing from our
+        # adapter's map — encode_state(domain="community") raised
+        # KeyError. After the merge it must resolve and encode.
+        profile = {
+            "population": 1000,
+            "farms_ha": 50,
+            "gardens_ha": 10,
+        }
+        bits = encode_state(profile, domain="community", mode="binary")
+        self.assertIsInstance(bits, str)
+        self.assertTrue(set(bits) <= {"0", "1"})
+
+    def test_community_ternary_path_reachable(self):
+        profile = {"population": 1000, "farms_ha": 50, "gardens_ha": 10}
+        diag = encode_state(profile, domain="community", mode="ternary")
+        self.assertEqual(type(diag).__name__, "CommunityAlternativeDiagnostic")
 
 
 if __name__ == "__main__":
