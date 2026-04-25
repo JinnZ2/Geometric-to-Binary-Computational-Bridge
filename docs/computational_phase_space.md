@@ -106,6 +106,23 @@ designing tasks that need to be undone.
   eight vertices into physical S-space coordinates; reconciling the
   two vocabularies is Step 2–3 of the integration plan.
 
+> **Coordinate-convention warning.** The GEIS and Engine octahedral
+> tables index the eight vertices in *different* sign conventions and
+> *different* bit orderings:
+>
+> | Source | Index 0 | Bit-to-axis map | Bit value 0 | Bit value 1 |
+> |---|---|---|---|---|
+> | `GEIS/octahedral_state.py::OctahedralState.POSITIONS` | `(+0.25, +0.25, +0.25)` | LSB → y, mid → x, MSB → z | `+` | `−` |
+> | `Engine/gaussian_splats/octahedral.py::OctahedralStateEncoder.state_centers` | `(−1, −1, −1)` | LSB → x, mid → y, MSB → z | `−` | `+` |
+>
+> The two systems do not currently cross-import (verified by
+> grepping `from GEIS` in `Engine/` and vice versa). Each encoder is
+> internally consistent in its own namespace — but if you write a
+> bridge that translates a GEIS index into an Engine state index,
+> you must apply both an axis permutation and a sign flip. Future
+> Step 2/3 of the integration plan should fix this drift, ideally
+> by promoting one convention to a shared canonical table.
+
 * **Regime-mediated QEC** ([`Silicon/core/regime_mediated_qec.py`](../Silicon/core/regime_mediated_qec.py))
   is where a trajectory's current regime label should be consumed
   for code-distance and threshold-surface decisions.

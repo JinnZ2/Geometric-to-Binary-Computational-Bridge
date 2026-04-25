@@ -697,5 +697,45 @@ class TestExpandedBinaryCoverage(unittest.TestCase):
         self.assertEqual(type(diag).__name__, "CommunityAlternativeDiagnostic")
 
 
+class TestParadigmRegistry(unittest.TestCase):
+    """Regression tests for the class-name lookup in
+    bridges.unified_alternative_registry.
+
+    Pre-fix, the memristive mapping's primary_encoders list had the
+    string ``"ElectricBridgeEncoder (conductivity domain)"`` — the
+    parenthetical annotation prevented the exact-match lookup in
+    ``get_applicable_paradigms`` from recognising ``"ElectricBridgeEncoder"``
+    and silently dropped memristive from every result. Both tests
+    below explicitly assert membership so any future regression of
+    the same class is caught immediately."""
+
+    def test_electric_includes_memristive(self):
+        from bridges.unified_alternative_registry import get_applicable_paradigms
+
+        names = [
+            m.paradigm.value
+            for m in get_applicable_paradigms("ElectricBridgeEncoder")
+        ]
+        self.assertIn("memristive", names)
+
+    def test_primary_encoders_have_no_inline_annotations(self):
+        # Class-name strings in PARADIGM_REGISTRY must be bare class
+        # names so ``if encoder_name in mapping.primary_encoders``
+        # can match them. The "All encoders" sentinel is the only
+        # non-class-name value allowed.
+        from bridges.unified_alternative_registry import PARADIGM_REGISTRY
+
+        for paradigm_name, mappings in PARADIGM_REGISTRY.items():
+            for mapping in mappings:
+                for enc in mapping.primary_encoders:
+                    if enc.startswith("All encoders"):
+                        continue
+                    self.assertNotIn(
+                        "(", enc,
+                        f"Inline annotation leaked into primary_encoders "
+                        f"for paradigm {paradigm_name!r}: {enc!r}",
+                    )
+
+
 if __name__ == "__main__":
     unittest.main()

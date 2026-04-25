@@ -1,2 +1,11 @@
 numpy>=1.20
 scipy>=1.7
+
+# Required by documented demo and CLI scripts:
+#   Silicon/modules/demo.py, Silicon/FRET/cli.py, Silicon/lattice/cli.py,
+#   and the visualization helpers in Silicon/core/*.py.
+# The core test suites (GEIS, Engine, bridges, gaussian splats,
+# alt-integration, intersection) do not import matplotlib, so CI works
+# without it — but a fresh `pip install -r requirements.txt` should
+# succeed in running the demos.
+matplotlib>=3.5

@@ -82,7 +82,7 @@ PARADIGM_REGISTRY: Dict[str, List[ParadigmEncoderMapping]] = {
     "memristive": [
         ParadigmEncoderMapping(
             AlternativeParadigm.MEMRISTIVE,
-            ["ElectricBridgeEncoder (conductivity domain)"],
+            ["ElectricBridgeEncoder"],  # scope: conductivity sub-domain
             "MemristiveTrace.from_measurements",
             "Binary reads instantaneous state; memristor state IS its history",
             "Memory Coupling (co-located → intrinsic)"
