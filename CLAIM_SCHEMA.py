@@ -321,8 +321,26 @@ def read_claims_binary(
     path: str | Path,
     table: Dict[str, List[str]],
     id_lookup: Dict[int, str] | None = None,
+    max_bytes: int = 8 * 1024 * 1024,
 ) -> List[Dict[str, Any]]:
-    blob = Path(path).read_bytes()
+    """
+    Read a packed ``.claims.bin`` file back into claim dicts.
+
+    A canonical repo's binary file is well under 1 MB. The
+    ``max_bytes`` cap (default 8 MiB) refuses to read pathologically
+    large files into memory — protects against accidentally pointing
+    at a multi-GB log or a malicious upload. Raise the cap if you
+    have a legitimate need for huge claim catalogues.
+    """
+    p = Path(path)
+    size = p.stat().st_size
+    if size > max_bytes:
+        raise ValueError(
+            f"binary claim file {p} is {size} bytes, exceeding the "
+            f"{max_bytes}-byte cap. Pass a larger ``max_bytes`` if "
+            f"this is a legitimate large catalogue."
+        )
+    blob = p.read_bytes()
     if len(blob) % BIN_CLAIM_BYTES != 0:
         raise ValueError(
             f"binary claim file length {len(blob)} is not a multiple "

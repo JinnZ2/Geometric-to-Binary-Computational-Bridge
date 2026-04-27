@@ -43,9 +43,13 @@ class LoRaTransmitter:
         payload = line.encode("utf-8")
 
         if self.send_bytes is None:
+            # Log only the byte count — never the payload prefix.
+            # Primitive payloads include timestamp + location bounds,
+            # which would broadcast the deployment site to anyone with
+            # log read access.
             LOG.info(
-                "LoRaTransmitter no-op: would send %d bytes (%s …)",
-                len(payload), payload[:40].decode("utf-8", errors="replace"),
+                "LoRaTransmitter no-op: would send %d bytes",
+                len(payload),
             )
             return False
 

@@ -77,10 +77,65 @@ class QueueManager:
     # ------------------------------------------------------------------
 
     def _cursor(self) -> int:
+        """
+        Return the byte offset of the next un-popped line.
+
+        Validates the cursor against the queue file size. If the
+        on-disk cursor is corrupted (non-numeric, negative, or
+        beyond EOF), the method logs a warning and clamps to a safe
+        value rather than silently re-reading already-popped items.
+
+        Clamping rules:
+          * unparseable / negative → 0 (re-read whole queue, but log)
+          * beyond file size       → file size (treat as fully drained)
+        """
+        raw = ""
         try:
-            return int(self._cursor_path.read_text().strip() or "0")
-        except (OSError, ValueError):
+            raw = self._cursor_path.read_text().strip()
+        except OSError as exc:
+            LOG.warning(
+                "queue cursor at %s unreadable (%s) — resetting to 0",
+                self._cursor_path, exc,
+            )
             return 0
+
+        if not raw:
+            return 0
+
+        try:
+            offset = int(raw)
+        except ValueError:
+            LOG.warning(
+                "queue cursor at %s contains non-numeric %r — "
+                "resetting to 0 (this may cause re-transmission of "
+                "already-popped items)",
+                self._cursor_path, raw,
+            )
+            return 0
+
+        try:
+            file_size = self.queue_path.stat().st_size
+        except OSError:
+            file_size = 0
+
+        if offset < 0:
+            LOG.warning(
+                "queue cursor at %s is negative (%d) — resetting to 0",
+                self._cursor_path, offset,
+            )
+            return 0
+
+        if offset > file_size:
+            LOG.warning(
+                "queue cursor at %s (%d) exceeds queue file size "
+                "(%d) — clamping to file size. This usually means "
+                "the queue file was truncated externally; the cursor "
+                "is the conservative choice (treat queue as empty).",
+                self._cursor_path, offset, file_size,
+            )
+            return file_size
+
+        return offset
 
     def _set_cursor(self, offset: int) -> None:
         self._cursor_path.write_text(str(int(offset)))

@@ -110,6 +110,13 @@ class AnomalyTracker:
     """
     Multi-channel detector. One :class:`RollingBaseline` per channel.
 
+    The set of tracked channels is bounded by ``max_channels`` to
+    prevent unbounded memory growth on nodes that see new sensor
+    identifiers over their lifetime (mesh peers, hot-swap probes,
+    timestamp-suffixed channel names). When the cap is hit, the
+    least-recently-evaluated channel is evicted — so the active
+    set always holds the most-recently-active channels.
+
     Typical use::
 
         tracker = AnomalyTracker()
@@ -120,21 +127,38 @@ class AnomalyTracker:
                     primitive = build_primitive(...)  # escalate
     """
 
+    DEFAULT_MAX_CHANNELS = 1024
+
     def __init__(
         self,
         alpha: float = 0.05,
         sigma_threshold: float = 3.0,
         warmup: int = 8,
+        max_channels: Optional[int] = None,
     ) -> None:
         self._defaults = dict(
             alpha=alpha, sigma_threshold=sigma_threshold, warmup=warmup,
         )
-        self._baselines: dict[str, RollingBaseline] = {}
+        # Use OrderedDict so we can move-to-end on access for the
+        # LRU eviction policy without a separate timestamp field.
+        from collections import OrderedDict
+        self._baselines: "OrderedDict[str, RollingBaseline]" = OrderedDict()
+        self._max_channels = (
+            max_channels if max_channels is not None
+            else self.DEFAULT_MAX_CHANNELS
+        )
 
     def baseline_for(self, channel: str) -> RollingBaseline:
-        if channel not in self._baselines:
-            self._baselines[channel] = RollingBaseline(**self._defaults)
-        return self._baselines[channel]
+        if channel in self._baselines:
+            self._baselines.move_to_end(channel)
+            return self._baselines[channel]
+
+        baseline = RollingBaseline(**self._defaults)
+        self._baselines[channel] = baseline
+        # Evict the oldest entry if we just exceeded the cap.
+        while len(self._baselines) > self._max_channels:
+            self._baselines.popitem(last=False)
+        return baseline
 
     def evaluate(self, channel: str, value: float) -> AnomalySummary:
         baseline = self.baseline_for(channel)

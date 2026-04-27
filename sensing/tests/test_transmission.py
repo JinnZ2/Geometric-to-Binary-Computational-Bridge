@@ -161,12 +161,23 @@ class TestHamKiss(unittest.TestCase):
             self.assertEqual(kiss_decode(frame), body)
 
     def test_no_op_without_writer(self):
-        tx = HamKissTransmitter(callsign="NOCALL", write_kiss=None)
+        # Real callsign required even on the no-op log path, since
+        # the no-op path was previously leaking "NOCALL" into local
+        # logs as if it were a station-of-record.
+        tx = HamKissTransmitter(callsign="K0AAA", write_kiss=None)
         self.assertFalse(tx(_primitive()))
 
-    def test_rejects_real_writer_without_callsign(self):
+    def test_rejects_nocall_unconditionally(self):
+        # Both with and without write_kiss the placeholder callsign
+        # is rejected — Part 97 § 97.119.
         with self.assertRaises(ValueError):
             HamKissTransmitter(callsign="NOCALL", write_kiss=lambda b: True)
+        with self.assertRaises(ValueError):
+            HamKissTransmitter(callsign="NOCALL", write_kiss=None)
+        with self.assertRaises(ValueError):
+            HamKissTransmitter(callsign="nocall")  # case-insensitive
+        with self.assertRaises(ValueError):
+            HamKissTransmitter(callsign="")        # empty
 
     def test_real_writer_returns_true(self):
         sent = []
