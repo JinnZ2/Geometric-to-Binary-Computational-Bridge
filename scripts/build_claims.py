@@ -75,11 +75,13 @@ CLAIMS = [
     },
 
     # provenance: bridges/electric_alternative_compute.py (analyze_ac_zero_crossings)
+    # The magnitude of dI/dt achieves omega * I_peak at zero crossings;
+    # the "at zero crossing" qualifier lives in ``cond``, not in the rate.
     {
         "id":     "ac_zero_cross",
-        "rate":   "dI/dt@I=0=omega*I_peak",
+        "rate":   "abs(dI/dt)=omega*I_peak",
         "bounds": "AC_circuit,sample_window",
-        "cond":   ["AC_excitation", "above_nyquist"],
+        "cond":   ["AC_excitation", "above_nyquist", "at_zero_crossing"],
         "rel":    ["skin_depth", "ohmic_dissip"],
         "fail":   ["DC_offset_dominant", "sub_nyquist"],
         "meas":   ["zero_crossing_detector", "FFT"],
@@ -147,9 +149,12 @@ CLAIMS = [
     },
 
     # provenance: bridges/sound_encoder.py:104 (beat_frequency)
+    # Rate is the count of beat cycles per second; ``f_beat`` itself
+    # is a frequency (Hz), not a rate.  ``dN_beats/dt = abs(f1-f2)``
+    # keeps both sides dimensional (cycles/s).
     {
         "id":     "beat_freq",
-        "rate":   "df_beat/dt=abs(f1-f2)",
+        "rate":   "dN_beats/dt=abs(f1-f2)",
         "bounds": "two_tone_superposition",
         "cond":   ["near_unison", "linear_medium"],
         "rel":    ["doppler_shift", "harmonic_ratio"],
@@ -159,9 +164,12 @@ CLAIMS = [
     },
 
     # provenance: bridges/sound_encoder.py:109 (harmonic_ratio)
+    # The harmonic ratio ``h = f1/f2`` is a dimensionless number; the
+    # corresponding *rate* is the relative phase advance per unit
+    # time, which equals f1/f2 in a Kuramoto / phase-lock framing.
     {
         "id":     "harmonic_ratio",
-        "rate":   "dh/dt=f1/f2",
+        "rate":   "dphase_ratio/dt=f1/f2",
         "bounds": "stable_pitches,linear_medium",
         "cond":   ["f1_finite", "f2_nonzero"],
         "rel":    ["beat_freq", "doppler_shift"],
@@ -243,11 +251,14 @@ CLAIMS = [
     },
 
     # provenance: Engine/kt_annealer.py + bridges/magnetic_encoder.py (KT phase transition)
+    # Inverse correlation length goes to zero at T_KT — clean
+    # single-line marker. Pure equation form; the "at T_KT"
+    # qualifier moves to ``cond``.
     {
         "id":     "kt_phase",
-        "rate":   "dn_v/dT@T_KT_diverges",
+        "rate":   "d(xi_inv)/dT=0",
         "bounds": "2D_XY_model,near_T_KT",
-        "cond":   ["lattice_size_gt_core", "equil_anneal"],
+        "cond":   ["lattice_size_gt_core", "equil_anneal", "at_T_KT"],
         "rel":    ["magnonic_disp", "larmor_precess"],
         "fail":   ["long_range_order", "3D_system"],
         "meas":   ["helicity_modulus", "spin_correl"],
@@ -267,9 +278,12 @@ CLAIMS = [
     },
 
     # provenance: Silicon/modules/dynamics.py (evolve_deterministic / evolve_stochastic)
+    # Geodesic equation with potential: the Christoffel term is
+    # *quadratic* in velocity, not linear. Index notation:
+    #   d2S^a/dt2 + Gamma^a_{bc} * dS^b/dt * dS^c/dt = -g^{ab} * dV/dS^b
     {
         "id":     "si_geodesic",
-        "rate":   "d2S/dt2=-Gamma*dS/dt-ginv*gradV",
+        "rate":   "d2S/dt2=-Gamma*(dS/dt)*(dS/dt)-ginv*gradV",
         "bounds": "9D_silicon_manifold,fab_pipeline",
         "cond":   ["g_pos_def", "smooth_V"],
         "rel":    ["regime_omega2", "octahedral_col"],
@@ -279,11 +293,14 @@ CLAIMS = [
     },
 
     # provenance: Silicon/modules/regime.py:93 (log_omega2) + Octahedral_Integration.md Step 4
+    # The boundary itself: Ω² crosses zero with normal-velocity v_perp,
+    # carrying the signature flip. "At the boundary" is a ``cond``,
+    # not part of the rate equation.
     {
         "id":     "regime_omega2",
-        "rate":   "dOmega2/dt@Omega2=0=signature_flip",
+        "rate":   "dOmega2/dt=v_perp",
         "bounds": "silicon_manifold,near_face",
-        "cond":   ["smooth_metric", "rim_to_lor_transition"],
+        "cond":   ["smooth_metric", "rim_to_lor_transition", "at_signature_boundary"],
         "rel":    ["si_geodesic", "octahedral_col"],
         "fail":   ["pure_riemannian", "pure_lorentzian"],
         "meas":   ["kernel_eigval_sign", "omega2_sign_log"],
@@ -291,9 +308,12 @@ CLAIMS = [
     },
 
     # provenance: Engine/gaussian_splats/octahedral.py + bridges/probability_collapse.py
+    # Time derivative of Shannon entropy on the 8-state distribution.
+    # Derived: dH/dt = -sum_i (dp_i/dt) * log p_i  (the -1 cancels
+    # because sum_i dp_i/dt = 0 for a normalised distribution).
     {
         "id":     "octahedral_col",
-        "rate":   "dH/dt=d(-sum p_i*log p_i)/dt",
+        "rate":   "dH/dt=-sum_i(dp_i/dt)*log(p_i)",
         "bounds": "8_state_octahedral_basis",
         "cond":   ["positive_probabilities", "normalised"],
         "rel":    ["si_geodesic", "regime_omega2"],
@@ -303,9 +323,13 @@ CLAIMS = [
     },
 
     # provenance: bridges/intersection/resonate.py (resonate / resonate_many)
+    # Kuramoto-style coupled-oscillator phase evolution. The coupling
+    # strength produced by ``resonate()`` is the order parameter
+    # ``r = (1/N) * sum_j cos(phi_j - <phi>)`` of the Kuramoto model;
+    # the underlying dynamics is the per-oscillator phase rate below.
     {
         "id":     "resonate",
-        "rate":   "dC/dt=mean(cos(theta_ij))",
+        "rate":   "dphi_i/dt=omega_i+(K/N)*sum_j(sin(phi_j-phi_i))",
         "bounds": "multi_domain_basin_signatures",
         "cond":   ["vector_normalisable", "regime_classified"],
         "rel":    ["octahedral_col"],
