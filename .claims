@@ -1,0 +1,23 @@
+ohmic_dissip|dE/dt=V*I|ohmic_circuit,steady_state,lab_scale|I_nonzero,R_finite,V_bounded|skin_depth,ac_zero_cross|superconductor,dielectric_breakdown|VI_probes,calorimetry|0
+coulomb_field|dF/dr=-2*k*q1*q2/r^3|vacuum,classical,far_field|r_positive,classical_regime|skin_depth,ohmic_dissip|r_to_zero,quantum_regime|torsion_balance,electrometer|0
+skin_depth|dJ/dr=-J/delta|cylindrical_conductor,AC_steady|f_positive,sigma_positive,delta_lt_radius|ac_zero_cross,ohmic_dissip|DC_limit,perfect_conductor|four_wire_AC,eddy_probe|0
+ac_zero_cross|dI/dt@I=0=omega*I_peak|AC_circuit,sample_window|AC_excitation,above_nyquist|skin_depth,ohmic_dissip|DC_offset_dominant,sub_nyquist|zero_crossing_detector,FFT|0
+biot_savart|dB/dl=mu0*I*(dl_x_rhat)/(4pi*r^2)|vacuum,magnetostatic,line_current|current_steady,no_displacement|larmor_precess,magnonic_disp|rapidly_varying,relativistic|hall_probe,fluxgate|0
+larmor_precess|dphi/dt=gamma*B|spin_in_field,classical_to_quantum|B_static,T2_long|magnonic_disp,biot_savart|B_zero,T2_short,RF_resonance|NMR,ESR,ODMR|0
+psi_evolve|dpsi/dt=(-i*H/hbar)*psi|closed_quantum_system|H_hermitian,no_decoherence|born_density|open_system,measurement_collapse|state_tomography,interferometry|0
+born_density|dP/dx=d_abs(psi)^2/dx|normalised_state,position_basis|norm_unity,finite_support|psi_evolve|unnormalised,momentum_basis_only|photon_counting,spatial_imaging|0
+doppler_shift|df/dv=f_source/v_sound|subsonic_observer,classical|v_lt_v_sound,line_of_sight|beat_freq,harmonic_ratio|sonic_boom,transverse_motion|spectrogram,phase_locked_loop|0
+beat_freq|df_beat/dt=abs(f1-f2)|two_tone_superposition|near_unison,linear_medium|harmonic_ratio,doppler_shift|nonlinear_medium,chaotic_phase|zero_crossing_detector,FFT|0
+harmonic_ratio|dh/dt=f1/f2|stable_pitches,linear_medium|f1_finite,f2_nonzero|beat_freq,doppler_shift|chaotic_pitch,pitch_zero|FFT,pitch_tracker|0
+thermal_rad|dM/dT=4*epsilon*sigma*T^3|blackbody_or_grey,thermal_equilibrium|T_positive,epsilon_in_0_1,LTE|fourier_heat,newton_cool|non_LTE,plasma,cosmological|bolometer,IR_spectrometer|0
+fourier_heat|dT/dt=alpha*d2T/dx2|solid_or_static_fluid,isotropic|k_constant,no_radiation,no_convection|newton_cool,thermal_rad|plasma,anisotropic,phase_change|thermocouple_array,IR_camera|0
+newton_cool|dQ/dt=h*(T_obj-T_env)|convective,small_dT|h_constant,T_obj_gt_T_env|fourier_heat,thermal_rad|phase_change,large_dT|IR_camera,thermocouple|0
+grav_accel|dv/dt=-G*M/r^2|weak_field,point_mass|classical_regime,r_gt_r_s|tidal_grad,orbital_v|near_horizon,multi_body|gravimeter,free_fall|0
+tidal_grad|da/dr=-2*G*M/r^3|extended_body,weak_field|d_lt_r,rigid_body|orbital_v,grav_accel|roche_disrupt,BH_horizon|torsion_pendulum,gradient_satellite|0
+orbital_v|dv_orb/dr=-(1/2)*sqrt(G*M)/r^(3/2)|circular_orbit,bound_state|E_negative,no_drag|tidal_grad,grav_accel|unbound,drag_dominant|orbit_tracking,doppler_shift|3
+kt_phase|dn_v/dT@T_KT_diverges|2D_XY_model,near_T_KT|lattice_size_gt_core,equil_anneal|larmor_precess,magnonic_disp|long_range_order,3D_system|helicity_modulus,spin_correl|0
+magnonic_disp|domega/dk=v_g(k,H0,Ms,Aex,theta)|thin_magnetic_film,exchange_dominated|k_positive,low_damping,in_plane|larmor_precess,biot_savart|bulk_3D,high_damping|brillouin_light_scatt,propagating_sw|0
+si_geodesic|d2S/dt2=-Gamma*dS/dt-ginv*gradV|9D_silicon_manifold,fab_pipeline|g_pos_def,smooth_V|regime_omega2,octahedral_col|signature_change,constraint_viol|state_trajectory,regime_weights|4
+regime_omega2|dOmega2/dt@Omega2=0=signature_flip|silicon_manifold,near_face|smooth_metric,rim_to_lor_transition|octahedral_col,si_geodesic|pure_riemannian,pure_lorentzian|kernel_eigval_sign,omega2_sign_log|0
+octahedral_col|dH/dt=d(-sum p_i*log p_i)/dt|8_state_octahedral_basis|positive_probabilities,normalised|regime_omega2,si_geodesic|sub_8_state,basis_change|vertex_argmax,distribution_collapse|0
+resonate|dC/dt=mean(cos(theta_ij))|multi_domain_basin_signatures|vector_normalisable,regime_classified|octahedral_col|empty_vector,single_domain|pairwise_dot,agreement_regime|0
