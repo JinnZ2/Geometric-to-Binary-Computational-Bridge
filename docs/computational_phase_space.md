@@ -106,22 +106,24 @@ designing tasks that need to be undone.
   eight vertices into physical S-space coordinates; reconciling the
   two vocabularies is Step 2–3 of the integration plan.
 
-> **Coordinate-convention warning.** The GEIS and Engine octahedral
-> tables index the eight vertices in *different* sign conventions and
-> *different* bit orderings:
+> **Coordinate-convention reconciliation.** The GEIS and Engine
+> octahedral tables index the eight vertices in *different* sign
+> conventions and *different* bit orderings:
 >
 > | Source | Index 0 | Bit-to-axis map | Bit value 0 | Bit value 1 |
 > |---|---|---|---|---|
 > | `GEIS/octahedral_state.py::OctahedralState.POSITIONS` | `(+0.25, +0.25, +0.25)` | LSB → y, mid → x, MSB → z | `+` | `−` |
 > | `Engine/gaussian_splats/octahedral.py::OctahedralStateEncoder.state_centers` | `(−1, −1, −1)` | LSB → x, mid → y, MSB → z | `−` | `+` |
 >
-> The two systems do not currently cross-import (verified by
-> grepping `from GEIS` in `Engine/` and vice versa). Each encoder is
-> internally consistent in its own namespace — but if you write a
-> bridge that translates a GEIS index into an Engine state index,
-> you must apply both an axis permutation and a sign flip. Future
-> Step 2/3 of the integration plan should fix this drift, ideally
-> by promoting one convention to a shared canonical table.
+> Both subsystems are internally consistent in their own namespaces.
+> The bijection between them lives in
+> [`bridges/octahedral_canon.py`](../bridges/octahedral_canon.py) —
+> use ``geis_to_engine(idx)`` / ``engine_to_geis(idx)`` whenever you
+> cross the boundary. The transformation is an involution (its own
+> inverse), it's verified against the live tables on every test run,
+> and ``reconciliation_table()`` is the single source of truth for
+> the per-index mapping. Step 2/3 of the integration plan should
+> defer to this canon rather than picking a third convention.
 
 * **Regime-mediated QEC** ([`Silicon/core/regime_mediated_qec.py`](../Silicon/core/regime_mediated_qec.py))
   is where a trajectory's current regime label should be consumed
