@@ -183,6 +183,78 @@ class TestRepoArtifacts(unittest.TestCase):
                 f"{claim['id']} rate {rate!r} is not a differential form",
             )
 
+    def test_rate_is_a_clean_equation(self):
+        # Every rate is a single equation: exactly one '=', neither
+        # side empty. Boundary / evaluation-point qualifiers belong
+        # in ``cond``, not in the rate string. A future schema
+        # revision could allow ``@<token>`` qualifiers — until then,
+        # the cleaner discipline is to keep rate strings free of
+        # them.
+        for claim in cs.read_claims(self.claims_path):
+            rate = claim["rate"]
+            self.assertNotIn(
+                "@", rate,
+                f"{claim['id']} rate {rate!r} uses the deprecated "
+                f"@<cond> qualifier — move the condition into "
+                f"the ``cond`` field instead",
+            )
+            self.assertEqual(
+                rate.count("="), 1,
+                f"{claim['id']} rate {rate!r} is not a clean equation "
+                f"(needs exactly one '=')",
+            )
+            lhs, rhs = rate.split("=", 1)
+            self.assertTrue(
+                lhs.strip() and rhs.strip(),
+                f"{claim['id']} rate {rate!r} has an empty side",
+            )
+
+    def test_meas_entries_are_reachable_via_vocabulary(self):
+        # Every claim's ``meas`` set must contain at least one entry
+        # that is reachable through the default sensing vocabulary
+        # OR is a known physics-instrument vocabulary entry. This ties
+        # the claim catalogue to the field-measurement layer so the
+        # verifier can never silently drop a whole class of claims as
+        # "no sensor in the world maps to this".
+        from bridges.claim_evidence import default_vocabulary
+
+        # Allow these reference instruments even though no sensing
+        # driver currently maps to them; they are recognised lab
+        # instruments and a future driver may add the mapping.
+        external_known = {
+            "torsion_balance", "electrometer", "calorimetry",
+            "VI_probes", "hall_probe", "fluxgate",
+            "NMR", "ESR", "ODMR",
+            "state_tomography", "interferometry",
+            "photon_counting", "spatial_imaging",
+            "thermocouple", "IR_spectrometer",
+            "gravimeter", "torsion_pendulum", "gradient_satellite",
+            "orbit_tracking", "helicity_modulus", "spin_correl",
+            "brillouin_light_scatt", "propagating_sw",
+            "state_trajectory", "regime_weights",
+            "kernel_eigval_sign", "omega2_sign_log",
+            "vertex_argmax", "distribution_collapse",
+            "pairwise_dot", "agreement_regime",
+        }
+
+        vocab = default_vocabulary()
+        sensor_supported: set = set()
+        for device in vocab.known_devices():
+            sensor_supported |= set(vocab.measurements_for(device))
+
+        all_known = sensor_supported | external_known
+
+        for claim in cs.read_claims(self.claims_path):
+            meas = set(claim["meas"])
+            self.assertTrue(
+                meas & all_known,
+                f"{claim['id']}: none of meas={meas!r} is reachable "
+                f"via the default sensing vocabulary or the known "
+                f"external-instrument list. Either add a sensor "
+                f"driver, register the instrument as external, or "
+                f"refine the claim's meas set.",
+            )
+
 
 # ---------------------------------------------------------------------------
 # Build pipeline idempotency

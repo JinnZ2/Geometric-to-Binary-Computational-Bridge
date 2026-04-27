@@ -28,16 +28,33 @@ True
 from __future__ import annotations
 
 import heapq
+import itertools
 from dataclasses import dataclass, field
 from typing import Any, Callable, List, Optional
 
 
+# Module-level monotonic counter used as the third tiebreaker in
+# Event ordering. Two events scheduled at exactly the same (time,
+# priority) would otherwise compare as equal — and Python's heapq
+# does not guarantee FIFO order for equal keys, so the firing order
+# becomes non-deterministic. The counter forces strict ordering by
+# scheduling sequence.
+_EVENT_COUNTER = itertools.count()
+
+
 @dataclass(order=True)
 class Event:
-    """One scheduled callable ordered by ``(time, priority)``."""
+    """One scheduled callable ordered by ``(time, priority, sequence)``.
+
+    The ``sequence`` field is auto-generated from a module-level
+    monotonic counter, ensuring strict ordering for events with
+    identical time + priority (FIFO by schedule order). Without it
+    Python's heapq behaviour for equal keys is unspecified.
+    """
 
     time: float
     priority: int = field(default=0)
+    sequence: int = field(default_factory=lambda: next(_EVENT_COUNTER))
     fn: Callable[..., Any] = field(default=lambda *a, **k: None, compare=False)
     args: tuple = field(default=(), compare=False)
 
@@ -50,6 +67,10 @@ class EventScheduler:
     the cursor to the event's scheduled time, then calls
     ``event.fn(*event.args, self)`` — the scheduler is always passed
     as the last argument so handlers can schedule follow-up events.
+
+    Ordering: ``(time, priority, sequence)`` lexicographic. Events at
+    the same time fire in priority order; events at the same time
+    *and* priority fire in scheduling order (FIFO).
     """
 
     def __init__(self) -> None:
@@ -63,7 +84,12 @@ class EventScheduler:
         args: tuple = (),
         priority: int = 0,
     ) -> None:
-        heapq.heappush(self.queue, Event(time, priority, fn, args))
+        # Note: passing fn / args via constructor positional doesn't
+        # work here because ``sequence`` is in the middle. Use kwargs.
+        heapq.heappush(
+            self.queue,
+            Event(time=time, priority=priority, fn=fn, args=args),
+        )
 
     def run(self, t_end: float) -> None:
         """Drain events whose scheduled time is ≤ ``t_end``."""

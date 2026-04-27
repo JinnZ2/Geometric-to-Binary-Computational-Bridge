@@ -70,26 +70,53 @@ class AlternativeSPICE:
     Parameters
     ----------
     frequency_hz
-        Excitation frequency for the sinusoidal voltage source. Also
-        drives the skin-effect computation for each node.
+        Excitation frequency for the sinusoidal voltage source (must
+        be > 0 — a zero or negative frequency would produce a flat
+        sin(0) = 0 every step, silently turning the simulator into a
+        no-op). Also drives the skin-effect computation for each node.
     dt
-        Timestep in seconds.
+        Timestep in seconds (must be > 0).
     record_history
         When true, each call to ``step`` appends a
         ``(time, current, ternary)`` triple to
         ``state.history[node]``. Off by default to keep long runs
-        cheap.
+        cheap. The history is **bounded** to ``max_history_per_node``
+        entries (default 10 000); older entries are dropped FIFO so
+        long runs don't OOM the host.
+    max_history_per_node
+        Cap on the per-node history length. Set to 0 to disable
+        recording even when ``record_history`` is true; set to a
+        large number for unbounded recording on hosts with sufficient
+        memory (use with care on a Pi Zero).
     """
+
+    DEFAULT_MAX_HISTORY_PER_NODE = 10_000
 
     def __init__(
         self,
         frequency_hz: float = 60.0,
         dt: float = 1e-3,
         record_history: bool = False,
+        max_history_per_node: Optional[int] = None,
     ) -> None:
+        if frequency_hz <= 0:
+            raise ValueError(
+                f"frequency_hz must be > 0; got {frequency_hz!r}. "
+                f"A zero or negative frequency would silently flatline "
+                f"the simulator (sin(0) = 0 every step) — pass a "
+                f"real AC frequency or use a different model."
+            )
+        if dt <= 0:
+            raise ValueError(f"dt must be > 0; got {dt!r}")
+
         self.frequency_hz = frequency_hz
         self.state = CircuitState(dt=dt)
         self.record_history = record_history
+        self.max_history_per_node = (
+            max_history_per_node
+            if max_history_per_node is not None
+            else self.DEFAULT_MAX_HISTORY_PER_NODE
+        )
 
     def add_node(
         self,
@@ -133,8 +160,14 @@ class AlternativeSPICE:
                 conductivity_S=sigma,
             )
 
-            if self.record_history:
-                self.state.history[node].append((t, current, int(ternary)))
+            if self.record_history and self.max_history_per_node > 0:
+                hist = self.state.history.setdefault(node, [])
+                hist.append((t, current, int(ternary)))
+                # FIFO eviction so long runs do not OOM. Slicing is
+                # cheap on small N; for very large caps switch to
+                # collections.deque(maxlen=...).
+                if len(hist) > self.max_history_per_node:
+                    del hist[: len(hist) - self.max_history_per_node]
 
         self.state.time += self.state.dt
         return self.state

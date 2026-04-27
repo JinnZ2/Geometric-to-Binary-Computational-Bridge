@@ -80,19 +80,47 @@ def kiss_decode(frame: bytes) -> bytes:
     return bytes(out)
 
 
+_NOCALL_PLACEHOLDER = "NOCALL"
+
+
 @dataclass
 class HamKissTransmitter:
-    """Stub HAM-packet transmitter; pass ``write_kiss`` to make it real."""
+    """Stub HAM-packet transmitter; pass ``write_kiss`` to make it real.
 
-    callsign: str = "NOCALL"
+    FCC Part 97 compliance (and the equivalent rules in other
+    jurisdictions) is the **operator's** responsibility:
+
+    * Stations must transmit a valid callsign at least every 10
+      minutes and at the end of any transmission.
+    * No encryption or codes obscuring the meaning of the
+      transmission (§ 97.113(a)(4)). Plain text only.
+    * No commercial / for-profit messages. This includes any data
+      stream tied to a paid service.
+    * No broadcasting. Targeted point-to-point or net traffic only.
+
+    This class enforces only the most basic guardrail: the placeholder
+    callsign ``"NOCALL"`` is rejected at construction, regardless of
+    whether ``write_kiss`` is wired up. Operators using the no-op log
+    path with ``NOCALL`` is also rejected — broadcasting "NOCALL" via
+    a misconfigured transmitter is the most common Part 97 violation
+    the framework can prevent up front.
+    """
+
+    callsign: str = _NOCALL_PLACEHOLDER
     write_kiss: Optional[Callable[[bytes], bool]] = None
 
     def __post_init__(self) -> None:
-        if self.write_kiss is not None and self.callsign == "NOCALL":
+        # Enforce a real callsign unconditionally — the previous
+        # version only checked when ``write_kiss`` was set, which let
+        # the no-op log path leak ``NOCALL > <payload>`` into local
+        # logs as if it were a station-of-record callsign. Either you
+        # supply a real callsign or you do not construct this class.
+        if not self.callsign or self.callsign.upper() == _NOCALL_PLACEHOLDER:
             raise ValueError(
-                "HamKissTransmitter must be initialised with a real "
-                "callsign before write_kiss is wired up — transmitting "
-                "without a callsign is a regulatory violation."
+                f"HamKissTransmitter must be constructed with a real "
+                f"FCC / IARU callsign — got {self.callsign!r}. "
+                f"Transmitting (or even logging) without one is a "
+                f"regulatory violation under Part 97 § 97.119."
             )
 
     def __call__(self, primitive: Primitive) -> bool:
@@ -101,10 +129,13 @@ class HamKissTransmitter:
         frame = kiss_encode(payload)
 
         if self.write_kiss is None:
+            # Log only the byte count and frame type. The payload
+            # carries timestamp + location bounds + raw values; we do
+            # not echo any of that to logs.
             LOG.info(
-                "HamKissTransmitter no-op: would send KISS frame "
-                "(%d bytes, %s …)",
-                len(frame), payload[:48].decode("utf-8", errors="replace"),
+                "HamKissTransmitter no-op (callsign=%s): would send "
+                "KISS frame (%d bytes)",
+                self.callsign, len(frame),
             )
             return False
         try:

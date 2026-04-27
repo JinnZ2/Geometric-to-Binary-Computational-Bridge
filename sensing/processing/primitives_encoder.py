@@ -199,9 +199,31 @@ def primitive_to_obs_line(p: Primitive) -> str:
     return "\t".join(fields)
 
 
+# Defensive cap on a single .obs line. The biggest legitimate field
+# is ``form`` (the JSON dump of all readings), which the encoder
+# already truncates to ``form_budget_chars`` (default 240). A
+# whole-line cap of 16 KiB leaves generous room for that plus every
+# other field, while rejecting adversarial lines that would expand
+# memory unboundedly through a megabyte-long ``form``.
+MAX_OBS_LINE_BYTES = 16 * 1024
+
+
 def obs_line_to_primitive(line: str) -> Primitive:
     """Inverse of :func:`primitive_to_obs_line`. Drops the ``readings``
-    list (it's not stored on disk)."""
+    list (it's not stored on disk).
+
+    Rejects lines longer than :data:`MAX_OBS_LINE_BYTES` to prevent
+    a hostile / corrupt queue file from blowing up memory at parse
+    time. An honest Primitive is comfortably under the cap; if you
+    hit it, something is wrong upstream.
+    """
+    if len(line.encode("utf-8")) > MAX_OBS_LINE_BYTES:
+        raise ValueError(
+            f"obs line is {len(line)} bytes, exceeding the "
+            f"{MAX_OBS_LINE_BYTES}-byte cap. Either the upstream "
+            f"writer is misbehaving or the .obs file is corrupted; "
+            f"refuse to allocate a primitive this large."
+        )
     parts = line.rstrip("\n").split("\t")
     if len(parts) != len(_OBS_FIELDS):
         raise ValueError(
