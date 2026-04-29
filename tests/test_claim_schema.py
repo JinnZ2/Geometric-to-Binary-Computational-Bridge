@@ -227,7 +227,7 @@ class TestRepoArtifacts(unittest.TestCase):
             "NMR", "ESR", "ODMR",
             "state_tomography", "interferometry",
             "photon_counting", "spatial_imaging",
-            "thermocouple", "IR_spectrometer",
+            "thermocouple", "IR_spectrometer", "spectrometer",
             "gravimeter", "torsion_pendulum", "gradient_satellite",
             "orbit_tracking", "helicity_modulus", "spin_correl",
             "brillouin_light_scatt", "propagating_sw",
@@ -235,6 +235,7 @@ class TestRepoArtifacts(unittest.TestCase):
             "kernel_eigval_sign", "omega2_sign_log",
             "vertex_argmax", "distribution_collapse",
             "pairwise_dot", "agreement_regime",
+            "polarimeter", "stokes_decomposition", "rotating_polarizer",
         }
 
         vocab = default_vocabulary()

@@ -69,6 +69,16 @@ _DEFAULT_VOCABULARY: Dict[str, frozenset] = {
     "Microphone": frozenset({
         "spectrogram", "FFT", "phase_locked_loop", "pitch_tracker",
     }),
+    # AS7341 multispectral (visible + NIR)
+    "AS7341": frozenset({
+        "spectrometer", "photon_counting", "spatial_imaging",
+        "IR_spectrometer",
+    }),
+    # Rotating-polarizer + photodiode (linear-polarization Stokes)
+    "RotatingPolarizer": frozenset({
+        "polarimeter", "stokes_decomposition",
+        "rotating_polarizer", "photon_counting",
+    }),
 }
 
 

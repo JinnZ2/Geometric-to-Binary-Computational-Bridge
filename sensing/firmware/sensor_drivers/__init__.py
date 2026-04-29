@@ -28,6 +28,13 @@ from sensing.firmware.sensor_drivers.motion_acoustic import (
     PIRMotionDriver,
     MicrophoneDriver,
 )
+from sensing.firmware.sensor_drivers.light_spectrum import (
+    AS7341Driver,
+    AS7341_CHANNELS_NM,
+)
+from sensing.firmware.sensor_drivers.light_polarization import (
+    RotatingPolarizerDriver,
+)
 
 __all__ = [
     "SensorDriver",
@@ -38,4 +45,7 @@ __all__ = [
     "MLX90614Driver",
     "PIRMotionDriver",
     "MicrophoneDriver",
+    "AS7341Driver",
+    "AS7341_CHANNELS_NM",
+    "RotatingPolarizerDriver",
 ]
