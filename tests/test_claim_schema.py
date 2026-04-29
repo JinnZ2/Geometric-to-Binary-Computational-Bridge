@@ -236,6 +236,7 @@ class TestRepoArtifacts(unittest.TestCase):
             "vertex_argmax", "distribution_collapse",
             "pairwise_dot", "agreement_regime",
             "polarimeter", "stokes_decomposition", "rotating_polarizer",
+            "mass_spectrometry", "radioimmunoassay", "tissue_biopsy",
         }
 
         vocab = default_vocabulary()

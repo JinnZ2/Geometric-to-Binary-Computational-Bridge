@@ -180,18 +180,33 @@ REPO_HOOKS = {
 
 ```python
 QUEUE = [
-    "should geometric_to_binary expose a primitive type "
-    "'shape_channel' that wraps (basis, DOF, projection_op)?",
-    "EDC × heat: build coupled ODE with T as amplifier of effective Kd?",
+    "[DONE] should geometric_to_binary expose a primitive type "
+    "'shape_channel' that wraps (basis, DOF, projection_op)? "
+    "→ bridges/hidden_channel_detector.py::ShapeChannel",
+    "[DONE] EDC × heat: build coupled ODE with T as amplifier of "
+    "effective Kd? → bridges/edc_thermal_coupling.py "
+    "(steady_state, simulate, cascade_leverage)",
     "vector spin: is the spin-separation operator the same algebra "
     "as the K+ mode-switch (allosteric basis change)?",
-    "is 'whisper redirecting hurricane' formally a "
+    "[PARTIAL] is 'whisper redirecting hurricane' formally a "
     "low-amplitude-high-leverage marker that the audit engine "
-    "should flag automatically?",
+    "should flag automatically? → cascade_leverage scalar exists "
+    "(d(occupancy)/d(log[L]), peaks at occ=0.5 with value ln10/4); "
+    "audit-engine integration still pending",
 ]
 ```
 
 ---
+
+## Implementation status
+
+| Instance | Module | Status |
+|---|---|---|
+| `polarization_linear` (vectorial spin → light) | `sensing/firmware/sensor_drivers/light_polarization.py` | ✅ wired |
+| `hormone_geometry` (EDC × heat) | `bridges/edc_thermal_coupling.py` | ✅ wired |
+| `spin_separation` (full vectorial-EM basis) | — | ⬜ scheduled |
+| `ion_coordination` (DmAlka K⁺) | — | ⬜ scheduled |
+| `polarization` (full Stokes incl. circular) | — | ⬜ scheduled (needs quarter-wave-plate driver) |
 
 ## Connection to existing work
 
