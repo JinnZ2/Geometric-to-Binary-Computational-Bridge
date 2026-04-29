@@ -384,6 +384,22 @@ class EDCThermalCouplingDiagnostic:
         return [SHAPE_CHANNEL_REGISTRY["hormone_geometry"]]
 
     # ------------------------------------------------------------------
+    # LeverageProbe — auto-flag the whisper-redirects-hurricane regime
+    # ------------------------------------------------------------------
+
+    def current_leverage(self) -> float:
+        """Return the *peak* cascade leverage observed during the
+        simulated trajectory.
+
+        The audit engine reads this through
+        :class:`bridges.hidden_channel_detector.LeverageProbe`. Peak
+        rather than final because the climate-amplifier transient
+        is exactly the regime where leverage spikes — the diagnostic
+        has the privileged view that a single instant does not.
+        """
+        return self.peak_leverage
+
+    # ------------------------------------------------------------------
     # Summary statistics
     # ------------------------------------------------------------------
 

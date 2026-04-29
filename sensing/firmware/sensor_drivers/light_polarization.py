@@ -148,6 +148,12 @@ class RotatingPolarizerDriver(SensorDriver):
         self._intensity_at_angle = intensity_at_angle
         self._sample_angles_deg = tuple(sample_angles_deg)
         self._peak_intensity = peak_intensity
+        # Cached DoLP from the most recent reading. Used by
+        # ``current_leverage()`` to expose the LeverageProbe protocol.
+        # 0.0 before any read so the audit engine can distinguish
+        # "not measured yet" via the report's broader context, while
+        # still satisfying the protocol's float-return contract.
+        self._last_dolp: float = 0.0
         super().__init__(channel=channel, mock=mock, seed=seed)
 
     def _open(self) -> None:
@@ -166,6 +172,20 @@ class RotatingPolarizerDriver(SensorDriver):
         is reserved for a quarter-wave-plate setup that this driver
         does not measure."""
         return [SHAPE_CHANNEL_REGISTRY["polarization_linear"]]
+
+    def current_leverage(self) -> float:
+        """Return DoLP from the most recent reading as the leverage
+        proxy.
+
+        For polarization, DoLP IS the operating-point sensitivity:
+        a fully unpolarised beam (DoLP = 0) carries no information
+        in the polarization channel — the scalar amplitude is
+        sufficient. A fully linearly polarised beam (DoLP = 1)
+        carries maximum information that the scalar would discard.
+        Returns 0.0 if no reading has been taken yet so the audit
+        engine sees "currently flat" rather than crashing.
+        """
+        return float(self._last_dolp)
 
     # ------------------------------------------------------------------
     # Reading
@@ -224,6 +244,8 @@ class RotatingPolarizerDriver(SensorDriver):
         angles_rad = tuple(math.radians(d) for d in self._sample_angles_deg)
         s0, s1, s2 = _stokes_from_intensities(intensities, angles_rad)
         dolp, aop_rad = _dolp_aop(s0, s1, s2)
+        # Cache for current_leverage().
+        self._last_dolp = dolp
         values = {
             "intensity":   round(s0, 4),
             "dolp":        round(dolp, 4),

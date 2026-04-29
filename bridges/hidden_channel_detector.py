@@ -236,6 +236,54 @@ def shape_channels_of(obj: Any) -> List[ShapeChannel]:
 
 
 # ----------------------------------------------------------------------
+# LeverageProbe — "whisper redirects hurricane" auto-flag
+# ----------------------------------------------------------------------
+
+@runtime_checkable
+class LeverageProbe(Protocol):
+    """Anything that can report its current d(response)/d(log substrate)
+    sensitivity as a single scalar in ``[0, 1]``.
+
+    Mathematically: ``leverage = ln(10) · occupancy · (1 − occupancy)``
+    is the canonical Hill-1 form (peaks at 0.5 with value
+    ``ln(10) / 4 ≈ 0.5757``); other systems may use a different
+    expression but should normalise to ``[0, 1]`` so the audit
+    engine can compare across instances.
+
+    Returning ``0.0`` is meaningful — it explicitly says "this
+    system is at an operating point where small substrate changes
+    do *not* swing the response", i.e. either deep saturation or
+    well below threshold."""
+
+    def current_leverage(self) -> float:
+        ...
+
+
+# Threshold above which the audit engine considers a system to be
+# in the "high-leverage / whisper-redirects-hurricane" regime. The
+# Hill-1 analytic peak is ln(10)/4 ≈ 0.5757; 0.4 corresponds to
+# roughly the central 70% of the dose-response curve where
+# d(occupancy)/d(log [L]) is still strong.
+HIGH_LEVERAGE_THRESHOLD: float = 0.4
+
+
+def current_leverage_of(obj: Any) -> Optional[float]:
+    """Return ``obj.current_leverage()`` if obj implements the
+    protocol, else ``None``. Convenience for callers."""
+    fn = getattr(obj, "current_leverage", None)
+    if not callable(fn):
+        return None
+    try:
+        value = fn()
+    except Exception:  # noqa: BLE001
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+# ----------------------------------------------------------------------
 # Detection helper
 # ----------------------------------------------------------------------
 
@@ -252,6 +300,19 @@ class HiddenChannelReport:
     claimed channel already names every advertised channel."""
 
     notes: Tuple[str, ...]
+
+    current_leverage: Optional[float] = None
+    """Receiver's d(response)/d(log substrate) sensitivity, if it
+    implements :class:`LeverageProbe`. ``None`` when the protocol
+    is not implemented — *not* the same as 0.0, which means
+    "implemented but currently flat"."""
+
+    is_high_leverage: bool = False
+    """True iff ``current_leverage`` is at or above
+    :data:`HIGH_LEVERAGE_THRESHOLD`. The audit engine uses this to
+    flag the "whisper redirects hurricane" regime: small substrate
+    changes producing large response swings, irrespective of the
+    hidden-channel structural finding."""
 
 
 def detect_hidden_channels(
@@ -291,14 +352,28 @@ def detect_hidden_channels(
     HiddenChannelReport
     """
     advertised = shape_channels_of(receiver)
+    leverage = current_leverage_of(receiver)
+    is_high_lev = (
+        leverage is not None and leverage >= HIGH_LEVERAGE_THRESHOLD
+    )
+
     if not advertised:
+        notes = ["receiver advertises no shape channels; "
+                 "scalar reading is taken as sufficient"]
+        if is_high_lev:
+            notes.append(
+                f"BUT current_leverage={leverage:.3f} ≥ "
+                f"{HIGH_LEVERAGE_THRESHOLD} — system sits in a "
+                f"high-leverage operating point. Even a scalar-only "
+                f"system in this regime amplifies small substrate "
+                f"changes; flag for review."
+            )
         return HiddenChannelReport(
             hidden_channels=(),
             scalar_sufficient=True,
-            notes=(
-                "receiver advertises no shape channels; "
-                "scalar reading is taken as sufficient",
-            ),
+            notes=tuple(notes),
+            current_leverage=leverage,
+            is_high_leverage=is_high_lev,
         )
 
     known: set = {claimed_channel.lower()}
@@ -320,11 +395,21 @@ def detect_hidden_channels(
             "every advertised channel is covered by the claimed "
             "channel or the extras list"
         )
+    if is_high_lev:
+        notes_list.append(
+            f"high-leverage regime detected "
+            f"(current_leverage={leverage:.3f} ≥ "
+            f"{HIGH_LEVERAGE_THRESHOLD}) — substrate operating point "
+            f"is in the steep part of the response curve; small "
+            f"environmental changes produce large effects."
+        )
 
     return HiddenChannelReport(
         hidden_channels=hidden,
         scalar_sufficient=not bool(hidden),
         notes=tuple(notes_list),
+        current_leverage=leverage,
+        is_high_leverage=is_high_lev,
     )
 
 
@@ -335,6 +420,9 @@ __all__ = [
     "get_shape_channel",
     "SupportsShapeChannels",
     "shape_channels_of",
+    "LeverageProbe",
+    "HIGH_LEVERAGE_THRESHOLD",
+    "current_leverage_of",
     "HiddenChannelReport",
     "detect_hidden_channels",
 ]

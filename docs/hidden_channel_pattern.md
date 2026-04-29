@@ -183,16 +183,28 @@ QUEUE = [
     "[DONE] should geometric_to_binary expose a primitive type "
     "'shape_channel' that wraps (basis, DOF, projection_op)? "
     "→ bridges/hidden_channel_detector.py::ShapeChannel",
+
     "[DONE] EDC × heat: build coupled ODE with T as amplifier of "
     "effective Kd? → bridges/edc_thermal_coupling.py "
     "(steady_state, simulate, cascade_leverage)",
-    "vector spin: is the spin-separation operator the same algebra "
-    "as the K+ mode-switch (allosteric basis change)?",
-    "[PARTIAL] is 'whisper redirecting hurricane' formally a "
+
+    "[DONE — answered NO] vector spin: is the spin-separation "
+    "operator the same algebra as the K+ mode-switch? "
+    "→ bridges/mode_switch_algebra.py distinguishes "
+    "THRESHOLD_CROSSING (DmAlka, EDC × heat) from LATENT_BASIS "
+    "(vectorial spin); the shared *type* is ShapeChannel itself. "
+    "classify_pattern() probes a system's leverage profile to pick "
+    "the right flavour.",
+
+    "[DONE] is 'whisper redirecting hurricane' formally a "
     "low-amplitude-high-leverage marker that the audit engine "
-    "should flag automatically? → cascade_leverage scalar exists "
-    "(d(occupancy)/d(log[L]), peaks at occ=0.5 with value ln10/4); "
-    "audit-engine integration still pending",
+    "should flag automatically? → bridges/hidden_channel_detector.py "
+    "now exposes the LeverageProbe protocol; "
+    "detect_hidden_channels() reads current_leverage() off any "
+    "receiver that implements it and sets is_high_leverage=True "
+    "when value ≥ HIGH_LEVERAGE_THRESHOLD (= 0.4). "
+    "EDCThermalCouplingDiagnostic returns peak_leverage; "
+    "RotatingPolarizerDriver returns DoLP.",
 ]
 ```
 
