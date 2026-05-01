@@ -136,6 +136,62 @@ CLAIMS = [
         "cyc":    0,
     },
 
+    # provenance: bridges/edc_thermal_coupling.py
+    # Endocrine disruption × thermal amplifier — coupled ODE for
+    # the lipid-tissue concentration of an EDC under a (possibly
+    # time-varying) environmental concentration and ambient
+    # temperature. Hidden channel: ``hormone_geometry`` — receptor
+    # reads ligand pose, not scalar concentration.
+    {
+        "id":     "edc_thermal",
+        "rate":   "dC_tissue/dt=k_in*P(T)*phi_lipid*C_env-k_out*C_tissue",
+        "bounds": "mammalian_lipid_tissue,quasi-steady_environment,classical",
+        "cond":   [
+            "EDC_lipophilic", "T_above_zero_K",
+            "k_in_positive", "k_out_positive",
+            "shape_channel_hormone_geometry",
+        ],
+        "rel":    ["thermal_rad", "fourier_heat"],
+        "fail":   ["denatured_receptor", "ionising_dose", "non_LTE"],
+        "meas":   [
+            "mass_spectrometry", "radioimmunoassay", "tissue_biopsy",
+        ],
+        "cyc":    4,    # generational — EDC effects cross generations
+    },
+
+    # provenance: bridges/light_encoder.py:68 (photon_energy_eV)
+    # E = hc/λ, dE/dλ = -hc/λ². Underlying gradient of photon
+    # energy with wavelength — supports any spectral measurement.
+    {
+        "id":     "photon_energy",
+        "rate":   "dE_photon/d_lambda=-h*c/lambda^2",
+        "bounds": "vacuum_or_air,linear_optics,visible_to_NIR",
+        "cond":   ["lambda_positive", "no_relativistic_doppler"],
+        "rel":    ["psi_evolve", "born_density"],
+        "fail":   ["lambda_to_zero", "relativistic_source"],
+        "meas":   ["spectrometer", "IR_spectrometer", "photon_counting"],
+        "cyc":    0,
+    },
+
+    # provenance: bridges/light_encoder.py:87 (malus_intensity)
+    # Malus's law: I(θ) = I₀ cos²(θ - θ₀); dI/dθ = -I₀ sin(2(θ-θ₀)).
+    # Polarization is the canonical hidden channel — see
+    # docs/hidden_channel_pattern.md and
+    # bridges/hidden_channel_detector.py.
+    {
+        "id":     "polarization_malus",
+        "rate":   "dI/dtheta=-I0*sin(2*(theta-theta0))",
+        "bounds": "linear_polarized,monochromatic_or_broadband,classical",
+        "cond":   [
+            "polarizer_in_path", "I0_positive",
+            "linear_optics", "shape_channel_polarization",
+        ],
+        "rel":    ["photon_energy", "psi_evolve"],
+        "fail":   ["circular_polarization_dominant", "depolarised_light"],
+        "meas":   ["polarimeter", "stokes_decomposition", "rotating_polarizer"],
+        "cyc":    0,
+    },
+
     # provenance: bridges/sound_encoder.py:123 (doppler_shift)
     {
         "id":     "doppler_shift",
