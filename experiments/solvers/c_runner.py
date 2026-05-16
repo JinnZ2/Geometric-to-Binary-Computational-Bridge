@@ -73,12 +73,33 @@ def _ensure_built() -> tuple[bool, str]:
     return True, ""
 
 
+def _name_matches(problem_name: str, family: str) -> bool:
+    return problem_name == family or problem_name.startswith(family + "_")
+
+
+FACTOR_TAG_HINT = {"bignum", "bitwise", "numeric_tight"}
+
+
+def _tags_consistent(problem: Problem) -> bool:
+    actual = {t.value for t in problem.tags}
+    return bool(actual & FACTOR_TAG_HINT)
+
+
 @register_runner("c")
 def run_c(problem: Problem) -> tuple[bool, str, float]:
-    if not problem.name.startswith("factor"):
-        return False, f"no C solver for {problem.name}", 0.0
+    if not _name_matches(problem.name, "factor"):
+        return False, f"no C solver for '{problem.name}'", 0.0
+    if not _tags_consistent(problem):
+        return False, (f"factor: name='{problem.name}' but tags="
+                       f"{[t.value for t in problem.tags]} — refusing misroute"), 0.0
 
+    if "n" not in problem.payload:
+        return False, "factor: missing required payload key 'n'", 0.0
     n = problem.payload["n"]
+    if not isinstance(n, int):
+        return False, f"factor: payload['n'] must be int, got {type(n).__name__}", 0.0
+    if n < 4:
+        return False, f"factor: n={n} not composite (must be >= 4)", 0.0
     if n.bit_length() > 63:
         return False, f"C runner limited to 63-bit n (got {n.bit_length()} bits)", 0.0
 
@@ -89,5 +110,11 @@ def run_c(problem: Problem) -> tuple[bool, str, float]:
     r = subprocess.run([_EXE_PATH, str(n)], capture_output=True, text=True, timeout=60)
     if r.returncode != 0:
         return False, f"run failed: {r.stderr}", 0.0
-    a, b = r.stdout.strip().split()
+    try:
+        a_s, b_s = r.stdout.strip().split()
+        a, b = int(a_s), int(b_s)
+    except Exception as e:
+        return False, f"C output parse failed: {e!r}; stdout={r.stdout!r}", 0.0
+    if a <= 1 or a >= n or a * b != n:
+        return False, f"factor: bogus C result f={a} for n={n}", 0.0
     return True, f"{n} = {a} * {b}", 0.0

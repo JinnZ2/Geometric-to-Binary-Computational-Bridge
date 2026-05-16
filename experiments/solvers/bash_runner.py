@@ -11,15 +11,28 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dispatcher import Problem, register_runner
 
 
+def _name_matches(problem_name: str, family: str) -> bool:
+    return problem_name == family or problem_name.startswith(family + "_")
+
+
 @register_runner("bash")
 def run_bash(problem: Problem) -> tuple[bool, str, float]:
     if not shutil.which("bash"):
         return False, "bash not available", 0.0
 
-    if problem.name.startswith("parallel_prime_sweep"):
+    if _name_matches(problem.name, "parallel_prime_sweep"):
+        for k, t in (("lo", int), ("hi", int)):
+            if k not in problem.payload:
+                return False, f"parallel_prime_sweep: missing payload key '{k}'", 0.0
+            if not isinstance(problem.payload[k], t):
+                return False, f"parallel_prime_sweep: '{k}' must be {t.__name__}", 0.0
         lo = problem.payload["lo"]
         hi = problem.payload["hi"]
+        if hi < lo:
+            return False, f"parallel_prime_sweep: hi={hi} < lo={lo}", 0.0
         workers = problem.payload.get("workers", 4)
+        if not isinstance(workers, int) or workers < 1:
+            return False, f"parallel_prime_sweep: workers must be positive int", 0.0
 
         # chunk work: each worker handles a contiguous range, not one number.
         # spawn-cost is amortized over the whole chunk.
@@ -57,4 +70,4 @@ print(c)
         count = r.stdout.strip()
         return True, f"primes in [{lo},{hi}] via {workers} chunked workers: {count}", 0.0
 
-    return False, f"no bash solver for {problem.name}", 0.0
+    return False, f"no bash solver for '{problem.name}'", 0.0
