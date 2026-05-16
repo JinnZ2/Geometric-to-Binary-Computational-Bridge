@@ -14,8 +14,15 @@ from pathlib import Path
 
 def race(problem: Problem, langs: list[str], trials: int = 3,
          registry: Registry | None = None) -> dict[str, float]:
+    # bit-width is only a meaningful label for number-theoretic operands.
+    # n in nqueens / sweep is a structural parameter, not a numeric operand.
+    is_numeric_operand = (problem.name == "factor"
+                          or problem.name.startswith("factor_"))
     bits = problem.payload.get("n", 0)
-    bits_str = f"  ({bits.bit_length()} bits)" if isinstance(bits, int) and bits else ""
+    if is_numeric_operand and isinstance(bits, int) and bits:
+        bits_str = f"  ({bits.bit_length()} bits)"
+    else:
+        bits_str = ""
     print(f"\n=== {problem.name}{bits_str} ===")
     print(f"  shapes: {[s.value for s in problem.tags]}")
 
