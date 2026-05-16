@@ -1,4 +1,24 @@
-"""solvers/julia_runner.py -- prime sweep via Julia.
+"""
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This system is NOT a central controller making decisions.      ║
+║ It is a distributed ecology of specialized solvers (cells)     ║
+║ organized by a learned topology (landscape) that reads signals ║
+║ (waste, latency, overhead) and routes work accordingly.        ║
+║                                                                ║
+║ • Each runner: one specialized function                        ║
+║ • Dispatcher: a router reading cell signals, not a thinker     ║
+║ • Landscape: topology learned from observed flows              ║
+║ • Waste audit: how cells talk back to the router               ║
+║                                                                ║
+║ Intelligence emerges from specialization + signal flow +       ║
+║ topology learning. Not from central control.                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+ROLE: CELL -- prime-sweep specialist (Julia JIT). Emits wall-time + overhead signals.
+
+solvers/julia_runner.py -- prime sweep via Julia.
 
 Julia's fit: JIT'd vectorized numeric loops, SIMD when available,
 fast inner-loop performance with high-level syntax. Compares

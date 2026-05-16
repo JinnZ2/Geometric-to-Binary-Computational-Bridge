@@ -1,4 +1,23 @@
 """
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This system is NOT a central controller making decisions.      ║
+║ It is a distributed ecology of specialized solvers (cells)     ║
+║ organized by a learned topology (landscape) that reads signals ║
+║ (waste, latency, overhead) and routes work accordingly.        ║
+║                                                                ║
+║ • Each runner: one specialized function                        ║
+║ • Dispatcher: a router reading cell signals, not a thinker     ║
+║ • Landscape: topology learned from observed flows              ║
+║ • Waste audit: how cells talk back to the router               ║
+║                                                                ║
+║ Intelligence emerges from specialization + signal flow +       ║
+║ topology learning. Not from central control.                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+ROLE: TOPOLOGY EXTENSION -- overhead-aware learning; wells reshape from waste signals.
+
 landscape_overhead_axes.py
 
 Extends dispatcher_v2_energetic with overhead-cost axes learned from

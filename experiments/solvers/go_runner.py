@@ -1,4 +1,24 @@
-"""solvers/go_runner.py -- parallel prime sweep via goroutines.
+"""
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This system is NOT a central controller making decisions.      ║
+║ It is a distributed ecology of specialized solvers (cells)     ║
+║ organized by a learned topology (landscape) that reads signals ║
+║ (waste, latency, overhead) and routes work accordingly.        ║
+║                                                                ║
+║ • Each runner: one specialized function                        ║
+║ • Dispatcher: a router reading cell signals, not a thinker     ║
+║ • Landscape: topology learned from observed flows              ║
+║ • Waste audit: how cells talk back to the router               ║
+║                                                                ║
+║ Intelligence emerges from specialization + signal flow +       ║
+║ topology learning. Not from central control.                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+ROLE: CELL -- parallel prime-sweep specialist (goroutines). Emits wall-time + overhead signals.
+
+solvers/go_runner.py -- parallel prime sweep via goroutines.
 
 Go's fit: goroutines + channels, lightweight concurrency, no GIL.
 Different parallelism profile than bash (subprocess fork) or

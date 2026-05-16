@@ -1,4 +1,24 @@
-"""demo_recursive_learning.py -- closes the recursive loop end-to-end.
+"""
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This system is NOT a central controller making decisions.      ║
+║ It is a distributed ecology of specialized solvers (cells)     ║
+║ organized by a learned topology (landscape) that reads signals ║
+║ (waste, latency, overhead) and routes work accordingly.        ║
+║                                                                ║
+║ • Each runner: one specialized function                        ║
+║ • Dispatcher: a router reading cell signals, not a thinker     ║
+║ • Landscape: topology learned from observed flows              ║
+║ • Waste audit: how cells talk back to the router               ║
+║                                                                ║
+║ Intelligence emerges from specialization + signal flow +       ║
+║ topology learning. Not from central control.                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+ROLE: CLOSED-LOOP DEMO -- solve -> emit signal -> topology reshapes -> next route reflects reality.
+
+demo_recursive_learning.py -- closes the recursive loop end-to-end.
 
 Pipeline:
   1. dispatch problem to solver (real race)

@@ -1,4 +1,24 @@
-"""solvers/perl_runner.py -- Pollard rho via perl.
+"""
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This system is NOT a central controller making decisions.      ║
+║ It is a distributed ecology of specialized solvers (cells)     ║
+║ organized by a learned topology (landscape) that reads signals ║
+║ (waste, latency, overhead) and routes work accordingly.        ║
+║                                                                ║
+║ • Each runner: one specialized function                        ║
+║ • Dispatcher: a router reading cell signals, not a thinker     ║
+║ • Landscape: topology learned from observed flows              ║
+║ • Waste audit: how cells talk back to the router               ║
+║                                                                ║
+║ Intelligence emerges from specialization + signal flow +       ║
+║ topology learning. Not from central control.                   ║
+╚════════════════════════════════════════════════════════════════╝
+
+ROLE: CELL -- Pollard-rho factoring specialist (Perl bigint). Emits wall-time + overhead signals.
+
+solvers/perl_runner.py -- Pollard rho via perl.
 
 Perl's fit: text-stream processing, regex, glue-code. Numeric tight
 loops are NOT its native habitat -- interesting to see how it loses
