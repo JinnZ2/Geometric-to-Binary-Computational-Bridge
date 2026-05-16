@@ -1,12 +1,15 @@
-"""Language fitness profiles for the polyglot dispatcher.
+"""dispatcher.py -- v1 symbolic/affinity routing.
 
-LANGUAGE_FITNESS[lang][Shape.X] -> [0.0, 1.0] score for runner `lang`
-on workload axis X. Dispatcher consults this table to rank candidate
-runners for a Problem before invoking them.
+LANG_PROFILE[lang][Shape.X] -> [0.0, 1.0] fitness score for runner
+`lang` on workload axis X. Dispatcher v1 consults this table to rank
+candidate runners for a Problem after tagging it with Shape values.
 
-Stubs (0.5 across the board) are placeholders for the baseline
-languages whose runners exist but whose profiles haven't been
-characterized yet. Tune as benchmarks come in.
+Stubs (0.5 across the board) are placeholders for languages whose
+runners exist but whose profiles haven't been characterized yet.
+Tune as benchmarks come in.
+
+See dispatcher_v2_energetic.py for the parallel substrate-as-
+potential-well routing.
 """
 from __future__ import annotations
 from enum import Enum
@@ -27,10 +30,12 @@ class Shape(Enum):
 _STUB = {s: 0.5 for s in Shape}
 
 
-LANGUAGE_FITNESS: dict[str, dict[Shape, float]] = {
+LANG_PROFILE: dict[str, dict[Shape, float]] = {
     # --- baseline stubs (replace with measured profiles) ---
     "python": dict(_STUB),
     "c":      dict(_STUB),
+    "rust":   dict(_STUB),
+    "sql":    dict(_STUB),
     "bash":   dict(_STUB),
 
     # --- characterized profiles ---
