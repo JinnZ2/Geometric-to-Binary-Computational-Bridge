@@ -71,6 +71,9 @@ if __name__ == "__main__":
     race(p1, trials=5, registry=reg)
 
     # 62-bit — harder
+    # TODO: rename to factor_63bit. 2147483647 * 2147483659 actually has
+    # bit_length() == 63 (it lands just over 2^62), so the printed header
+    # already says "(63 bits)". The name lags the math.
     p2 = Problem("factor_62bit", "62-bit semiprime",
                  [Shape.BIGNUM, Shape.BITWISE, Shape.NUMERIC_TIGHT],
                  {"n": 2147483647 * 2147483659})
