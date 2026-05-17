@@ -1,4 +1,8 @@
 """
+dispatcher_v2_energetic.py
+
+Same job as dispatcher.py v1 (route problem -> best solver),
+but a completely different epistemology.
 ╔════════════════════════════════════════════════════════════════╗
 ║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
 ║                                                                ║
@@ -27,6 +31,16 @@ V1 (sequential / symbolic):
     text problem -> Shape tags -> rank by affinity table -> pick lang
 
 V2 (energetic / substrate):
+    problem state vector (no text) -> compute energy cost across substrates
+    -> argmin = solver. landscape reshapes as registry observes reality.
+
+What changes:
+  - input is NUMERIC (memory_pattern, bit_density, parallelism_grain, …),
+    not symbolic tags
+  - each language is a POTENTIAL WELL — a function from problem-space to
+    energy cost. depth varies by problem location in parameter space.
+  - selection is gradient descent: argmin(E(problem, lang)) — no rules
+  - learning reshapes the wells (coefficient update), not the rule table
     problem state vector (no text) -> compute energy cost across
     substrates -> argmin = solver. landscape reshapes as registry
     observes reality.
@@ -55,6 +69,9 @@ from pathlib import Path
 from typing import Callable
 
 
+# ═══════════════════════════════════════════════════════════════════
+# PROBLEM STATE — numeric signature, NOT text
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # PROBLEM STATE -- numeric signature, NOT text
 # ===================================================================
@@ -83,6 +100,18 @@ class ProblemState:
         return ("bit", "num", "mem", "par", "rel", "stt", "big", "io")
 
 
+# ═══════════════════════════════════════════════════════════════════
+# POTENTIAL WELLS — each language is a function of problem state
+# ═══════════════════════════════════════════════════════════════════
+#
+# Well depth = energy cost when the problem sits at that point in space.
+# LOW depth = good fit (steep well draws the problem in).
+# Cost decomposes into:  (substrate_overhead + axis_costs)
+#
+#   substrate_overhead = fixed cost for using this language at all
+#                        (subprocess fork, compile, GIL, JIT warmup)
+#   axis_cost          = per-axis penalty if the problem is heavy on an axis
+#                        the language handles poorly
 # ===================================================================
 # POTENTIAL WELLS -- each language is a function of problem state
 # ===================================================================
@@ -118,6 +147,7 @@ class PotentialWell:
         return e
 
 
+# ─── INITIAL LANDSCAPE — physics-grounded priors ────────────────────
 # --- INITIAL LANDSCAPE -- physics-grounded priors -------------------
 #
 # Read as: "language L has well-depth profile across (bit, num, mem, par,
@@ -126,6 +156,7 @@ class PotentialWell:
 LANDSCAPE: dict[str, PotentialWell] = {
     "python": PotentialWell(
         name="python",
+        substrate_overhead=0.05,    # minimal — already running in-process
         substrate_overhead=0.05,    # minimal -- already running in-process
         weights={
             "bit":  +0.40,           # slow at raw bit ops (interp overhead)
@@ -134,6 +165,7 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "par":  +0.20,           # GIL tax
             "rel":  -0.10,           # decent at dicts/sets
             "stt":  -0.15,           # native big search is fine
+            "big":  -0.40,           # native arbitrary precision — STRENGTH
             "big":  -0.40,           # native arbitrary precision -- STRENGTH
             "io":   -0.10,           # async is OK
         }),
@@ -142,6 +174,7 @@ LANDSCAPE: dict[str, PotentialWell] = {
         name="c",
         substrate_overhead=0.40,    # fork+exec subprocess cost
         weights={
+            "bit":  -0.50,           # native bit ops — STRENGTH
             "bit":  -0.50,           # native bit ops -- STRENGTH
             "num":  -0.55,           # tight loops are its strength
             "mem":  -0.40,           # full control over layout
@@ -159,6 +192,7 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "bit":  -0.45,
             "num":  -0.50,
             "mem":  -0.40,
+            "par":  -0.50,           # fearless concurrency — DEEPEST par well
             "par":  -0.50,           # fearless concurrency -- DEEPEST par well
             "rel":  +0.35,
             "stt":  -0.10,
@@ -168,6 +202,7 @@ LANDSCAPE: dict[str, PotentialWell] = {
 
     "sql": PotentialWell(
         name="sql",
+        substrate_overhead=0.10,    # sqlite stdlib — minimal
         substrate_overhead=0.10,    # sqlite stdlib -- minimal
         weights={
             "bit":  +0.60,
@@ -187,12 +222,19 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "bit":  +0.50,
             "num":  +0.65,
             "mem":  +0.30,
+            "par":  -0.40,           # xargs -P / GNU parallel — STRENGTH
             "par":  -0.40,           # xargs -P / GNU parallel -- STRENGTH
             "rel":  +0.30,
             "stt":  +0.40,
             "big":  +0.60,
             "io":   -0.40,           # io_bound is its native habitat
         }),
+}
+
+
+# ═══════════════════════════════════════════════════════════════════
+# DISPATCH — pure gradient descent. no rules, no shape table.
+# ═══════════════════════════════════════════════════════════════════
 
     "cobol": PotentialWell(
         name="cobol",
@@ -340,6 +382,9 @@ def dispatch(state: ProblemState,
                          gap_to_runner_up=gap)
 
 
+# ═══════════════════════════════════════════════════════════════════
+# LEARNING — reshape the wells from observation
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # LEARNING -- reshape the wells from observation
 # ===================================================================
@@ -376,6 +421,9 @@ def update_landscape(landscape: dict[str, PotentialWell],
         landscape[loser ].weights[axis] += learning_rate * val
 
 
+# ═══════════════════════════════════════════════════════════════════
+# BRIDGE — translate v1 Shape tags to v2 ProblemState, for cross-check
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # BRIDGE -- translate v1 Shape tags to v2 ProblemState, for cross-check
 # ===================================================================
@@ -386,6 +434,8 @@ def update_landscape(landscape: dict[str, PotentialWell],
 def shape_tags_to_state(tag_names: list[str]) -> ProblemState:
     """Heuristic projection: shape tags -> energetic state vector.
 
+    A real problem-encoder would measure the problem directly. This is the
+    compatibility shim for the v1 demo problems."""
     A real problem-encoder would measure the problem directly. This is
     the compatibility shim for the v1 demo problems."""
     s = {a: 0.0 for a in ("bit", "num", "mem", "par", "rel", "stt", "big", "io")}
@@ -411,6 +461,13 @@ def shape_tags_to_state(tag_names: list[str]) -> ProblemState:
     )
 
 
+# ═══════════════════════════════════════════════════════════════════
+# SELF-DEMO
+# ═══════════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    print("=" * 60)
+    print("ENERGETIC DISPATCHER — landscape selection by gradient")
 # ===================================================================
 # SELF-DEMO
 # ===================================================================
@@ -450,6 +507,10 @@ if __name__ == "__main__":
 
     # Show learning: simulate race outcomes that contradict the prior
     print("\n" + "=" * 60)
+    print("LEARNING — landscape reshapes from empirical race")
+    print("=" * 60)
+    measured = {"python": 0.0005, "sql": 0.030}   # python beat SQL on n-queens
+    print(f"\nbefore update — n-queens dispatch:")
     print("LEARNING -- landscape reshapes from empirical race")
     print("=" * 60)
     measured = {"python": 0.0005, "sql": 0.030}   # python beat SQL on n-queens
@@ -458,5 +519,6 @@ if __name__ == "__main__":
     update_landscape(LANDSCAPE, pB, measured, learning_rate=0.08)
     update_landscape(LANDSCAPE, pB, measured, learning_rate=0.08)
     update_landscape(LANDSCAPE, pB, measured, learning_rate=0.08)
+    print(f"\nafter 3 updates — same problem, reshaped landscape:")
     print(f"\nafter 3 updates -- same problem, reshaped landscape:")
     print(dispatch(pB).show())

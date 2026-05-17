@@ -1,4 +1,11 @@
 """
+dispatcher.py — polyglot puzzle solver router
+
+Energy flow:
+    puzzle + tags  ->  classifier  ->  language ranking  ->  runner  ->  result
+         ^                                                                  |
+         |                                                                  v
+       registry  <–  decision cache  <–––––––––––––––––––––––––––––––––––––+
 ╔════════════════════════════════════════════════════════════════╗
 ║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
 ║                                                                ║
@@ -42,6 +49,9 @@ from pathlib import Path
 from typing import Callable
 
 
+# ═══════════════════════════════════════════════════════════════════
+# PROBLEM SHAPES — what KIND of computation does this puzzle need?
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # PROBLEM SHAPES -- what KIND of computation does this puzzle need?
 # ===================================================================
@@ -58,6 +68,10 @@ class Shape(Enum):
     IO_BOUND        = "io_bound"         # mostly waiting on data
 
 
+# ═══════════════════════════════════════════════════════════════════
+# LANGUAGE PROFILES — affinity for each shape (0.0 - 1.0)
+# Higher = better fit. These are PRIORS, updated by registry over time.
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # LANGUAGE PROFILES -- affinity for each shape (0.0 - 1.0)
 # Higher = better fit. These are PRIORS, updated by registry over time.
@@ -66,6 +80,7 @@ class Shape(Enum):
 LANG_PROFILE: dict[str, dict[Shape, float]] = {
     "python": {
         Shape.BITWISE:       0.30,   # works but slow
+        Shape.BIGNUM:        0.90,   # native big ints — actually excellent
         Shape.BIGNUM:        0.90,   # native big ints -- actually excellent
         Shape.SYMBOLIC:      0.85,
         Shape.SEARCH:        0.70,
@@ -119,6 +134,12 @@ LANG_PROFILE: dict[str, dict[Shape, float]] = {
         Shape.METAPROG:      0.20,
         Shape.IO_BOUND:      0.85,
     },
+}
+
+
+# ═══════════════════════════════════════════════════════════════════
+# CLASSIFIER — heuristic for now, learnable later
+# ═══════════════════════════════════════════════════════════════════
     "cobol": {
         Shape.BITWISE:       0.40,    # COMP-5 binary works but not native
         Shape.BIGNUM:        0.50,    # PIC 9(18) fixed-width, not arbitrary
@@ -228,6 +249,9 @@ def classify(problem: Problem) -> list[Shape]:
     return problem.tags
 
 
+# ═══════════════════════════════════════════════════════════════════
+# RANKER — given shapes, pick languages
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # RANKER -- given shapes, pick languages
 # ===================================================================
@@ -236,6 +260,7 @@ def rank_languages(shapes: list[Shape],
                    profile: dict[str, dict[Shape, float]] = LANG_PROFILE
                    ) -> list[tuple[str, float]]:
     """Score each language by min-fit across required shapes.
+    Min (not avg) — a language that's great at 4 shapes and terrible at 1
     Min (not avg) -- a language that's great at 4 shapes and terrible at 1
     will bottleneck on that 1. Min captures the weak link."""
     if not shapes:
@@ -250,6 +275,9 @@ def rank_languages(shapes: list[Shape],
     return sorted(scored, key=lambda x: -x[1])
 
 
+# ═══════════════════════════════════════════════════════════════════
+# REGISTRY — decision cache. learns from past runs.
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # REGISTRY -- decision cache. learns from past runs.
 # ===================================================================
@@ -289,6 +317,9 @@ class Registry:
         return winner.language
 
 
+# ═══════════════════════════════════════════════════════════════════
+# DISPATCHER — top-level entry point
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # DISPATCHER -- top-level entry point
 # ===================================================================
@@ -321,6 +352,7 @@ def plan(problem: Problem, registry: Registry | None = None) -> DispatchPlan:
             problem=problem,
             shapes=shapes,
             language=cached,
+            reason="registry cache: previously won for shape set",
             reason=f"registry cache: previously won for shape set",
             alternatives=ranking,
         )
@@ -335,6 +367,9 @@ def plan(problem: Problem, registry: Registry | None = None) -> DispatchPlan:
     )
 
 
+# ═══════════════════════════════════════════════════════════════════
+# RUNNER REGISTRY — wires languages to solver modules
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # RUNNER REGISTRY -- wires languages to solver modules
 # ===================================================================
@@ -371,6 +406,9 @@ def execute(plan_: DispatchPlan, registry: Registry | None = None
     return success, output, elapsed
 
 
+# ═══════════════════════════════════════════════════════════════════
+# SELF-DEMO
+# ═══════════════════════════════════════════════════════════════════
 # ===================================================================
 # SELF-DEMO
 # ===================================================================
