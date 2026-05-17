@@ -287,6 +287,12 @@ class DispatcherStats:
     by_tier:               dict[str, int] = field(default_factory=dict)
     total_cost:            float = 0.0
     cost_saved_vs_all_ai:  float = 0.0       # what would have cost if all AI_FULL
+    request_log:           list[dict] = field(default_factory=list)
+    # per-request entries; schema defined by whoever appends (the
+    # dispatcher and/or downstream calibrator). Persisted by
+    # persistence.save_stats / load_stats so observations survive
+    # restarts and the cost_calibrator can recompute tier costs
+    # from accumulated history.
 
     def record(self, tier: RouteTier, cost: float, ai_full_cost: float) -> None:
         self.total_requests += 1
