@@ -20,7 +20,7 @@ Demo problem: parallel primality check across a range.
 from __future__ import annotations
 import subprocess, os, sys, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dispatcher import Problem, register_runner
+from runner_api import Problem, register_runner
 
 
 def _name_matches(problem_name: str, family: str) -> bool:

@@ -54,6 +54,8 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Callable
 
+from runner_api import LANGUAGES, assert_complete
+
 
 # ===================================================================
 # PROBLEM STATE -- numeric signature, NOT text
@@ -306,6 +308,8 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "io":   -0.45,           # stream processing
         }),
 }
+
+assert_complete(LANDSCAPE, "LANDSCAPE")
 
 
 # ===================================================================

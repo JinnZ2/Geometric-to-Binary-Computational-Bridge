@@ -29,7 +29,7 @@ Graceful skip if perl not installed.
 from __future__ import annotations
 import subprocess, sys, os, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dispatcher import Problem, register_runner
+from runner_api import Problem, register_runner
 
 PERL_POLLARD = r'''
 use strict; use warnings;
