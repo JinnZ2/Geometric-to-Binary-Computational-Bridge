@@ -48,34 +48,30 @@ from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
 
+from toolkit_types import ConstraintStatePattern, Substrate
+
 
 # ---------------------------------------------------------------------------
 # REQUEST PATTERN -- constraint-state descriptor of what's being asked
 # ---------------------------------------------------------------------------
+# Earlier prototype used a bespoke 6-axis RequestPattern. The shared
+# 7-axis ConstraintStatePattern from toolkit_types (also used by
+# pattern_extractor, ESD-001, and the metrology shelf) replaces it.
+# Axis mapping kept consistent with real_classifier.classify():
+#
+#   old RequestPattern field   ->   ConstraintStatePattern field
+#   novelty                    ->   prediction_error
+#   reasoning_depth            ->   attention_tunneling
+#   context_sensitivity        ->   coherence_seeking
+#   output_creativity          ->   state_shift_rate
+#   safety_sensitivity         ->   resource_reallocation
+#   determinism_value          ->   (1 - constraint_uncertainty)
+#   (new axis)                 ->   duration_scale
 
-@dataclass(frozen=True)
-class RequestPattern:
-    """
-    Numeric signature of a request. NOT the request text -- the constraint
-    geometry it represents. Two requests with different words but same
-    constraint shape get routed the same way.
-
-    All values normalized [0, 1].
-    """
-    novelty:              float   # 0=seen-many-times, 1=never-seen
-    reasoning_depth:      float   # 0=lookup, 1=multi-step inference required
-    context_sensitivity:  float   # 0=stateless, 1=depends heavily on history
-    output_creativity:    float   # 0=factual answer, 1=generative work
-    safety_sensitivity:   float   # 0=low-stakes, 1=high-stakes
-    determinism_value:    float   # 0=variation OK, 1=must be exact match
-
-    def as_vec(self) -> tuple[float, ...]:
-        return (self.novelty, self.reasoning_depth, self.context_sensitivity,
-                self.output_creativity, self.safety_sensitivity,
-                self.determinism_value)
-
-    def axis_names(self) -> tuple[str, ...]:
-        return ("novelty", "reason", "context", "create", "safety", "determ")
+# Back-compat alias so any caller still doing
+# `from comfort_layer_dispatcher import RequestPattern` keeps working
+# (now means the same type as ConstraintStatePattern).
+RequestPattern = ConstraintStatePattern
 
 
 # ---------------------------------------------------------------------------
@@ -120,12 +116,18 @@ DEFAULT_COSTS: dict[RouteTier, TierCost] = {
 }
 
 
-def estimate_cost(tier: RouteTier, pattern: RequestPattern,
+def _complexity_of(pattern: ConstraintStatePattern) -> float:
+    """Complexity scalar used by the cost model.
+    (attention_tunneling + prediction_error) / 2 -- the constraint-pattern
+    equivalent of the prototype's (reasoning_depth + novelty) / 2."""
+    return (pattern.attention_tunneling + pattern.prediction_error) / 2
+
+
+def estimate_cost(tier: RouteTier, pattern: ConstraintStatePattern,
                   costs: dict[RouteTier, TierCost] = DEFAULT_COSTS) -> float:
-    """Cost = base + per_unit * (reasoning_depth + novelty)/2."""
+    """Cost = base + per_unit * complexity."""
     tc = costs[tier]
-    complexity = (pattern.reasoning_depth + pattern.novelty) / 2
-    return tc.base_cost + tc.per_unit_cost * complexity
+    return tc.base_cost + tc.per_unit_cost * _complexity_of(pattern)
 
 
 # ---------------------------------------------------------------------------
@@ -190,7 +192,7 @@ class PatternMemory:
 # ROUTING LOGIC -- gradient-descent over tier cost vs. capability
 # ---------------------------------------------------------------------------
 
-def route(pattern: RequestPattern,
+def route(pattern: ConstraintStatePattern,
           memory: PatternMemory,
           costs: dict[RouteTier, TierCost] = DEFAULT_COSTS) -> RouteDecision:
     """
@@ -205,17 +207,17 @@ def route(pattern: RequestPattern,
       4. AI_FULL: complex reasoning
       5. AI_DEEP_LEARN: high novelty + high depth (worth learning from)
 
-    Safety override: high safety_sensitivity always escalates to at least AI_LIGHT
-    even for routine-looking patterns, because the cost of mistake outweighs
-    the cost savings.
+    Safety override: high resource_reallocation (the axis real_classifier
+    fills with safety severity) always escalates to AI_FULL even for
+    routine-looking patterns -- cost of mistake outweighs cost savings.
     """
     # safety check first -- never route safety-critical to software fast path
-    if pattern.safety_sensitivity > 0.7:
+    if pattern.resource_reallocation > 0.7:
         return RouteDecision(
             tier=RouteTier.AI_FULL,
             estimated_cost=estimate_cost(RouteTier.AI_FULL, pattern, costs),
             confidence=0.95,
-            reason="high safety sensitivity overrides cost optimization",
+            reason="high safety sensitivity (resource_reallocation) overrides cost optimization",
         )
 
     # known pattern in memory?
@@ -232,11 +234,11 @@ def route(pattern: RequestPattern,
                 fallback_tier=RouteTier.AI_LIGHT,
             )
 
-    # routine deterministic? (low novelty, low reasoning, low context)
-    is_routine = (pattern.novelty < 0.2
-                  and pattern.reasoning_depth < 0.2
-                  and pattern.context_sensitivity < 0.3
-                  and pattern.output_creativity < 0.2)
+    # routine deterministic? (low novelty, low reasoning, low context, low creativity)
+    is_routine = (pattern.prediction_error < 0.2
+                  and pattern.attention_tunneling < 0.2
+                  and pattern.coherence_seeking < 0.3
+                  and pattern.state_shift_rate < 0.2)
     if is_routine:
         return RouteDecision(
             tier=RouteTier.SOFTWARE_FAST,
@@ -247,7 +249,7 @@ def route(pattern: RequestPattern,
         )
 
     # high novelty AND high reasoning = worth learning from
-    if pattern.novelty > 0.7 and pattern.reasoning_depth > 0.6:
+    if pattern.prediction_error > 0.7 and pattern.attention_tunneling > 0.6:
         return RouteDecision(
             tier=RouteTier.AI_DEEP_LEARN,
             estimated_cost=estimate_cost(RouteTier.AI_DEEP_LEARN, pattern, costs),
@@ -257,7 +259,7 @@ def route(pattern: RequestPattern,
         )
 
     # moderate complexity -> AI_LIGHT or AI_FULL
-    if pattern.reasoning_depth > 0.5 or pattern.context_sensitivity > 0.6:
+    if pattern.attention_tunneling > 0.5 or pattern.coherence_seeking > 0.6:
         return RouteDecision(
             tier=RouteTier.AI_FULL,
             estimated_cost=estimate_cost(RouteTier.AI_FULL, pattern, costs),
@@ -319,12 +321,16 @@ class ComfortLayerDispatcher:
         self.ai_handler = handler
 
     def dispatch(self, request_text: str,
-                 pattern: RequestPattern) -> tuple[bool, str, RouteDecision]:
-        """Route the request and execute through the chosen tier."""
+                 pattern: ConstraintStatePattern) -> tuple[bool, str, RouteDecision]:
+        """Route the request and execute through the chosen tier.
+        Times the call, appends a request_log entry with the schema
+        cost_calibrator + operator_dashboard consume."""
         decision = route(pattern, self.memory)
         ai_full_cost = estimate_cost(RouteTier.AI_FULL, pattern)
 
+        t_start = time.perf_counter()
         success, output = self._execute(request_text, pattern, decision)
+        wall_time = time.perf_counter() - t_start
 
         # learning feedback: if AI handled a novel pattern successfully,
         # software gets to record it for future routing
@@ -338,6 +344,17 @@ class ComfortLayerDispatcher:
                 self.memory.record_failure(pattern)
 
         self.stats.record(decision.tier, decision.estimated_cost, ai_full_cost)
+        # request_log entry: schema matches what cost_calibrator and
+        # operator_dashboard read.
+        self.stats.request_log.append({
+            "timestamp": time.time(),
+            "request":   request_text,
+            "tier":      decision.tier.value,
+            "cost":      decision.estimated_cost,
+            "wall_time": wall_time,
+            "success":   success,
+            "output":    output[:200] if isinstance(output, str) else str(output)[:200],
+        })
         return success, output, decision
 
     def _execute(self, request_text: str, pattern: RequestPattern,
@@ -389,10 +406,10 @@ def demo_software_math_handler(text: str, pattern: RequestPattern) -> tuple[bool
     return False, ""
 
 
-def demo_ai_handler(text: str, pattern: RequestPattern) -> tuple[bool, str]:
+def demo_ai_handler(text: str, pattern: ConstraintStatePattern) -> tuple[bool, str]:
     """Stand-in for an actual AI call. In production this would call your LLM."""
     # simulated AI response -- token cost would be real here
-    return True, f"[AI handled novel request, depth={pattern.reasoning_depth:.2f}]: {text}"
+    return True, f"[AI handled novel request, depth={pattern.attention_tunneling:.2f}]: {text}"
 
 
 # ---------------------------------------------------------------------------
@@ -442,10 +459,23 @@ def classify_request_heuristic(text: str) -> RequestPattern:
     if any(c.isdigit() for c in text):
         determinism = max(determinism, 0.7)
 
-    return RequestPattern(
-        novelty=novelty, reasoning_depth=reasoning_depth,
-        context_sensitivity=context, output_creativity=creativity,
-        safety_sensitivity=safety, determinism_value=determinism,
+    # axis mapping into the shared 7-dim ConstraintStatePattern.
+    # duration_scale derived crudely from word_count; not great, but
+    # the heuristic classifier is here only as a fallback -- real
+    # routing should use real_classifier.classify().
+    duration = 0.05 if any(k in text_lower for k in routine_keywords) else 0.2
+    if word_count > 30:
+        duration = 0.5
+    return ConstraintStatePattern(
+        substrate              = Substrate.REQUEST_STREAM,
+        prediction_error       = novelty,
+        attention_tunneling    = reasoning_depth,
+        coherence_seeking      = context,
+        state_shift_rate       = creativity,
+        resource_reallocation  = safety,
+        constraint_uncertainty = 1.0 - determinism,
+        duration_scale         = duration,
+        trigger_documented     = True,
     )
 
 
@@ -480,8 +510,10 @@ if __name__ == "__main__":
         pattern = classify_request_heuristic(req)
         success, output, decision = dispatcher.dispatch(req, pattern)
         print(f"\n  request: '{req}'")
-        print(f"    pattern: nov={pattern.novelty:.2f} reason={pattern.reasoning_depth:.2f} "
-              f"safety={pattern.safety_sensitivity:.2f}")
+        # field names follow the shared ConstraintStatePattern schema
+        print(f"    pattern: pred={pattern.prediction_error:.2f} "
+              f"attn={pattern.attention_tunneling:.2f} "
+              f"realloc={pattern.resource_reallocation:.2f}")
         print(f"    routed:  {decision.tier.value:20s}  cost={decision.estimated_cost:.4f}")
         print(f"    reason:  {decision.reason}")
         print(f"    output:  {output[:80]}")
