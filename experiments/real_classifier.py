@@ -115,10 +115,16 @@ class ClassificationResult:
 
 
 def _match_groups(text_lower: str) -> dict[str, int]:
-    """Count how many words from each vocab group appear in text."""
+    """Count how many words/phrases from each vocab group appear in text.
+    Uses word-boundary matching so 'we' (context vocab) doesn't false-match
+    inside 'weather'. Multi-word keywords still work because \\b spans
+    word/non-word transitions, not just spaces."""
     counts = {}
     for group, vocab in VOCAB.items():
-        c = sum(1 for kw in vocab if kw in text_lower)
+        c = 0
+        for kw in vocab:
+            if re.search(rf"\b{re.escape(kw)}\b", text_lower):
+                c += 1
         if c > 0:
             counts[group] = c
     return counts

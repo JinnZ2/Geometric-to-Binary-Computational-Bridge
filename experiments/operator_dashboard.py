@@ -110,8 +110,19 @@ def build_report(dispatcher: ComfortLayerDispatcher,
         )
 
     # === SUSPICIOUS ROUTES ===
-    # entries that cost a lot AND were routed despite ambiguity
+    # entries that cost a lot AND were routed despite ambiguity.
+    # safety-keyword requests are EXPECTED to escalate to ai_full --
+    # exclude them so they don't drown out the actually-suspicious ones.
+    safety_words_for_filter = ("medical", "pain", "suicide", "emergency",
+                                "legal", "abuse", "danger", "hurt",
+                                "bleeding", "police", "chest", "panic",
+                                "fever", "wound", "ankle", "sprained",
+                                "injury", "injured", "broken", "vomit",
+                                "dizzy", "faint")
     for entry in stats.request_log[-200:]:  # last 200 only
+        req_lower = entry["request"].lower()
+        if any(kw in req_lower for kw in safety_words_for_filter):
+            continue  # safety escalation is expected, not suspicious
         if entry["cost"] >= suspicion_cost_threshold:
             # check: was this routed away from software despite looking routine?
             # we don't have confidence directly, but high cost + short text
