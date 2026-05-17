@@ -1,3 +1,7 @@
+"""solvers/sql_runner.py — relational puzzle solver via sqlite3 stdlib.
+
+Demonstrates: the SHAPE of a problem determines the language.
+N-queens is a constraint-satisfaction / relational problem — SQL is native fit.
 """solvers/sql_runner.py -- relational puzzle solver via sqlite3 stdlib.
 
 ╔════════════════════════════════════════════════════════════════╗
@@ -22,6 +26,17 @@ import sqlite3, os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from runner_api import Problem, register_runner
 
+
+N_QUEENS_SQL = """
+WITH RECURSIVE
+cols(c) AS (
+    SELECT 1
+    UNION ALL
+    SELECT c + 1 FROM cols WHERE c < ?
+),
+-- place(row, col_list_as_text)
+-- col_list is a comma-separated list of columns already placed, row-by-row
+place(row, cols_used) AS (
 N_QUEENS_SQL = """
 WITH RECURSIVE
   cols(c) AS (
@@ -42,6 +57,25 @@ WITH RECURSIVE
     FROM place p, cols c
     WHERE p.row < ?
       AND NOT EXISTS (
+          -- check column conflict + diagonal conflict against each prior row
+          SELECT 1 FROM (
+              WITH RECURSIVE split(i, val, rest) AS (
+                  SELECT 1,
+                         CAST(substr(p.cols_used || ',', 1,
+                                     instr(p.cols_used || ',', ',') - 1) AS INTEGER),
+                         substr(p.cols_used || ',', instr(p.cols_used || ',', ',') + 1)
+                  UNION ALL
+                  SELECT i + 1,
+                         CAST(substr(rest, 1, instr(rest, ',') - 1) AS INTEGER),
+                         substr(rest, instr(rest, ',') + 1)
+                  FROM split WHERE rest != ''
+              )
+              SELECT 1 FROM split
+              WHERE val = c.c                                -- same column
+                 OR abs(val - c.c) = abs(i - (p.row + 1))    -- same diagonal
+          )
+      )
+)
         -- check column conflict + diagonal conflict against each prior row
         SELECT 1 FROM (
           WITH RECURSIVE split(i, val, rest) AS (

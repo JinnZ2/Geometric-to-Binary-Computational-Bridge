@@ -11,6 +11,7 @@
 ║ The waste audit captures bash's fork overhead. The landscape   ║
 ║ learns when bash wins (huge sweeps) vs loses (small ranges).   ║
 ╚════════════════════════════════════════════════════════════════╝
+"""solvers/bash_runner.py — parallel sweep via xargs -P.
 
 Shape: PARALLEL + IO_BOUND. The win isn't single-thread speed,
 it's running N independent jobs concurrently with near-zero overhead.
@@ -21,6 +22,7 @@ from __future__ import annotations
 import subprocess, os, sys, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from runner_api import Problem, register_runner
+from dispatcher import Problem, register_runner
 
 
 def _name_matches(problem_name: str, family: str) -> bool:
@@ -73,6 +75,14 @@ for n in range(max(lo, 2), hi + 1):
             break
     if is_p:
         c += 1
+lo,hi = int(sys.argv[1]), int(sys.argv[2])
+c = 0
+for n in range(max(lo,2), hi+1):
+    is_p = True
+    for p in range(2, int(n**0.5)+1):
+        if n % p == 0:
+            is_p = False; break
+    if is_p: c += 1
 print(c)
 " $lo $hi
 ' | awk '{{s+=$1}} END {{print s}}'

@@ -1,3 +1,4 @@
+"""solvers/c_runner.py — compile once at import, run many"""
 """solvers/c_runner.py -- compile once at import, run many
 
 ╔════════════════════════════════════════════════════════════════╗
@@ -22,9 +23,11 @@ _BUILD_DIR = tempfile.mkdtemp(prefix="polyglot_c_")
 _EXE_PATH  = os.path.join(_BUILD_DIR, "p")
 _BUILT     = False
 
+
 def _cleanup():
     shutil.rmtree(_BUILD_DIR, ignore_errors=True)
 atexit.register(_cleanup)
+
 
 C_POLLARD = r"""
 #include <stdio.h>
@@ -103,6 +106,7 @@ def run_c(problem: Problem) -> tuple[bool, str, float]:
         return False, f"no C solver for '{problem.name}'", 0.0
     if not _tags_consistent(problem):
         return False, (f"factor: name='{problem.name}' but tags="
+                       f"{[t.value for t in problem.tags]} — refusing misroute"), 0.0
                        f"{[t.value for t in problem.tags]} -- refusing misroute"), 0.0
 
     if "n" not in problem.payload:
