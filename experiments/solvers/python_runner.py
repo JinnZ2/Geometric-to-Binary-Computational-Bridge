@@ -65,7 +65,7 @@ Hardened against silent misroute:
 from __future__ import annotations
 import math, random, sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dispatcher import Problem, register_runner
+from runner_api import Problem, register_runner
 
 
 # --- validators ----------------------------------------------------

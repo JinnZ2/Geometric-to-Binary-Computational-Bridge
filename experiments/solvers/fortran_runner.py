@@ -29,7 +29,7 @@ Graceful skip if gfortran not installed.
 from __future__ import annotations
 import subprocess, tempfile, os, sys, shutil, atexit
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dispatcher import Problem, register_runner
+from runner_api import Problem, register_runner
 
 _BUILD_DIR = tempfile.mkdtemp(prefix="polyglot_f90_")
 _EXE_PATH  = os.path.join(_BUILD_DIR, "p")

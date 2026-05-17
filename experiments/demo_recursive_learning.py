@@ -35,7 +35,8 @@ from __future__ import annotations
 import sys, os, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from dispatcher import Problem, Shape, plan, execute, Registry, rank_languages
+from dispatcher import Shape, plan, execute, Registry, rank_languages
+from runner_api import Problem
 from dispatcher_v2_energetic import ProblemState, shape_tags_to_state
 from substrate_waste_audit import (
     WasteSignature, CycleTimers, capture_waste, analyze_waste,

@@ -87,8 +87,13 @@ class VoiceArtifact:
 def extract_artifacts(conversation_text: str) -> list[VoiceArtifact]:
     """Scan conversation text for VOICE_ARTIFACT...END_ARTIFACT blocks.
     Each artifact's content is bounded by its header and the next
-    END_ARTIFACT marker. Artifacts without an END marker are skipped
-    with a warning recorded."""
+    END_ARTIFACT marker. Two failure modes detected:
+
+      1. Header with no END_ARTIFACT anywhere after it -> abandoned
+      2. Header A, then header B before A's END_ARTIFACT -> A abandoned
+         (without this check, A would silently absorb B's header into
+         its content, corrupting both artifacts)
+    """
     starts = list(START_MARKER.finditer(conversation_text))
     if not starts:
         return []
@@ -110,6 +115,28 @@ def extract_artifacts(conversation_text: str) -> list[VoiceArtifact]:
                 extracted_at=now,
                 status="failed",
                 notes="no END_ARTIFACT marker found after this header",
+            ))
+            continue
+
+        # Defensive check: did another START marker appear before this END?
+        # If yes, this artifact's header was abandoned -- fail it explicitly
+        # rather than letting it swallow the next artifact's territory.
+        next_start = START_MARKER.search(
+            conversation_text,
+            pos=content_start,
+            endpos=end_match.start(),
+        )
+        if next_start:
+            artifacts.append(VoiceArtifact(
+                filename=m.group("filename").strip(),
+                intent=(m.group("intent") or "").strip(),
+                timestamp=(m.group("timestamp") or "").strip(),
+                session=(m.group("session") or "").strip(),
+                content="",
+                extracted_at=now,
+                status="failed",
+                notes=("abandoned artifact header: another VOICE_ARTIFACT "
+                       "header started before an END_ARTIFACT was encountered"),
             ))
             continue
 

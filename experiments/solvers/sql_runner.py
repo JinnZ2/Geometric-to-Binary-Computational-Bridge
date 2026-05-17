@@ -24,7 +24,7 @@ No subprocess overhead: sqlite3 is in-process.
 from __future__ import annotations
 import sqlite3, os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dispatcher import Problem, register_runner
+from runner_api import Problem, register_runner
 
 
 N_QUEENS_SQL = """

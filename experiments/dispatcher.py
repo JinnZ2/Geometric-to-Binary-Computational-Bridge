@@ -43,10 +43,11 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from enum import Enum
 from pathlib import Path
-from typing import Callable
+
+from runner_api import Problem, RUNNERS, LANGUAGES, assert_complete
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -230,19 +231,12 @@ LANG_PROFILE: dict[str, dict[Shape, float]] = {
     },
 }
 
+assert_complete(LANG_PROFILE, "LANG_PROFILE")
+
 
 # ===================================================================
 # CLASSIFIER -- heuristic for now, learnable later
 # ===================================================================
-
-@dataclass
-class Problem:
-    name:        str
-    description: str
-    tags:        list[Shape]            # what shapes does it touch?
-    payload:     dict                   # actual data for the solver
-    hint_lang:   str | None = None      # user override
-
 
 def classify(problem: Problem) -> list[Shape]:
     """For now: trust the tags. Later: NLP on description, learned classifier."""
@@ -371,19 +365,10 @@ def plan(problem: Problem, registry: Registry | None = None) -> DispatchPlan:
 # RUNNER REGISTRY — wires languages to solver modules
 # ═══════════════════════════════════════════════════════════════════
 # ===================================================================
-# RUNNER REGISTRY -- wires languages to solver modules
+# RUNNER INVOCATION -- consume the runner_api.RUNNERS registry
+# (Problem + register_runner + RUNNERS itself live in runner_api.py
+# so cells stay independent of routing logic.)
 # ===================================================================
-
-RunnerFn = Callable[[Problem], tuple[bool, str, float]]
-RUNNERS: dict[str, RunnerFn] = {}
-
-
-def register_runner(lang: str):
-    def deco(fn: RunnerFn):
-        RUNNERS[lang] = fn
-        return fn
-    return deco
-
 
 def execute(plan_: DispatchPlan, registry: Registry | None = None
             ) -> tuple[bool, str, float]:

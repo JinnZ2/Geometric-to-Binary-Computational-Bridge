@@ -1,3 +1,16 @@
+"""solvers/bash_runner.py -- parallel sweep via xargs -P.
+
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This file is a specialized CELL in a distributed ecology.      ║
+║ It does ONE thing: runs embarrassingly-parallel sweeps using   ║
+║ xargs -P chunked workers. Heavy subprocess fork tax but        ║
+║ amortizes at large problem scales.                             ║
+║                                                                ║
+║ The waste audit captures bash's fork overhead. The landscape   ║
+║ learns when bash wins (huge sweeps) vs loses (small ranges).   ║
+╚════════════════════════════════════════════════════════════════╝
 """solvers/bash_runner.py — parallel sweep via xargs -P.
 
 Shape: PARALLEL + IO_BOUND. The win isn't single-thread speed,
@@ -8,6 +21,7 @@ Demo problem: parallel primality check across a range.
 from __future__ import annotations
 import subprocess, os, sys, shutil
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from runner_api import Problem, register_runner
 from dispatcher import Problem, register_runner
 
 
@@ -51,6 +65,16 @@ lo=${{range%-*}}
 hi=${{range#*-}}
 python3 -c "
 import sys
+lo, hi = int(sys.argv[1]), int(sys.argv[2])
+c = 0
+for n in range(max(lo, 2), hi + 1):
+    is_p = True
+    for p in range(2, int(n ** 0.5) + 1):
+        if n % p == 0:
+            is_p = False
+            break
+    if is_p:
+        c += 1
 lo,hi = int(sys.argv[1]), int(sys.argv[2])
 c = 0
 for n in range(max(lo,2), hi+1):
