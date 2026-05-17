@@ -1,4 +1,19 @@
 """solvers/c_runner.py — compile once at import, run many"""
+"""solvers/c_runner.py -- compile once at import, run many
+
+╔════════════════════════════════════════════════════════════════╗
+║ ECOLOGICAL INTELLIGENCE ARCHITECTURE                           ║
+║                                                                ║
+║ This file is a specialized CELL in a distributed ecology.      ║
+║ It does ONE thing: factors small integers in C, via subprocess.║
+║ Its characteristic signal is the SUBPROCESS FORK TAX (~5-15ms) ║
+║ which dominates at small problem sizes -- exactly the signal   ║
+║ the landscape needs to learn work-scale-dependent routing.     ║
+║                                                                ║
+║ C's compute is fast; its overhead is real. The dispatcher      ║
+║ learns when each matters by reading the waste audit signals.   ║
+╚════════════════════════════════════════════════════════════════╝
+"""
 from __future__ import annotations
 import subprocess, tempfile, os, sys, shutil, atexit
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -92,6 +107,7 @@ def run_c(problem: Problem) -> tuple[bool, str, float]:
     if not _tags_consistent(problem):
         return False, (f"factor: name='{problem.name}' but tags="
                        f"{[t.value for t in problem.tags]} — refusing misroute"), 0.0
+                       f"{[t.value for t in problem.tags]} -- refusing misroute"), 0.0
 
     if "n" not in problem.payload:
         return False, "factor: missing required payload key 'n'", 0.0
