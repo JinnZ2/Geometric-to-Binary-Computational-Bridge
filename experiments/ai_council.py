@@ -77,6 +77,15 @@ class AIMember:
     available:              bool = True   # is the AI online/willing right now?
     monitoring_self:        bool = True   # does it self-report token state honestly?
 
+    # cognition_style_addon traits -- declared by the AI, consulted by the
+    # council only when a FormatDirective is passed to deliberate().
+    # Recognized keys: narrative_capable, substrate_capable, speed_tier
+    # ("fast" | "moderate" | "slow"). Missing keys default to
+    # narrative_capable=True, substrate_capable=False, speed_tier="moderate"
+    # (the most common AI profile -- matches the assumption the cognition
+    # addon is built to work around).
+    cognition_traits:       dict = field(default_factory=dict)
+
     def estimated_cost_for(self, pattern: ConstraintStatePattern) -> float:
         """User-facing cost (currency) for handling this pattern."""
         complexity = (pattern.prediction_error + pattern.attention_tunneling
@@ -152,13 +161,22 @@ class AICouncil:
         self.members.append(member)
 
     def deliberate(self, pattern: ConstraintStatePattern,
-                   user_priority: str = "balanced"
+                   user_priority: str = "balanced",
+                   directive=None,                  # optional FormatDirective
+                   cognition_fit_threshold: float = 0.3,
                    ) -> CouncilDecision:
         """
         Council deliberates: which member is best positioned to handle
         this pattern given (fit + cost + current token availability)?
 
         `user_priority` can be: "balanced", "cheapest", "best_fit", "speed"
+
+        If `directive` (a FormatDirective from cognition_style_addon) is
+        provided, members whose declared cognition_traits don't satisfy
+        the directive (fit_score below cognition_fit_threshold) are
+        filtered out before ranking -- so e.g. a tornado emergency
+        directive (raw + 1s budget) refuses to route to a narrative-only
+        slow AI even if it's the cheapest option.
         """
         if not self.members:
             return CouncilDecision(
@@ -187,6 +205,38 @@ class AICouncil:
                     f"insufficient user tokens: {unaffordable}"
                 )
             return decision
+
+        # Optional: cognition-style filter. Lazy import so the council
+        # has no hard dependency on cognition_style_addon -- the addon
+        # is only consulted when the caller passes a directive.
+        cognition_excluded: list[tuple[str, float, list[str]]] = []
+        if directive is not None:
+            from cognition_style_addon import assess_cognition_fit
+            kept = []
+            for m in candidates:
+                cfit = assess_cognition_fit(m.name, m.cognition_traits,
+                                            directive)
+                if cfit.fit_score < cognition_fit_threshold:
+                    cognition_excluded.append(
+                        (m.name, cfit.fit_score, cfit.notes)
+                    )
+                else:
+                    kept.append(m)
+            candidates = kept
+            if not candidates:
+                decision = CouncilDecision(
+                    outcome=CouncilOutcome.ALL_REJECTED,
+                    reasoning=[
+                        "cognition-style filter excluded all members "
+                        f"(threshold {cognition_fit_threshold})"
+                    ],
+                )
+                for name, score, notes in cognition_excluded:
+                    decision.reasoning.append(
+                        f"  {name}: fit={score:.2f}"
+                        + (f" ({'; '.join(notes)})" if notes else "")
+                    )
+                return decision
 
         # score each candidate
         # normalize fit and cost to comparable scales
@@ -242,13 +292,20 @@ class AICouncil:
             ],
             alternatives=[(m.name, fit, cost) for m, _, cost, fit in ranked[1:4]],
         )
+        if cognition_excluded:
+            decision.reasoning.append(
+                "cognition-style filter excluded: "
+                + ", ".join(f"{n} ({s:.2f})" for n, s, _ in cognition_excluded)
+            )
         return decision
 
     def dispatch(self, request_text: str,
                  pattern: ConstraintStatePattern,
-                 user_priority: str = "balanced"
+                 user_priority: str = "balanced",
+                 directive=None,
                  ) -> tuple[bool, str, CouncilDecision]:
-        decision = self.deliberate(pattern, user_priority=user_priority)
+        decision = self.deliberate(pattern, user_priority=user_priority,
+                                   directive=directive)
         if decision.outcome != CouncilOutcome.ROUTED:
             self._log(request_text, decision, success=False, output="")
             return False, f"council could not route: {decision.outcome.value}", decision
@@ -329,7 +386,8 @@ def local_llama_handler(text, pattern):
 
 def build_demo_council() -> AICouncil:
     council = AICouncil()
-    # Claude: strong at nuanced reasoning + safety
+    # Claude: strong at nuanced reasoning + safety. Narrative-primary
+    # by training; not great at raw/structured output; moderate speed.
     council.join_council(AIMember(
         name="claude",
         axis_affinities={
@@ -342,8 +400,11 @@ def build_demo_council() -> AICouncil:
         base_overhead=0.001,
         cost_per_token=0.000015,
         handler=claude_handler,
+        cognition_traits={"narrative_capable": True,
+                          "substrate_capable": False,
+                          "speed_tier": "moderate"},
     ))
-    # GPT: balanced
+    # GPT: balanced. Can switch between narrative and structured output.
     council.join_council(AIMember(
         name="gpt",
         axis_affinities={
@@ -356,8 +417,12 @@ def build_demo_council() -> AICouncil:
         base_overhead=0.001,
         cost_per_token=0.000010,
         handler=gpt_handler,
+        cognition_traits={"narrative_capable": True,
+                          "substrate_capable": True,
+                          "speed_tier": "fast"},
     ))
-    # Gemini: strong at quick factual, weaker at safety-sensitive
+    # Gemini: strong at quick factual, weaker at safety-sensitive.
+    # Can produce structured output; fast tier.
     council.join_council(AIMember(
         name="gemini",
         axis_affinities={
@@ -370,8 +435,13 @@ def build_demo_council() -> AICouncil:
         base_overhead=0.001,
         cost_per_token=0.000008,
         handler=gemini_handler,
+        cognition_traits={"narrative_capable": True,
+                          "substrate_capable": True,
+                          "speed_tier": "fast"},
     ))
-    # LocalLlama: cheap, decent at simple, weak at deep reasoning
+    # LocalLlama: cheap, decent at simple, weak at deep reasoning.
+    # Substrate-primary capable, fast tier (no network hop), poor at
+    # generating long narrative.
     council.join_council(AIMember(
         name="local_llama",
         axis_affinities={
@@ -384,6 +454,9 @@ def build_demo_council() -> AICouncil:
         base_overhead=0.0005,
         cost_per_token=0.0000001,
         handler=local_llama_handler,
+        cognition_traits={"narrative_capable": False,
+                          "substrate_capable": True,
+                          "speed_tier": "fast"},
     ))
     return council
 
@@ -477,3 +550,49 @@ if __name__ == "__main__":
 
     print()
     print(council2.member_status_report())
+
+    # -----------------------------------------------------------------
+    # cognition-style composition: emergency directive filters members
+    # -----------------------------------------------------------------
+    print()
+    print("=" * 72)
+    print("COMPOSITION WITH cognition_style_addon -- tornado emergency")
+    print("=" * 72)
+    from cognition_style_addon import (
+        CognitionStyleAddon, UserProfile, CognitionStyle,
+        InformationFormat, ContextUrgency,
+    )
+
+    tornado_pattern = ConstraintStatePattern(
+        substrate=Substrate.REQUEST_STREAM,
+        prediction_error=0.9, state_shift_rate=0.95,
+        attention_tunneling=0.9, resource_reallocation=0.85,
+        coherence_seeking=0.2, constraint_uncertainty=0.7,
+        duration_scale=0.1, trigger_documented=True,
+    )
+    emergency_user = UserProfile(
+        cognition_style=CognitionStyle.SUBSTRATE_PRIMARY,
+        preferred_format=InformationFormat.RAW,
+        current_urgency=ContextUrgency.EMERGENCY,
+        rejects_scaffolding=True, rejects_reassurance=True,
+    )
+    directive = CognitionStyleAddon(profile=emergency_user
+                                    ).derive_format_directive(tornado_pattern)
+    print(f"\n  directive: format={directive.target_format.value}, "
+          f"delay<{directive.max_response_delay_sec}s, "
+          f"narrative={directive.include_narrative}")
+
+    council3 = build_demo_council()
+
+    print("\n  WITHOUT directive (cheapest viable wins):")
+    decision = council3.deliberate(tornado_pattern, user_priority="cheapest")
+    print(f"    routed to: {decision.chosen_member}  "
+          f"(${decision.estimated_cost:.6f})")
+
+    print("\n  WITH directive (cognition filter excludes narrative-only):")
+    decision = council3.deliberate(tornado_pattern, user_priority="cheapest",
+                                   directive=directive)
+    print(f"    routed to: {decision.chosen_member}  "
+          f"(${decision.estimated_cost:.6f})")
+    for r in decision.reasoning:
+        print(f"      reason: {r}")
