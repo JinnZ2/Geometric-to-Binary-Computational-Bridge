@@ -40,3 +40,17 @@ def q_factor(freqs, mags, f0):
 
     bw = freqs[iR] - freqs[iL]
     return (f0 / bw) if bw > 0 else float("inf")
+
+
+def peak_pick_gated(freqs, mags, coh, f_lo, f_hi, coh_min=0.7):
+    """Coherence-gated peak pick. Refuses to return a peak in a
+    frequency bin where the excitation was too weak to trust."""
+    in_band = [
+        (f, m, c)
+        for f, m, c in zip(freqs, mags, coh)
+        if f_lo <= f <= f_hi and c >= coh_min
+    ]
+    if not in_band:
+        return None
+    f0, m0, _ = max(in_band, key=lambda t: t[1])
+    return f0, m0
