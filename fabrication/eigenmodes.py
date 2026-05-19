@@ -113,3 +113,76 @@ def predict_eigenmodes(ir):
     freqs = _eigvals_1d_chain(Cs, Ls)
     return [{"f": f, "mode_index": i, "kind": "lumped"}
             for i, f in enumerate(freqs)]
+
+
+# -------------------------------------------------------------
+# Dispatcher: combine lumped chain + distributed pipe/box/cylinder.
+# Auto-decide via ka_check; user can force via geometry_hints.
+# -------------------------------------------------------------
+
+def predict_eigenmodes_full(ir, geometry_hints=None, c=None):
+    """
+    Lumped-chain prediction (predict_eigenmodes) plus, if
+    geometry_hints["distributed"] is set AND ka > 0.3, the
+    distributed-element modes from pipe_modes.
+
+    geometry_hints (optional dict), e.g.:
+      {"distributed": "cylinder",
+       "radius": 0.04, "length": 0.20,
+       "n_axial": 3, "m_radial": 2,
+       "characteristic_dim_m": 0.04,
+       "lumped_f_lowest_Hz":   170.0}
+
+    If hints absent OR ka < 0.3 -> lumped only (current behaviour).
+    Combined modes are deduped within 1% of each other (distributed
+    annotation wins when both are present).
+    """
+    from .pipe_modes import (pipe_modes, box_modes, cylinder_modes,
+                             ka_check, C_AIR)
+    if c is None:
+        c = C_AIR
+
+    modes = predict_eigenmodes(ir)
+    if not geometry_hints:
+        return modes
+
+    # auto-decide whether distributed prediction is warranted
+    if ("lumped_f_lowest_Hz" in geometry_hints
+            and "characteristic_dim_m" in geometry_hints):
+        ka = ka_check(geometry_hints, c=c)
+        if ka < 0.3:
+            return modes      # safely lumped; nothing to add
+
+    kind = geometry_hints.get("distributed")
+    extra = []
+    if kind == "pipe":
+        extra = pipe_modes(geometry_hints["length"],
+                           geometry_hints["end_condition"],
+                           n_max=geometry_hints.get("n_max", 4),
+                           c=c)
+    elif kind == "box":
+        extra = box_modes(geometry_hints["Lx"],
+                          geometry_hints["Ly"],
+                          geometry_hints["Lz"],
+                          n_max=geometry_hints.get("n_max", 2),
+                          c=c)
+    elif kind == "cylinder":
+        extra = cylinder_modes(geometry_hints["radius"],
+                               geometry_hints["length"],
+                               n_axial=geometry_hints.get("n_axial", 3),
+                               m_radial=geometry_hints.get("m_radial", 2),
+                               c=c)
+
+    # merge: re-index, dedupe within 1% (distributed annotation wins)
+    combined = modes + extra
+    combined.sort(key=lambda d: d["f"])
+    deduped = []
+    for m in combined:
+        if deduped and abs(m["f"] - deduped[-1]["f"]) / deduped[-1]["f"] < 0.01:
+            if "kind" in m and deduped[-1].get("kind") == "lumped":
+                deduped[-1] = m
+            continue
+        deduped.append(m)
+    for i, m in enumerate(deduped):
+        m["mode_index"] = i
+    return deduped
