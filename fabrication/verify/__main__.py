@@ -22,6 +22,7 @@ from .verifier import verify
 from .verifier_sweep import verify_sweep
 from .verifier_modes import verify_multimode
 from .verifier_cross_piezo import verify_cross_piezo
+from .verifier_cross_speaker import verify_cross_speaker
 from .sweep import make_sweep_file
 from .baseline import capture_baseline, list_baselines
 from .wav_reader import read_wav
@@ -204,6 +205,63 @@ def main():
         for n in r["diagnostic"]:
             print(f"    • {n}")
         print("─" * 60)
+        sys.exit({"pass": 0, "drift": 1, "fail": 2}[r["overall"]])
+
+    if cmd == "cross_speaker":
+        if len(sys.argv) < 3:
+            print("usage: cross_speaker <coupler_name> "
+                  "--sweep <sweep.wav> "
+                  "--acoustic <acoustic_resp.wav> "
+                  "[--baseline <id>] --imp <electrical.csv> "
+                  "--vib <vibration.csv> "
+                  "[--band <f_lo> <f_hi>]")
+            sys.exit(2)
+        name = sys.argv[2]
+        opts = list(sys.argv[3:])
+
+        def _take(flag, n=1):
+            if flag in opts:
+                i = opts.index(flag)
+                vals = opts[i+1:i+1+n]
+                del opts[i:i+1+n]
+                return vals if n > 1 else vals[0]
+            return None
+
+        sweep = _take("--sweep")
+        aresp = _take("--acoustic")
+        bid   = _take("--baseline")
+        imp   = _take("--imp")
+        vib   = _take("--vib")
+        band  = _take("--band", 2)
+        band = (float(band[0]), float(band[1])) if band else (30.0, 4000.0)
+        r = verify_cross_speaker(
+            coupler_name=name,
+            sweep_wav=sweep,
+            acoustic_response_wav=aresp,
+            acoustic_baseline_id=bid,
+            acoustic_search_band=band,
+            electrical_impedance_csv=imp,
+            mechanical_vibration_csv=vib,
+        )
+        print("─" * 64)
+        print(f"  coupler        : {r['coupler']}")
+        print(f"  f_acoustic     : {r['f_acoustic']:8.2f} Hz   "
+              f"(A {r['verdict_acoustic'].upper()})")
+        print(f"  f_electrical   : {r['f_electrical']:8.2f} Hz   "
+              f"(E {r['verdict_electrical'].upper()})")
+        print(f"  f_mechanical   : {r['f_mechanical']:8.2f} Hz   "
+              f"(M {r['verdict_mechanical'].upper()})")
+        print(f"  agreement A-E  : {100*r['agreement_AE']:6.2f}%")
+        print(f"  agreement A-M  : {100*r['agreement_AM']:6.2f}%")
+        print(f"  agreement E-M  : {100*r['agreement_EM']:6.2f}%")
+        print(f"  agreement min  : {100*r['agreement_min']:6.2f}%  "
+              f"(expected {100*r['expected_pct']:.2f}% ± "
+              f"{100*r['tol_frac']:.1f}%)")
+        print(f"  cross verdict  : {r['verdict_cross'].upper()}")
+        print(f"  OVERALL        : {r['overall'].upper()}")
+        for n in r["diagnostic"]:
+            print(f"    • {n}")
+        print("─" * 64)
         sys.exit({"pass": 0, "drift": 1, "fail": 2}[r["overall"]])
 
     if cmd == "multimode":
