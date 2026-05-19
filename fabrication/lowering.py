@@ -11,7 +11,9 @@ add one row here + one file in backends/.
 License: CC0. Stdlib only (imports siblings).
 """
 from substrate_ir import SubstrateIR, Element, BondPort
-from backends import acoustic, fluidic, electrical as elec, mechanical as mech
+from backends import (acoustic, fluidic, electrical as elec,
+                      mechanical as mech, thermal as therm,
+                      magnetic as mag)
 
 
 DOMAIN_PORTS = {
@@ -19,6 +21,8 @@ DOMAIN_PORTS = {
     "fluidic":    BondPort("fluidic",    "mdot", "P"),
     "electrical": BondPort("electrical", "I",    "V"),
     "mechanical": BondPort("mechanical", "v",    "F"),
+    "thermal":    BondPort("thermal",    "qdot", "dT"),
+    "magnetic":   BondPort("magnetic",   "PhiB", "MMF"),
 }
 
 
@@ -87,6 +91,35 @@ LOWER = {
         lambda g: g["c"]),
     ("mechanical", "damping_value"):    ("dissipate",
         lambda g: g["b"]),
+
+    # ----- thermal: geometry primitives -----
+    ("thermal", "wall"):                ("dissipate",
+        lambda g: therm.conduction_resistance(
+            g["length"], g["area"], g["k"])),
+    ("thermal", "block"):               ("store_effort",
+        lambda g: therm.storage_capacity(
+            g["volume"], g["density"], g["cp"])),
+    ("thermal", "convective_surface"):  ("dissipate",
+        lambda g: therm.convection_resistance(g["h"], g["area"])),
+    ("thermal", "radiative_surface"):   ("dissipate",
+        lambda g: therm.radiation_resistance_linearized(
+            g["epsilon"], g["area"], g.get("T_avg_K", 300.0))),
+
+    # ----- thermal: explicit lab values -----
+    ("thermal", "R_value"):             ("dissipate",
+        lambda g: g["R_th"]),
+    ("thermal", "C_value"):             ("store_effort",
+        lambda g: g["C_th"]),
+
+    # ----- magnetic: geometry primitives -----
+    ("magnetic", "gap"):                ("dissipate",
+        lambda g: mag.gap_reluctance(g["gap"], g["area"])),
+    ("magnetic", "core_leg"):           ("dissipate",
+        lambda g: mag.core_reluctance(g["length"], g["area"], g["mu_r"])),
+    # A coil's contribution to the magnetic IR is N² (turns-squared);
+    # the eventual inductance is N² / ℛ_total, computed at claim time.
+    ("magnetic", "coil"):               ("store_flow",
+        lambda g: g["turns"] ** 2),
 }
 
 
