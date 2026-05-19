@@ -99,12 +99,26 @@
         "name": "emotions",
         "repo": "https://github.com/JinnZ2/Emotions-as-Sensors",
         "ref": "main",
+        "direction": "inbound",
+        "relation": "metrology_toolkit_source",
         "paths": [
           "sensors/**/*.json",
           "glyphs/**/*.json",
-          "atlas/**/*.json"
+          "atlas/**/*.json",
+          "metrology/*.py",
+          "metrology/README.md"
         ],
-        "consent": { "license": "MIT", "share_ok": true }
+        "mounts": [
+          { "remote": "metrology/pattern_extractor.py",     "as": "experiments/metrology/pattern_extractor.py" },
+          { "remote": "metrology/empathy_layer_audit.py",   "as": "experiments/metrology/empathy_layer_audit.py" },
+          { "remote": "metrology/measurement_honesty.py",   "as": "experiments/metrology/measurement_honesty.py" },
+          { "remote": "metrology/cooperation_substrate.py", "as": "experiments/metrology/cooperation_substrate.py" },
+          { "remote": "metrology/README.md",                "as": "experiments/metrology/README.md" }
+        ],
+        "_note": "Four metrology modules vendored at sha 2026-05-19 for use by experiments/emotion_substrate_dispatcher.py (ESD-001) and the comfort-layer addon stack. ELA-001 + MH-004 are called directly via experiments/metrology/esd_integration.py. Deferred upstream modules: training_loop, retroactive_empathy_trainer, dynamic_architecture_toolkit, thermodynamic_overlays.",
+        "entities_consumed": ["ELA.001", "MH.001", "MH.002", "MH.003", "MH.004", "PEX.001", "CS.001"],
+        "entities_exported": ["ESD.001"],
+        "consent": { "license": "CC0", "share_ok": true }
       },
       {
         "name": "defense",
