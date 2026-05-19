@@ -20,9 +20,40 @@ import sys
 
 from .verifier import verify
 from .verifier_sweep import verify_sweep
+from .verifier_modes import verify_multimode
 from .sweep import make_sweep_file
 from .baseline import capture_baseline, list_baselines
 from .wav_reader import read_wav
+
+
+def _print_multi(r):
+    print("─" * 56)
+    print(f"  scope_prefix : {r['scope_prefix']}")
+    print(f"  method       : {r['method']}")
+    if r.get("baseline_id"):
+        print(f"  baseline     : {r['baseline_id']}")
+    print(f"  OVERALL      : {r['overall'].upper()}")
+    print("  per-mode:")
+    for pm in r["per_mode"]:
+        if pm.get("measured") is None:
+            print(f"    mode {pm['mode_index']}  predicted "
+                  f"{pm['predicted']:8.2f} Hz   MISSING   FAIL")
+        else:
+            print(f"    mode {pm['mode_index']}  "
+                  f"pred {pm['predicted']:8.2f}  "
+                  f"meas {pm['measured']:8.2f}  "
+                  f"({pm['delta_pct']:+5.1f}%)  "
+                  f"Q={pm['q_factor']:6.1f}   {pm['verdict'].upper()}")
+    if r["unmatched_measured"]:
+        print("  unmatched measured peaks:")
+        for x in r["unmatched_measured"]:
+            print(f"    {x['f']:8.2f} Hz   Q={x['q']:6.1f}   "
+                  f"coh={x['coh']:.2f}   ({x['note']})")
+    if r["diagnostic"]:
+        print("  notes:")
+        for n in r["diagnostic"]:
+            print(f"    • {n}")
+    print("─" * 56)
 
 
 def _print(r):
@@ -124,6 +155,25 @@ def main():
                          baseline_id=baseline_id)
         _print(r)
         sys.exit({"pass": 0, "drift": 1, "fail": 2}[r["verdict"]])
+
+    if cmd == "multimode":
+        if len(sys.argv) < 5:
+            print("usage: multimode <sweep_wav> <response_wav> "
+                  "<scope_prefix> [--baseline <id>] [f_lo f_hi]")
+            sys.exit(2)
+        sw, rs, scope_prefix = sys.argv[2], sys.argv[3], sys.argv[4]
+        baseline_id = None
+        rest = sys.argv[5:]
+        if "--baseline" in rest:
+            i = rest.index("--baseline")
+            baseline_id = rest[i+1]
+            rest = rest[:i] + rest[i+2:]
+        band = (float(rest[0]), float(rest[1])) if len(rest) >= 2 \
+               else (50.0, 4000.0)
+        r = verify_multimode(sw, rs, scope_prefix,
+                             search_band=band, baseline_id=baseline_id)
+        _print_multi(r)
+        sys.exit({"pass": 0, "drift": 1, "fail": 2}[r["overall"]])
 
     print("unknown cmd:", cmd)
     sys.exit(2)
