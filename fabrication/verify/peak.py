@@ -23,7 +23,10 @@ def peak_pick(freqs, mags, f_lo, f_hi):
 
 
 def q_factor(freqs, mags, f0):
-    """Half-power (-3 dB => peak/√2) bandwidth."""
+    """Half-power (-3 dB => peak/√2) bandwidth for a PEAK.
+    For a dip (series-resonance), use q_factor_dip instead --
+    this function walks outward while mags > half, which is
+    nonsense at a minimum."""
     # find peak index
     i0 = min(range(len(freqs)), key=lambda i: abs(freqs[i] - f0))
     peak = mags[i0]
@@ -36,6 +39,25 @@ def q_factor(freqs, mags, f0):
     # walk right
     iR = i0
     while iR < len(mags) - 1 and mags[iR] > half:
+        iR += 1
+
+    bw = freqs[iR] - freqs[iL]
+    return (f0 / bw) if bw > 0 else float("inf")
+
+
+def q_factor_dip(freqs, mags, f0):
+    """Q from a DIP (series resonance). At f0 the magnitude is at
+    its minimum; -3 dB-equivalent for a dip means walking outward
+    until mags exceed dip*√2."""
+    i0 = min(range(len(freqs)), key=lambda i: abs(freqs[i] - f0))
+    dip = mags[i0]
+    threshold = dip * math.sqrt(2)
+
+    iL = i0
+    while iL > 0 and mags[iL] < threshold:
+        iL -= 1
+    iR = i0
+    while iR < len(mags) - 1 and mags[iR] < threshold:
         iR += 1
 
     bw = freqs[iR] - freqs[iL]

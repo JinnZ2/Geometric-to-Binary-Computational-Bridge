@@ -11,12 +11,13 @@ add one row here + one file in backends/.
 License: CC0. Stdlib only (imports siblings).
 """
 from substrate_ir import SubstrateIR, Element, BondPort
-from backends import acoustic, fluidic
+from backends import acoustic, fluidic, electrical as elec
 
 
 DOMAIN_PORTS = {
-    "acoustic": BondPort("acoustic", "Q", "P"),
-    "fluidic":  BondPort("fluidic",  "mdot", "P"),
+    "acoustic":   BondPort("acoustic",   "Q",    "P"),
+    "fluidic":    BondPort("fluidic",    "mdot", "P"),
+    "electrical": BondPort("electrical", "I",    "V"),
 }
 
 
@@ -39,6 +40,28 @@ LOWER = {
         lambda g: fluidic.channel_inertance(g["length"], g["area"], g["fluid"])),
     ("fluidic",  "reservoir"):("store_effort",
         lambda g: fluidic.reservoir_compliance(g["volume"], g["bulk_modulus"])),
+
+    # ----- electrical: geometry primitives -----
+    ("electrical", "loop"):     ("store_flow",
+        lambda g: elec.air_core_loop_inductance(g["radius"],
+                                                g["wire_radius"])),
+    ("electrical", "solenoid"): ("store_flow",
+        lambda g: elec.solenoid_inductance(g["turns"], g["length"],
+                                           g["area"], g.get("mu_r", 1.0))),
+    ("electrical", "gap"):      ("store_effort",
+        lambda g: elec.parallel_plate_capacitance(g["area"], g["gap"],
+                                                  g.get("er", 1.0))),
+    ("electrical", "cyl_cap"):  ("store_effort",
+        lambda g: elec.cylindrical_capacitance(g["inner_r"], g["outer_r"],
+                                               g["length"],
+                                               g.get("er", 1.0))),
+    ("electrical", "wire"):     ("dissipate",
+        lambda g: elec.wire_resistance(g["length"], g["area"], g["rho"])),
+
+    # ----- electrical: explicit breadboard values -----
+    ("electrical", "R_value"):  ("dissipate",     lambda g: g["R"]),
+    ("electrical", "L_value"):  ("store_flow",    lambda g: g["L"]),
+    ("electrical", "C_value"):  ("store_effort",  lambda g: g["C"]),
 }
 
 
