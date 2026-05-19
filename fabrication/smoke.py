@@ -43,6 +43,9 @@ SMOKE_MODULES = [
     "fabrication.verify.tests.cross_solenoid_smoke",
     # emit-side
     "fabrication.emit.tests.emit_all_smoke",
+    # voice + archive
+    "fabrication.voice.tests.voice_smoke",
+    "fabrication.archive_tests.archive_smoke",
 ]
 
 
