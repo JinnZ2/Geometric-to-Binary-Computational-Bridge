@@ -15,6 +15,11 @@ from pathlib import Path
 from .couplers_piezo import (PIEZO_MATERIALS, piezo_capacitance,
                              effective_k_squared, predict_split,
                              expected_agreement_pct)
+from .couplers_speaker import (speaker_fs_Hz, speaker_Q_total,
+                               speaker_motional_impedance_peak,
+                               speaker_coupling_quality,
+                               expected_agreement_pct
+                               as expected_agreement_pct_speaker)
 
 
 OVERLAY = Path("coupler_overlay.json")
@@ -50,6 +55,51 @@ def make_piezo_coupler(name, material, disc_geometry, cavity_geometry,
         "acoustic_scope":   acoustic_scope,
         "electrical_scope": electrical_scope,
         "provenance":       "couplers_piezo.py",
+        "ts":               time.time(),
+    }
+    entry["id"] = hashlib.sha256(
+        json.dumps(entry, sort_keys=True, default=str).encode()
+    ).hexdigest()[:16]
+    return entry
+
+
+def make_speaker_coupler(name,
+                         Re, Le, BL, Mms, Cms, Rms, Sd,
+                         acoustic_scope, electrical_scope,
+                         mechanical_scope):
+    """
+    Three-way dynamic-speaker coupler entry. Predicts the single
+    fundamental f_s that should appear on ALL THREE substrates,
+    plus the pairwise agreement budget.
+
+    No per-substrate IR is created here; the existing IRs for each
+    domain stand on their own. This entry just links three scopes
+    via the BL gyrator and the Sd transformer.
+    """
+    f_s = speaker_fs_Hz(Mms, Cms)
+    Q_t = speaker_Q_total(Mms, Cms, Rms, Re, BL)
+    Z_pk = speaker_motional_impedance_peak(Mms, Cms, Rms, Re, BL)
+    q = speaker_coupling_quality(Mms, Cms, Rms, Re, BL, Sd)
+    expected_pct = expected_agreement_pct_speaker(q)
+    entry = {
+        "name":             name,
+        "kind":             "speaker_gyrator_chain",
+        "Re_ohm":           Re,
+        "Le_H":             Le,
+        "BL":               BL,
+        "Mms_kg":           Mms,
+        "Cms_m_per_N":      Cms,
+        "Rms_Ns_per_m":     Rms,
+        "Sd_m2":            Sd,
+        "f_s_Hz":           f_s,
+        "Q_total":          Q_t,
+        "Z_peak_ohm":       Z_pk,
+        "coupling_quality": q,
+        "expected_agreement_pct": expected_pct,
+        "acoustic_scope":   acoustic_scope,
+        "electrical_scope": electrical_scope,
+        "mechanical_scope": mechanical_scope,
+        "provenance":       "couplers_speaker.py",
         "ts":               time.time(),
     }
     entry["id"] = hashlib.sha256(

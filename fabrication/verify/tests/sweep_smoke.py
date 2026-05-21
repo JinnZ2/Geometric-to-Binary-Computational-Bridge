@@ -71,5 +71,4 @@ if __name__ == "__main__":
     r = verify_sweep("sweep.wav", "response.wav", scope)
     assert r["verdict"] == "pass", r
     print("sweep smoke OK:", round(r["measured"], 1),
-          "Hz  Q≈", round(r["q_factor"], 1),
-          "  bins_ok=", r["bins_trusted"])
+          "Hz  Q≈", round(r["q_factor"], 1))
