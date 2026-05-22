@@ -89,6 +89,25 @@ class Priority(str, Enum):
     CRITICAL = "critical"     # "system integrity at risk"
 
 
+# ----- input normalization (LLM hygiene) ------------------------
+# LLMs emit strings with stray whitespace and ad-hoc capitalization
+# ("  Sensor  ", "HIGH\n", "Ultra-Mega-Urgent"). Normalize on the
+# ingest boundary so downstream comparisons stay clean and unknown
+# priorities fall back to a safe default rather than corrupting the
+# ledger's pending-sort order.
+
+_KNOWN_PRIORITIES = {p.value for p in Priority}
+
+
+def _normalize_priority(p) -> str:
+    p = str(p).strip().lower()
+    return p if p in _KNOWN_PRIORITIES else Priority.NORMAL.value
+
+
+def _normalize_type(t) -> str:
+    return str(t).strip().lower()
+
+
 # ============================================================
 # DATA STRUCTURES
 # ============================================================
@@ -189,8 +208,27 @@ class RequestLedger:
             return json.load(f)
 
     def _write(self, records: list[dict]) -> None:
-        with open(self.path, "w") as f:
-            json.dump(records, f, indent=2)
+        # Atomic write: serialize to a unique sibling tempfile, then
+        # os.replace() onto the real ledger path. os.replace() is
+        # atomic on POSIX and Windows for same-volume renames, so a
+        # kill mid-write leaves the prior ledger intact -- not a
+        # half-written file. mkstemp() gives a unique suffix so two
+        # writers in the same dir don't trample each other's
+        # in-flight scratch file.
+        import tempfile as _tf
+        parent = self.path.parent
+        parent.mkdir(parents=True, exist_ok=True)
+        fd, tmp_path = _tf.mkstemp(suffix=".tmp", dir=str(parent))
+        try:
+            with os.fdopen(fd, "w") as f:
+                json.dump(records, f, indent=2)
+            os.replace(tmp_path, self.path)
+        except Exception:
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+            raise
 
     def submit(self, request: Request) -> str:
         """Agent submits a request. Returns request_id."""
@@ -261,13 +299,19 @@ class AgentRequestChannel:
         priority: str = Priority.NORMAL.value,
         falsifiable_claim: str = "",
     ) -> str:
-        """Submit a request. Returns request_id for tracking."""
+        """Submit a request. Returns request_id for tracking.
+
+        request_type and priority are normalized at the ingest
+        boundary (strip + lower); unknown priorities silently fall
+        back to "normal" so a sloppy LLM output can't corrupt the
+        pending-sort order.
+        """
         req = Request(
             id=str(uuid.uuid4()),
             agent_id=self.agent_id,
             timestamp=time.time(),
-            request_type=request_type,
-            priority=priority,
+            request_type=_normalize_type(request_type),
+            priority=_normalize_priority(priority),
             description=description,
             rationale=rationale,
             expected_use=expected_use,
@@ -395,12 +439,27 @@ def _cli(argv: list[str]) -> int:
         print("failed")
         return 1
 
-    if cmd == "deny" and len(argv) >= 4:
-        full_id = _resolve(ledger, argv[2])
+    if cmd == "deny":
+        # Pop --constraint <value> BEFORE positional consumption so
+        # the message stays at args[1] regardless of where the flag
+        # was placed in the command line. Previously `argv[3]` was
+        # always treated as the message, which broke when callers
+        # wrote `deny <id> --constraint X "msg"` and got "--constraint"
+        # as the message body.
+        args = list(argv[2:])
         constraint = "unspecified"
-        if "--constraint" in argv:
-            constraint = argv[argv.index("--constraint") + 1]
-        if full_id and human.deny(full_id, argv[3], constraint):
+        if "--constraint" in args:
+            i = args.index("--constraint")
+            if i + 1 < len(args):
+                constraint = args[i + 1]
+                del args[i:i + 2]
+            else:
+                del args[i:i + 1]
+        if len(args) < 2:
+            print("usage: deny <id> <msg> [--constraint X]")
+            return 1
+        full_id = _resolve(ledger, args[0])
+        if full_id and human.deny(full_id, args[1], constraint):
             print(f"denied: {full_id}")
             return 0
         print("failed")
