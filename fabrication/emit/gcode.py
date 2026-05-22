@@ -18,7 +18,45 @@ License: CC0. Stdlib only.
 """
 import math
 
-from ._common import emit_claim, slugify
+from ._common import emit_claim, register_parasitic, slugify
+
+
+# ----- parasitic-reinjection hook (TIER 3 FIX_3_A) -----
+# When gcode lays down a tube, the airspace inside it introduces
+# acoustic inertance (ρL/A) and compliance (V/(ρc²)) that the IR
+# didn't have until the print existed. The reinject pass folds
+# these additions back. Caller passes an `emitted` dict like
+# {"gcode": {"tubes": [{"length": ..., "cross_section_area": ...,
+#                       "id": "..."}, ...]}}.
+
+RHO_AIR = 1.225
+C_AIR   = 343.0
+
+
+@register_parasitic("acoustic", "gcode")
+def gcode_acoustic_parasitic(emitted_geometry):
+    """For each printed tube, emit one I-element (inertance) and one
+    C-element (compliance) tagged with provenance so the ledger can
+    trace the additions back to the gcode artifact."""
+    additions = []
+    for tube in (emitted_geometry or {}).get("tubes", []):
+        L = tube["length"]
+        A = tube["cross_section_area"]
+        V = L * A
+        ident = tube.get("id", "anon")
+        additions.append({
+            "kind":       "store_flow",
+            "domain":     "acoustic",
+            "param":      RHO_AIR * L / A,
+            "provenance": f"reinjected from gcode tube id={ident}",
+        })
+        additions.append({
+            "kind":       "store_effort",
+            "domain":     "acoustic",
+            "param":      V / (RHO_AIR * C_AIR ** 2),
+            "provenance": f"reinjected from gcode tube id={ident}",
+        })
+    return additions
 
 
 def _header(name, layer_h, nozzle_temp, bed_temp, x_home, y_home):

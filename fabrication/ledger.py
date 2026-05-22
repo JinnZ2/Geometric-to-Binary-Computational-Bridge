@@ -63,8 +63,9 @@ def summary():
     for c in claims:
         parts = c.get("scope", "").split("::")
         if len(parts) >= 2 and parts[0] == "fab":
-            dom = parts[1]
-            by_domain[dom] = by_domain.get(dom, 0) + 1
+            # compound domains like "electrical-magnetic" tally both
+            for dom in parts[1].split("-"):
+                by_domain[dom] = by_domain.get(dom, 0) + 1
         k = c.get("kind", "?")
         by_kind[k] = by_kind.get(k, 0) + 1
         if c.get("format"):
@@ -123,13 +124,20 @@ def main(argv=None):
         if len(argv) < 2:
             print("show needs id or scope"); return 2
         hit = show(argv[1])
-        print(json.dumps(hit, indent=2, default=str) if hit
+        # `hit is not None` matters because a legitimate empty-dict
+        # claim entry (e.g. one with only id+scope set) should not
+        # render as "not found".
+        print(json.dumps(hit, indent=2, default=str)
+              if hit is not None
               else f"not found: {argv[1]}")
         return 0
     if cmd == "measure":
         if len(argv) < 2:
             print("measure needs scope prefix"); return 2
-        for m in measurements_for(argv[1]):
+        # Sort by timestamp so a measurement history reads in
+        # chronological order regardless of insertion order in the log.
+        for m in sorted(measurements_for(argv[1]),
+                        key=lambda x: x.get("ts", 0)):
             v = m.get("verdict") or m.get("overall") or "?"
             print(f"  ts={m.get('ts',0):.0f}  {v:6s}  "
                   f"{m.get('method','?'):40s}  "

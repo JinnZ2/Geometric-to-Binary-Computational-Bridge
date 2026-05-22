@@ -55,3 +55,54 @@ MAGNETIC_CORE = {
     "silicon_steel":   {"mu_r":  4000.0, "B_sat_T":  2.0},
     "mu_metal":        {"mu_r": 80000.0, "B_sat_T":  0.75},
 }
+
+
+# ----- nonlinear saturation model (TIER 2 FIX_2_B) -----
+
+# tanh saturation parameters per material. provenance per entry.
+SATURATION_MODELS = {
+    "silicon_steel":  {"B_sat": 1.8, "mu_r_initial": 4000.0,
+                       # M-19 grain-oriented nominal
+                       },
+    "ferrite_3C90":   {"B_sat": 0.4, "mu_r_initial": 2300.0,
+                       # 3C90 typical
+                       },
+    "ferrite_77":     {"B_sat": 0.4, "mu_r_initial": 2000.0,
+                       # 77 typical
+                       },
+    "iron_powder_26": {"B_sat": 1.4, "mu_r_initial": 75.0,
+                       # iron-powder cores, nominal
+                       },
+    "mu_metal":       {"B_sat": 0.75, "mu_r_initial": 80000.0,
+                       # mumetal nominal
+                       },
+    "air":            {"B_sat": float("inf"), "mu_r_initial": 1.0},
+}
+
+
+def mu_effective(material, H_A_per_m):
+    """Effective permeability with tanh saturation.
+
+      B(H)  = B_sat · tanh(μ_r_initial · μ₀ · H / B_sat)
+      μ_eff = dB/dH = μ_r_initial·μ₀ · sech²(arg)
+                    = μ_r_initial·μ₀ · (1 - tanh²(arg))
+
+    Air / vacuum (B_sat = ∞) returns the static μ_r_initial·μ₀.
+    """
+    m = SATURATION_MODELS.get(material, SATURATION_MODELS["air"])
+    mu_init = m["mu_r_initial"] * MU_0
+    if m["B_sat"] == float("inf"):
+        return mu_init
+    arg = mu_init * H_A_per_m / m["B_sat"]
+    return mu_init * (1.0 - math.tanh(arg) ** 2)
+
+
+def reluctance_nonlinear(length_m, area_m2, material, H_A_per_m):
+    """ℛ(H) = ℓ / (μ_eff(H) · A).
+
+    For a simulator: at each step, compute H from the current MMF
+    state, look up μ_eff, recompute ℛ -- this is the "dissipate_dynamic"
+    element kind in the IR. When μ becomes B-dependent the storage
+    accounting on the I-element must switch from energy to co-energy
+    W' = ∫λ·di; flagged as `fab::magnetic::coenergy` claim."""
+    return length_m / (mu_effective(material, H_A_per_m) * area_m2)

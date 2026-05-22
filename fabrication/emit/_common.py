@@ -44,3 +44,30 @@ def emit_claim(format_name, ir, artifact_path, geo_hash, params=None):
 
 def slugify(s):
     return "".join(c if c.isalnum() else "_" for c in str(s))[:40]
+
+
+# ----- parasitic-reinjection registry (TIER 3 FIX_3_A) -----
+#
+# When an emitter materializes geometry (e.g. gcode lays down a tube
+# of length L and area A), that geometry introduces physics back into
+# the IR that wasn't there originally -- acoustic inertance ρL/A,
+# acoustic compliance V/(ρc²), parasitic capacitance, etc. The
+# parasitic registry lets emitters declare what they re-add, and the
+# `passes.parasitic_reinject` loop folds the additions back into the
+# IR for re-prediction.
+
+PARASITIC_INJECTORS = {}
+
+
+def register_parasitic(domain, emit_format):
+    """Decorator: register an injector for (domain, emit_format).
+
+    The decorated function takes the emitted-geometry record produced
+    by the emitter (whatever shape that emitter exports) and returns
+    a list of {kind, domain, param, provenance} dicts to add to the
+    IR. Returning [] is a clean no-op.
+    """
+    def deco(fn):
+        PARASITIC_INJECTORS[(domain, emit_format)] = fn
+        return fn
+    return deco

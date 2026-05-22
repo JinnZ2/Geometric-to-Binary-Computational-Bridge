@@ -26,48 +26,116 @@ from dataclasses import dataclass, field
 from typing import Literal, Callable, Optional
 
 
+# `Domain` is kept as Literal for the original substrates but
+# multi-substrate hyphenated names ("electrical-magnetic", ...) are
+# now used by transducer couplers; we relax the runtime type to `str`
+# on the dataclass fields so those names parse without escape hatches.
 Domain = Literal[
     "electrical", "mechanical", "acoustic",
     "fluidic", "optical", "magnetic", "thermal"
 ]
 
 
+JunctionKind = Literal["0", "1"]      # 0=shared effort, 1=shared flow
+Causality    = Literal["effort_in", "flow_in"]
+
+
 @dataclass(frozen=True)
 class BondPort:
-    """One port = (flow var, effort var) in a chosen domain."""
-    domain: Domain
-    flow_name: str          # e.g. "I", "F", "Q", "Φ"
-    effort_name: str        # e.g. "V", "v", "P", "E"
+    """One port = (flow var, effort var) in a chosen domain.
+
+    Optional `junction_id` lets a port name the junction it connects
+    to (set by the lowering pass or by an SCAP run). Optional
+    `causality` is set by `passes.causality.assign_causality`.
+    """
+    domain: str
+    flow_name: str
+    effort_name: str
+    junction_id: Optional[str] = None
+    causality: Optional[Causality] = None
 
 
 @dataclass(frozen=True)
 class Element:
     """
     Substrate-agnostic primitive.
-    Geometry sets the parameter; domain sets the units.
+    `kind` is a str (was Literal); a registry of valid kinds is
+    documented below but not enforced at construction time so future
+    backends can extend it without editing this file.
+
+    Known kinds:
+      store_flow       inductor / mass / inertance / inductance
+      store_effort     capacitor / spring / compliance / tank
+      dissipate        resistor / damper / acoustic loss
+      dissipate_dynamic state-dependent R(state)  (e.g. T^4 radiation,
+                       μ(B) reluctance)
+      transform        transformer / lever / horn / lens
+      gyrate           cross-domain gyrator coupler
+      transformer      cross-domain TF coupler (e.g. coil N:1)
+      mesh_expand      geometry that lowers into N sub-elements
+      source_flow      source of flow
+      source_effort    source of effort
+
+    `parameter` may be a scalar OR a dict (e.g. transformers carry
+    modulus + leakage + winding resistance + core loss together).
     """
-    kind: Literal[
-        "store_flow",     # inductor / mass / inertance / inductance
-        "store_effort",   # capacitor / spring / compliance
-        "dissipate",      # resistor / damper / acoustic loss
-        "transform",      # transformer / lever / horn / lens
-        "gyrate",         # gyrator -- cross-domain coupler
-        "source_flow",
-        "source_effort",
-    ]
-    geometry: dict        # e.g. {"length": 0.10, "area": 1e-4}
-    parameter: float      # L, C, R, ratio -- computed FROM geometry
+    kind: str
+    geometry: dict
+    parameter: object
     port_a: BondPort
     port_b: Optional[BondPort] = None
+    is_transducer: bool = False     # NEW: cross-substrate flag
+
+
+@dataclass(frozen=True)
+class Junction:
+    """Bond-graph junction node.
+
+    0-junction: all bonds share effort
+                (parallel circuits, force balance)
+    1-junction: all bonds share flow
+                (series circuits, velocity balance)
+    """
+    id: str
+    kind: JunctionKind
+    domain: str
+
+
+@dataclass
+class Bond:
+    """Power bond between an Element port and a Junction.
+    Causality is set by `passes.causality.assign_causality`."""
+    element_idx: int
+    port: Literal["a", "b"]
+    junction_id: str
+    causality: Optional[Causality] = None
 
 
 @dataclass
 class SubstrateIR:
-    """The lowered graph -- same shape, different domain."""
-    domain: Domain
-    elements: list[Element] = field(default_factory=list)
-    topology: list[tuple[int, int]] = field(default_factory=list)
-    # element indices forming edges
+    """The lowered graph -- same shape, different domain.
+
+    `junctions` + `bonds` carry the bond-graph topology (added in
+    TIER 1 of the structural-repair wedge). `topology` predates them
+    and is preserved for backward compatibility; legacy code that
+    only fills `topology` continues to work unchanged.
+    """
+    domain: str
+    elements: list = field(default_factory=list)
+    junctions: list = field(default_factory=list)
+    bonds: list = field(default_factory=list)
+    topology: list = field(default_factory=list)
+    # element indices forming legacy edges
+
+    def add_junction(self, jid, kind, domain):
+        if any(j.id == jid for j in self.junctions):
+            raise ValueError(f"duplicate junction id: {jid}")
+        self.junctions.append(Junction(jid, kind, domain))
+
+    def add_bond(self, element_idx, port, junction_id):
+        if not any(j.id == junction_id for j in self.junctions):
+            raise ValueError(f"unknown junction: {junction_id}")
+        self.bonds.append(Bond(element_idx, port, junction_id))
 
 
 # -------------------------------------------------------------

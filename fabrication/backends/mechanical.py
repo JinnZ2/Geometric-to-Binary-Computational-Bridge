@@ -1,7 +1,18 @@
 """
 mechanical.py  (fabrication/backends/)
 
-Mechanical translational: effort = F (N), flow = v (m/s).
+Mechanical translational -- FORCE ANALOGY.
+
+    effort       = F (N)
+    flow         = v (m/s)
+    momentum p   = ∫F·dt        (I-element stores)
+    displacement = ∫v·dt        (C-element stores)
+
+This is the IEC-standard analogy and is the right one for bond
+graphs: an I-element (mass) takes effort IN and integrates it to
+momentum. If you ever see a mass storing displacement here,
+something has been inverted -- file a failing claim against
+`fab::mechanical::analogy`.
 
 Geometry / material -> bond-graph parameter
 
@@ -23,24 +34,39 @@ License: CC0. Stdlib only.
 """
 import math
 
+from .materials import resolve_material
 
-# Density (kg/m³) and Young's modulus E (Pa) for common materials.
-# CC0 reference values; override with datasheet for actual stock.
-MATERIAL_TABLE = {
-    "aluminum":  {"rho": 2700, "E": 69e9},
-    "steel":     {"rho": 7850, "E": 200e9},
-    "stainless": {"rho": 8000, "E": 193e9},
-    "brass":     {"rho": 8500, "E": 100e9},
-    "copper":    {"rho": 8960, "E": 117e9},
-    "titanium":  {"rho": 4500, "E": 116e9},
-    "wood_pine": {"rho":  500, "E": 9e9},
-    "wood_oak":  {"rho":  750, "E": 11e9},
-    "abs":       {"rho": 1050, "E": 2.3e9},
-    "pla":       {"rho": 1240, "E": 3.5e9},
-    "petg":      {"rho": 1270, "E": 2.1e9},
-    "silicon":   {"rho": 2330, "E": 130e9},
-    "polymer_paper": {"rho": 800, "E": 4e9},  # speaker cone composite
-}
+
+# Mechanical-domain view onto the unified materials registry. Provides
+# the legacy {"rho", "E"} keys this module's functions consume, sourced
+# from backends.materials so per-domain tables don't drift.
+def _mech_view(name):
+    p = resolve_material(name)
+    return {"rho": p["density"], "E": p["youngs"]}
+
+
+class _MaterialTableView:
+    """Lazy dict-like view over backends.materials.MATERIALS exposing
+    the legacy {"rho", "E"} keys used by this module's functions."""
+
+    def __getitem__(self, key):
+        return _mech_view(key)
+
+    def __contains__(self, key):
+        try:
+            _mech_view(key)
+            return True
+        except KeyError:
+            return False
+
+    def get(self, key, default=None):
+        try:
+            return _mech_view(key)
+        except KeyError:
+            return default
+
+
+MATERIAL_TABLE = _MaterialTableView()
 
 
 # ----- inertia ----------------------------------------------------
