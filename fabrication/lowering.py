@@ -10,10 +10,11 @@ add one row here + one file in backends/.
 
 License: CC0. Stdlib only (imports siblings).
 """
-from substrate_ir import SubstrateIR, Element, BondPort
-from backends import (acoustic, fluidic, electrical as elec,
-                      mechanical as mech, thermal as therm,
-                      magnetic as mag)
+from .substrate_ir import SubstrateIR, Element, BondPort
+from .backends import (acoustic, fluidic, electrical as elec,
+                       mechanical as mech, thermal as therm,
+                       magnetic as mag)
+from .backends.materials import _expand_material
 
 
 DOMAIN_PORTS = {
@@ -111,6 +112,36 @@ LOWER = {
     ("thermal", "C_value"):             ("store_effort",
         lambda g: g["C_th"]),
 
+    # ----- thermal: nonlinear radiation (TIER 2 FIX_2_A) -----
+    # Parameter is a dict; the simulator calls the func at runtime
+    # with the current surface temperature to get R(T_s).
+    ("thermal", "radiative_surface"):   ("dissipate_dynamic",
+        lambda g: {
+            "func":       "radiation_resistance_dynamic",
+            "epsilon":    g["epsilon"],
+            "area":       g["area"],
+            "T_ambient":  g.get("T_ambient", 293.15),
+        }),
+
+    # ----- thermal: 1-D mesh (TIER 2 FIX_2_C) -----
+    # `mesh_expand` kind tells a richer lowering pass to inflate
+    # this single node into N R-C elements; the existing lower()
+    # records the spec dict as the parameter so a future
+    # mesh_expand pass can act on it.
+    ("thermal", "solid_wall"):          ("mesh_expand",
+        lambda g: therm.build_1d_mesh(
+            g["length"], g["area"], g["material"],
+            g.get("n_nodes", 5))),
+
+    # ----- magnetic: nonlinear reluctance (TIER 2 FIX_2_B) -----
+    ("magnetic", "core_segment"):       ("dissipate_dynamic",
+        lambda g: {
+            "func":     "reluctance_nonlinear",
+            "length":   g["length"],
+            "area":     g["area"],
+            "material": g["material"],
+        }),
+
     # ----- magnetic: geometry primitives -----
     ("magnetic", "gap"):                ("dissipate",
         lambda g: mag.gap_reluctance(g["gap"], g["area"])),
@@ -118,13 +149,70 @@ LOWER = {
         lambda g: mag.core_reluctance(g["length"], g["area"], g["mu_r"])),
     # A coil's contribution to the magnetic IR is N² (turns-squared);
     # the eventual inductance is N² / ℛ_total, computed at claim time.
+    # See ("electrical-magnetic", "coil") for the proper transducer
+    # entry that couples copper loss + leakage + core loss across
+    # both domains; the magnetic-only entry above is preserved for
+    # smokes and legacy callers.
     ("magnetic", "coil"):               ("store_flow",
         lambda g: g["turns"] ** 2),
+
+    # ----- electrical <-> magnetic transducer (coil as TF) -----
+    # Couples electrical and magnetic IRs through one N-modulus
+    # transformer. Parameter is a DICT carrying:
+    #   modulus_N            turns ratio (gyrator-like)
+    #   winding_resistance   copper I²R loss [Ω]
+    #   leakage_inductance   imperfect coupling [H]
+    #   core_eddy_R          eddy-loss as parallel R [Ω]
+    # Simulators that handle dict parameters get the full physics;
+    # legacy paths that only inspect kind="transformer" can read
+    # modulus_N from the dict.
+    ("electrical-magnetic", "coil"):    ("transformer",
+        lambda g: {
+            "modulus_N":          g["turns"],
+            "winding_resistance": _wire_resistance(g),
+            "leakage_inductance": _leakage_estimate(g),
+            "core_eddy_R":        g.get("core_eddy_R", 1e4),
+        }),
 }
 
 
+# ----- helpers for the electrical-magnetic transducer entry -----
+
+import math as _math
+
+
+def _wire_resistance(g):
+    """R = ρ · L_wire / A_wire.  Copper at 20°C: 1.68e-8 Ω·m.
+
+    L_wire = turns × mean turn length (caller can override via
+    `mean_turn_length`; otherwise 2π·coil_radius).
+    A_wire = π·wire_radius² (caller can override).
+    """
+    rho_cu = g.get("wire_rho", 1.68e-8)
+    mean_turn = g.get("mean_turn_length",
+                      2 * _math.pi * g.get("coil_radius", 0.01))
+    L_wire = g["turns"] * mean_turn
+    A_wire = _math.pi * g.get("wire_radius", 0.0005) ** 2
+    return rho_cu * L_wire / A_wire
+
+
+def _leakage_estimate(g):
+    """Coupling coefficient k typically 0.95–0.99 for tight cores.
+    Leakage L_leak ≈ (1 - k²) · L_self where L_self = N² / ℛ."""
+    k = g.get("coupling_coefficient", 0.97)
+    L_self = (g["turns"] ** 2) / g.get("reluctance", 1e6)
+    return (1 - k * k) * L_self
+
+
 def lower(geometric_graph, domain: str) -> SubstrateIR:
-    """One pass: shape -> substrate IR. No domain-specific code path."""
+    """One pass: shape -> substrate IR. No domain-specific code path.
+
+    Material expansion happens BEFORE the LOWER lambda runs, so a
+    geometry dict carrying `{"material": "steel", ...}` is functionally
+    interchangeable with one carrying explicit `{"youngs": 200e9,
+    "density": 7850, ...}` -- the lambda sees both. Explicit numeric
+    overrides always win over the registry default.
+    """
     ir = SubstrateIR(domain=domain)
     port = DOMAIN_PORTS[domain]
     for node in geometric_graph.nodes:
@@ -132,7 +220,8 @@ def lower(geometric_graph, domain: str) -> SubstrateIR:
         if key not in LOWER:
             raise ValueError(f"No lowering for {key}; add to LOWER table.")
         kind, fn = LOWER[key]
-        param = fn(node.geometry)
-        ir.elements.append(Element(kind, node.geometry, param, port, port))
+        geom = _expand_material(node.geometry)
+        param = fn(geom)
+        ir.elements.append(Element(kind, geom, param, port, port))
     ir.topology = list(geometric_graph.edges)
     return ir

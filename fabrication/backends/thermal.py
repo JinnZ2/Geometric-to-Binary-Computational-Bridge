@@ -37,23 +37,91 @@ def convection_resistance(h_W_per_m2K, area_m2):
 
 
 def radiation_resistance_linearized(emissivity, area_m2, T_avg_K):
-    """R_rad ≈ 1/(4·ε·σ·T³·A) -- valid for small ΔT around T_avg."""
+    """R_rad ≈ 1/(4·ε·σ·T³·A) -- LINEAR APPROXIMATION around T_avg.
+
+    Only valid within ±20 K of the linearization temperature; use
+    `radiation_resistance_dynamic` for hot transients."""
     return 1.0 / (4.0 * emissivity * STEFAN_BOLTZMANN
                   * (T_avg_K ** 3) * area_m2)
+
+
+def radiation_resistance_dynamic(emissivity, area_m2,
+                                 T_surface_K, T_ambient_K=293.15):
+    """True nonlinear radiation resistance.
+
+      q_rad   = σ·ε·A·(T_s⁴ - T_a⁴)
+      R(T_s)  = (T_s - T_a) / q_rad
+
+    Falls back to the linearized form at the midpoint when T_s == T_a
+    (avoiding a 0/0 limit) so the simulator can call this every step
+    without special-casing equilibrium."""
+    if abs(T_surface_K - T_ambient_K) < 1e-6:
+        T_avg = 0.5 * (T_surface_K + T_ambient_K)
+        return radiation_resistance_linearized(emissivity, area_m2, T_avg)
+    q = (STEFAN_BOLTZMANN * emissivity * area_m2
+         * (T_surface_K ** 4 - T_ambient_K ** 4))
+    return (T_surface_K - T_ambient_K) / q
+
+
+def build_1d_mesh(length_m, area_m2, material, n_nodes=5):
+    """Build a 1-D thermal mesh: N nodes, N-1 R links, N C lumps.
+
+    Returns a dict ready for the lowering pass to expand into N
+    Elements + N-1 bonds + junctions. Captures spatial gradients
+    that a single R-C lump misses (hot spots near a heater, slow
+    soak across a thick wall).
+    """
+    from .materials import resolve_material
+    p = resolve_material(material)
+    k   = p["thermal_k"]
+    cp  = p["specific_heat"]
+    rho = p["density"]
+
+    dx = length_m / n_nodes
+    R_segment = dx / (k * area_m2)
+    C_node    = rho * cp * area_m2 * dx
+
+    return {
+        "nodes": [{"id": f"th_node_{i}", "C": C_node}
+                  for i in range(n_nodes)],
+        "links": [{"from": f"th_node_{i}", "to": f"th_node_{i+1}",
+                   "R":    R_segment}
+                  for i in range(n_nodes - 1)],
+        "n_nodes":   n_nodes,
+        "dx_m":      dx,
+        "R_per_seg": R_segment,
+        "C_per_node": C_node,
+    }
 
 
 def time_constant(R, C):
     return R * C
 
 
-# Reference table -- CC0 published values, override per build.
-MATERIAL_THERMAL = {
-    "copper":     {"k": 401.0,  "rho": 8960,  "cp":  385, "epsilon": 0.04},
-    "aluminum":   {"k": 237.0,  "rho": 2700,  "cp":  897, "epsilon": 0.09},
-    "steel":      {"k":  50.0,  "rho": 7850,  "cp":  466, "epsilon": 0.50},
-    "abs_3dp":    {"k":   0.17, "rho": 1040,  "cp": 1300, "epsilon": 0.90},
-    "pla_3dp":    {"k":   0.13, "rho": 1240,  "cp": 1800, "epsilon": 0.90},
-    "wood_pine":  {"k":   0.12, "rho":  500,  "cp": 1700, "epsilon": 0.85},
-    "water":      {"k":   0.60, "rho": 1000,  "cp": 4186, "epsilon": 0.95},
-    "air":        {"k":   0.026,"rho":   1.225,"cp":1005, "epsilon": 0.0},
-}
+# Thermal-domain view onto backends.materials.MATERIALS. Legacy
+# callers expect the {"k", "rho", "cp", "epsilon"} key shape.
+from .materials import MATERIALS as _M_ALL
+
+
+def _thermal_view(name):
+    p = _M_ALL[name]
+    return {
+        "k":        p["thermal_k"],
+        "rho":      p["density"],
+        "cp":       p["specific_heat"],
+        "epsilon":  p.get("epsilon", 0.0),
+    }
+
+
+class _ThermalView:
+    def __getitem__(self, key):
+        return _thermal_view(key)
+
+    def __contains__(self, key):
+        return key in _M_ALL
+
+    def get(self, key, default=None):
+        return _thermal_view(key) if key in _M_ALL else default
+
+
+MATERIAL_THERMAL = _ThermalView()

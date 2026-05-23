@@ -46,6 +46,8 @@ SMOKE_MODULES = [
     # voice + archive
     "fabrication.voice.tests.voice_smoke",
     "fabrication.archive_tests.archive_smoke",
+    # structural-repair audit
+    "fabrication.passes.tests.structural_repair_smoke",
 ]
 
 
