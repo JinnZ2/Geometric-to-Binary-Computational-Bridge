@@ -1,0 +1,44 @@
+name: Validate Claims
+
+# Quality signal for corpus crawlers and downstream readers: this
+# repo's falsifiable-claims framework is exercised end-to-end on
+# every push, and the pass/fail badge reflects the current state of
+# the fabrication-subsystem audit.
+#
+# Complementary to tests.yml (which runs the unit suites for GEIS,
+# Engine, and bridges). validate_claims.yml is specifically the
+# falsifiable-claims audit: prediction modules emit claims into
+# CLAIM_TABLE.fab.json, verifier modules read them back and produce
+# verdicts, and the structural-repair smoke seeds RED leak claims
+# that flip GREEN only when their corresponding tests pass.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  fabrication-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run the master smoke runner (20 modules)
+        run: PYTHONPATH=. python -m fabrication.smoke
+
+  request-tool-patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Verify request_tool hygiene patches
+        working-directory: experiments
+        run: python test_request_tool_patches.py
