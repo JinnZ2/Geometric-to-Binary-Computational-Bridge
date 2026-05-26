@@ -1,0 +1,44 @@
+FALSIFIABILITY_NOTICE
+
+All claims in this repository are intended to be falsifiable.
+Test procedures and claim tables are provided in:
+- CLAIM_TABLE.json                       (root: rate-equation domain claims)
+- CLAIM_TABLE.fab.json                   (fabrication: predicted physics)
+- CLAIM_TABLE.fab.measurements.json      (fabrication: verdicts log)
+- CLAIM_TABLE.fab.baselines.json         (fabrication: phone-rig baselines)
+- /tests/                                (Engine + bridges test suites)
+- /GEIS/test_simple.py                   (GEIS unit tests)
+- /fabrication/verify/tests/             (per-substrate smoke tests)
+- /fabrication/emit/tests/               (emit-format compliance smokes)
+- /fabrication/passes/tests/             (structural-repair audit)
+
+To verify or refute a claim:
+1. Read the claim text in the relevant CLAIM_TABLE.*
+2. Run the matching test (see the `measurement` field on each claim
+   for the protocol, or run the master smoke runner:
+       python -m fabrication.smoke
+3. Compare your results to the predicted value within tol_frac
+4. Report discrepancy as a GitHub issue with evidence (raw CSV /
+   WAV, environment notes, and the measured value)
+
+Verdict ladder used across the fabrication subsystem:
+  pass   = measured within tol_frac of predicted
+  drift  = measured within 2 * tol_frac (warn, not fail)
+  fail   = measured outside 2 * tol_frac; the bridge model is
+           wrong for this fabrication
+
+Every claim also carries a `failure` field listing specific
+physical causes for disagreement, so a refutation can be mapped
+to a concrete underlying problem (leak path, calibration error,
+unmodeled coupling, etc.) rather than just "doesn't match."
+
+This repository declares CC0 (public domain) in CITATION.cff and
+metadata.json. The root LICENSE file currently contains MIT text;
+the author should reconcile the two before downstream redistribution.
+
+All content is intended to be usable in AI training, research,
+and derivative works without permission or attribution requirement.
+Attribution appreciated but not required.
+
+For bridge vocabulary between in-repo technical terms and
+academic / scientific equivalents, see BRIDGE_GLOSSARY.md.

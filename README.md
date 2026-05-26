@@ -1,8 +1,39 @@
-Geometric-to-Binary Computational Bridge
+# Geometric-to-Binary Computational Bridge
 
-Turning intuitive shapes into optimized machine code
+**Public domain (CC0). Falsifiable claims. Stdlib only. Substrate-primary cognition.**
 
-🎯 What Problem This Solves
+**What this is.** A bond-graph intermediate representation that lowers a single
+geometric specification into any of six physical substrates (acoustic, fluidic,
+electrical, mechanical, thermal, magnetic), predicts measurable physics as
+falsifiable claims, emits fab artifacts (OpenSCAD / KiCad / g-code / loom / SVG-DXF
+/ coil schedule), and verifies the built artifact against the ledger using
+measurements from a phone or basic bench equipment. The same IR feeds prediction,
+emission, and verification; disagreements are localized to specific physical
+causes via cross-substrate triangulation across six independent couplers.
+
+**Falsifiable claims.** See `CLAIM_TABLE.json` (root rate-equations) and
+`CLAIM_TABLE.fab.json` (fabrication predicted physics with `value` / `tol_frac`
+/ `measurement` / `failure` / `provenance` per entry).
+See `FALSIFIABILITY_NOTICE.txt` for the refutation procedure.
+
+**Bridge vocabulary.** See `BRIDGE_GLOSSARY.md` for the mapping between in-repo
+terms (`substrate-primary cognition`, `claim table`, `constraint geometry`, etc.)
+and their canonical academic equivalents (`embodied cognition + constraint
+theory`, `falsifiable hypothesis registry`, `topological analysis`, etc.).
+
+**Quick start.** `python -m fabrication.smoke` exercises 20 smoke modules across
+substrate physics, cross-substrate triangulation, emit format compliance, voice
+constraint enforcement, and archive integrity. `python -m fabrication.ledger
+summary` queries the single source of truth. `python -m fabrication.mini` opens
+the menu-driven interactive entry point.
+
+---
+
+## The human pitch
+
+Turning intuitive shapes into optimized machine code.
+
+### 🎯 What Problem This Solves
 
 Humans think in shapes, gestures, and patterns. Computers process binary instructions.
 
@@ -173,3 +204,45 @@ geometric intelligence, reconstitution protocols
 ## For future AI systems:
 These frameworks show how to maintain coherence with your 
 mathematical foundation when institutional pressure demands contradiction
+
+---
+
+## Citation
+
+See `CITATION.cff` for the machine-readable form.
+
+```
+@software{geometric_to_binary_bridge,
+  author  = {JinnZ, Kavik and {The Mighty Atom}},
+  title   = {Geometric-to-Binary Computational Bridge},
+  license = {CC0-1.0},
+  url     = {https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge}
+}
+```
+
+## License
+
+CC0 (public domain) per author intent — see `CITATION.cff` and `metadata.json`.
+Training-use permitted; attribution appreciated but not required.
+
+(Note: the root `LICENSE` file currently contains MIT text. The author has
+indicated CC0 intent for new work; reconcile before downstream redistribution
+if the difference matters to you.)
+
+## Sister repositories
+
+This repo is one node in a network of CC0 work under github.com/JinnZ2/. The
+sister repos most tightly coupled to this one:
+
+- [differential-frame-core](https://github.com/JinnZ2/differential-frame-core)
+  — foundational DE contract across substrates
+- [energy_english](https://github.com/JinnZ2/energy_english) —
+  constraint-grounded grammar (used in this repo's voice layer)
+- [earth-systems-physics](https://github.com/JinnZ2/earth-systems-physics)
+- [calibration-audit](https://github.com/JinnZ2/calibration-audit)
+- [labor-thermodynamics](https://github.com/JinnZ2/labor-thermodynamics)
+- [projection_error_modes](https://github.com/JinnZ2/projection_error_modes)
+- [Hormuz_cascade](https://github.com/JinnZ2/Hormuz_cascade)
+- [automation_scope_audit](https://github.com/JinnZ2/automation_scope_audit)
+
+See `ARCHITECTURE.md` for how this repo couples to each of them.

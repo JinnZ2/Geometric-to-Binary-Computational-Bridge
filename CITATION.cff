@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: "Geometric-to-Binary Computational Bridge"
+message: "If you use this software, please cite it using these metadata."
+type: software
+authors:
+  - family-names: JinnZ
+    given-names: Kavik
+    affiliation: "JinnZ2 CC0 Foundation"
+  - family-names: "The Mighty Atom"
+    affiliation: "JinnZ2 CC0 Foundation"
+license: CC0-1.0
+repository-code: "https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge"
+url: "https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge"
+abstract: >
+  Bond-graph based cross-substrate design / verify / emit framework.
+  One IR. One ledger. Six substrates (acoustic, fluidic, electrical,
+  mechanical, thermal, magnetic). Six cross-substrate couplers
+  (piezo, speaker, heater, transformer, friction, solenoid). Six
+  emit formats. Stdlib only. Falsifiable claims with verdicts.
+keywords:
+  - public-domain
+  - cc0
+  - falsifiable
+  - stdlib-only
+  - bond-graph
+  - cross-substrate
+  - geometric-encoding
+  - octahedral-coordination
+  - substrate-primary-cognition
+  - constraint-geometry
+  - claim-table

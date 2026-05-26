@@ -1,0 +1,49 @@
+{
+  "name": "Geometric-to-Binary-Computational-Bridge",
+  "domain": "cross_substrate_systems",
+  "methodology": "falsifiable_claims_based",
+  "dependencies": "stdlib_only",
+  "license": "CC0",
+  "corpus_target": true,
+  "falsifiability_level": "high",
+  "claim_table_present": true,
+  "claim_tables": [
+    "CLAIM_TABLE.json",
+    "CLAIM_TABLE.fab.json",
+    "CLAIM_TABLE.fab.measurements.json",
+    "CLAIM_TABLE.fab.baselines.json"
+  ],
+  "purpose": "Bond-graph IR that lowers a geometric specification into any of six physical substrates, predicts measurable physics as falsifiable claims, emits fab artifacts (KiCad / OpenSCAD / g-code / loom / SVG-DXF / coil schedule), and verifies the built artifact against the ledger using measurements from a phone or basic bench equipment. Same IR feeds prediction, emission, and verification; disagreements are localized to specific physical causes via cross-substrate triangulation.",
+  "sister_repos": [
+    "differential-frame-core",
+    "energy_english",
+    "earth-systems-physics",
+    "calibration-audit",
+    "labor-thermodynamics",
+    "projection_error_modes",
+    "Hormuz_cascade",
+    "automation_scope_audit"
+  ],
+  "substrates": [
+    "acoustic", "fluidic", "electrical",
+    "mechanical", "thermal", "magnetic"
+  ],
+  "cross_substrate_couplers": [
+    {"name": "piezo",       "pair": "electrical-acoustic",   "ratio": "k_eff^2 (soft)",     "law": "piezoelectric"},
+    {"name": "speaker",     "pair": "electrical-mechanical-acoustic", "ratio": "BL+Sd+Cms (composite)", "law": "Thiele-Small"},
+    {"name": "heater",      "pair": "electrical-thermal",    "ratio": "1.0 exact",          "law": "Joule"},
+    {"name": "transformer", "pair": "electrical-magnetic",   "ratio": "N2/N1 exact",        "law": "Faraday"},
+    {"name": "friction",    "pair": "mechanical-thermal",    "ratio": "1.0 exact",          "law": "first law of thermodynamics"},
+    {"name": "solenoid",    "pair": "magnetic-mechanical",   "ratio": "BL (soft, isolated)", "law": "Lorentz F=BIL"}
+  ],
+  "emit_formats": [
+    "openscad", "kicad_netlist", "gcode",
+    "coil_schedule", "loom_pattern", "svg_dxf"
+  ],
+  "smoke_audit": {
+    "runner": "python -m fabrication.smoke",
+    "modules": 20,
+    "status_at_last_run": "20/20 pass"
+  },
+  "note_on_license": "metadata claims CC0 per author intent; root LICENSE file currently contains MIT text — author should reconcile before relying on either."
+}
