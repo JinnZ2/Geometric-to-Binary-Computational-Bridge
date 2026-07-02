@@ -72,6 +72,9 @@ class Source:
     embodiment: dict = field(default_factory=dict)   # raw practice, if EMBODIED
     reciprocity: float = 1.0      # 0..1, non-extraction score (G2 input)
     styled_as_own: bool = False   # True = presented without crediting the source
+    derivation: tuple = ()        # (tag, origin, matched_keyword) triples, for
+                                   # mechanically-derived constraints — how a
+                                   # tag was earned, not just that it was earned
 
 
 @dataclass
