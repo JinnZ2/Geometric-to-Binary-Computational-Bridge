@@ -9,3 +9,7 @@ scipy>=1.7
 # without it — but a fresh `pip install -r requirements.txt` should
 # succeed in running the demos.
 matplotlib>=3.5
+
+# Required only by experiments/simd_rf_proximity.py (RF-proximity-sorted
+# SIMD chunking experiment). No core test suite imports scikit-learn.
+scikit-learn>=1.0
