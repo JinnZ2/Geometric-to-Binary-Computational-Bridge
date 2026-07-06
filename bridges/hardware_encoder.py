@@ -470,3 +470,15 @@ if __name__ == "__main__":
 
 
 ### notes to do: have ("diode", "short_circuit") mapping to "conductor". In a high-energy task, a shorted diode often becomes a thermal event (a fuse) before it becomes a useful conductor. Have you considered adding a conditional check in Section D that triggers a QUARANTINE if the temp_band and current_band spike simultaneously, regardless of the health score?
+
+
+add:
+
+# Inside the HardwareBridgeEncoder class (after temp_band / current_band are encoded)
+
+def _thermal_runaway_quarantine(self, temperature: float, current: float) -> bool:
+    """Return True if temp and current are simultaneously in dangerous bands."""
+    temp_band_idx = _band_index(temperature, _TEMP_BANDS)   # 0..7
+    curr_band_idx = _band_index(abs(current), _CURRENT_BANDS)
+    # Top two bands: index 6 or 7
+    return temp_band_idx >= 6 and curr_band_idx >= 6
