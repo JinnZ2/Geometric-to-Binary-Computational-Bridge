@@ -32,7 +32,7 @@ pip install -r requirements.txt
 
 # Run all tests
 cd GEIS && python test_simple.py        # GEIS (116 tests)
-python tests/test_bridges.py            # Bridge encoders (57 tests)
+python tests/test_bridges.py            # Bridge encoders (758 tests)
 python tests/test_engine.py             # Engine/solver (58 tests)
 python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
 
@@ -67,7 +67,7 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 231 | All 11 domain encoders — physics helpers + encoder I/O |
+| Bridges | `tests/test_bridges.py` | 758 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 58 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 | Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |

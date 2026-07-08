@@ -185,8 +185,8 @@ if __name__ == "__main__":
     # DrillLoop with a stub encoder for demo (real usage: pass actual encoder)
     class _StubEncoder:
         """Stand-in encoder that echoes geometry as a fixed bit pattern."""
-        def from_geometry(self, data):
-            self._data = data
+        def from_geometry(self, geometry_data: dict):
+            self._data = geometry_data
             return self
         def to_binary(self):
             return "101010" * 6   # 36-bit stub output

@@ -422,7 +422,7 @@ class CommunityBridgeEncoder(BinaryBridgeEncoder):
         super().__init__("community")
         self._resilience_geometry = None
 
-    def from_geometry(self, geometry_data):
+    def from_geometry(self, geometry_data: dict):
         """Load a community profile from a dict or dataclass-like object."""
         if not isinstance(geometry_data, dict):
             geometry_data = geometry_data.__dict__

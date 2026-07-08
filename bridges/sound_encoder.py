@@ -33,6 +33,7 @@ Summary  (7 bits — appended when samples present):
 
 import math
 from bridges.abstract_encoder import BinaryBridgeEncoder
+from bridges.common import gray_bits as _gray_bits
 
 # ---------------------------------------------------------------------------
 # Physical constants
@@ -73,23 +74,6 @@ def _pitch_bands(pitch_threshold: float) -> list:
     p = pitch_threshold
     _e = 1e-9   # sub-Hz epsilon — inaudible, keeps harmonics in lower band
     return [p / 16, p / 8, p / 4, p / 2, p, p * 2 + _e, p * 4 + _e, p * 8 + _e]
-
-# ---------------------------------------------------------------------------
-# Gray-code helpers
-# ---------------------------------------------------------------------------
-
-def _gray(n: int) -> int:
-    return n ^ (n >> 1)
-
-
-def _gray_bits(value: float, bands: list, n_bits: int = 3) -> str:
-    """Map non-negative scalar to Gray-coded binary string. Scans edges highest→lowest."""
-    band = 0
-    for i in range(len(bands) - 1, -1, -1):
-        if value >= bands[i]:
-            band = i
-            break
-    return format(_gray(band), f'0{n_bits}b')
 
 # ---------------------------------------------------------------------------
 # Physics functions  (pure, importable)
@@ -138,7 +122,7 @@ class SoundBridgeEncoder(BinaryBridgeEncoder):
         self.pitch_threshold = pitch_threshold
         self.amp_threshold   = amp_threshold
 
-    def from_geometry(self, geometry_data):
+    def from_geometry(self, geometry_data: dict):
         """Load acoustic geometry data dict and return self for chaining."""
         self.input_geometry = geometry_data
         return self
