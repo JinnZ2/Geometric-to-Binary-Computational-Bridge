@@ -28,6 +28,7 @@ Summary  (7 bits — appended when samples present):
 
 import math
 from bridges.abstract_encoder import BinaryBridgeEncoder
+from bridges.common import gray_bits as _gray_bits
 
 # ---------------------------------------------------------------------------
 # Physical constants
@@ -43,23 +44,6 @@ _WAVELENGTH_BANDS    = [0.0, 280.0, 315.0, 400.0, 450.0, 495.0, 570.0, 620.0]   
 _INTERFERENCE_BANDS  = [0.0, 0.125, 0.25,  0.375, 0.5,   0.625, 0.75,  0.875]   # normalised [0, 1]
 _ENERGY_BANDS        = [0.0, 0.1,   0.5,   1.0,   2.0,   3.0,   5.0,   10.0]    # eV
 _VISIBILITY_BANDS    = [0.0, 0.125, 0.25,  0.375, 0.5,   0.625, 0.75,  0.875]   # normalised [0, 1]
-
-# ---------------------------------------------------------------------------
-# Gray-code helpers
-# ---------------------------------------------------------------------------
-
-def _gray(n: int) -> int:
-    return n ^ (n >> 1)
-
-
-def _gray_bits(value: float, bands: list, n_bits: int = 3) -> str:
-    """Map non-negative scalar to Gray-coded binary string. Scans edges highest→lowest."""
-    band = 0
-    for i in range(len(bands) - 1, -1, -1):
-        if value >= bands[i]:
-            band = i
-            break
-    return format(_gray(band), f'0{n_bits}b')
 
 # ---------------------------------------------------------------------------
 # Physics functions  (pure, importable)
@@ -111,7 +95,7 @@ class LightBridgeEncoder(BinaryBridgeEncoder):
     def __init__(self):
         super().__init__("light")
 
-    def from_geometry(self, geometry_data):
+    def from_geometry(self, geometry_data: dict):
         """Load optical geometry data dict and return self for chaining."""
         self.input_geometry = geometry_data
         return self

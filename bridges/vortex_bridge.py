@@ -74,7 +74,7 @@ class VortexBridgeEncoder(BinaryBridgeEncoder):
     # BinaryBridgeEncoder interface
     # ------------------------------------------------------------------
 
-    def from_geometry(self, geometry_data) -> "VortexBridgeEncoder":
+    def from_geometry(self, geometry_data: dict):
         """
         Load vortex state from a VortexMemory or a plain dict.
 

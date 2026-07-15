@@ -77,6 +77,7 @@ Magnonic mode — fixed 43-bit output
 
 import math
 from bridges.abstract_encoder import BinaryBridgeEncoder
+from bridges.common import gray_bits as _gray_bits
 
 # ── Physical constants ────────────────────────────────────────────────────────
 MU_0        = 4 * math.pi * 1e-7      # Permeability of free space (H/m)
@@ -109,31 +110,6 @@ _GAMMA = 1.7608597e11  # rad/s/T
 # 2-bit encodings for categorical magnonic quantities
 _THERMAL_REGIME_BITS = {"quantum": "00", "crossover": "01", "classical": "10", "gapless": "11"}
 _MP_REGIME_BITS      = {"no coupling": "00", "weak": "01", "hybridized": "10"}
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _gray(n: int) -> int:
-    """Integer → Gray code integer (single-bit transitions between adjacent values)."""
-    return n ^ (n >> 1)
-
-
-def _gray_bits(value: float, bands: list, n_bits: int = 3) -> str:
-    """
-    Map a non-negative scalar to a Gray-coded binary string.
-
-    Scans band edges from highest to lowest; returns the index of the highest
-    edge the value meets or exceeds, Gray-encoded to n_bits.
-
-    Gray-code property: adjacent bands differ by exactly 1 bit, so a physical
-    value near a band boundary never causes more than 1-bit change.
-    """
-    band = 0
-    for i in range(len(bands) - 1, -1, -1):
-        if value >= bands[i]:
-            band = i
-            break
-    return format(_gray(band), f'0{n_bits}b')
 
 
 # ── Physics equations ─────────────────────────────────────────────────────────

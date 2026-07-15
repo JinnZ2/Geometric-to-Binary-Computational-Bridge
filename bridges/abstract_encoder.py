@@ -30,7 +30,7 @@ class BinaryBridgeEncoder(ABC):
         }
 
     @abstractmethod
-    def from_geometry(self, geometry_data):
+    def from_geometry(self, geometry_data: dict):
         """Load and interpret geometric field or shape data."""
         pass
 
