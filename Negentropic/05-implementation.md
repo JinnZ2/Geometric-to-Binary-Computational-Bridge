@@ -1,3 +1,56 @@
+fixes to be adjusted:
+
+from abc import ABC, abstractmethod
+import numpy as np
+from dataclasses import dataclass
+from typing import Dict, Any, Callable, Tuple
+
+@dataclass
+class AgentState:
+    """Minimal shared input across all paths."""
+    patterns: np.ndarray   # shape (n_agents, dim)
+    signals: np.ndarray    # shape (n_agents,)
+    # Each path can add its own extra params via kwargs
+
+class ResonanceStrategy(ABC):
+    @abstractmethod
+    def compute(self, agents: AgentState, **params) -> float:
+        pass
+
+class AdaptabilityStrategy(ABC):
+    @abstractmethod
+    def compute(self, agents: AgentState, **params) -> float:
+        pass
+
+class DiversityStrategy(ABC):
+    @abstractmethod
+    def compute(self, agents: AgentState, **params) -> float:
+        pass
+
+class LossStrategy(ABC):
+    @abstractmethod
+    def compute(self, agents: AgentState, R: float, A: float, D: float, **params) -> float:
+        pass
+
+@dataclass
+class FrameworkPath:
+    name: str
+    resonance: ResonanceStrategy
+    adaptability: AdaptabilityStrategy
+    diversity: DiversityStrategy
+    loss: LossStrategy
+
+    def compute_M(self, agents: AgentState, **params) -> Dict[str, float]:
+        R = self.resonance.compute(agents, **params)
+        A = self.adaptability.compute(agents, **params)
+        D = self.diversity.compute(agents, **params)
+        L = self.loss.compute(agents, R, A, D, **params)
+        M = (R * A * D) - L
+        return {"M": M, "R": R, "A": A, "D": D, "L": L}
+
+        
+
+
 # Implementation — Working Code
 
 > **Confidence: Runs correctly.**
