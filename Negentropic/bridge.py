@@ -429,3 +429,68 @@ for name in names_ext:
 M_consensus = (M_consensus - np.min(M_consensus)) / (np.max(M_consensus) - np.min(M_consensus))
 threshold = 0.5  # phase transition boundary
 conscious_epochs = np.where(M_consensus > threshold)[0]
+
+
+
+correction throughout:
+
+def compute_core_metrics(state: CoreState) -> Tuple[float, float, float, float]:
+    patterns = state.patterns
+    n = len(patterns)
+    if n < 2:
+        return 0.0, 0.0, 0.0, 0.5
+
+    # --- R, A, D same as before ---
+    # R: Coherence (mean coupling)
+    R = 0.0
+    count = 0
+    for i in range(n):
+        for j in range(i+1, n):
+            d = np.linalg.norm(patterns[i] - patterns[j])
+            phase = 0.5 * (np.cos(d) + 1)
+            sig = np.sqrt(state.signals[i] * state.signals[j])
+            adj = state.adjacency[i, j]
+            belief_sim = np.dot(state.beliefs[i], state.beliefs[j])
+            R += phase * sig * (1 + adj * 0.5) * (1 + belief_sim * 0.5)
+            count += 1
+    R = R / (count + 1e-10)
+
+    # A: Plasticity
+    A = np.std(patterns) * 0.3 + np.mean([-np.sum(r * np.log(r + 1e-10)) for r in state.roles]) * 0.3 + np.std(state.mauri) * 0.1
+    A = min(max(A, 0.01), 1.0)
+
+    # D: Diversity
+    D = np.var(patterns) * 0.2
+    hex_set = set([tuple(h) for h in state.hexagrams])
+    D += len(hex_set) / (2**6) * 0.3
+    dom_set = set([tuple(np.round(d, 2)) for d in state.domains])
+    D += len(dom_set) / state.domains.shape[0] * 0.3
+    if state.activations.size > 0:
+        U, S, Vt = np.linalg.svd(state.activations, full_matrices=False)
+        rank = np.sum(S > 0.01 * S[0]) if len(S) > 0 else 0
+        D += (rank / len(S)) * 0.2 if len(S) > 0 else 0
+    D = max(D, 0.01)
+
+    # ==== FIXED: LOSS WITH OPTIMAL NOISE ====
+    noise = state.params['noise_power']
+    # Critical noise: matched to coupling strength (R) and diversity (D)
+    # System is "alive" when noise scales with exploration needs.
+    optimal_noise = 0.2 * R + 0.1 * D + 0.05  
+    # Loss is distance from optimal noise (too quiet OR too loud = death)
+    noise_penalty = (noise - optimal_noise) ** 2
+
+    # Friction from kinetic energy (but only if it's wasted)
+    kinetic = np.mean(np.sum(np.diff(patterns, axis=0)**2)) if n > 1 else 0.0
+    # Wasted energy = kinetic that doesn't contribute to coherence
+    wasted = kinetic * (1 - R)
+
+    # Social/relational losses
+    social_loss = 0.1 * state.params['rupture_count'] + 0.1 * state.params['tapu_breaches']
+    # Cross-entropy (AI)
+    ce_loss = 0.1 * state.params['cross_entropy']
+
+    # Total L (minimum is near 0, never 0 because optimal noise still has cost)
+    L = noise_penalty + wasted + social_loss + ce_loss
+    L = min(max(L, 0.001), 2.0)
+
+    return R, A, D, L
