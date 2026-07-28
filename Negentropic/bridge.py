@@ -409,3 +409,23 @@ print("\nBottom 5 lowest correlated pairs (still > 0.89):")
 for i, (a, b, r) in enumerate(pairs[-5:]):
     print(f"  {i+1}. {a:22s} ↔ {b:22s}  r = {r:.4f}")
 
+
+consensus metric?
+
+# User-defined weights (sum to 1)
+weights = {
+    "Thermodynamic": 0.10,
+    "Māori": 0.10,
+    "Aboriginal (Dreamtime)": 0.10,
+    "Buddhist": 0.10,
+    "AI Alignment": 0.05,   # lower weight for now
+    # ... fill all 17
+}
+M_consensus = np.zeros_like(M_ext[names_ext[0]])
+for name in names_ext:
+    M_consensus += weights.get(name, 1.0/len(names_ext)) * M_ext[name]
+
+# Normalize to [0,1] for threshold comparison
+M_consensus = (M_consensus - np.min(M_consensus)) / (np.max(M_consensus) - np.min(M_consensus))
+threshold = 0.5  # phase transition boundary
+conscious_epochs = np.where(M_consensus > threshold)[0]
