@@ -44,7 +44,7 @@ NEG-8, `Φ = −Ṡ_exchange − σ` in W/K, which has no threshold to tune.
 | [02-empirical-audit.md](02-empirical-audit.md) | Audit of each empirical claim | **Mixed** — statistical method is real; data provenance is not. Claim 5 revised on second pass. Includes a safety correction |
 | [03-consciousness.md](03-consciousness.md) | M(S) consciousness model, threshold, phase trigger | **Speculative** — and the threshold is dimensionally undefined, not merely free |
 | [04-alignment.md](04-alignment.md) | AI alignment implications | **Analogy, not proof** — D→0 mapping to RLHF still not demonstrated |
-| [05-implementation.md](05-implementation.md) | Original code listings (§7 of the monolith) | **Historical** — the running code is the modules below |
+| [legacy/Negentropic-05-implementation.md](../legacy/Negentropic-05-implementation.md) | Original code listings (§7 of the monolith) | **Historical** — the running code is the modules below |
 | [06-connections.md](06-connections.md) | Hooks into the rest of the repository | **Grounded** |
 | [07-thermodynamics.md](07-thermodynamics.md) | TUR/KUR, finite-time Landauer, dissipative adaptation, p-bit hardware, Mpemba, MaxCal | **Grounded** — established results, with the speculative application flagged per axis |
 | [08-oral-technology.md](08-oral-technology.md) | Reconstruction of a pole-referenced field polarimeter from claims that read as mystical, with seven discriminating tests | **Split** — mechanisms documented, attribution inferred, T1–T7 not yet run |

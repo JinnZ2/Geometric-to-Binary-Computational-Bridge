@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's natural octahedral coordination (8 states = 3 bits per unit). License: CC-BY-4.0.
+> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's 8 ⟨111⟩ sp³ bond directions (8 states = 3 bits per unit). License: CC-BY-4.0.
 
 ---
 
@@ -297,7 +297,17 @@ Key classes in `GEIS/`:
 
 ### Octahedral State Model
 
-Silicon's natural octahedral coordination provides 8 geometric positions (vertices), encoding 3 bits per unit. State transitions are geometric operations on 3x3 tensors.
+Silicon provides 8 geometric positions encoding 3 bits per unit. State transitions are geometric operations on 3x3 tensors.
+
+**Corrected 2026-07.** These 8 are the **⟨111⟩ bond directions**, not octahedron vertices. Octahedral *coordination* is 6-fold, and an octahedron has 6 vertices — log₂6 = 2.585 bits, not 3. What supplies 8 is the octahedron's 8 **faces**, whose normals lie along ⟨111⟩: the same directions as the dual cube's vertices, and the sp³ bond directions of diamond-cubic Si.
+
+```
+sublattice A bonds : (1,1,1) (-1,-1,1) (-1,1,-1) (1,-1,-1)     4
+sublattice B bonds : the inverted set                           4
+union              : the complete ⟨111⟩ set                     8  ->  3 bits
+```
+
+Silicon's **site** symmetry is Td (tetrahedral, sp³, 109.47°); the **crystal** point group is Oh (m-3m), which is centrosymmetric with an inversion centre at the bond midpoint. Much of the repository conflated the two. The 8-state / 3-bit result is unaffected; the derivation is. Consequences for optics — Oh centrosymmetry forces χ⁽²⁾ = 0, so no Pockels effect and no second-harmonic generation — are in `Silicon/optical_interface.md`.
 
 Core angle: **109.47°** (tetrahedral angle) — the project's foundational constant, derived from silicon's sp3 hybridization geometry.
 

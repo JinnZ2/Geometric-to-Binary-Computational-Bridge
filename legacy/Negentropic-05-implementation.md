@@ -6,9 +6,9 @@
 > elsewhere** — the inverted Kuramoto sign, the constant-D Fokker-Planck
 > form, `A = avg_R_e`, the compounding curiosity update, and the raised
 > cosine applied to Euclidean distances. See
-> [corrections.md](corrections.md) for the full list.
+> [corrections.md](../Negentropic/corrections.md) for the full list.
 >
-> The running code is in the modules listed in [README.md](README.md).
+> The running code is in the modules listed in [Negentropic/README.md](../Negentropic/README.md).
 > Start from `core.py` (stdlib) or `negentropic_engine.py` (numpy), not
 > from this file.
 
@@ -832,8 +832,8 @@ def fibonacci_schedule(start_date, n_sessions):
     return schedule, fib
 ```
 
-Whether the schedule produces better therapeutic outcomes is an empirical question (see [02-empirical-audit.md](02-empirical-audit.md)).
+Whether the schedule produces better therapeutic outcomes is an empirical question (see [02-empirical-audit.md](../Negentropic/02-empirical-audit.md)).
 
 ---
 
-*Back to: [README.md](README.md)*
+*Back to: [Negentropic/README.md](../Negentropic/README.md)*
