@@ -18,8 +18,12 @@ Status values:
 |----|-------|--------|----------------|-----------|
 | NEG-2 | An archive is a dissipative structure. Lifetime is set by `sigma - W_care/T`, not by the medium. | live | `maintenance.py` | Equal lifetimes under unequal care flux |
 | NEG-3 | Finite-time erasure costs `kT ln2 + C/tau`; resurfacing of an overwritten trace scales as `tau^-1` | live | `landauer.py` | Resurfacing flat in `tau`, or exponent materially different from -1 |
+| NEG-4 | Dependency re-rooting is the correct update operation; radiate and recenter are the only two evidence moves | live | `rebase.py` | An archive that survives an inversion without reordering its base |
 | NEG-7 | Seventeen cultural and scientific lenses are surface renderings of one deep grammar | **dead** | `lenses.py`, `lens_collapse_test.py` | Random lenses of the same functional form reproduce the correlation floor |
 | NEG-8 | A structure persists iff it exports entropy at least as fast as it produces it: `Phi = -S_exchange_dot - sigma >= 0` | live | `persistence.py` | A system with `Phi < 0` sustained over `tau` that does not lose structure |
+| NEG-9 | A cycle after inversion is a contradiction detector: two claims cannot both be foundational to each other, so one is wrong | live | `rebase.Archive.invert` | A stable archive containing a genuine mutual dependency that is not an error |
+| NEG-10 | Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology | live | `rebase.Archive.topology` | Recentering-frequent archives showing no depth reduction over time |
+| NEG-11 | The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one | live | `rebase.Archive.recenter` | A durable archive rooted on an unconfirmed base |
 
 ---
 
@@ -70,6 +74,110 @@ right.
 away from -1, kills it. The decision rule is in that function's docstring.
 
 **Not yet run.**
+
+---
+
+## NEG-4 — dependency re-rooting
+
+```
+EDGE SEMANTICS   b in dep[a]  means  "a rests on b"
+                 foundations  = nodes with no outgoing dependency
+                 center       = the node the archive is rooted at
+
+radiate    add(new, rests_on=[existing])       cheap, local
+recenter   reverse every edge on paths v -> center
+```
+
+**Claim.** These two are the only moves evidence can make on a well-formed
+archive. New evidence either hangs off what is already there, or it changes
+which claim everything else is founded on. There is no third operation.
+
+**Falsifier.** An archive that survives an inversion without reordering its
+base. If a claim can be overturned and the base stays put, then either the
+edge was not load-bearing (it was not really a dependency) or there is a
+third operation the model does not have.
+
+**Implemented in** `rebase.py`. `radiate()` refuses parents that do not
+already exist, which is what makes it O(1) and cycle-check-free; `recenter()`
+reverses the edge set on all paths to the old centre and reports the work
+done.
+
+**Not yet run** against a real archive. The natural test corpus is this
+repository's own claim history: `NEG_CLAIMS.md` is a dependency graph, and
+the NEG-7 result was an inversion that should have moved the base.
+
+---
+
+## NEG-9 — inversion as contradiction detector
+
+**Claim.** When inverting an edge closes a cycle, that is not a graph bug to
+be routed around. It means the archive would contain two claims each
+foundational to the other, which is impossible, so at least one claim on the
+cycle is wrong. The cycle is a *pointer to the error*.
+
+`Archive.invert` therefore rolls the change back and returns the cycle
+rather than storing a known impossibility.
+
+**Falsifier.** A stable archive containing a genuine mutual dependency that
+is not an error. Co-definition is the obvious candidate — two terms defined
+in terms of each other, or a pair of physical laws each derivable from the
+other. If such a pair is genuinely foundational both ways and the archive is
+otherwise sound, NEG-9 is too strong and needs a "co-foundational" edge type
+it currently does not have.
+
+**Status: live, and this is the one most likely to need weakening.**
+
+---
+
+## NEG-10 — recentering cost and topology
+
+```
+cost(recenter to v) = |edges on paths v -> center|
+                    ~ path length from v to the base
+```
+
+**Claim.** Because the cost of moving the base scales with depth, an archive
+that recenters often is under selection pressure toward shallow, wide
+topology. Deep chains are expensive to re-root and should be selected
+against wherever evidence turns over quickly.
+
+Demonstrated directly in `rebase.py`'s `__main__`: two archives of eight
+nodes each, one a chain and one a star, cost 7 edges and 1 edge respectively
+to re-root at a leaf.
+
+**Falsifier.** Recentering-frequent archives showing no depth reduction over
+time. `Archive.topology()` returns `depth`, `width` and their ratio;
+`Archive.history` records the cost of every recenter performed. The
+prediction is that aspect ratio falls as cumulative recentering rises.
+
+**Not yet run.** Needs a real archive with a revision history long enough to
+show a trend.
+
+---
+
+## NEG-11 — the validation gate is load-bearing
+
+**Claim.** An archive rooted on an unvalidated node degrades faster than one
+rooted on a confirmed node, because everything else inherits the base's
+confirmation status. A claim last checked in 1850 cannot be re-promoted to
+the base on memory alone.
+
+`Archive.recenter(v, now, v_max_gap)` refuses the move when
+`now - validated[v] > v_max_gap`. This is the mechanical form of the
+consensus gate. Passing `v_max_gap=None` disables it, which is a decision
+the caller has to make explicitly.
+
+**Falsifier.** A durable archive rooted on an unconfirmed base. Long-lived
+traditions rooted on unverifiable foundational claims are the obvious
+counterexample class, and the honest version of this test has to define
+"degrades" independently of "is unconfirmed" — otherwise it is circular.
+That definition does not exist yet, which is the main obstacle to running
+this one.
+
+**Related.** The angular-datum reading of "the home stone must be in place"
+in [08-oral-technology.md](08-oral-technology.md) is the same structure in
+physical form: a surveyed reference that everything is calibrated against,
+where moving it invalidates every derived measurement at once.
 
 ---
 
@@ -192,6 +300,7 @@ them. That is the work required to promote a row into the table above.
 | RLHF sets `D → 0` in activation space | `04-alignment.md` | Analogy. Needs a measurement of an effective diffusion constant in activation space before and after alignment training |
 | Self-reference raises `R_e` | `03-consciousness.md` | No model of which `s_i` change when a system becomes self-referential |
 | Negentropy implies morality | `README.md` | A crystal reduces local entropy. The bridging argument from entropy reduction to moral valence is not made anywhere in the framework |
+| The oral-technology reconstruction (calcite analyser + quartz retarder + water standard + surveyed datum) | `08-oral-technology.md` | Has five discriminating tests (T1–T5) but no NEG number yet. T5 — six orderings of the three optical elements, one produces a colour null — is a bench test needing no field access, and is the cheapest way to promote or kill it |
 
 ---
 

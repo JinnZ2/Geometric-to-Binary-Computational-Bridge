@@ -49,6 +49,7 @@ from Negentropic.lenses import (
     LENS_REGISTRY,
     canonical_lens,
 )
+from Negentropic.rebase import Archive
 
 
 # ---------------------------------------------------------------------------
@@ -560,6 +561,254 @@ class TestEmitIsing(unittest.TestCase):
         self.assertAlmostEqual(flip_cost_floor(1000, 300.0), 1000 * one)
         with self.assertRaises(ValueError):
             flip_cost_floor(-1, 300.0)
+
+
+# ---------------------------------------------------------------------------
+# rebase -- NEG-4, NEG-9, NEG-10, NEG-11
+# ---------------------------------------------------------------------------
+
+def _chain(n, validated=2020):
+    """Archive shaped as a chain: c0 <- c1 <- ... <- c(n-1)."""
+    a = Archive()
+    a.add("c0", validated=validated)
+    for i in range(1, n):
+        a.radiate(f"c{i}", rests_on=[f"c{i-1}"], validated=validated)
+    return a
+
+
+def _star(n, validated=2020):
+    """Archive shaped as a star: every leaf rests directly on s0."""
+    a = Archive()
+    a.add("s0", validated=validated)
+    for i in range(1, n):
+        a.radiate(f"s{i}", rests_on=["s0"], validated=validated)
+    return a
+
+
+class TestArchiveConstruction(unittest.TestCase):
+    def test_first_added_node_becomes_center(self):
+        a = Archive()
+        a.add("only")
+        self.assertEqual(a.center, "only")
+
+    def test_unknown_parents_are_created_unvalidated(self):
+        a = Archive()
+        a.add("top", rests_on=["implied"], validated=2020)
+        self.assertIn("implied", a.dep)
+        self.assertEqual(a.validated["implied"], 0)
+
+    def test_self_dependency_rejected(self):
+        a = Archive()
+        with self.assertRaises(ValueError):
+            a.add("x", rests_on=["x"])
+
+    def test_foundations_are_nodes_with_no_dependencies(self):
+        a = _chain(4)
+        self.assertEqual(a.foundations(), {"c0"})
+        self.assertEqual(_star(4).foundations(), {"s0"})
+
+    def test_readding_updates_validation_epoch(self):
+        a = Archive()
+        a.add("x", validated=1900)
+        a.add("x", validated=2020)
+        self.assertEqual(a.validated["x"], 2020)
+
+
+class TestRadiate(unittest.TestCase):
+    """NEG-4, operation 1: cheap, local, cannot move the base."""
+
+    def test_radiate_requires_existing_parents(self):
+        a = _chain(2)
+        with self.assertRaises(KeyError):
+            a.radiate("new", rests_on=["nonexistent"])
+
+    def test_radiate_requires_at_least_one_parent(self):
+        a = _chain(2)
+        with self.assertRaises(ValueError):
+            a.radiate("new", rests_on=[])
+
+    def test_radiate_rejects_existing_node(self):
+        a = _chain(3)
+        with self.assertRaises(ValueError):
+            a.radiate("c1", rests_on=["c0"])
+
+    def test_radiate_never_moves_the_base(self):
+        a = _chain(4)
+        base_before, center_before = a.foundations(), a.center
+        a.radiate("leaf", rests_on=["c2"], validated=2020)
+        self.assertEqual(a.foundations(), base_before)
+        self.assertEqual(a.center, center_before)
+
+    def test_radiate_reports_depth(self):
+        a = _chain(4)
+        self.assertEqual(a.radiate("leaf", rests_on=["c2"])["depth"], 3)
+
+
+class TestRecenter(unittest.TestCase):
+    """NEG-4, operation 2: reverse every edge on paths v -> center."""
+
+    def test_recenter_reverses_the_path_and_moves_the_base(self):
+        a = Archive()
+        a.add("T1", validated=1850)
+        a.add("T2", rests_on=["T1"], validated=1900)
+        a.add("T3", rests_on=["T2"], validated=1960)
+        a.radiate("T4", rests_on=["T2"], validated=2010)
+
+        result = a.recenter("T4", now=2026, v_max_gap=90)
+        self.assertEqual(result["status"], "OK")
+        self.assertEqual(result["work"], 2)
+        self.assertEqual(result["from"], "T1")
+        self.assertEqual(result["to"], "T4")
+        self.assertEqual(a.foundations(), {"T4"})
+
+    def test_recenter_cost_predicts_work(self):
+        a = _chain(6)
+        predicted = a.recenter_cost("c5")
+        self.assertEqual(a.recenter("c5", now=2026)["work"], predicted)
+
+    def test_recentering_on_the_center_is_free(self):
+        a = _chain(5)
+        self.assertEqual(a.recenter(a.center, now=2026)["work"], 0)
+
+    def test_recenter_is_involutive_in_shape(self):
+        a = _chain(5)
+        original = {n: set(d) for n, d in a.dep.items()}
+        a.recenter("c4", now=2026)
+        a.recenter("c0", now=2026)
+        self.assertEqual(a.dep, original)
+
+    def test_recenter_unknown_node_raises(self):
+        with self.assertRaises(KeyError):
+            _chain(3).recenter("absent")
+
+    def test_recenter_records_history(self):
+        a = _chain(5)
+        a.recenter("c4", now=2026)
+        a.recenter("c0", now=2027)
+        self.assertEqual(len(a.history), 2)
+        self.assertEqual(a.mean_recenter_cost(), 4.0)
+
+    def test_mean_cost_is_none_before_any_recenter(self):
+        self.assertIsNone(_chain(3).mean_recenter_cost())
+
+
+class TestContradictionDetection(unittest.TestCase):
+    """NEG-9: a cycle after inversion means one of the claims is wrong."""
+
+    def test_inversion_closing_a_loop_is_reported_not_stored(self):
+        a = Archive()
+        a.add("ground", validated=2020)
+        a.add("mid", rests_on=["ground"], validated=2020)
+        a.add("top", rests_on=["mid", "ground"], validated=2020)
+
+        before = {n: set(d) for n, d in a.dep.items()}
+        result = a.invert("top", "ground")
+
+        self.assertEqual(result["status"], "CONTRADICTION")
+        self.assertIn("ground", result["cycle"])
+        self.assertEqual(result["cycle"][0], result["cycle"][-1])
+        self.assertEqual(a.dep, before)
+
+    def test_safe_inversion_succeeds_and_flips_the_edge(self):
+        a = Archive()
+        a.add("b", validated=2020)
+        a.add("a", rests_on=["b"], validated=2020)
+        self.assertEqual(a.invert("a", "b")["status"], "OK")
+        self.assertIn("a", a.dep["b"])
+        self.assertNotIn("b", a.dep["a"])
+
+    def test_inverting_a_missing_edge_reports_no_edge(self):
+        a = _chain(3)
+        self.assertEqual(a.invert("c0", "c2")["status"], "NO_EDGE")
+
+    def test_cycle_report_is_reproducible(self):
+        results = []
+        for _ in range(3):
+            a = Archive()
+            a.add("ground", validated=2020)
+            a.add("mid", rests_on=["ground"], validated=2020)
+            a.add("top", rests_on=["mid", "ground"], validated=2020)
+            results.append(tuple(a.invert("top", "ground")["cycle"]))
+        self.assertEqual(len(set(results)), 1)
+
+    def test_no_cycle_in_a_well_formed_archive(self):
+        self.assertIsNone(_chain(6)._cycle())
+        self.assertIsNone(_star(6)._cycle())
+
+
+class TestTopology(unittest.TestCase):
+    """NEG-10: recenter cost scales with depth, so depth is under pressure."""
+
+    def test_chain_is_deep_and_star_is_wide(self):
+        chain, star = _chain(8).topology(), _star(8).topology()
+        self.assertEqual(chain["depth"], 7.0)
+        self.assertEqual(chain["width"], 1.0)
+        self.assertEqual(star["depth"], 1.0)
+        self.assertEqual(star["width"], 7.0)
+        self.assertGreater(chain["aspect"], star["aspect"])
+
+    def test_recenter_cost_tracks_depth(self):
+        self.assertEqual(_chain(8).recenter_cost("c7"), 7)
+        self.assertEqual(_star(8).recenter_cost("s7"), 1)
+
+    def test_deeper_archives_cost_more_to_reroot(self):
+        costs = [_chain(n).recenter_cost(f"c{n-1}") for n in (3, 5, 9)]
+        for earlier, later in zip(costs, costs[1:]):
+            self.assertLess(earlier, later)
+
+    def test_depth_of_a_foundation_is_zero(self):
+        self.assertEqual(_chain(5).depth_of("c0"), 0)
+
+    def test_depth_takes_the_longest_path(self):
+        a = Archive()
+        a.add("base", validated=2020)
+        a.radiate("short", rests_on=["base"], validated=2020)
+        a.radiate("mid", rests_on=["base"], validated=2020)
+        a.radiate("long", rests_on=["mid"], validated=2020)
+        a.radiate("join", rests_on=["short", "long"], validated=2020)
+        self.assertEqual(a.depth_of("join"), 3)
+
+    def test_empty_archive_topology(self):
+        self.assertEqual(Archive().topology()["nodes"], 0.0)
+
+
+class TestValidationGate(unittest.TestCase):
+    """NEG-11: an unconfirmed claim cannot become the base."""
+
+    def test_stale_node_is_refused_as_base(self):
+        a = Archive()
+        a.add("T1", validated=1850)
+        a.add("T2", rests_on=["T1"], validated=2010)
+        a.recenter("T2", now=2026, v_max_gap=90)
+
+        result = a.recenter("T1", now=2026, v_max_gap=90)
+        self.assertEqual(result["status"], "V_GATE")
+        self.assertEqual(result["gap"], 176)
+        self.assertEqual(result["limit"], 90)
+        self.assertEqual(a.center, "T2")
+
+    def test_fresh_node_passes_the_gate(self):
+        a = _chain(3, validated=2020)
+        self.assertEqual(a.recenter("c2", now=2026, v_max_gap=90)["status"], "OK")
+
+    def test_gate_is_off_when_no_limit_given(self):
+        a = Archive()
+        a.add("ancient", validated=1000)
+        a.add("recent", rests_on=["ancient"], validated=2020)
+        a.recenter("recent", now=2026)
+        self.assertEqual(a.recenter("ancient", now=2026)["status"], "OK")
+
+    def test_validation_gap_and_base_gap(self):
+        a = Archive()
+        a.add("old", validated=1900)
+        a.add("new", rests_on=["old"], validated=2020)
+        self.assertEqual(a.validation_gap("old", 2026), 126)
+        self.assertEqual(a.base_validation_gap(2026), 126)
+        a.recenter("new", now=2026)
+        self.assertEqual(a.base_validation_gap(2026), 6)
+
+    def test_base_gap_of_empty_archive_is_none(self):
+        self.assertIsNone(Archive().base_validation_gap(2026))
 
 
 if __name__ == "__main__":

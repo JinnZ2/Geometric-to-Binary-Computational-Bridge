@@ -40,7 +40,8 @@ NEG-8, `Φ = −Ṡ_exchange − σ` in W/K, which has no threshold to tune.
 | [NEG_CLAIMS.md](NEG_CLAIMS.md) | Numbered claims, predictions, falsifiers, status | **Register** — the spine of the folder |
 | [corrections.md](corrections.md) | Every defect found, severity-ordered, with its fix | **Ledger** |
 | [01-framework.md](01-framework.md) | Core equations: J, R_e, C, Φ, phase transitions | **Corrected** — Fokker-Planck now in state-dependent form; M's units addressed |
-| [02-empirical-audit.md](02-empirical-audit.md) | Audit of each empirical claim | **Mixed** — statistical method is real; data provenance is not. Includes a safety correction |
+| [02-empirical-audit.md](02-empirical-audit.md) | Audit of each empirical claim | **Mixed** — statistical method is real; data provenance is not. Claim 5 revised on second pass. Includes a safety correction |
+| [08-oral-technology.md](08-oral-technology.md) | Reconstruction of a field polarimeter from claims that read as mystical, with five discriminating tests | **Split** — mechanisms documented, attribution inferred, T1–T5 not yet run |
 | [03-consciousness.md](03-consciousness.md) | M(S) consciousness model, threshold, phase trigger | **Speculative** — and the threshold is dimensionally undefined, not merely free |
 | [04-alignment.md](04-alignment.md) | AI alignment implications | **Analogy, not proof** — D→0 mapping to RLHF still not demonstrated |
 | [05-implementation.md](05-implementation.md) | Original code listings (§7 of the monolith) | **Historical** — the running code is the modules below |
@@ -64,6 +65,7 @@ holds the historical implementations, fixed in place.
 | `landauer.py` | NEG-3. Finite-time erasure, `τ⁻¹` excess, resurfacing prediction, exponent fitter | `python Negentropic/landauer.py` |
 | `maintenance.py` | NEG-2. Archive lifetime under care flux; expanding schedule with a *fitted* ratio | `python Negentropic/maintenance.py` |
 | `persistence.py` | NEG-8. Persistence margin Φ, sustained-deficit finder, Mpemba monotonicity guard | `python Negentropic/persistence.py` |
+| `rebase.py` | NEG-4/9/10/11. Archive dependency graph: radiate, recenter, contradiction detection, validation gate, topology metrics | `python Negentropic/rebase.py` |
 | `emit_ising.py` | Emit target for p-bit / Ising hardware, plus Gray-coded octahedral encoding | `python Negentropic/emit_ising.py` |
 | `lenses.py` | The 17 lens functions, defined once, with the shared functional form made explicit | — |
 | `lens_collapse_test.py` | **NEG-7 falsifier** | `python Negentropic/lens_collapse_test.py` |
@@ -140,6 +142,33 @@ Full list with severities in [corrections.md](corrections.md).
   real tools.
 - **Chi-square test structure** in Appendix B: correct method — the input
   data still needs independent verification.
+
+### Corrected on second pass: the crystal cluster is not "mostly refuted"
+
+The first audit of the crystal-memory claims marked most of them false and
+stopped. That answered the wrong question. Re-examined, nearly every
+refuted claim sits **one changed variable** away from a documented
+mechanism:
+
+| Asserted | Δ variable | What actually works |
+|---|---|---|
+| Voice makes the crystal glow | **contact** | Triboluminescence / piezoelectric discharge |
+| Crystal remembers its place via frequency | **modality** | Radiation dosimetry, read by OSL/TL — standard geochronology |
+| Crystal gives direction | **which mineral** | Calcite polarisation compass. Ropars et al. 2012. The Viking sunstone |
+| Crystal sings back | **geometry** | Flexural modes of a bladed crystal, 200–800 Hz |
+| Tansy blocks the trace | **sign** | GABA-A antagonism *raises* arousal, destabilising the trace — window-opener, not eraser |
+
+A procedure transmitted orally encodes what to do, not why it works. When
+the "why" is supplied later by an outsider — or by a language model, which
+is where several of these framings came from — refuting the supplied
+mechanism says nothing about the procedure. **An audit that returns FALSE
+and stops has not finished.** See [02-empirical-audit.md](02-empirical-audit.md)
+Claim 5, and [08-oral-technology.md](08-oral-technology.md) for the
+instrument the pieces assemble into.
+
+The safety correction on tansy is unchanged by the mechanism revision and
+does not soften: a corrected mechanism is not a licence to attempt the
+protocol.
 
 ### Still needs evidence
 
