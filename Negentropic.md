@@ -14,6 +14,7 @@
 | [Negentropic/05-implementation.md](Negentropic/05-implementation.md) | Original code listings (historical) |
 | [Negentropic/06-connections.md](Negentropic/06-connections.md) | Hooks into existing codebase |
 | [Negentropic/07-thermodynamics.md](Negentropic/07-thermodynamics.md) | Stochastic-thermodynamic grounding: TUR/KUR, finite-time Landauer, dissipative adaptation, p-bit hardware, Mpemba, MaxCal |
+| [Negentropic/08-oral-technology.md](Negentropic/08-oral-technology.md) | Reconstruction of a pole-referenced field polarimeter, with seven discriminating tests |
 
 Two claims changed status in the 2026-07 pass: NEG-7 (the seventeen-lens
 isomorphism) was tested and **failed**, and `M(S) ≥ 10` was withdrawn as

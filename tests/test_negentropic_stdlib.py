@@ -49,6 +49,21 @@ from Negentropic.lenses import (
     LENS_REGISTRY,
     canonical_lens,
 )
+from Negentropic.precession import (
+    CATALOG,
+    OBLIQUITY,
+    POLE_ECLIPTIC_LATITUDE,
+    PRECESSION_PERIOD,
+    alignment_window,
+    closest_approach,
+    declination_at,
+    drift_years_per_degree,
+    equatorial_to_ecliptic,
+    is_circumpolar,
+    limiting_latitude,
+    pole_ecliptic_longitude,
+    separation_from_pole,
+)
 from Negentropic.rebase import Archive
 
 
@@ -809,6 +824,150 @@ class TestValidationGate(unittest.TestCase):
 
     def test_base_gap_of_empty_archive_is_none(self):
         self.assertIsNone(Archive().base_validation_gap(2026))
+
+
+# ---------------------------------------------------------------------------
+# precession -- dating a sky datum and its re-datum interval
+# ---------------------------------------------------------------------------
+
+def _ecl(name):
+    return equatorial_to_ecliptic(*CATALOG[name])
+
+
+class TestPrecessionModel(unittest.TestCase):
+    """Validated against the three standard pole-star epochs."""
+
+    def test_polaris_closest_approach(self):
+        year, sep = closest_approach(*_ecl("Polaris"), near_year=2000)
+        self.assertAlmostEqual(year, 2100, delta=40)
+        self.assertAlmostEqual(sep, 0.45, delta=0.1)
+
+    def test_thuban_closest_approach(self):
+        year, sep = closest_approach(*_ecl("Thuban"), near_year=0)
+        self.assertAlmostEqual(year, -2750, delta=120)
+        self.assertLess(sep, 0.5)
+
+    def test_vega_late_glacial(self):
+        year, sep = closest_approach(*_ecl("Vega"), near_year=-12000)
+        self.assertAlmostEqual(year, -12000, delta=200)
+        self.assertAlmostEqual(sep, 4.8, delta=0.6)
+
+    def test_closest_approach_is_periodic(self):
+        lam, beta = _ecl("Vega")
+        past, _ = closest_approach(lam, beta, near_year=-12000)
+        future, _ = closest_approach(lam, beta, near_year=14000)
+        self.assertAlmostEqual(future - past, PRECESSION_PERIOD, delta=1.0)
+
+    def test_pole_longitude_advances_uniformly(self):
+        self.assertAlmostEqual(pole_ecliptic_longitude(2000), 90.0, places=9)
+        one_degree = drift_years_per_degree()
+        self.assertAlmostEqual(one_degree, 71.6, delta=0.1)
+        self.assertAlmostEqual(pole_ecliptic_longitude(2000 + one_degree), 89.0,
+                               places=6)
+
+    def test_pole_returns_after_one_full_cycle(self):
+        lam, beta = _ecl("Thuban")
+        now = separation_from_pole(lam, beta, 2000)
+        later = separation_from_pole(lam, beta, 2000 + PRECESSION_PERIOD)
+        self.assertAlmostEqual(now, later, places=6)
+
+    def test_minimum_separation_matches_ecliptic_latitude_gap(self):
+        for name in CATALOG:
+            lam, beta = _ecl(name)
+            _, sep = closest_approach(lam, beta)
+            self.assertAlmostEqual(sep, abs(beta - POLE_ECLIPTIC_LATITUDE),
+                                   places=9, msg=name)
+
+    def test_ecliptic_conversion_of_the_ecliptic_pole(self):
+        # RA 18h, Dec 90 - obliquity is the north ecliptic pole: beta = 90.
+        lam, beta = equatorial_to_ecliptic(270.0, 90.0 - OBLIQUITY)
+        self.assertAlmostEqual(beta, 90.0, delta=1e-4)
+
+    def test_declination_is_ninety_minus_polar_distance(self):
+        lam, beta = _ecl("Polaris")
+        self.assertAlmostEqual(declination_at(lam, beta, 2000),
+                               CATALOG["Polaris"][1], delta=0.05)
+
+
+class TestAlignmentWindow(unittest.TestCase):
+    """The window is both a dating method and a re-datum interval."""
+
+    def test_window_brackets_the_closest_approach(self):
+        lam, beta = _ecl("Polaris")
+        window = alignment_window(lam, beta, tolerance=1.0)
+        self.assertLess(window["start"], window["center"])
+        self.assertLess(window["center"], window["end"])
+        self.assertAlmostEqual(window["duration"],
+                               window["end"] - window["start"], places=6)
+
+    def test_looser_tolerance_gives_a_longer_window(self):
+        lam, beta = _ecl("Polaris")
+        durations = [alignment_window(lam, beta, t)["duration"]
+                     for t in (0.5, 1.0, 2.0, 4.0)]
+        for earlier, later in zip(durations, durations[1:]):
+            self.assertLess(earlier, later)
+
+    def test_tolerance_below_minimum_separation_has_no_window(self):
+        lam, beta = _ecl("Vega")           # never closer than ~4.8 degrees
+        self.assertIsNone(alignment_window(lam, beta, tolerance=1.0))
+        self.assertIsNotNone(alignment_window(lam, beta, tolerance=6.0))
+
+    def test_separation_stays_within_tolerance_across_the_window(self):
+        lam, beta = _ecl("Thuban")
+        window = alignment_window(lam, beta, tolerance=1.0, near_year=0)
+        for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
+            year = window["start"] + frac * window["duration"]
+            self.assertLessEqual(separation_from_pole(lam, beta, year), 1.0 + 1e-6)
+
+    def test_separation_exceeds_tolerance_just_outside_the_window(self):
+        lam, beta = _ecl("Thuban")
+        window = alignment_window(lam, beta, tolerance=1.0, near_year=0)
+        for year in (window["start"] - 50, window["end"] + 50):
+            self.assertGreater(separation_from_pole(lam, beta, year), 1.0)
+
+    def test_redatum_interval_is_generations_not_millennia(self):
+        """The point of NEG-4 at archive scale: the base needs re-establishing."""
+        lam, beta = _ecl("Polaris")
+        self.assertLess(alignment_window(lam, beta, 0.5)["duration"], 200)
+
+    def test_rejects_nonpositive_tolerance(self):
+        lam, beta = _ecl("Polaris")
+        with self.assertRaises(ValueError):
+            alignment_window(lam, beta, tolerance=0.0)
+
+
+class TestCircumpolarity(unittest.TestCase):
+    """Whether the Bear never sets depends on the epoch, not only the latitude."""
+
+    def test_alkaid_limiting_latitude_today(self):
+        lam, beta = _ecl("Alkaid")
+        self.assertAlmostEqual(limiting_latitude(lam, beta, 2000), 40.7, delta=0.3)
+
+    def test_alkaid_limiting_latitude_late_glacial_is_higher(self):
+        lam, beta = _ecl("Alkaid")
+        now = limiting_latitude(lam, beta, 2000)
+        glacial = limiting_latitude(lam, beta, -12000)
+        self.assertGreater(glacial, now)
+        self.assertAlmostEqual(glacial, 47.8, delta=1.0)
+
+    def test_circumpolar_iff_separation_below_latitude(self):
+        lam, beta = _ecl("Alkaid")
+        for year in (2000, -6000, -12000):
+            sep = separation_from_pole(lam, beta, year)
+            self.assertTrue(is_circumpolar(lam, beta, sep + 1.0, year))
+            self.assertFalse(is_circumpolar(lam, beta, sep - 1.0, year))
+
+    def test_bear_stays_circumpolar_at_glacial_margin_latitude(self):
+        """True, but the margin at 14000 BCE is under a degree."""
+        lam, beta = _ecl("Alkaid")
+        for year in (-10000, -12000, -14000):
+            self.assertTrue(is_circumpolar(lam, beta, 55.0, year))
+        self.assertLess(55.0 - limiting_latitude(lam, beta, -14000), 1.0)
+
+    def test_pointer_stars_are_closer_to_the_pole_than_alkaid(self):
+        alkaid = separation_from_pole(*_ecl("Alkaid"), year=2000)
+        dubhe = separation_from_pole(*_ecl("Dubhe"), year=2000)
+        self.assertLess(dubhe, alkaid)
 
 
 if __name__ == "__main__":

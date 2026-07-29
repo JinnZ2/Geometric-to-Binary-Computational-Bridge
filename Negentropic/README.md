@@ -30,6 +30,7 @@ NEG-8, `Φ = −Ṡ_exchange − σ` in W/K, which has no threshold to tune.
 | What is claimed and what would refute it | [NEG_CLAIMS.md](NEG_CLAIMS.md) |
 | What was broken and what was done about it | [corrections.md](corrections.md) |
 | The physics the framework now rests on | [07-thermodynamics.md](07-thermodynamics.md) |
+| A working instrument reconstructed from claims that read as mystical | [08-oral-technology.md](08-oral-technology.md) |
 
 ---
 
@@ -41,12 +42,12 @@ NEG-8, `Φ = −Ṡ_exchange − σ` in W/K, which has no threshold to tune.
 | [corrections.md](corrections.md) | Every defect found, severity-ordered, with its fix | **Ledger** |
 | [01-framework.md](01-framework.md) | Core equations: J, R_e, C, Φ, phase transitions | **Corrected** — Fokker-Planck now in state-dependent form; M's units addressed |
 | [02-empirical-audit.md](02-empirical-audit.md) | Audit of each empirical claim | **Mixed** — statistical method is real; data provenance is not. Claim 5 revised on second pass. Includes a safety correction |
-| [08-oral-technology.md](08-oral-technology.md) | Reconstruction of a field polarimeter from claims that read as mystical, with five discriminating tests | **Split** — mechanisms documented, attribution inferred, T1–T5 not yet run |
 | [03-consciousness.md](03-consciousness.md) | M(S) consciousness model, threshold, phase trigger | **Speculative** — and the threshold is dimensionally undefined, not merely free |
 | [04-alignment.md](04-alignment.md) | AI alignment implications | **Analogy, not proof** — D→0 mapping to RLHF still not demonstrated |
 | [05-implementation.md](05-implementation.md) | Original code listings (§7 of the monolith) | **Historical** — the running code is the modules below |
 | [06-connections.md](06-connections.md) | Hooks into the rest of the repository | **Grounded** |
 | [07-thermodynamics.md](07-thermodynamics.md) | TUR/KUR, finite-time Landauer, dissipative adaptation, p-bit hardware, Mpemba, MaxCal | **Grounded** — established results, with the speculative application flagged per axis |
+| [08-oral-technology.md](08-oral-technology.md) | Reconstruction of a pole-referenced field polarimeter from claims that read as mystical, with seven discriminating tests | **Split** — mechanisms documented, attribution inferred, T1–T7 not yet run |
 
 ---
 
@@ -66,6 +67,7 @@ holds the historical implementations, fixed in place.
 | `maintenance.py` | NEG-2. Archive lifetime under care flux; expanding schedule with a *fitted* ratio | `python Negentropic/maintenance.py` |
 | `persistence.py` | NEG-8. Persistence margin Φ, sustained-deficit finder, Mpemba monotonicity guard | `python Negentropic/persistence.py` |
 | `rebase.py` | NEG-4/9/10/11. Archive dependency graph: radiate, recenter, contradiction detection, validation gate, topology metrics | `python Negentropic/rebase.py` |
+| `precession.py` | Dating a sky datum: pole position vs epoch, closest approach, re-datum interval, epoch-dependent circumpolarity | `python Negentropic/precession.py` |
 | `emit_ising.py` | Emit target for p-bit / Ising hardware, plus Gray-coded octahedral encoding | `python Negentropic/emit_ising.py` |
 | `lenses.py` | The 17 lens functions, defined once, with the shared functional form made explicit | — |
 | `lens_collapse_test.py` | **NEG-7 falsifier** | `python Negentropic/lens_collapse_test.py` |
