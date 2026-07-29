@@ -32,11 +32,11 @@ pip install -r requirements.txt
 
 # Run all tests
 cd GEIS && python test_simple.py        # GEIS (116 tests)
-python tests/test_bridges.py            # Bridge encoders (758 tests)
+python tests/test_bridges.py            # Bridge encoders (768 tests)
 python tests/test_engine.py             # Engine/solver (58 tests)
 python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
 python tests/test_negentropic.py        # Negentropic numpy tier (39 tests)
-python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (133 tests, no deps)
+python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (155 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -69,11 +69,11 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 758 | All 11 domain encoders — physics helpers + encoder I/O |
+| Bridges | `tests/test_bridges.py` | 768 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 58 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 | Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
 | Negentropic (numpy) | `tests/test_negentropic.py` | 39 | R_e/A/D/L, agent network, Fokker-Planck conventions + conservation |
-| Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 133 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, Ising emit, precession |
+| Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 155 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, TRI-1..4, Ising emit, precession |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -196,6 +196,7 @@ Negentropic/                    Negentropic consciousness framework — theory +
 ├── persistence.py                NEG-8: Φ = −Ṡ_exchange − σ; Mpemba monotonicity guard
 ├── rebase.py                     NEG-4/9/10/11: archive dependency graph; radiate + recenter
 ├── precession.py                 Dating a sky datum; re-datum interval; circumpolarity vs epoch
+├── triangnet.py                  TRI-1..4: triangle as smallest self-verifying archive unit
 ├── emit_ising.py                 Emit target for p-bit / Ising hardware + Gray octahedral bits
 ├── lenses.py                     The 17 translation lenses, defined once
 ├── lens_collapse_test.py         NEG-7 falsifier

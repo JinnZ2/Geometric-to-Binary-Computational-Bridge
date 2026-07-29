@@ -58,9 +58,29 @@ def gray_bits(value: float, bands: list, n_bits: int = 3) -> str:
         gray_bits(1.0,  [0, 1, 2, 3, 4, 5, 6, 7]) → "001"  (band 1)
         gray_bits(3.0,  [0, 1, 2, 3, 4, 5, 6, 7]) → "010"  (band 3 → Gray=2)
     """
+    return format(gray_code(band_index(value, bands)), f'0{n_bits}b')
+
+
+def band_index(value: float, bands: list) -> int:
+    """
+    Return the index of the highest band edge that `value` meets or exceeds.
+
+    This is the raw band number, before Gray coding. `gray_bits` is this
+    function plus a Gray encode, so the two can never disagree about which
+    band a value falls in.
+
+    Callers that need to reason about band *ordering* — "is this in the top
+    two bands?" — must use this rather than decoding the Gray bits, because
+    Gray codes are deliberately not order-preserving as integers.
+
+    Examples:
+        band_index(0.0, [0, 1, 2, 3])  → 0
+        band_index(2.5, [0, 1, 2, 3])  → 2
+        band_index(99.0, [0, 1, 2, 3]) → 3
+    """
     band = 0
     for i in range(len(bands) - 1, -1, -1):
         if value >= bands[i]:
             band = i
             break
-    return format(gray_code(band), f'0{n_bits}b')
+    return band

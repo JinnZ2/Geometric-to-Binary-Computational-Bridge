@@ -47,6 +47,10 @@ Section C — Repurpose routing  (12 bits):
 Section D — System integration  (6 bits):
   [lifetime_band  3b Gray]  estimated lifetime (h) across 8 log bands ([0, 1, 10, 100, …])
   [drill_depth    2b Gray]  consciousness drill depth: PASS(00)→MONITOR(01)→ALERT(11)→QUARANTINE(10)
+                            QUARANTINE is forced — overriding health score — when
+                            temperature and current are BOTH in their top two bands.
+                            A shorted junction at current is a thermal event before
+                            it is a useful conductor. See thermal_runaway().
   [semiconductor  1b]       is semiconductor (diode/transistor/IC) = 1; passive = 0
 
 License: CC-BY-4.0
@@ -54,6 +58,7 @@ License: CC-BY-4.0
 
 import math
 from bridges.abstract_encoder import BinaryBridgeEncoder
+from bridges.common import band_index as _band_index
 from bridges.common import gray_bits as _gray_bits
 
 # ---------------------------------------------------------------------------
@@ -294,6 +299,57 @@ class HardwareBridgeEncoder(BinaryBridgeEncoder):
         self.input_geometry = geometry_data
         return self
 
+    # -- safety gate ------------------------------------------------------
+
+    def thermal_runaway(self) -> bool:
+        """True when temperature and current are both in their top two bands.
+
+        A shorted diode maps to repurpose class "conductor", which is right
+        for a low-energy signal path and wrong for a high-energy one: at
+        current, a shorted junction becomes a thermal event — a fuse —
+        before it becomes a useful conductor. Health score does not catch
+        this, because a component can read healthy right up to the moment
+        it lets go.
+
+        So this gate is deliberately *not* a function of health. It reads
+        the two measured quantities that together mean "this part is
+        dissipating power it cannot shed", and it overrides.
+
+        Band indices come from `band_index`, not from decoding the Gray
+        bits: Gray codes are not order-preserving as integers, so
+        `int(gray, 2) >= 6` would be wrong. Band 6 or 7 of `_TEMP_BANDS` is
+        ≥125 °C; of `_CURRENT_BANDS`, ≥1 A.
+        """
+        if self.input_geometry is None:
+            raise ValueError(
+                "No geometry loaded. Call from_geometry(data) before this."
+            )
+        d = self.input_geometry
+        temp_idx = _band_index(float(d.get("temperature_c", 25.0)), _TEMP_BANDS)
+        curr_idx = _band_index(abs(float(d.get("current_a", 0.0))), _CURRENT_BANDS)
+        return temp_idx >= 6 and curr_idx >= 6
+
+    def drill_depth(self) -> str:
+        """Consciousness drill depth: pass / monitor / alert / quarantine.
+
+        Thermal runaway forces QUARANTINE regardless of health score. Every
+        other level is the health-score ladder.
+        """
+        if self.input_geometry is None:
+            raise ValueError(
+                "No geometry loaded. Call from_geometry(data) before this."
+            )
+        if self.thermal_runaway():
+            return "quarantine"
+        health = float(self.input_geometry.get("health_score", 1.0))
+        if health < 0.30:
+            return "quarantine"
+        if health < 0.50:
+            return "alert"
+        if health < 0.70:
+            return "monitor"
+        return "pass"
+
     def to_binary(self) -> str:
         """
         Convert component health state to a 39-bit binary string.
@@ -351,6 +407,15 @@ class HardwareBridgeEncoder(BinaryBridgeEncoder):
         eff   = _EFFECTIVENESS.get(key,
                 _EFFECTIVENESS.get(("default", fail_mode.lower().replace(" ", "_")), 0.0))
 
+        # A component in thermal runaway is a fuse, not a salvage candidate.
+        # Clearing the salvageable and fallback bits is the actionable half
+        # of the quarantine — the drill_depth bits say "stop", these two say
+        # "and do not route anything through it in the meantime".
+        runaway = self.thermal_runaway()
+        if runaway:
+            salvageable = False
+            fallback = False
+
         bits.append(_index_bits(rp, _REPURPOSE_CLASSES))
         bits.append(_gray_bits(eff,  _EFFECT_BANDS, n_bits=2))
         bits.append(_index_bits(bt,  _BRIDGE_TARGETS))
@@ -361,15 +426,7 @@ class HardwareBridgeEncoder(BinaryBridgeEncoder):
         # ------------------------------------------------------------------
         # Section D: System integration  →  6 bits
         # ------------------------------------------------------------------
-        # Drill depth: escalate based on health
-        if health < 0.30:
-            drill = "quarantine"
-        elif health < 0.50:
-            drill = "alert"
-        elif health < 0.70:
-            drill = "monitor"
-        else:
-            drill = "pass"
+        drill = self.drill_depth()
 
         bits.append(_gray_bits(lifetime, _LIFETIME_BANDS))
         bits.append(_index_bits(drill, _DRILL_DEPTHS, n_bits=2))
@@ -468,17 +525,26 @@ if __name__ == "__main__":
         print(f"  repurpose → {rp:14s}  bridge → {bridge_target(rp)}")
         print(f"  binary    : {b}  ({len(b)} bits)")
 
-
-### notes to do: have ("diode", "short_circuit") mapping to "conductor". In a high-energy task, a shorted diode often becomes a thermal event (a fuse) before it becomes a useful conductor. Have you considered adding a conditional check in Section D that triggers a QUARANTINE if the temp_band and current_band spike simultaneously, regardless of the health score?
-
-
-add:
-
-# Inside the HardwareBridgeEncoder class (after temp_band / current_band are encoded)
-
-def _thermal_runaway_quarantine(self, temperature: float, current: float) -> bool:
-    """Return True if temp and current are simultaneously in dangerous bands."""
-    temp_band_idx = _band_index(temperature, _TEMP_BANDS)   # 0..7
-    curr_band_idx = _band_index(abs(current), _CURRENT_BANDS)
-    # Top two bands: index 6 or 7
-    return temp_band_idx >= 6 and curr_band_idx >= 6
+    # 5. Thermal runaway quarantine
+    print("\n" + "=" * 60)
+    print("Thermal runaway gate — quarantine overrides health score")
+    print("=" * 60)
+    runaway = {
+        "component_type": "diode",
+        "failure_mode":   "short_circuit",
+        "health_score":   0.95,          # looks healthy
+        "confidence":     0.9,
+        "voltage_v":      0.4,
+        "current_a":      12.0,          # top current band
+        "temperature_c":  150.0,         # top temp band
+        "salvageable":    True,
+        "fallback_ready": True,
+    }
+    enc = HardwareBridgeEncoder().from_geometry(runaway)
+    bits = enc.to_binary()
+    print(f"  shorted diode, H={runaway['health_score']}, "
+          f"T={runaway['temperature_c']}°C, I={runaway['current_a']}A")
+    print(f"  thermal runaway : {enc.thermal_runaway()}")
+    print(f"  drill depth     : {enc.drill_depth()}   (health alone would say 'pass')")
+    print(f"  salvageable bit : {bits[31]}   (forced to 0 — do not repurpose a fuse)")
+    print(f"  binary          : {bits}  ({len(bits)} bits)")
