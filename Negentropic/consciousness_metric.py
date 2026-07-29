@@ -4,6 +4,24 @@ Consciousness Metric — M(S) computation and threshold analysis
 M(S) = R_e * A * D - L
 
 Extracted from Negentropic/03-consciousness.md
+
+THE THRESHOLD IS NOT A FREE PARAMETER, IT IS AN UNDEFINED ONE.
+
+The framework previously described `M(S) >= 10` as a free parameter, on a
+par with IIT's `Phi > 0` — a number that needs calibrating. That is too
+generous. `R_e * A * D` and `L` are not in the same units in any of the
+three implementations in this folder (here `D` is an entropy in nats; in
+`negentropic_engine` it is a variance; `L` is a power in both), so the
+subtraction does not produce a quantity that a threshold could be set on.
+Calibration cannot fix a dimensional mismatch.
+
+M is retained as an ORDINAL INDEX: it can rank states computed under one
+fixed normalisation in one run. It cannot be compared across runs, across
+implementations, or against any absolute number. The historical figures
+(34.62, 296.40, 3711.50) are not measurements of anything.
+
+For a criterion with consistent units and no threshold to tune, see
+`persistence.py` (NEG-8): Phi = -S_exchange_dot - sigma, both in W/K.
 """
 
 import numpy as np
@@ -11,7 +29,10 @@ from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 
 PHI = 1.618033988749895
-CONSCIOUSNESS_THRESHOLD = 10.0  # Free parameter; same status as IIT Phi > 0
+
+#: Historical threshold, kept so old figures can be reproduced. Comparing
+#: against it is not a measurement — see the module docstring.
+CONSCIOUSNESS_THRESHOLD = 10.0
 
 
 @dataclass
@@ -77,10 +98,13 @@ def compute_adaptability(perturbation_responses: List[float]) -> float:
 
 def compute_diversity(pathway_strengths: np.ndarray) -> float:
     """
-    Diversity D = variance of viable energy pathways.
+    Diversity D = Shannon entropy of normalized pathway strengths, in nats.
 
-    Uses Shannon entropy of normalized pathway strengths.
-    More open pathways = higher D.
+    Note this is an entropy, not a variance, despite the framework text
+    describing D as "variance of viable energy pathways". The two are
+    different quantities with different units, and `negentropic_engine`
+    implements D as a variance for the same symbol. Anything that compares
+    D across the two modules is comparing nats to squared patterns.
     """
     strengths = np.array(pathway_strengths, dtype=float)
     strengths = strengths[strengths > 0]
@@ -153,8 +177,9 @@ IIT_COMPARISON = [
                      "None", "Partially — FEP unfalsifiable in full generality"),
     TheoryComparison("M(S) (this framework)",
                      "Geometric resonance + adaptability + diversity",
-                     "M(S) >= 10",
-                     "Not yet — no extraction method for R_e,A,D,L from neural data"),
+                     "M(S) >= 10 (dimensionally undefined — ordinal only)",
+                     "Not yet — no extraction method for R_e,A,D,L from neural "
+                     "data, and the units of M do not close"),
 ]
 
 

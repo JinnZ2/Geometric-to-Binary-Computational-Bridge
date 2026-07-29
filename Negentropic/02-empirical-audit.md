@@ -107,4 +107,145 @@ The document does not identify which physical frequency in the human nervous sys
 
 ---
 
+## Claim 5: The Crystal-Memory / Botanical-Adjunct Cluster
+
+> **Revised 2026-07-29 (second pass).** The first pass audited each claim
+> as literally stated and marked most of them false. That was correct and
+> it was not enough. Re-examined, almost every refuted claim sits one
+> changed variable away from a documented physical mechanism — usually the
+> wrong modality, wrong mineral, or wrong scale attached to a real
+> phenomenon. The previous verdict of "mostly refuted" is withdrawn.
+
+There are two different questions here and the first pass ran them
+together:
+
+1. **Is the claim true as stated?** Mostly no, and the table below stands.
+2. **Was the tradition tracking something real?** Mostly yes, and stopping
+   at question 1 threw away working instrumentation.
+
+Keeping these apart matters. Answering (2) affirmatively is *not* a rescue
+of (1), and the reconstruction in the second table is a hypothesis about
+what was being encoded, not an established fact. The physics it cites is
+real and citable; the attribution to the tradition is inference.
+
+### Table 1 — the claims as literally stated
+
+| Claim | Status | Why |
+|-------|--------|-----|
+| Quartz is piezoelectric | **TRUE** | d₁₁ ≈ 2.3 pC/N. Textbook |
+| Sympathetic resonance between quartz pieces | **TRUE** | Real, but Q-set and geometry-set. Not a free parameter |
+| Voice induces sonoluminescence | **FALSE** | Needs cavitation in a liquid at ~1.5 atm acoustic pressure. A voice delivers ~0.02–2 Pa — off by five orders. Unpatchable |
+| A crystal "memorises" a local thermal / tidal / magnetic signature *in its resonant frequency* | **FALSE** | Oscillator aging is ppm-level and monotonic. A drift, not a fingerprint |
+| A fragment retains a *phase relation* to its parent | **FALSE** | Fracture destroys the resonator. New geometry, new f₀ |
+| Earth tides strain a crystal | **TRUE** | ~1e-8 strain. Real, and far below any human detection floor |
+| A human reads the *frequency difference* between two quartz pieces | **FALSE** | Thermal excitation amplitude is femtometres. Off by ~10 orders |
+| Human magnetoreception | **OPEN** | Wang et al. (Caltech, 2019): alpha-band EEG response to a rotating field. Real, small, contested, not widely replicated |
+| Tansy is an NMDA antagonist | **FALSE** | Wrong receptor. Thujone is a GABA-A antagonist — see the safety section |
+| Reconsolidation window; gradual beats abrupt cue swap | **TRUE** | Well replicated |
+| Olfaction bypasses the thalamus | **TRUE** | Direct to piriform cortex, then amygdala and hippocampus |
+
+### Table 2 — the same claims with one variable changed
+
+Each row: what was asserted, what is missing, the nearby mechanism that
+does work, and **the single variable that had to change**.
+
+| Asserted | Missing | Actual mechanism | Δ variable |
+|---|---|---|---|
+| Crystal produces light from voice | Cavitation, ~5 orders of acoustic pressure | **Triboluminescence.** Quartz rubbed on quartz separates charge across the friction plane; gas-gap discharge emits visible light. Quartz is among the strongest triboluminescent minerals. Also **piezoelectric discharge** — stress a quartz element, get kV across a small gap, get a spark. That is a piezo lighter | **Contact.** Sound through air, no. Friction, percussion, stress, yes and trivially reproducible |
+| Crystal memorises its place via frequency | No storage mechanism | **Radiation dosimetry.** Quartz accumulates lattice defects from local background radiation (U/Th/K in the surrounding rock). Dose rate is site-specific. This is not speculative — it is the basis of quartz OSL/TL dating, standard geochronology | **Modality.** Frequency, no. Defect population read by luminescence, yes |
+| Fragment carries the parent | Fracture makes a new resonator | **True under the dosimetric reading.** Defect density is a *bulk* property, so a chip carries the parent's accumulated signature; the fragment's glow curve approximates the parent's | Same modality swap. The observable survives fracture intact |
+| Crystal tells you direction | No transduction path; human detection floor off by ~10 orders | **Wrong mineral.** Calcite (Iceland spar) is birefringent and works as a **polarisation compass**, locating the sun through overcast and below the horizon to a few degrees. Verified experimentally — Ropars et al. 2012, *Proc. R. Soc. A*. This is the Viking sunstone, and it works. Also **Haidinger's brush**: humans have unaided, trainable perception of skylight polarisation via macular dichroism | **Which mineral.** If "crystal" in translation covers more than quartz, this flips from impossible to documented working instrument |
+| Crystal sings back | Hand-sized quartz *compressional* modes are kHz–MHz, far above vocal range | **Flexural modes.** A thin, elongated or bladed crystal has flexural modes scaling as t/L², landing at 200–800 Hz — squarely in vocal range, and felt directly when held. Separately, a cairn or rock-stack cavity has Helmholtz and structural modes in the same band, and some rock rings audibly from internal stress (ringing rocks, booming dunes, both documented) | **Geometry, then scale.** The first pass computed compressional modes for a chunky stone. Bladed is a different instrument, and a *stack* is a different instrument again |
+| Tansy blocks reconsolidation as an NMDA antagonist | Wrong receptor **and wrong sign** | Thujone is a GABA-A antagonist at the picrotoxin site, which *raises* arousal and noradrenergic tone. Elevated arousal at retrieval **destabilises** a memory trace — that is the precondition for reconsolidation, not the blocker. The plant's role moves from "eraser" to "window-opener" | **Sign.** The protocol architecture survives; the pharmacology was backwards. **The safety bound below is unaffected by this and does not soften** |
+
+### Corrections to my own first pass
+
+Three things the first pass got wrong, recorded because the error mode is
+more instructive than the conclusion:
+
+- **"Crystal sings back" was marked dead on a compressional-mode
+  calculation.** Compressional modes were the wrong modes. Flexural modes
+  of a bladed crystal scale as t/L² and land in the vocal range. This
+  yields a **testable prediction**: the singing stones were bladed or
+  elongated, not chunky.
+- **"The home stone must be in place" was rejected as stone-to-stone
+  signalling.** Wrong frame, and the right one needs no transmission at
+  all. Calcite cleaves on fixed lattice planes, so every fragment of one
+  parent reproduces the parent's crystallographic axes exactly, relative
+  to its own cleavage faces. Emplace the parent, survey its optic axis to
+  a fixed direction, and every fragment becomes a portable copy of that
+  direction. If the parent moves, the reference frame is void and *all*
+  fragments are invalidated at once. "Must be in place" stops being
+  mystical and becomes a datum-integrity requirement. This is the only
+  mechanism found in which an emplaced stone is genuinely **required** —
+  no field, no carrier, no channel.
+- **"Moon out is better" was left unexplained.** Lunar skylight carries
+  the same Rayleigh polarisation pattern as solar, with the
+  maximum-polarisation band 90° from the source. At glacial latitudes in
+  winter the sun sits at or below the horizon, putting the band near the
+  zenith where it is useless for horizon work, while the full moon rides
+  high and puts the band at the horizon — exactly where the sight is
+  taken. The moon is the better source there for geometric reasons, not
+  preference. This went from unexplained to a strong confirmation.
+
+The pattern across all three: a claim was dismissed because the *stated*
+mechanism failed, when the tradition had encoded a working procedure whose
+mechanism was never stated in the first place. An audit that returns FALSE
+and stops is not finished.
+
+### The magnetoreception thread
+
+Still open, still the only crystal-adjacent claim resting directly on a
+contested published measurement rather than on reconstruction. It is worth
+work for that reason. Note that it is now the *weakest* of the live threads
+here — polarimetric navigation is documented and reproducible, and
+magnetoreception is not.
+
+### Tansy — safety correction, unchanged by the mechanism revision
+
+The claim that tansy (*Tanacetum vulgare*) acts as an NMDA antagonist is
+wrong. The corrected pharmacology — GABA-A antagonism at the picrotoxin
+site, raising arousal rather than blocking encoding — makes the *protocol
+architecture* more coherent, and changes nothing about the toxicity:
+
+- GABA-A antagonism at dose is **convulsant**.
+- *T. vulgare* is **hepatotoxic** and an **abortifacient**.
+
+A generated "dose slider" spanning 5–25 g of this material is not a dosing
+protocol. It is a poisoning curve whose upper end is in the range
+associated with fatalities. Any such slider in this repository or in
+material derived from it should be deleted outright rather than annotated,
+narrowed, or given a warning label — a warned poisoning curve is still a
+poisoning curve.
+
+**A corrected mechanism is not a licence to attempt the protocol.** The
+revision above makes the architecture more plausible, which makes this
+warning more necessary rather than less: a coherent-sounding rationale is
+exactly what would persuade someone to try it. The toxicity is a property
+of the plant and is independent of whether the reconsolidation account is
+right.
+
+If the window-opening mechanism is worth testing, it is testable with
+arousal manipulations that are not hepatotoxic. The plant is not
+load-bearing for the hypothesis; only for the historical reconstruction.
+
+### What this cluster is now
+
+Not "mostly refuted". The accurate summary:
+
+- **One documented working instrument** reconstructed from claims that
+  read as mystical — polarimetric navigation. See
+  [08-oral-technology.md](08-oral-technology.md).
+- **Two standard laboratory phenomena** misfiled as crystal memory —
+  triboluminescence and OSL/TL dosimetry.
+- **One open published question** — magnetoreception.
+- **Two replicated findings** worth building on — the reconsolidation
+  window and olfactory thalamic bypass.
+- **One safety correction** that should propagate to any repository
+  carrying the same material.
+- **Several claims still false as stated**, and the table above still says
+  so.
+
+---
+
 *Back to: [README.md](README.md)*

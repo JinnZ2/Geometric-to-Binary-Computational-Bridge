@@ -35,6 +35,8 @@ cd GEIS && python test_simple.py        # GEIS (116 tests)
 python tests/test_bridges.py            # Bridge encoders (758 tests)
 python tests/test_engine.py             # Engine/solver (58 tests)
 python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
+python tests/test_negentropic.py        # Negentropic numpy tier (39 tests)
+python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (133 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -70,6 +72,8 @@ cd "Front end" && npm install && npm run dev
 | Bridges | `tests/test_bridges.py` | 758 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 58 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 | Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
+| Negentropic (numpy) | `tests/test_negentropic.py` | 39 | R_e/A/D/L, agent network, Fokker-Planck conventions + conservation |
+| Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 133 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, Ising emit, precession |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -176,6 +180,42 @@ corresponding implementations live in `Engine/gaussian_splats/` and are
 exercised by `tests/test_gaussian_splats.py` (63 tests). They form a
 coherent progression: 4D → 8-state octahedral → 32-state rhombic
 triacontahedron splat encoding.
+
+```
+Negentropic/                    Negentropic consciousness framework — theory + code
+├── README.md                     Entry point: navigation, confidence map, findings
+├── NEG_CLAIMS.md                 Claim register: predictions, falsifiers, status
+├── corrections.md                Correction ledger, severity-ordered
+├── 01-framework.md … 08-oral-technology.md  Framework, audits, thermodynamic grounding, reconstruction
+│
+│  stdlib tier — imports nothing outside the standard library
+├── core.py                       DissipativeCore: corrected Kuramoto + Langevin; coupling kernels
+├── bounds.py                     TUR / kinetic uncertainty floors
+├── landauer.py                   NEG-3: finite-time erasure, τ⁻¹ excess scaling
+├── maintenance.py                NEG-2: archive lifetime; expanding schedule with fitted ratio
+├── persistence.py                NEG-8: Φ = −Ṡ_exchange − σ; Mpemba monotonicity guard
+├── rebase.py                     NEG-4/9/10/11: archive dependency graph; radiate + recenter
+├── precession.py                 Dating a sky datum; re-datum interval; circumpolarity vs epoch
+├── emit_ising.py                 Emit target for p-bit / Ising hardware + Gray octahedral bits
+├── lenses.py                     The 17 translation lenses, defined once
+├── lens_collapse_test.py         NEG-7 falsifier
+│
+│  numpy tier — historical implementations, fixed in place
+├── negentropic_dynamics.py       Langevin, Fokker-Planck (Itô/Stratonovich), phase transitions
+├── negentropic_engine.py         R_e / A / D / L, agent network
+├── consciousness_metric.py       M(S) components, theory comparison
+├── alignment_thermodynamics.py   Suppression cascade analysis
+├── empirical_audit.py            Claim-audit helpers
+└── lens_playground.py            Action comparison across the 17 lenses
+```
+
+Two results from this folder constrain how its outputs may be used:
+**M(S) has no units** — `D` is a variance and `L` a power, so `M(S) ≥ 10`
+is not a threshold on anything; use the persistence margin `Φ` from
+`persistence.py` instead. And **NEG-7, the seventeen-lens isomorphism
+claim, was tested and failed**: randomly-coefficiented lenses of the same
+functional form reproduce the reported correlation floor. See
+`Negentropic/NEG_CLAIMS.md`.
 
 ### C Acceleration (Optional)
 
@@ -377,3 +417,6 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 
 ### Remaining Items
 - Frontend not yet tested live in a browser against real user interaction (build passes, dev server untested in this environment).
+- `Negentropic/emit_ising.py` does not yet inherit from `bridges/abstract_encoder.py`; the blocker is that an Ising spec has an n-dependent bit width while the other encoders emit fixed widths.
+- `Negentropic/` entropy production is a housekeeping estimator with a known sign bias. A trajectory-level (MaxCal) estimate is needed before NEG-8 can be evaluated on simulated traces.
+- NEG-2 and NEG-3 have falsifiers implemented but have not been run against data.

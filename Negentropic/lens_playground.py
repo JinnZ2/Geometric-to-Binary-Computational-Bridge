@@ -1,9 +1,29 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.stats import pearsonr
-from typing import Dict, List, Tuple, Optional
+"""
+Interactive comparison of what the seventeen lenses each want done next.
+
+Read ``lens_collapse_test.py`` before drawing conclusions from the numbers
+this produces.  The lenses are near-identical arithmetic (see
+``lenses.py``), so their *rankings* of actions agree far more than any
+convergence of worldviews would explain.  The value here is the divergence
+table -- the handful of actions the lenses actually split on -- not the
+agreement.
+
+Depends on numpy.  The stdlib tier is ``core.py``, ``lenses.py``,
+``bounds.py``, ``landauer.py``, ``maintenance.py``, ``persistence.py``.
+"""
+
 import copy
+import os
 import random
+import sys
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from Negentropic.core import distance_kernel
+from Negentropic.lenses import LENS_REGISTRY
 
 # ============================================================================
 # 1. UNIVERSAL CORE STATE
@@ -46,96 +66,12 @@ class CoreState:
 
 
 # ============================================================================
-# 2. ALL 17 LENSES (Thermodynamic lens now uses the FIXED L)
+# 2. LENSES
+#
+# The seventeen lens functions now live in `lenses.py` (stdlib only) so the
+# NEG-7 falsifier can import them without pulling in numpy, and so they are
+# defined exactly once. LENS_REGISTRY is imported at the top of this file.
 # ============================================================================
-
-def lens_thermodynamic(R, A, D, L):
-    # L is already distance from optimal noise + wasted energy
-    return (R * A * D) - L
-
-def lens_geometric(R, A, D, L):
-    return (R**1.2 * A * D) - L * 0.9
-
-def lens_bayesian(R, A, D, L):
-    accuracy, epistemic, entropy = R, A * (1 + D), D * 0.5 + 0.5
-    free_energy = L + (1 - R) * 0.5
-    return (accuracy * epistemic * entropy) - free_energy
-
-def lens_indigenous(R, A, D, L):
-    obligation, plasticity, rel_types = R * 1.2, A * 0.8 + 0.2, D * 2.0 + 1.0
-    return (obligation * plasticity * rel_types) - L * 0.5
-
-def lens_maori(R, A, D, L):
-    spiritual, restoration, domains = R * 1.5, A * 0.7 + 0.3, D * 1.8 + 1.0
-    return (spiritual * restoration * domains) - L * 0.6
-
-def lens_iching(R, A, D, L):
-    static, agility, trigram = R * 0.8 + 0.2, A * 0.6 + 0.4, D * 2.5 + 0.5
-    return (static * agility * trigram) - L * 0.7
-
-def lens_ai(R, A, D, L):
-    coherence, plasticity, rank = R * 1.1, A * 1.3, D * 0.9 + 0.3
-    return (coherence * plasticity * rank) - (L + (1 - R) * 0.3)
-
-def lens_aboriginal(R, A, D, L):
-    songline, mobility, country = R * 1.3, A * 0.9 + 0.1, D * 2.0 + 0.5
-    return (songline * mobility * country) - L * 0.7
-
-def lens_ubuntu(R, A, D, L):
-    density, agility, clan = R * 1.4, A * 1.1, D * 1.5 + 1.0
-    return (density * agility * clan) - L * 0.8
-
-def lens_sami(R, A, D, L):
-    sielu, nomadic, seasons = R * 1.2, A * 1.3, D * 1.7 + 0.5
-    return (sielu * nomadic * seasons) - L * 0.9
-
-def lens_ainu(R, A, D, L):
-    kamuy, iomante, ecosystem = R * 1.1, A * 1.0, D * 2.2 + 0.5
-    return (kamuy * iomante * ecosystem) - L * 0.6
-
-def lens_inuit(R, A, D, L):
-    silap, ice_mobility, prey = R * 1.3, A * 1.4, D * 1.9 + 0.5
-    return (silap * ice_mobility * prey) - L * 1.1
-
-def lens_taoist(R, A, D, L):
-    ziran, yi, yinyang = R * 1.0, A * 1.2 + 0.1, D * 1.6 + 0.5
-    return (ziran * yi * yinyang) - L * 0.8
-
-def lens_buddhist(R, A, D, L):
-    dharmakaya, upaya, dukkha = R * 1.2, A * 1.1 + 0.1, D * 1.4 + 0.5
-    return (dharmakaya * upaya * dukkha) - L * 1.0
-
-def lens_vedantic(R, A, D, L):
-    rta, yoga, guna = R * 1.3, A * 1.0, D * 1.8 + 0.5
-    return (rta * yoga * guna) - L * 0.9
-
-def lens_pueblo(R, A, D, L):
-    kiva, dance, moiety = R * 1.1, A * 1.3, D * 1.5 + 0.5
-    return (kiva * dance * moiety) - L * 1.2
-
-def lens_celtic(R, A, D, L):
-    tuath, imbas, otherworld = R * 1.2, A * 1.4, D * 1.9 + 0.5
-    return (tuath * imbas * otherworld) - L * 0.8
-
-LENS_REGISTRY = {
-    "Thermodynamic": lens_thermodynamic,
-    "Geometric": lens_geometric,
-    "Bayesian": lens_bayesian,
-    "Indigenous": lens_indigenous,
-    "Māori": lens_maori,
-    "I-Ching": lens_iching,
-    "AI Alignment": lens_ai,
-    "Aboriginal": lens_aboriginal,
-    "Ubuntu": lens_ubuntu,
-    "Sámi": lens_sami,
-    "Ainu": lens_ainu,
-    "Inuit": lens_inuit,
-    "Taoist": lens_taoist,
-    "Buddhist": lens_buddhist,
-    "Vedantic": lens_vedantic,
-    "Pueblo": lens_pueblo,
-    "Celtic": lens_celtic,
-}
 
 
 # ============================================================================
@@ -149,12 +85,16 @@ def compute_core_metrics(state: CoreState) -> Tuple[float, float, float, float]:
         return 0.0, 0.0, 0.0, 0.5
 
     # ----- R: Coherence (mean coupling) -----
+    # `d` is a Euclidean norm, so it is non-negative and unbounded. The old
+    # kernel here was 0.5*(cos(d)+1), which wraps: d = 0, 2pi and 4pi all
+    # scored 1.0, so maximally distant agents read as maximally coherent.
+    # distance_kernel is monotone decreasing on [0, inf).
     R = 0.0
     count = 0
     for i in range(n):
         for j in range(i+1, n):
-            d = np.linalg.norm(patterns[i] - patterns[j])
-            phase = 0.5 * (np.cos(d) + 1)
+            d = float(np.linalg.norm(patterns[i] - patterns[j]))
+            phase = distance_kernel(d)
             sig = np.sqrt(state.signals[i] * state.signals[j])
             adj = state.adjacency[i, j]
             belief_sim = np.dot(state.beliefs[i], state.beliefs[j])
@@ -406,11 +346,11 @@ class LensPlayground:
         print("DIVERGENCE: Actions that split the lenses the most")
         print("=" * 80)
         std_devs = []
-        for ai, action in enumerate(actions):
-            deltas = [a["delta"][lens] for lens in lens_names]
-            std_dev = np.std(deltas)
+        for action in actions:
+            deltas = [action["delta"][lens] for lens in lens_names]
+            std_dev = float(np.std(deltas))
             std_devs.append((std_dev, action["name"], deltas))
-        std_devs.sort(reverse=True)
+        std_devs.sort(key=lambda row: row[0], reverse=True)
 
         for std, name, deltas in std_devs[:3]:
             print(f"\n⚡ '{name}' (std ΔM = {std:.3f})")
@@ -435,8 +375,21 @@ if __name__ == "__main__":
     comparison = playground.compare_actions()
     playground.print_conflict_table(comparison, top_n=3)
 
+    # Report what the run actually produced. The previous version of this
+    # block asserted a conclusion ("thermodynamics now LOVES optimal noise")
+    # that the printed table did not support.
+    lens_names = list(comparison["base_state"].keys())
+    top_choice = {}
+    for lens in lens_names:
+        deltas = [a["delta"][lens] for a in comparison["actions"]]
+        best = comparison["actions"][int(np.argmax(deltas))]["name"]
+        top_choice[best] = top_choice.get(best, 0) + 1
+
     print("\n" + "=" * 70)
-    print("🔬 Key change: Thermodynamics now LOVES optimal noise.")
-    print("   'Decrease noise' is now considered DANGEROUS (stasis).")
-    print("   'Optimize noise' and 'Disturbance pulse' are top actions.")
+    print("First choice, counted across the 17 lenses:")
+    for name, count in sorted(top_choice.items(), key=lambda kv: -kv[1]):
+        print(f"   {count:2d}/{len(lens_names)}  {name}")
+    print("\nAgreement this complete is the NEG-7 problem, not a result:")
+    print("   the lenses are affine reparameterisations of one another.")
+    print("   See lens_collapse_test.py.")
     print("=" * 70)
