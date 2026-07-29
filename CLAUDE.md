@@ -37,6 +37,7 @@ python tests/test_engine.py             # Engine/solver (58 tests)
 python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
 python tests/test_negentropic.py        # Negentropic numpy tier (39 tests)
 python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (155 tests, no deps)
+python tests/test_silicon_check.py      # Silicon strain-fault checker (29 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -74,6 +75,7 @@ cd "Front end" && npm install && npm run dev
 | Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
 | Negentropic (numpy) | `tests/test_negentropic.py` | 39 | R_e/A/D/L, agent network, Fokker-Planck conventions + conservation |
 | Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 155 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, TRI-1..4, Ising emit, precession |
+| Silicon check | `tests/test_silicon_check.py` | 29 | Thermal noise floor, strain invariants, orientation blindness (SIL-1), recovery channels |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -160,6 +162,8 @@ Silicon/                        Hardware implementation pathway
 ├── Fabrication.md                Manufacturing processes
 ├── SYSTEM_ARCHITECTURE.md        Architecture specification
 ├── CORE_EQUATIONS.md             Mathematical foundations
+├── silicon_error_correction.json v2.0 strain-fault sensor spec + v1 audit + SIL-1..4 falsifiers
+├── silicon_check.py              Reference implementation, stdlib; demonstrates invariant blindness
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
 geometric_intelligence/         Integrity & consciousness research
