@@ -25,6 +25,23 @@ Status values:
 | NEG-10 | Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology | live | `rebase.Archive.topology` | Recentering-frequent archives showing no depth reduction over time |
 | NEG-11 | The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one | live | `rebase.Archive.recenter` | A durable archive rooted on an unconfirmed base |
 
+### Triangle claims (TRI-*)
+
+Separate series: these are about the storage geometry, not the negentropic
+framework. Implemented in `triangnet.py`, tested in the stdlib suite.
+
+| ID | Claim | Status | Falsifier |
+|----|-------|--------|-----------|
+| TRI-1 | Equilateral minimises worst-case strength of figure, at exactly 1.0 | live, verified in test | A figure with strength < 1.0 (3000 random figures tried, none found) |
+| TRI-2 | Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design | live | Surviving nets uniformly distributed in shape |
+| TRI-3 | Closure failure and record drift are separable: closure tests the observation, drift tests the figure | live, verified in test | A deformation that also preserves closure exactly |
+| TRI-4 | Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum | live, verified in test | A figure whose shape cannot be recovered from angles alone |
+
+TRI-1 and TRI-4 are provable and are proved in the test suite. TRI-3 is a
+property of the implementation and is tested. **TRI-2 is the only empirical
+one** — it is a claim about which structures survive, not about what anyone
+intended, and it needs a survey of surviving nets to test.
+
 ---
 
 ## NEG-2 — archive as dissipative structure
@@ -74,23 +91,6 @@ right.
 away from -1, kills it. The decision rule is in that function's docstring.
 
 **Not yet run.**
-
-### Triangle claims (TRI-*)
-
-Separate series: these are about the storage geometry, not the negentropic
-framework. Implemented in `triangnet.py`, tested in the stdlib suite.
-
-| ID | Claim | Status | Falsifier |
-|----|-------|--------|-----------|
-| TRI-1 | Equilateral minimises worst-case strength of figure, at exactly 1.0 | live, verified in test | A figure with strength < 1.0 (3000 random figures tried, none found) |
-| TRI-2 | Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design | live | Surviving nets uniformly distributed in shape |
-| TRI-3 | Closure failure and record drift are separable: closure tests the observation, drift tests the figure | live, verified in test | A deformation that also preserves closure exactly |
-| TRI-4 | Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum | live, verified in test | A figure whose shape cannot be recovered from angles alone |
-
-TRI-1 and TRI-4 are provable and are proved in the test suite. TRI-3 is a
-property of the implementation and is tested. **TRI-2 is the only empirical
-one** — it is a claim about which structures survive, not about what anyone
-intended, and it needs a survey of surviving nets to test.
 
 ---
 
