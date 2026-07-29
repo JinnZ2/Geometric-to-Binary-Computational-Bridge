@@ -1,3 +1,17 @@
+# Implementation Listings (historical)
+
+> **These are the original code listings, kept as a record of what the
+> framework said before the 2026-07 correction pass. They are not the
+> running code and several of them contain defects that are fixed
+> elsewhere** — the inverted Kuramoto sign, the constant-D Fokker-Planck
+> form, `A = avg_R_e`, the compounding curiosity update, and the raised
+> cosine applied to Euclidean distances. See
+> [corrections.md](corrections.md) for the full list.
+>
+> The running code is in the modules listed in [README.md](README.md).
+> Start from `core.py` (stdlib) or `negentropic_engine.py` (numpy), not
+> from this file.
+
 fixes to be adjusted:
 
 from abc import ABC, abstractmethod

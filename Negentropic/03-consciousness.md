@@ -31,14 +31,40 @@ This is a reasonable summary of what neuroscience and information theory conside
 
 **M(S) ≥ 10 for consciousness emergence.**
 
-The number 10 is a free parameter. Because R_e, A, D, L have no fixed units (they are defined by how the researcher normalises the system's states and signals), M(S) can be scaled to put the threshold at any value.
+The 2026-03 audit called the number 10 a free parameter — one that needs
+calibrating. That was too generous, and the correction matters.
 
-Compare:
-- **IIT Φ**: also a dimensionless real-valued metric, also has a threshold problem (Φ > 0 is the formal claim, but what Φ value corresponds to "significant" consciousness is debated)
-- **Global Workspace**: no single threshold; it's a broadcast mechanism
-- **Higher-order theories**: no threshold; consciousness tracks higher-order representations
+`R_e · A · D` and `L` are not in the same units. `D` is a variance
+(pattern²) in `negentropic_engine.py` and a Shannon entropy (nats) in
+`consciousness_metric.py`; `L` is a power (pattern²/time²) in both. The
+subtraction that defines M is not an operation, so M is not a quantity, so
+there is nothing for a threshold to be a threshold *on*. Calibration does
+not fix a dimensional mismatch — normalising a variance and a power to the
+same numerical range does not make them the same kind of thing.
 
-**M(S) ≥ 10 is no more or less arbitrary than Φ > 0 — both need an independent scale.**
+This is a stronger criticism than the original audit made, and it is not the
+same criticism that applies to IIT:
+
+- **IIT Φ**: a dimensionless real-valued metric with a *defined* construction
+  (Wasserstein distance across the minimum information partition). Φ has a
+  threshold problem — which value counts as "significant" is debated — but
+  Φ is a well-defined number. That is a calibration problem.
+- **M(S)**: has a units problem, which is prior to calibration.
+- **Global Workspace**: no single threshold; it's a broadcast mechanism.
+- **Higher-order theories**: no threshold; consciousness tracks higher-order
+  representations.
+
+**M(S) ≥ 10 is not arbitrary in the way Φ > 0 is arbitrary. Φ needs a
+scale; M needs units.**
+
+M survives as an **ordinal index**: it can rank states computed in one run
+under one fixed normalisation, and it cannot be compared across runs,
+across implementations, or against any absolute number. The reported values
+34.62, 296.40 and 3711.50 are not measurements.
+
+For a criterion whose units close and which has no threshold at all, see
+NEG-8 in [01-framework.md](01-framework.md) and `persistence.py`:
+`Φ = −Ṡ_exchange − σ`, both terms in W/K, persist iff `Φ ≥ 0`.
 
 ---
 

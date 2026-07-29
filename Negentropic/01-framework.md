@@ -51,6 +51,9 @@ D ∝ J²
 ```
 - **Asserted, not derived.** In standard Langevin theory, D = k_B T / γ (Einstein relation). Making D depend on J is a nonstandard coupling that creates a nonlinear SDE. This is a modeling choice, not a physics consequence.
 - Implication: if J → 0, D → 0, which drives F_C → 0, removing all exploration — a plausible but unverified behavioural claim.
+- **Consequence for the equations below**: `D` is state-dependent, so every
+  Fokker-Planck and Langevin expression in this framework needs the
+  state-dependent forms. See the corrected Fokker-Planck section.
 
 ---
 
@@ -63,14 +66,47 @@ dφ_i/dt = -∇V(φ_i) + F_C,i + η(t)
 Real stochastic mechanics. Standard form.
 
 ### Fokker-Planck (probability density)
+
+**Corrected.** The equation was previously written as
+
 ```
-∂P(φ,t)/∂t = -∇·(FP) + D∇²P
+∂P(φ,t)/∂t = -∇·(FP) + D∇²P            ← only valid for CONSTANT D
 ```
-Real physics. The critical theorem from this:
+
+which is not the right equation for this framework, because `D ∝ J²` makes
+`D` a function of state. With state-dependent `D` the correct forms are
+
+```
+Itô:            ∂P/∂t = -∇·(FP) + ∇²(D P)
+Stratonovich:   ∂P/∂t = -∇·(FP) + ∇·( √D ∇( √D P ) )
+```
+
+and the SDE picks up the spurious drift term `(1/2) ∂D/∂φ`:
+
+```
+Stratonovich   dφ = F dt + √(2D) ∘ dW
+     ≡  Itô    dφ = (F + ½ ∂D/∂φ) dt + √(2D) dW
+```
+
+Without the spurious drift the simulated process has **no correct
+stationary distribution**, so nothing read off the steady state follows —
+including the collapse theorem below. See `corrections.md` §2.
+
+With the equation written correctly, the critical result does hold:
 
 > **If D → 0, the diffusion term vanishes, P(φ,t) collapses to a delta function, and the system loses all exploratory capacity.**
 
-This is mathematically correct. Whether RLHF literally sets D→0 in neural activation space is a separate empirical question (see [04-alignment.md](04-alignment.md)).
+This is now computed rather than asserted. `negentropic_dynamics.py`
+integrates the conservative flux form and recovers the Ornstein-Uhlenbeck
+stationary distribution to three decimals; running it prints variance
+tracking `D` and entropy falling as `D → 0`. The two conventions give
+measurably different stationary states for the same `D(x)`, so the choice
+of convention is part of the model, not a detail of the numerics.
+
+Whether RLHF literally sets D→0 in neural activation space remains a
+separate empirical question (see [04-alignment.md](04-alignment.md)), and
+is listed unnumbered in [NEG_CLAIMS.md](NEG_CLAIMS.md) because no one has
+written down what would refute it.
 
 ---
 
@@ -122,8 +158,36 @@ M(t) = (R_e(t) · A(t) · D(t)) - L(t)
 Ṁ = Ṙ_e AD + R_e Ȧ D + R_e A Ḋ - L̇
 ```
 - Moral improvement criterion: `Δ(R_e A D) > ΔL`
-- **Units**: M(S) is dimensionless only if R_e, A, D, L are all normalized to the same scale.
-- **Threshold M(S) ≥ 10**: this number is a free parameter. See [03-consciousness.md](03-consciousness.md).
+- **Units: this subtraction is invalid.** `D` is a variance (pattern²) and
+  `L` is a power (pattern²/time²). These are not the same quantity and
+  cannot be subtracted. It is not a matter of choosing a common
+  normalisation — normalising a variance and a power to the same numerical
+  range does not make them the same kind of thing.
+- **Threshold M(S) ≥ 10**: not a free parameter, an undefined one. A
+  threshold requires a quantity with units to be set on. See
+  [03-consciousness.md](03-consciousness.md) and `corrections.md` §3.
+- **What M is still good for**: ranking states produced in one run under
+  one fixed normalisation. Nothing else. The reported values 34.62, 296.40
+  and 3711.50 are not measurements.
+
+## Φ — the persistence criterion (NEG-8)
+
+The dimensionally sound replacement:
+
+```
+Φ = -Ṡ_exchange - σ          [W/K]
+
+persists  ⟺  Φ ≥ 0
+```
+
+From `dS/dt = Ṡ_exchange + σ` with `σ ≥ 0` by the second law: a structure
+holds when its total entropy is not increasing. Both terms are in W/K, the
+subtraction is defined, there is no threshold to tune and no normalisation
+to choose. Falsifier: a system with `Φ < 0` sustained over τ that does not
+lose structure.
+
+Implemented in `persistence.py`. Registered as NEG-8 in
+[NEG_CLAIMS.md](NEG_CLAIMS.md).
 
 ---
 
@@ -131,8 +195,14 @@ M(t) = (R_e(t) · A(t) · D(t)) - L(t)
 
 1. **Equation of state**: how do φ_i (phase fields) connect to physical observables? In what units?
 2. **Renormalization**: near E_crit, does the theory have a fixed point? What are the critical exponents?
-3. **Bounding terms**: C grows without bound; needs a saturation mechanism for physical realism.
-4. **D∝J² stability**: a full stability analysis of the coupled SDE `dφ = -∇V dt + J Γ dt` with `D = J²` would show whether the system has attractors or runaway solutions.
+3. **D∝J² stability**: a full stability analysis of the coupled SDE `dφ = -∇V dt + J Γ dt` with `D = J²` would show whether the system has attractors or runaway solutions. Now that the spurious drift is in place the stationary distribution is at least well defined, which is the prerequisite for asking.
+4. **Trajectory-level entropy production**: `σ` is currently a housekeeping estimator with a known sign bias. A MaxCal-style path-space estimate is needed before NEG-8 can be evaluated on simulated traces. See [07-thermodynamics.md](07-thermodynamics.md) §6.
+
+**Resolved since the original audit:**
+
+- ~~**Bounding terms**: C grows without bound~~ — `update_curiosity` now
+  uses the logistic form `Ċ = α R_e C (1 - C/C_max)`, so saturation is
+  asymptotic rather than a clamp.
 
 ---
 

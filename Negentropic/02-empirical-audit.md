@@ -107,4 +107,80 @@ The document does not identify which physical frequency in the human nervous sys
 
 ---
 
+## Claim 5: The Crystal-Memory / Botanical-Adjunct Cluster
+
+A cluster of claims about piezoelectric crystals as location-encoding memory
+substrates, human sensing of crystal resonance, and a botanical adjunct to
+memory reconsolidation. Audited claim by claim, because they are not all the
+same kind of wrong: two are textbook physics, one is an open research
+question worth pursuing, and one is a safety problem.
+
+| Claim | Status | Why |
+|-------|--------|-----|
+| Quartz is piezoelectric | **TRUE** | d₁₁ ≈ 2.3 pC/N. Textbook |
+| Sympathetic resonance between quartz pieces | **TRUE** | Real, but Q-set and geometry-set. Not a free parameter |
+| Voice induces sonoluminescence | **FALSE** | Sonoluminescence needs cavitation in a liquid at roughly 1 atm+ acoustic pressure. A voice supplies neither |
+| A crystal "memorises" a local thermal / tidal / magnetic signature | **FALSE** | No mechanism. Oscillator aging is ppm-level and monotonic — a drift, not a location fingerprint |
+| A fragment retains a phase relation to its parent crystal | **FALSE** | Fracture destroys the resonator. New geometry, new f₀. There is nothing left to hold a relation |
+| Earth tides strain a crystal | **TRUE** | ~1e-8 strain. Real, and far below any human detection floor |
+| A human can read the frequency difference between two quartz pieces | **FALSE** | Off by many orders of magnitude |
+| Human magnetoreception | **OPEN** | Wang et al. (Caltech, 2019) report an alpha-band EEG response to a rotating magnetic field. Real, small, contested, not replicated widely |
+| Tansy as an NMDA antagonist | **FALSE — and unsafe** | See below |
+| Reconsolidation window; gradual beats abrupt cue swap | **TRUE** | Well replicated |
+| Olfaction bypasses the thalamus | **TRUE** | Direct to piriform cortex, then amygdala and hippocampus |
+
+### The live thread is magnetoreception, not the crystal
+
+Six of the crystal claims are false and two are true but irrelevant at human
+scale. What survives is the Caltech magnetoreception result: a measured
+alpha-band EEG response to a rotating field. It is small, it is contested,
+and it has not been widely replicated — which is exactly what makes it worth
+work. Any effort spent on crystal memory is spent on a mechanism that does
+not exist; the same effort spent on magnetoreception is spent on an open
+question with a published measurement to argue with.
+
+### Tansy — safety correction
+
+The claim that tansy (*Tanacetum vulgare*) acts as an NMDA antagonist is
+wrong on the pharmacology and dangerous on the dosing.
+
+- Thujone, the relevant constituent, is a **GABA-A antagonist**, not an
+  NMDA antagonist. Those are different receptors and the mechanisms are not
+  interchangeable.
+- GABA-A antagonism at dose is **convulsant**.
+- *Tanacetum vulgare* is **hepatotoxic** and an **abortifacient**.
+
+A generated "dose slider" spanning 5–25 g of this material is not a dosing
+protocol. It is a poisoning curve, and the upper end of it is in the range
+associated with fatalities. Any such slider found in this repository or in
+material derived from it should be deleted outright rather than annotated,
+narrowed, or given a warning label — a warned poisoning curve is still a
+poisoning curve.
+
+This is recorded here rather than quietly removed so that the same claim is
+not reintroduced from the same source. The generative provenance of a
+number is not evidence for it, and a plausible-looking range attached to a
+plant name carries no safety information whatsoever.
+
+### What is worth keeping from this cluster
+
+Two claims in the table are both true and load-bearing elsewhere in this
+folder:
+
+- **Reconsolidation, gradual over abrupt.** Well replicated, and the
+  mechanism NEG-3 proposes for it (`landauer.py`) is registered with a
+  falsifier in `NEG_CLAIMS.md`. The behavioural finding stands whether or
+  not the dissipation account survives.
+- **Olfactory bypass of the thalamus.** True as stated, and a real
+  structural asymmetry — though "bypasses the thalamus" is a fact about
+  anatomy, not a licence to attach arbitrary claims to smell.
+
+### Current status
+
+**Mostly refuted.** One open question (magnetoreception), two replicated
+findings worth building on, one safety correction that should propagate to
+any repository carrying the same material.
+
+---
+
 *Back to: [README.md](README.md)*

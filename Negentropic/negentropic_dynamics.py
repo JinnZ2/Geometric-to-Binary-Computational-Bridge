@@ -13,8 +13,15 @@ Core quantities from the framework:
   - Diffusion (D) : proportional to J^2
 
 Dynamical equations:
-  - Langevin:      dphi/dt = -grad V(phi) + F_C + eta
-  - Fokker-Planck: dP/dt   = -div(F*P) + D * laplacian(P)
+  - Langevin:      dphi/dt = -grad V(phi) + F_C + eta   (+ spurious drift,
+                   see spurious_drift(); D depends on state here)
+  - Fokker-Planck: dP/dt   = -div(F*P) + laplacian(D*P)  [Ito]
+
+The Fokker-Planck term is laplacian(D*P), not D*laplacian(P). Those are the
+same only for constant D, and this framework sets D = k*J^2 with J a
+function of state. The framework text (01-framework.md) previously wrote the
+constant-D form, which is why the "D -> 0 collapse" result did not actually
+follow from the equation as written; it does follow from the form here.
 
 Phase transition:
   - alpha(E) = 0 for E < E_crit, alpha_0 for E >= E_crit
@@ -217,6 +224,7 @@ class LangevinDynamics:
         dt: float = 0.01,
         eta_scale: float = 0.01,
         seed: Optional[int] = None,
+        diffusion_gradient: Optional[callable] = None,
     ):
         """
         Parameters
@@ -231,25 +239,38 @@ class LangevinDynamics:
             Scale of the additional thermal noise eta(t).
         seed : int, optional
             RNG seed.
+        diffusion_gradient : callable, optional
+            Function phi -> dD/dphi (np.ndarray of shape (n_dims,)). Supply
+            this whenever D depends on state -- which it does under the
+            framework's D = k*J^2 -- and the integrator adds the Ito
+            spurious drift (1/2) dD/dphi. Leaving it None integrates as if D
+            were locally constant, which has no correct stationary
+            distribution when it is not. See spurious_drift().
         """
         self.grad_v = potential_gradient
         self.n_dims = n_dims
         self.dt = dt
         self.eta_scale = eta_scale
+        self.grad_d = diffusion_gradient
         self.rng = np.random.default_rng(seed)
 
     def step(self, state: LangevinState) -> LangevinState:
         """Advance one Euler-Maruyama step.
 
-        dphi = (-grad V + F_C + eta) * dt
+        dphi = (-grad V + (1/2) dD/dphi + F_C + eta) * dt
         """
         grad = self.grad_v(state.phi)
         f_c = stochastic_force(
             state.j_val, self.n_dims, state.d_coeff, self.dt, self.rng
         )
         eta = self.eta_scale * math.sqrt(self.dt) * self.rng.standard_normal(self.n_dims)
+        drift_correction = (
+            0.5 * np.asarray(self.grad_d(state.phi), dtype=float)
+            if self.grad_d is not None
+            else 0.0
+        )
 
-        new_phi = state.phi + (-grad + f_c + eta) * self.dt
+        new_phi = state.phi + (-grad + drift_correction + f_c + eta) * self.dt
 
         return LangevinState(
             phi=new_phi,
@@ -297,12 +318,39 @@ class LangevinDynamics:
 # Fokker-Planck (1-D discretised)
 # ---------------------------------------------------------------------------
 
+def spurious_drift(d_values: np.ndarray, dx: float) -> np.ndarray:
+    """Ito drift correction for a state-dependent diffusion coefficient.
+
+    A Stratonovich SDE ``dphi = A dt + sqrt(2 D(phi)) o dW`` is the same
+    process as the Ito SDE ``dphi = (A + (1/2) dD/dphi) dt + sqrt(2 D(phi)) dW``.
+    The extra ``(1/2) dD/dphi`` is the spurious (or noise-induced) drift.
+    Omitting it is not a small error: the simulated process then has no
+    correct stationary distribution, so anything read off the steady state
+    -- including the ``D -> 0`` collapse result -- does not follow.
+
+    This matters here because the framework sets ``D = k J^2`` with ``J`` a
+    function of state, so ``D`` is state-dependent by construction.
+    """
+    return 0.5 * np.gradient(np.asarray(d_values, dtype=float), dx)
+
+
 class FokkerPlanck1D:
     """Discretised 1-D Fokker-Planck equation on a grid.
 
-    dP/dt = -d/dx (F(x) * P) + D * d^2P/dx^2
+    Ito convention (the default), for a possibly state-dependent D::
 
-    Uses finite-difference with reflecting boundary conditions.
+        dP/dt = -d/dx (F P) + d^2/dx^2 (D P)
+
+    Stratonovich convention::
+
+        dP/dt = -d/dx (F P) + d/dx ( sqrt(D) d/dx ( sqrt(D) P ) )
+
+    The two agree only when D is constant, in which case both reduce to
+    ``D d^2P/dx^2``. Writing the constant-D form and then passing a
+    state-dependent D -- which is what the framework's ``D ~ J^2`` does --
+    silently solves a different equation from the one intended.
+
+    Uses finite differences with reflecting boundary conditions.
     """
 
     def __init__(
@@ -311,44 +359,83 @@ class FokkerPlanck1D:
         x_max: float = 5.0,
         n_grid: int = 256,
         dt: float = 0.001,
+        convention: str = "ito",
     ):
+        if convention not in ("ito", "stratonovich"):
+            raise ValueError("convention must be 'ito' or 'stratonovich'")
         self.n_grid = n_grid
         self.x = np.linspace(x_min, x_max, n_grid)
         self.dx = self.x[1] - self.x[0]
         self.dt = dt
+        self.convention = convention
         # Initialise uniform probability
         self.p = np.ones(n_grid) / (n_grid * self.dx)
 
-    def step(self, force: np.ndarray, d_coeff: float) -> None:
+    def step(self, force: np.ndarray, d_coeff) -> None:
         """Advance P by one time step.
 
         Parameters
         ----------
         force : np.ndarray
             Drift force F(x) evaluated at grid points, shape (n_grid,).
-        d_coeff : float
-            Diffusion coefficient D.
+        d_coeff : float or np.ndarray
+            Diffusion coefficient D. A scalar is broadcast; an array of
+            shape (n_grid,) is treated as state-dependent and integrated
+            under ``self.convention``.
         """
         p = self.p
         dx = self.dx
         dt = self.dt
 
-        # Advection: upwind finite-volume flux
-        flux = force * p
-        advection = np.zeros_like(p)
-        advection[1:-1] = -(flux[2:] - flux[:-2]) / (2.0 * dx)
+        d_arr = np.asarray(d_coeff, dtype=float)
+        if d_arr.ndim == 0:
+            d_arr = np.full_like(p, float(d_arr))
+        elif d_arr.shape != p.shape:
+            raise ValueError(f"d_coeff must be scalar or shape {p.shape}")
+        if np.any(d_arr < 0):
+            raise ValueError("diffusion coefficient must be non-negative")
 
-        # Diffusion: central difference Laplacian
-        diffusion = np.zeros_like(p)
-        diffusion[1:-1] = d_coeff * (p[2:] - 2.0 * p[1:-1] + p[:-2]) / dx ** 2
+        # Conservative flux form. The probability current on the interior
+        # cell faces (half-grid points) is
+        #     J = F p - d(D p)/dx                 [Ito]
+        #     J = F p - sqrt(D) d(sqrt(D) p)/dx   [Stratonovich]
+        # and dp/dt = -dJ/dx. Zero current at both ends is the reflecting
+        # boundary condition, imposed exactly rather than by copying edge
+        # values afterwards.
+        #
+        # The previous version differenced the drift and diffusion terms
+        # separately on the interior, zeroed them at the edges, copied edge
+        # values, and renormalised. That scheme does not conserve
+        # probability: for a uniform p the drift term contributes a spatially
+        # constant d(xp)/dx = p that renormalisation then divides straight
+        # back out, making the uniform distribution a spurious fixed point.
+        # The D -> 0 collapse result could not be demonstrated with it.
+        face_force = 0.5 * (force[:-1] + force[1:])
+        face_p = 0.5 * (p[:-1] + p[1:])
 
-        self.p = p + (advection + diffusion) * dt
+        if self.convention == "ito":
+            g = d_arr * p
+            grad_term = (g[1:] - g[:-1]) / dx
+        else:
+            root = np.sqrt(d_arr)
+            face_root = 0.5 * (root[:-1] + root[1:])
+            grad_term = face_root * (root[1:] * p[1:] - root[:-1] * p[:-1]) / dx
 
-        # Reflecting boundaries
-        self.p[0] = self.p[1]
-        self.p[-1] = self.p[-2]
+        current = face_force * face_p - grad_term
 
-        # Renormalise to preserve total probability
+        divergence = np.zeros_like(p)
+        divergence[1:-1] = -(current[1:] - current[:-1]) / dx
+        # Zero-flux walls: the outermost cells exchange only inward.
+        divergence[0] = -current[0] / dx
+        divergence[-1] = current[-1] / dx
+
+        self.p = p + divergence * dt
+        np.maximum(self.p, 0.0, out=self.p)
+
+        # Total probability is conserved by construction; this corrects
+        # floating-point drift and the clip above, and should be a no-op of
+        # order 1e-15 per step. A large correction here means dt violates
+        # the stability condition dt < dx^2 / (2 max(D)).
         total = _trapz(self.p, self.x)
         if total > 0:
             self.p /= total
@@ -488,6 +575,17 @@ def collective_resonance(
 def moral_function(r_e: float, a: float, d: float, l: float) -> float:
     """System moral function M(t) = Re(t) * A(t) * D(t) - L(t).
 
+    DIMENSIONALLY INVALID. D is a variance (pattern^2) and L is a power
+    (pattern^2 / time^2); subtracting them is not an operation. M is an
+    ordinal index comparable only against other M values computed under
+    identical normalisation, and any absolute threshold on it -- "M >= 10",
+    "M = 3711.50" -- is meaningless. Kept because the historical figures
+    were produced with it.
+
+    For a criterion with units that survive the subtraction, use NEG-8 in
+    persistence.py: Phi = -S_exchange_dot - sigma, both in W/K, persist iff
+    Phi >= 0. That criterion also has no threshold to tune.
+
     Parameters
     ----------
     r_e : float   Resonance
@@ -536,14 +634,28 @@ if __name__ == "__main__":
     traj = ld.evolve(init, n_steps=100)
     print(f"Langevin: phi_0={traj[0].phi} -> phi_100={traj[-1].phi}")
 
-    # -- Fokker-Planck --
-    fp = FokkerPlanck1D(n_grid=128, dt=0.001)
-    entropies = fp.evolve(
-        force_fn=lambda x: -x,
-        d_coeff_fn=lambda: 0.5,
-        n_steps=200,
-    )
-    print(f"Fokker-Planck entropy: {entropies[0]:.4f} -> {entropies[-1]:.4f}")
+    # -- Fokker-Planck: the D -> 0 collapse, actually computed --
+    print("\nFokker-Planck, harmonic drift F = -x, stationary state vs D:")
+    for d_const in (0.5, 0.1, 0.01):
+        fp = FokkerPlanck1D(n_grid=128, dt=0.0005)
+        fp.evolve(force_fn=lambda x: -x, d_coeff_fn=lambda: d_const, n_steps=20000)
+        var = float(_trapz(fp.p * fp.x ** 2, fp.x))
+        print(f"  D={d_const:<5} variance={var:.4f} (exact {d_const})"
+              f"  entropy={fp.entropy():+.4f} nats")
+    print("  variance -> D and entropy -> -inf as D -> 0: the distribution "
+          "collapses to a point.")
+
+    # -- state-dependent D: the two conventions are different models --
+    print("\nSame D(x) profile under each convention:")
+    for convention in ("ito", "stratonovich"):
+        fp_var = FokkerPlanck1D(n_grid=128, dt=0.0005, convention=convention)
+        d_profile = 0.1 + 0.4 * np.exp(-fp_var.x ** 2)
+        ent = fp_var.evolve(force_fn=lambda x: -x,
+                            d_coeff_fn=lambda: d_profile, n_steps=20000)
+        var = float(_trapz(fp_var.p * fp_var.x ** 2, fp_var.x))
+        print(f"  {convention:13s} variance={var:.4f}  entropy={ent[-1]:+.4f} nats")
+    print("  different stationary states from one D profile -- the convention "
+          "is part of the model, not a detail.")
 
     # -- Collective coupling --
     agents = [

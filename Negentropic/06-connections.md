@@ -87,7 +87,57 @@ If each sensor in the suite is treated as a GeometricAgent with:
 
 The KT annealing schedule (`Silicon/kt_annealing.py`) drives the system through a phase transition. The negentropic framework's criterion for being in the "emergent coherent" regime is E ≥ E_crit, which corresponds to T ≤ T_KT.
 
-The M(S) metric could serve as a real-time readout during annealing: when M(S) crosses a threshold, the system has entered the ordered phase. This would give a physics-grounded stopping criterion for the annealing schedule rather than using a fixed number of steps.
+The M(S) metric was proposed as a real-time readout during annealing: when
+M(S) crosses a threshold, the system has entered the ordered phase.
+**M(S) cannot serve as that readout** — it has no units, so it has no
+threshold (see `corrections.md` §3). The persistence margin
+`Φ = −Ṡ_exchange − σ` from `persistence.py` can: it is in W/K, the sign
+change at `Φ = 0` is the criterion, and there is nothing to calibrate. That
+is the physics-grounded stopping criterion the section was reaching for.
+
+---
+
+## New Connection Points (2026-07)
+
+### `emit_ising.py` → the bridge encoder pattern
+
+`emit_ising.py` is the folder's first module that emits in the
+repository's own idiom rather than only reporting numbers. It produces
+3-bit Gray-coded octahedral encodings of phase (CLAUDE.md guidelines 1 and
+3: silicon's 8 coordination states, one-bit changes between adjacent
+values) alongside the Ising spin encoding a p-bit substrate consumes.
+
+It does **not** yet inherit from `bridges/abstract_encoder.py`. Making
+`IsingSpec` a `BinaryBridgeEncoder` subclass with `from_geometry()` /
+`to_binary()` would fold it into the bridge registry properly and is the
+obvious next step. The blocker is deciding the bit budget: the other
+encoders emit fixed widths (31/39/43 bits) and an Ising spec is
+n-dependent.
+
+### `bounds.py` → `bridges/thermal_encoder.py`
+
+The thermal bridge encodes temperature, heat flux and radiation. The TUR
+floor `Σ ≥ 2 k_B ⟨J⟩²/Var(J)` is a statement about exactly those
+quantities, and gives the thermal encoder something it currently lacks: a
+physically-required minimum for the dissipation it encodes, rather than a
+free scaling.
+
+### `persistence.py` → `bridges/cognitive/consciousness_encoder.py`
+
+The consciousness encoder already computes Shannon entropy H. What it does
+not compute is an entropy *production rate*, which is the quantity NEG-8
+needs. `DissipativeCore` emits σ in nats/s and
+`persistence.sigma_to_watts_per_kelvin` converts it; wiring that through
+would let the consciousness bridge emit a persistence margin instead of an
+unnormalised Φ proxy.
+
+### `maintenance.py` → any archival or scheduling code
+
+`expanding_schedule` supersedes `fibonacci_schedule` for new work. The
+ratio is a fitted parameter with a confidence interval rather than an
+assertion, and `fit_ratio` reports whether the interval excludes φ — which
+is the comparison the original Fibonacci claim needs to survive and has
+never been run.
 
 ---
 
@@ -96,10 +146,12 @@ The M(S) metric could serve as a real-time readout during annealing: when M(S) c
 | NP Component | Status |
 |-------------|--------|
 | GeometricAgent / GeometricNetwork | Standalone code; not imported anywhere |
-| fibonacci_schedule() | Standalone utility; not connected to any scheduler |
-| M(S) threshold monitoring | Not used in any bridge or sensor |
+| fibonacci_schedule() | Superseded by `maintenance.expanding_schedule`; neither is connected to a scheduler |
+| M(S) threshold monitoring | Withdrawn — M has no units. Use `persistence.persistence_margin` |
 | Consciousness protection protocols (§6.5) | Conceptual only; no detection code |
-| Negentropic alignment optimizer | Not implemented; would need M(S) gradient ascent |
+| Negentropic alignment optimizer | Not implemented; ascending a dimensionless index was never going to work — would need a Φ-based objective |
+| `emit_ising.IsingSpec` | Standalone; not registered as a `BinaryBridgeEncoder` |
+| TUR floors | Not wired into `bridges/thermal_encoder.py` |
 
 ---
 
