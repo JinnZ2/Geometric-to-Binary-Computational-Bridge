@@ -132,6 +132,97 @@ power. Ohmic loss in the drivers produces heat and no momentum, and counting
 it inflates the denominator, which biases the test *toward* the null. Getting
 this wrong in the conservative direction is still getting it wrong.
 
+### 5.1 What the measurement actually has to be — a correction
+
+The version above says "one ratio, two instruments". That is right about the
+physics and wrong about the statistics, and building the apparatus is what
+exposed it. Recorded here rather than quietly fixed, because the error is
+instructive.
+
+**Do not average the ratio.** `mean(F/(P/v))` is a biased estimator and it
+diverges as `P → 0`. Fit a slope instead:
+
+```
+F  =  k · (P_rad / v)  +  c · P_elec  +  b
+```
+
+`k` is the entire claim — the thrust as a multiple of the momentum bound, so
+H₀ is `k ≤ 1`. `c` carries the confounders that scale with *electrical* rather
+than radiated power (thermal plume, ohmic heating, convection), and `b` carries
+amplitude-independent offsets (balance drift, electrostatic pull, mount
+preload).
+
+**Sweeping drive amplitude alone cannot work.** At fixed radiation efficiency
+`P_rad = η·P_elec`, so the `k` and `c` regressors are collinear to within
+power-meter noise — measured `corr = 0.996`, `VIF = 96`. In that design a
+simulated anomaly of `k = 4` was absorbed almost entirely by `c` (fitted
+2.56e-4 N/W = the 2.33e-4 anomaly plus the 2.0e-5 real thermal term) and `k`
+came back as **−0.06 ± 0.06 with r² = 0.9998** — a numerically excellent fit
+reporting a confident NULL on a world where H₁ was true, 40 times out of 40.
+The noise is on the regressor `P_rad`, so errors-in-variables pulls `k` toward
+zero as well; both failures point the same way, which is why the wrong answer
+looked precise.
+
+So the campaign must contain operating points where radiated power is
+decoupled from electrical power:
+
+| state | how | `P_elec` | `P_rad` |
+|---|---|---|---|
+| `open` | normal operation | full | full |
+| `detuned` | driven off resonance (40 → 32 kHz) | ~full | a fraction |
+| `muted` | absorber cap or clamped cones | full | ~0 |
+
+`muted` is the classical thrust-balance control and it is what makes `c` and
+`b` identifiable from data rather than from assumption. It carries a condition:
+a muted state must be **verified** to draw the same electrical power as the
+open state at the same amplitude. Blocking a driver's output changes its
+acoustic load and hence its electrical impedance; if `P_elec` shifts, it is a
+different operating point and the `c` it constrains is not the `c` acting in
+the open state. `check_muted_control()` tests both halves of that.
+
+**The decision is asymmetric**, and for a reason that is easy to get wrong:
+
+```
+ANOMALY      k − z·se >  margin      (margin ≥ 1; the calibration allowance)
+NULL         k + z·se ≤  1
+UNRESOLVED   anything between
+```
+
+Claiming the bound is violated requires clearing it with slack. Being
+*consistent* with the bound requires only sitting under it. A single threshold
+for both makes the null unreachable: with a null simulated at exactly `k = 1`,
+`k + z·se < 1` is false for any nonzero `se`, and a correct analysis scored
+7/30 on a world where H₀ held. Note also that `k = 1` is not what an ordinary
+radiator does — `F = P/v` is the perfectly collimated limit, and a real source
+of finite directivity sits well below it. **H₀ is `k ≤ 1`, not `k = 1`.**
+
+A fourth verdict, `NON-IDENTIFIABLE`, is returned when VIF(k) exceeds 20 and
+is checked *before* the others. A narrow interval on an unidentified parameter
+is not evidence.
+
+`Silicon/fp4_autopilot.py` implements this and runs the null-world self-test
+from §11 before it will report anything. `Silicon/field_propulsion_fp4.ino` is
+the instrument: an N = 8 phase-gradient driver that refuses to emit data until
+the balance is tared, the radiated-power survey factor has been entered, and
+the physical radiation state has been declared.
+
+### 5.2 One apparatus note that can manufacture a false positive
+
+λ at 40 kHz in air is 8.58 mm, so grating-lobe-free spacing is ≤ 4.29 mm.
+Eight 10 mm transducers on a ring give a 13.1 mm radius and 10.0 mm spacing
+= **1.17 λ**; 16 mm units give 1.87 λ. Any buildable 40 kHz ring of commodity
+transducers is spatially aliased and has real grating lobes.
+
+This does not affect FP-2 — traveling-wave mode indexing depends on the node
+count, not the spacing — and it does not affect FP-4's validity, since the
+momentum bound holds for any radiation pattern whatsoever. It does mean the
+power survey must be a genuine closed-surface integral. The lobes put a
+substantial fraction of the power off-axis, so an on-axis measurement scaled
+by solid angle **undercounts `P_rad`, which biases `k` upward** — toward a
+false anomaly. This is the single most likely way to get a spurious positive
+out of this apparatus, and it is a *specific*, checkable error rather than a
+general call for care.
+
 ---
 
 ## 6. Hypotheses, restated so they differ
@@ -215,9 +306,22 @@ Stated up front so that a null result is not a loss:
 | **FP-3** | All four originally registered predictions are also H₀ predictions | Any of the four shown to be excluded by ordinary radiation | LIVE, **verified in code** |
 | **FP-4** | `F > P/v` is the only registered test that can return "no" | A different single measurement with equal or better discriminating power | LIVE |
 | **FP-5** | Coherent N² power scaling accounts for the N² thrust prediction with no anomalous term | N² thrust scaling with sub-N² radiated power | LIVE |
+| **FP-6** | An amplitude-only sweep cannot separate `k` from `c`; the design needs a state where `P_rad` is decoupled from `P_elec` | An amplitude-only design recovering a hidden `k` with VIF > 20 | **REFUTED for amplitude-only** — VIF 96, `k = −0.06 ± 0.06` on a `k = 4` world, r² = 0.9998 |
+| **FP-7** | The N = 8 drive table realises `φᵢ = +2πm·i/N`, and mode `m` and `m + 8` are the same drive table byte-for-byte | Two distinct tables for `m = 6` and `m = −2`, or a recovered gradient of the opposite sign | LIVE, **verified in code** |
 
 FP-1, FP-2, FP-3 and FP-5 are settled by `python Silicon/propulsion_bounds.py`.
 They needed no apparatus.
+
+FP-6 and FP-7 are settled by `python tests/test_fp4_autopilot.py`. Neither
+needed apparatus either, and both were found by code rather than by argument:
+FP-6 by the null-world self-test refusing to pass, and FP-7 by recovering each
+node's phase from the emitted drive table's fundamental Fourier bin and
+comparing it against `propulsion_bounds.aliased_modes()`. The first version of
+`buildPhaseTable` delayed node *i* by `(i·m) mod N` steps, which makes it
+*lag*, so the wave ran the opposite way around the ring while every DATA line
+reported the positive `Δφ`. FP-4 is sign-blind and would have survived that;
+FP-2 and the sign-reversal prediction are precisely about which way the wave
+goes, and they would have been read against a mislabelled drive.
 
 ---
 
@@ -256,5 +360,29 @@ hide it from the model, and confirm the Bayes factor goes the right way in
 both cases. Until that passes, no output from the FRET autopilot means
 anything — and it is worth noting that the FRET *protocol* is sound; it is
 only the simulator that is rigged.
+
+### 11.1 The rule earns a corollary, and immediately catches its own author
+
+The first thing `fp4_autopilot.py` did on being run was fail its own
+null-world test — false-negative rate **40/40** — which is how §5.1 came to be
+written. Two things came out of that, and both generalise past this apparatus:
+
+> **The loop must also lose on a world where the null is false.** A one-sided
+> check passes any analysis that can only ever say "null", which is the mirror
+> image of the rigged simulator and just as empty.
+
+> **A null world must be drawn from the null hypothesis, not from its
+> boundary.** H₀ here is `k ≤ 1`; simulating it at `k = 1` tests the decision
+> threshold rather than the world, and it scored a correct analysis as broken.
+> The first version of `null_world_test` made exactly that mistake.
+
+The generalisable form: a self-test needs a **power** check alongside its
+false-positive check, and its synthetic worlds have to be drawn from the
+interior of each hypothesis rather than from the line between them.
+
+The FRET one-liner above inherits both. Drawing `true_coupling` from
+`{0, 0.3}` is the two-sided version already, but only if the run confirms the
+Bayes factor moves toward H₀ on the `0` draws — not merely that it moves
+toward H₁ on the `0.3` draws.
 
 *License: CC-BY-4.0*

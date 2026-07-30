@@ -147,6 +147,31 @@ from the model, and confirm the verdict goes both ways. It is cheap enough
 that there is no reason to skip it, and skipping it has now invalidated three
 sets of results.
 
+### Two corollaries, both earned the hard way
+
+`Silicon/fp4_autopilot.py` was the first module written *with* this rule in
+place. It failed its own null-world test on the first run, and the two
+amendments that came out of that are part of the rule now:
+
+> **The loop must also lose on a world where the null is false.** A one-sided
+> check passes any analysis that can only ever say "null" — the mirror image of
+> the rigged simulator, and just as empty. Report a power figure next to the
+> false-positive rate, and require both.
+
+> **Draw each synthetic world from the interior of its hypothesis, not from
+> the boundary.** FP-4's H₀ is `k ≤ 1`; simulating it at exactly `k = 1` tests
+> the decision threshold instead of the world, and scored a correct analysis as
+> broken (7/30). The first version of `null_world_test` made that mistake, and
+> the fixed version keeps `null_k_range=(1.0, 1.0)` available so the degenerate
+> case can be demonstrated on purpose.
+
+What the self-test found once it was two-sided was worth the whole exercise: an
+amplitude-only sweep leaves the anomaly term collinear with the thermal term
+(VIF 96), so a hidden `k = 4` was reported as `−0.06 ± 0.06` with r² = 0.9998 —
+a *confident* null, 40 times out of 40. High r² is not evidence of
+identifiability, and a narrow interval on an unidentified parameter is not
+evidence of anything. That is now a fourth verdict rather than a caveat.
+
 ---
 
 ## `co_cradle_phase1.py` — status
