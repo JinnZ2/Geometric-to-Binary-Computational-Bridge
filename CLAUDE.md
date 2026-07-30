@@ -43,6 +43,7 @@ python tests/test_propulsion_bounds.py  # Field-propulsion momentum bounds (27 t
 python tests/test_fp4_autopilot.py      # FP-4 estimator + firmware phase table (66 tests, no deps)
 python tests/test_epg_bounds.py         # Energy-pattern: cubic isotropy, defect floor (38 tests, no deps)
 python tests/test_magnetic_authority.py # Magnetic read/write authority in Si (67 tests, no deps)
+python tests/test_gies_core.py          # GIES tensor collapse + codec bijection (60 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -86,6 +87,7 @@ cd "Front end" && npm install && npm run dev
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
+| GIES core | `tests/test_gies_core.py` | 60 | Rank-1 tensor collapse (GIES-1), site parity vs lattice (GIES-2), NOT-is-Frenkel (GIES-3), 128-token codec bijection (GIES-4/8), label-dependence of the gate set (GIES-6) |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -114,8 +116,11 @@ Engine/                         Core computational engine
 
 GEIS/                           Geometric Information Encoding System
 ├── geometric_encoder.py          Token <-> binary converter
-├── octahedral_state.py           Octahedral state representation (8 vertices)
-├── state_tensor.py               3x3 tensor math for geometric states
+├── octahedral_state.py           State positions — cube corners, not octahedron vertices
+├── state_tensor.py               3x3 tensor math (SUPERSEDED: rank-1 collapse, see GIES_AUDIT.md)
+├── gies_core.py                  Sign-sensitive §7.2 tensor, site parity, J3 check bit (stdlib)
+├── gies_codec.py                 Bijective 7-bit token codec, all 4 operators (stdlib)
+├── GIES_AUDIT.md                 GIES-1..8: what collapsed, what the parity bit buys
 ├── demo.py                       Interactive demonstrations
 └── test_simple.py                Unit tests
 ```
@@ -462,4 +467,6 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
 - Two experiments are cheap, decisive, and unrun: **FAB-3** (8 implant states separable at >3σ in (R_s, carrier type, n); ~$3–6k) and **BRG-6** (piezoresistive dR/R at 0.1 % strain; a strain gauge and a four-point probe). Both return real results and neither needs a magnet.
 - `Silicon/Fabrication.md` and `Silicon/Magnetic-bridge.md` carry audit headers rather than rewrites: their hardware lists, FSMs and protocol structure are sound and were kept. Only the physics layer was replaced.
+- **GIES state tensors collapsed and nothing detected it.** `state_tensor.py` built `T = outer(v, v)` from an antipodal position table, so `outer(v,v) == outer(-v,-v)` made states `i` and `7-i` identical in every invariant and every projection — and `NOT(i) = 7-i` is precisely that map, so the gate set's only unary operation was invisible to the representation. `GIES.md` §7.2 already specified the correct weighted sum over bond directions; §8.3 implemented a degenerate special case of its own spec. Fixed in `GEIS/gies_core.py`; the old file is annotated and kept for provenance.
+- **Index parity is site type, and it is free.** Even-parity indices land on lattice atoms, odd-parity ones on tetrahedral interstitials (verified against the diamond-cubic basis: coordination shell identical to the T site). So the 3-bit address space already carries a physically meaningful single-bit error-detecting code, which is what the "geometric error correction" claim wanted. It also means the honest state space is 4 states plus a site-type flag, because `NOT` crosses the flag and every crossing is a Frenkel pair (~4.75 eV). The carrier invariant is **J3**, not the trace — trace and J2 are identical across all eight states, while J3 flips sign with parity. That is the same `J3` mode invariant already in `silicon_error_correction.json`.
 - `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.

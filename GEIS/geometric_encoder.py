@@ -1,4 +1,9 @@
 """
+SUPERSEDED for new work by ``gies_codec.py``. ``OPERATOR_MAP`` sends both
+``':'`` and ``'/'`` to ``'0'``, so the colon operator is lost, and the output is
+variable-width and not prefix-free, so token streams are ambiguous. Kept for
+provenance; see ``GIES_AUDIT.md`` GIES-4 and GIES-8.
+
 GeometricEncoder: Bidirectional encoding between geometric tokens and binary
 
 Handles conversion between:

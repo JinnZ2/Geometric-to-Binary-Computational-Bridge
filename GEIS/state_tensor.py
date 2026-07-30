@@ -1,4 +1,10 @@
 """
+SUPERSEDED for new work by ``gies_core.py``. ``_calculate_tensor`` returns
+``np.outer(v, v)``, and ``outer(v,v) == outer(-v,-v)`` identically, so states i
+and 7-i are indistinguishable by every method in this class -- including the
+``NOT(i) = 7-i`` that the gate set relies on. Kept for provenance; see
+``GIES_AUDIT.md`` GIES-1.
+
 StateTensor: Tensor representation and operations for geometric states
 
 Calculates and manipulates 3x3 symmetric tensors representing
