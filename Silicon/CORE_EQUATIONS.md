@@ -113,6 +113,6 @@ Maps joint velocities to end-effector linear/angular velocity.
 - Especially relevant for **soft robotics**, **prosthetic design**, **biomechanics**, and **AI-driven control systems**.  
 
 **Reference Link:**  
-→ [SYSTEM_ENERGY_DYNAMICS.md](../systems/SYSTEM_ENERGY_DYNAMICS.md)
+→ [SYSTEM_ENERGY_DYNAMICS.md](SYSTEM_ENERGY_DYNAMICS.md)
 
 ---

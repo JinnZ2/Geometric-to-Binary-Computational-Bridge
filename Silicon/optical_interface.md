@@ -101,6 +101,12 @@ scattering geometry  z(xx)z-bar  ->  couples the others
 Rotate the input and output polarizers, watch which peak lights up, read the
 frame.
 
+**Which directions to sample is not free.** `tensor_readout.py` settles it:
+the four sp³ bond directions are rank-deficient and blind to the E doublet,
+so a readout built on them cannot see two dimensions of the state space. The
+six ⟨110⟩ directions are complete and invertible. See
+[`ttm_audit.md`](ttm_audit.md), TTM-2 and TTM-3.
+
 **This is the missing channel.** `silicon_error_correction.json` v2.0
 established that strain invariants (I₁, J₂, J₃) are blind to pure
 reorientation and that the eigenvectors are required — then flagged the
