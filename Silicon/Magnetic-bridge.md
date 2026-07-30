@@ -1,3 +1,102 @@
+# Magnetic Bridge Architecture
+
+> **AUDIT 2026-07 — the control layer is sound, the physics layer beneath it
+> is not.** Numbers computed in `magnetic_authority.py`, settled by
+> `tests/test_magnetic_authority.py`.
+>
+> **This file states the correct electromigration limit** — `J_max ~ 1e10 A/m^2`
+> = 1e6 A/cm². `Fabrication.md` runs the same coil at 1e8 A/cm². The two
+> documents disagree and **this one is right**; propagate it back.
+>
+> Worked through this file's own coil geometry: 100 nm × 200 nm → A = 2e-14 m²,
+> so I_max = 0.20 mA, and with N = 10 at r = 250 nm, **B = 5.03 mT**. The write
+> protocol calls for 1.0 T static — **199× short**. Zeeman authority at 5 mT is
+> 0.58 µeV against a stated 10–100 meV barrier: **0.0006 % barrier modulation.**
+>
+> | claim | status | correct value |
+> |---|---|---|
+> | 1 T write field from the on-chip coil | **DEAD** | 5.03 mT at this file's own J limit |
+> | read time 50 ns | **8× OVER** | the hardware spec at the top of this file says 100 ns per field ramp; four rotations is a 400 ns floor before eddy currents |
+> | "wait 5 ns" for eddy decay | **3 ORDERS OFF** | τ ≈ μσL²/π², Cu: 7.6 µs at 1 mm, 76 ns at 100 µm, 0.76 ns at 10 µm. Anything at coil-former or package scale is **microseconds** |
+> | write = 70 ns | **DEAD** | write = read + transition + verify read, so the floor is >800 ns. Every downstream throughput and cost figure inherits this |
+> | 2 T + 3-axis + 100 ns slew + dB/B < 1e-5 | **MUTUALLY EXCLUSIVE** | 2 T over 1 cm³ stores 1.59 J; switching in 100 ns is **15.9 MW** and 1e5–1e6 V class drive. That is destructive-pulsed-magnet engineering. And dB/B < 1e-5 at 2 T is 20 µT stability, which needs superconducting persistent mode (cannot slew) or 1e-5 regulation *during* the slew. Real 1–3 T 3-axis vector magnets slew in seconds to minutes |
+> | gradient addressing, 10–1000 T/m at 5–50 nm | **714× SHORT** | see the correction note below |
+> | T_Rabi = 0.54 ps | **330× OFF** | the file substituted π·ħ = 3.14e-15 **s** where 3.31e-34 **J·s** belongs — wrong by 19 orders and dimensionally wrong. Correct: g·μ_B·B_RF = 1.855e-24 J, T_Rabi = **179 ps**, composite X(π/2)-Y(π)-X(π/2) = **536 ps** |
+> | B_RF = 0.1 T at "0.1–10 W" | **5 ORDERS SHORT** | u = B²/2μ₀ = 3979 J/m³, (λ/2)³ = 3.4e-6 m³ → U = 13.4 mJ, P = ωU/Q = **842 kW** at Q = 1000. Cross-checked against real hardware: a 1 kW pulsed X-band ESR spectrometer gives B1 ≈ 1 mT, and B1 ∝ √P, so 0.1 T needs **10 MW** |
+> | the [111] cross-check | **DEAD** | `T_111 = (T_xx+T_yy+T_zz)/3` drops the off-diagonals. The true projection is v·T·v = (1/3)(T_xx+T_yy+T_zz+2T_xy+2T_xz+2T_yz). The check reduces to an identity that holds whenever T is diagonal — the very assumption used to extract the diagonals. **It is exactly blind to the only error it claims to catch.** It is also underdetermined: a symmetric 3×3 has 6 independent components and four axes give four equations |
+> | frequency multiplexing as a static address | **DEAD** | ω_nm = ΔE_nm/ħ is a property of *which states the cell is between*. `transition_table[0][5]` → 15.2 GHz; a different starting state gives a different frequency for the same cell. **The address changes when the data changes.** The only static-offset candidate offered is the gradient, which fails above |
+> | `confidence = 1 - d_best/d_second` | **NaN FOR HALF THE STATES** | against the canonical table, states 1/4 and 2/5 are identical triples, so d_best == d_second → confidence 0 always, and 0/0 → NaN. **Four of eight states are permanently unreadable by this decoder** |
+> | calibration bootstrap | **NO ENTRY POINT** | writing requires a read, reading requires calibration, calibration requires writing. Fix, using something already available: `Fabrication.md`'s implanted array is permanent, read-only and of independently known dose. Calibrate the read against implanted cells and the loop opens. The read-only array has a job |
+>
+> **Two corrections to the audit's own arithmetic:**
+>
+> *Gradient addressing.* The offset across 50 nm at 1000 T/m is **1.40 MHz**,
+> not 1.4 kHz — g·μ_B/h = 28.0 GHz/T and 1000 T/m × 50 nm = 50 µT. So the
+> shortfall against 1 GHz channels is **714×**, not 700,000×, and the gradient
+> required for 1 GHz spacing is **7.1e5 T/m**, not 7e8. That is at the MFM tip
+> state of the art (~1e6 T/m), not three orders beyond it. BRG-5 stands — the
+> specified 10–1000 T/m is still 714× short, and a tip-scale gradient exists
+> only within tens of nm of the tip, which is not a 4×4 array at 5 µm pitch —
+> but it stands by hundreds, not by six orders.
+>
+> *Piezoresistance.* 6e-11 Pa⁻¹ is π₁₁, the **⟨100⟩** coefficient. The ⟨110⟩
+> longitudinal value is (π₁₁+π₁₂+π₄₄)/2 = **7.18e-10 Pa⁻¹**, 12× larger, and it
+> is the one consistent with the same audit's "gauge factor ~100" (π_l·E = 93;
+> 6e-11 gives 7.8). So dR/R = GF × ε: **93 % at 1 % strain**, which is
+> unphysical since Si fractures at 1–2 % and piezoresistance saturates well
+> below that, or **9.3 % at a realistic 0.1 %**. The quoted 7.8 % was right in
+> magnitude only because a 12×-low coefficient was paired with a 10×-high
+> strain.
+>
+> **KEEP AS-IS:** the `STATE_*` finite state machine, `BridgeCommand` /
+> `BridgeResponse`, the error code table, read → verify → retry(3) → mark
+> defective, the insight that the write path depends on starting state, the
+> coordinate system and v1..v4 definitions, the adiabaticity condition
+> T >> ħ/ΔE, and J_max = 1e10 A/m². The architecture is fine.
+>
+> **REPLACEMENT PHYSICS LAYER.** Zero magnetic terms, zero ESR, zero cryogenics:
+>
+> | layer | mechanism | number |
+> |---|---|---|
+> | state variable | strain tensor | — |
+> | write | piezo / optomechanical | 0.1–1 ns |
+> | select | valley splitting, Ξ_u = 9.16 eV | 92 meV at 1 % strain, 9.2 meV at 0.1 % — vs 0.58 µeV from the legal coil, **authority ratio 1.6e4** |
+> | read (fast) | **piezoresistive** — the piece that was missing | GF ≈ 93, dR/R ≈ **9 % at 0.1 % strain**, electrical, ns, 300 K |
+> | read (full frame) | polarized Raman, six ⟨110⟩ geometries | complete; ~ms |
+> | control layer | the FSM in this document, unchanged | — |
+>
+> **The six ⟨110⟩ directions are the fix for the third time.**
+> `silicon_error_correction.json` v1 kept invariants only and lost the frame;
+> the TTM sp3 projections kept off-diagonals only and lost the E doublet; this
+> file keeps diagonals only, loses T2, and then "checks" the gap with an
+> identity. Same fix all three times:
+> (1,1,0) (1,-1,0) (1,0,1) (1,0,-1) (0,1,1) (0,1,-1) / √2 — complete,
+> invertible, six physically realizable axes. `tensor_readout.py`, TTM-3.
+>
+> **Housekeeping:** this file contains a model self-correction left in place
+> verbatim ("Wait, that's less than 1 cycle - this is an adiabatic pulse, not
+> oscillatory. Let me correct:"), and the number it was correcting —
+> `transition_table[0][5]` duration 8.5 ps at 15.2 GHz — was never updated
+> upstream. The stale value is still in the table the write protocol reads from.
+>
+> | ID | CLAIM | FALSIFIER | STATUS |
+> |---|---|---|---|
+> | **BRG-1** | at the EM limit stated in this file the coil yields 5 mT, not 1 T | a coil at 1e6 A/cm² delivering >100 mT | LIVE |
+> | **BRG-2** | read time floor is >400 ns from this file's own 100 ns switching spec | a 1 T vector rotation measured under 100 ns | LIVE |
+> | **BRG-3** | the [111] cross-check is an identity under the diagonal assumption and cannot detect off-diagonal error | the check detecting a nonzero off-diagonal component | DEAD |
+> | **BRG-4** | B_RF = 0.1 T at 10 GHz needs ~1e5× the 10 W budgeted | 0.1 T B1 achieved at <100 W | LIVE |
+> | **BRG-5** | transition frequency cannot serve as a static address because it is state-dependent | a fixed per-cell address frequency independent of state | LIVE |
+> | **BRG-6** | Si piezoresistive readout gives dR/R ≈ 9 % at 0.1 % strain, ns, 300 K | measured dR/R < 1 % at 0.1 % strain | LIVE **← RUN** |
+> | **BRG-7** | 2 T + 100 ns slew + dB/B < 1e-5 are mutually exclusive | a system meeting all three simultaneously | DEAD |
+>
+> **BRG-6 is the one to run**, and it needs no magnet, no RF and no cleanroom:
+> a strain gauge on a silicon test bar and a four-point probe. If it returns
+> ~9 %, that is a read channel with ~1e4× the signal margin of anything else
+> proposed across these six documents, and the FSM in this file drives it
+> unchanged.
+
+---
+
 Magnetic Bridge Architecture Overview
 The bridge translates between:
 

@@ -1,5 +1,87 @@
 # Fabrication Pathway for Octahedral Silicon Encoding
 
+> **AUDIT 2026-07 — the magnetic readout does not exist. Read this first.**
+>
+> Numbers below are computed in `magnetic_authority.py` and settled by
+> `tests/test_magnetic_authority.py` (67 tests). Nothing here needs apparatus.
+>
+> | claim | status | correct value |
+> |---|---|---|
+> | 16 Hall sensors read the cell state | **DEAD** | cell moment 4e-19 A·m², field at 1 mm 8e-17 T = 8e-13 G, against a 0.2 G floor. SNR 4e-12, **11.4 orders short**. Linear in B, so 10 T still leaves 8 orders. |
+> | SQUID rescues it | **DEAD** | MPMS moment sensitivity ~1e-11 A·m². **7.4 orders short.** |
+> | Er3+ gives a magnetic state | **DEAD at 300 K** | χ_Er = 8.0e-9 at 1e16 cm⁻³ vs χ_Si = −4e-6. Host is **499× larger, opposite sign**. Winning needs 5e18 cm⁻³ (above Er solubility ~1e18) or T < 1 K. |
+> | "0.01 eV = 1.6 aJ" | **WRONG 1000×** | 0.01 eV = 0.0016 aJ. 1.6 aJ = 10.0 eV. The line contradicts itself. |
+> | 0.01 eV write energy | **BELOW LANDAUER** | kT·ln2 at 300 K = 0.0179 eV. Not a tight design — an impossible one. |
+> | ">10 yr at 85 °C" with Ea = 0.01–0.1 eV | **CONTRADICTION** | 10 yr at 85 °C needs Ea = 1.53 eV. Ea = 0.01–0.1 eV gives 0.14–2.6 **picoseconds**. The two specs differ by **20 orders in time**. |
+> | κ_[111] = 1.5 × κ_[100] | **DEAD** | Neumann's principle: a rank-2 tensor invariant under the cubic group is λ·I exactly. No thermal anisotropy exists to align vias to. `epg_bounds.cubic_isotropic()`. |
+> | micro-coil at 10 mA | **100× OVER EM LIMIT** | 50 nm × 200 nm → J = 1e8 A/cm² against a 1e6 design limit. Black n=2: 10 yr → **8.8 h** continuous, 37 d at 1 % duty. Risk 2 claims 2–3× margin; 100× is needed. `Magnetic-bridge.md` states the correct 1e10 A/m² limit — **the two documents disagree and that one is right**. |
+> | flux concentrator A = μ_r × (A_base/A_tip) = 500,000 | **WRONG** | flux conservation bounds gain at A_base/A_tip = 100. μ_r governs collection efficiency, not gain. NiFe B_sat = 1 T, so at the claimed 1–2.5 T the concentrator is **saturated**. |
+> | field authority over the barrier | **~1 %** | even granting 2 T: g·μ_B·B = 0.2315 meV vs a 10–100 meV barrier = 0.23–2.3 %. |
+> | "8 vertices per unit cell → octal natural" | **WRONG (5th instance)** | 8 **atoms** per conventional cell (two FCC offset ¼,¼,¼). A cube has 8 **corners**; an octahedron has 6 **vertices**. Si site symmetry is Td. |
+> | "infinite endurance / no wear-out" | **CONTRADICTION** | the qual section in this same document specifies >1e15 write cycles. |
+> | "$63/die, ROI 10–75×" | **MOOT** | downstream of the 11-order readout gap. |
+>
+> **Experiments 2, 3 and 4 all depend on Experiment 1**, which is state
+> readout. The $200 sensor board, the magneto-optical option, the 3-axis
+> Helmholtz protocol and the tensor decoder are all downstream of a signal
+> that is not there.
+>
+> **The success metric fails on the document's own table.** States 0→1 give
+> ΔΛ = 0.02 against a stated 0.05 threshold; and states 1/4 and 2/5 have
+> *identical* eigenvalue triples. The footnote says they differ by principal
+> direction, but the CMOS decoder sorts eigenvalues descending and discards
+> the eigenvectors. Sorting destroys exactly the information that
+> distinguishes them — the same structural fault as
+> `silicon_error_correction.json` v1: the detector throws away the frame and
+> then tries to read the frame.
+>
+> **KEEP the Phase 1 hardware list.** 3-axis Helmholtz coils, Arduino Mega +
+> Arty A7, ADS1115/INA128, XYZ stage, wafer specs, P/B/Er implant recipes,
+> RTA 1000 °C/10 s, KLayout masks, Python host stack — all sane. **DELETE**
+> the Hall array as state readout, the magneto-optical Faraday option (same
+> χ), and the cell-level electromagnet array (no magnetic state to write).
+>
+> **The states are real and distinguishable, just not magnetically.** Same
+> wafer, same implants, same stage — swap the sensor board: 4-point
+> probe/van der Pauw sheet resistance (1e16→1e17 cm⁻² spans a decade),
+> Hall for **carriers not magnetisation** (gives n and sign, which breaks
+> exactly the 1/4 and 2/5 degeneracy the eigenvalue table could not),
+> micro-Raman 520.7 cm⁻¹, Er3+ 1.54 µm photoluminescence, SIMS ground truth.
+>
+> **FAB-3 is the experiment worth running.** 8 implant conditions in a 4×4
+> array separable at >3σ in (R_s, carrier type, n) space. ~$3–6k.
+> It proves 8-level dopant encoding is *readable*. It does **not** prove a
+> memory: implants are permanent, so this is read-only by construction.
+> That gap is real and not small — no write mechanism in this document
+> survives audit, because magnetic authority over the barrier is ~1 %.
+> The channel that does work is **strain**: Ξ_u = 9.16 eV, so 0.1 % strain
+> gives 9.2 meV of valley splitting, 40× the 0.23 meV from 2 T, and strained
+> Si has shipped since the 90 nm node.
+>
+> | ID | CLAIM | FALSIFIER | STATUS |
+> |---|---|---|---|
+> | **FAB-1** | doped-Si cell moment at 5 µm scale is ~4e-19 A·m², 7–11 orders below Hall/SQUID floors | a Hall or SQUID reading of a single mesoscale cell | LIVE |
+> | **FAB-2** | Er3+ Curie susceptibility at 1e16 cm⁻³, 300 K is ~500× below Si host diamagnetism | measured net paramagnetic response from the Er cell at 300 K | LIVE |
+> | **FAB-3** | the 8 implant states ARE separable by (R_s, carrier type, n) at >3σ | overlapping clusters in electrical space | LIVE **← RUN** |
+> | **FAB-4** | eigenvalue sorting destroys the only information distinguishing states 1/4 and 2/5 | a sorted-eigenvalue decoder separating states 1 and 4 | DEAD |
+> | **FAB-5** | Cu coil at 1e8 A/cm² fails by electromigration in weeks, not years | coil surviving >1 yr at that J | LIVE |
+> | **FAB-6** | thermal conductivity is isotropic in cubic Si; no [111] pathway | measured κ anisotropy in undoped single-crystal Si | DEAD |
+> | **FAB-7** | no write mechanism here has >2 % authority over the stated barrier | a magnetic write demonstrating >10 % barrier modulation | LIVE |
+>
+> The document argues that "impractical" is a psychological objection and
+> cites the transistor, the IC and flash as precedents. Every objection above
+> is a number: 11 orders, 499×, 1000×, 20 orders, 100×, and zero anisotropy.
+> Pre-classifying quantitative refutation as institutional inertia makes the
+> document unfalsifiable, which is the opposite of what its own Evaluation
+> Criteria section asks for. And the precedents argue the other way — Bardeen
+> and Brattain had measured gain in December 1947, Kilby had a working
+> oscillator in September 1958, Masuoka had functioning cells first. In every
+> case the demonstration came before the paradigm argument. The analogy
+> becomes available to this project after FAB-3 returns clusters.
+
+
+---
+
 ## Philosophy: Working With Nature, Not Against It
 
 Traditional semiconductor fabrication asks: *“How do we force this material to do what we want?”*

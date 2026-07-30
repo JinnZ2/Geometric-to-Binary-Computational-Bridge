@@ -41,6 +41,8 @@ python tests/test_silicon_check.py      # Silicon strain-fault checker (29 tests
 python tests/test_tensor_readout.py     # Tensor readout completeness (21 tests, no deps)
 python tests/test_propulsion_bounds.py  # Field-propulsion momentum bounds (27 tests, no deps)
 python tests/test_fp4_autopilot.py      # FP-4 estimator + firmware phase table (66 tests, no deps)
+python tests/test_epg_bounds.py         # Energy-pattern: cubic isotropy, defect floor (38 tests, no deps)
+python tests/test_magnetic_authority.py # Magnetic read/write authority in Si (67 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -82,6 +84,8 @@ cd "Front end" && npm install && npm run dev
 | Tensor readout | `tests/test_tensor_readout.py` | 21 | sp3 rank deficiency (TTM-2), six-⟨110⟩ completeness (TTM-3) |
 | Propulsion bounds | `tests/test_propulsion_bounds.py` | 27 | Momentum bound F≤P/v (FP-1), phase aliasing (FP-2), discriminating power (FP-3/5) |
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
+| Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
+| Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -177,6 +181,11 @@ Silicon/                        Hardware implementation pathway
 ├── fp4_autopilot.py              FP-4/6/7: fits F = k·(P_rad/v) + c·P_elec + b; refuses non-identifiable designs
 ├── field_propulsion_fp4.ino      N=8 phase-gradient instrument; blocks DATA until tared + surveyed + state declared
 ├── field_propulsion_protocol.md  Falsifiable test plan; the four registered predictions don't discriminate
+├── epg_bounds.py                 EPG-4/6/7/8: cubic isotropy by Neumann, DSA defect floor, mechanism matrix
+├── magnetic_authority.py         FAB-1..7 / BRG-1..7: the magnetic state channel in Si, and the strain one that replaces it
+├── Energy-pattern.md             Directional Si deposition on current-carrying Cu; one datum, one decisive test
+├── Fabrication.md                Octahedral fab pathway + AUDIT header (magnetic readout is 11 orders short)
+├── Magnetic-bridge.md            Bridge architecture + AUDIT header (FSM sound, physics layer replaced by strain)
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
 geometric_intelligence/         Integrity & consciousness research
@@ -450,4 +459,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - NEG-2 and NEG-3 have falsifiers implemented but have not been run against data.
 - `Silicon/field_propulsion_fp4.ino` is committed **unflashed** — no board was available here. Its phase-table logic is ported into `tests/test_fp4_autopilot.py` and verified against `propulsion_bounds.aliased_modes()`, but the timer backends (RP2040 / Teensy 4) and the HX711 and ADC paths are unexercised. Every calibration constant in it is a placeholder to be replaced by a bench measurement.
 - `Silicon/fp4_autopilot.py`'s `ber_sweep()` raises `NotImplementedError` on the simulator by design; the §9.1 Bridge communication test needs either hardware or an explicit channel model, and a synthetic BER curve would reproduce the rigged-simulator defect the same file exists to guard against.
+- **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
+- Two experiments are cheap, decisive, and unrun: **FAB-3** (8 implant states separable at >3σ in (R_s, carrier type, n); ~$3–6k) and **BRG-6** (piezoresistive dR/R at 0.1 % strain; a strain gauge and a four-point probe). Both return real results and neither needs a magnet.
+- `Silicon/Fabrication.md` and `Silicon/Magnetic-bridge.md` carry audit headers rather than rewrites: their hardware lists, FSMs and protocol structure are sound and were kept. Only the physics layer was replaced.
 - `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.
