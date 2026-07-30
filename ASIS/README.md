@@ -115,6 +115,7 @@ Three times now, in three unrelated modules, the same failure:
 | `Negentropic/lenses.py` | A figure → four scalars at step one | 17 lenses became interchangeable; random coefficients reproduced the result |
 | `ASIS/asc_core.py` | Structural health → a hardcoded constant | The monitor could not report ill health |
 | `ASIS/co_cradle_phase1.py` | Surprise → MSE vs a mean+2σ threshold | **Measured**: flags 2–3% of any stream, including pure noise |
+| FRET mesocosm autopilot | H₁'s coupling estimator → the simulator's generative process, hand-copied | The Bayes factor cannot do anything but diverge toward H₁ (see `Silicon/field_propulsion_protocol.md` §11) |
 
 `Negentropic/triangnet.py` states the convention that catches all three:
 
@@ -128,6 +129,23 @@ A metric that cannot fail is not a metric. Every scalar health score in this
 folder should be checked against a null model before it is trusted — the way
 `lens_collapse_test.py` checks the lens correlations, and the way
 [`audit.md`](audit.md) checks these.
+
+### The rule, after three occurrences
+
+> **Before trusting an autopilot, run it against a world where the null is
+> true.** If H₀ does not win there, the loop is not measuring the world.
+
+Three instances now: `asc_core.py`'s hidden-variable search has one candidate
+and it is the true generative model; `co_cradle_phase1.py`'s surprise
+threshold fires at a fixed rate on any stream; and the FRET mesocosm's
+`estimate_coupling()` returns the simulator's own coefficients to machine
+precision. In each case the machinery is elaborate and the outcome was fixed
+before the first trial.
+
+The fix is always cheap — draw the ground truth at random per run, hide it
+from the model, and confirm the verdict goes both ways. It is cheap enough
+that there is no reason to skip it, and skipping it has now invalidated three
+sets of results.
 
 ---
 

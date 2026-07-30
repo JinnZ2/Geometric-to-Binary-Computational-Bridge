@@ -210,4 +210,16 @@ since the 90 nm node.
 TTM-2 and TTM-3 are settled by `python Silicon/tensor_readout.py` — they are
 the two that needed no experiment.
 
+---
+
+## Related claim series in `Silicon/`
+
+| Series | Subject | Register |
+|---|---|---|
+| SIL-1..4 | Strain-fault detection, invariant blindness | `silicon_error_correction.json` |
+| OSE-1..4 | ⟨111⟩ bond-direction state encoding | `octahedral_state_encoder.json` |
+| LO-1..5 | Optical interface, centrosymmetry, mode-size | `optical_interface.md` |
+| TTM-1..5 | This document |
+| FP-1..5 | Field propulsion momentum bounds | `field_propulsion_protocol.md` |
+
 *License: CC-BY-4.0*

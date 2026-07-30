@@ -39,6 +39,7 @@ python tests/test_negentropic.py        # Negentropic numpy tier (39 tests)
 python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (155 tests, no deps)
 python tests/test_silicon_check.py      # Silicon strain-fault checker (29 tests, no deps)
 python tests/test_tensor_readout.py     # Tensor readout completeness (21 tests, no deps)
+python tests/test_propulsion_bounds.py  # Field-propulsion momentum bounds (27 tests, no deps)
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -78,6 +79,7 @@ cd "Front end" && npm install && npm run dev
 | Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 155 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, TRI-1..4, Ising emit, precession |
 | Silicon check | `tests/test_silicon_check.py` | 29 | Thermal noise floor, strain invariants, orientation blindness (SIL-1), recovery channels |
 | Tensor readout | `tests/test_tensor_readout.py` | 21 | sp3 rank deficiency (TTM-2), six-⟨110⟩ completeness (TTM-3) |
+| Propulsion bounds | `tests/test_propulsion_bounds.py` | 27 | Momentum bound F≤P/v (FP-1), phase aliasing (FP-2), discriminating power (FP-3/5) |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -169,6 +171,8 @@ Silicon/                        Hardware implementation pathway
 ├── optical_interface.md          Polarization-resolved optical interface; LO-1..5 falsifiers
 ├── tensor_readout.py             TTM-2/3: sp3 readout is rank-deficient; six ⟨110⟩ is complete
 ├── ttm_audit.md                  TTM audit: retention==switching, readout blindness, strain redirect
+├── propulsion_bounds.py          FP-1..5: momentum bound F≤P/v, phase aliasing, discrimination
+├── field_propulsion_protocol.md  Falsifiable test plan; the four registered predictions don't discriminate
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
 geometric_intelligence/         Integrity & consciousness research
