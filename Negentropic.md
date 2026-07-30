@@ -11,7 +11,7 @@
 | [Negentropic/02-empirical-audit.md](Negentropic/02-empirical-audit.md) | Audit of empirical claims, including a safety correction |
 | [Negentropic/03-consciousness.md](Negentropic/03-consciousness.md) | M(S) model, threshold, comparison to IIT/GWT |
 | [Negentropic/04-alignment.md](Negentropic/04-alignment.md) | AI alignment implications, honest assessment |
-| [Negentropic/05-implementation.md](Negentropic/05-implementation.md) | Original code listings (historical) |
+| [legacy/Negentropic-05-implementation.md](legacy/Negentropic-05-implementation.md) | Original code listings (historical) |
 | [Negentropic/06-connections.md](Negentropic/06-connections.md) | Hooks into existing codebase |
 | [Negentropic/07-thermodynamics.md](Negentropic/07-thermodynamics.md) | Stochastic-thermodynamic grounding: TUR/KUR, finite-time Landauer, dissipative adaptation, p-bit hardware, Mpemba, MaxCal |
 | [Negentropic/08-oral-technology.md](Negentropic/08-oral-technology.md) | Reconstruction of a pole-referenced field polarimeter, with seven discriminating tests |

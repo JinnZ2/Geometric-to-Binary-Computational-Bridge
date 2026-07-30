@@ -3268,6 +3268,7 @@ class TestCuriosityEngineLog(unittest.TestCase):
 
 from bridges.hardware_encoder import (
     HardwareBridgeEncoder,
+    _TEMP_BANDS,
     component_health_score,
     drift_percent,
     lifetime_estimate_hours,
@@ -3469,6 +3470,80 @@ class TestHardwareEncoderBitLength(unittest.TestCase):
         enc = HardwareBridgeEncoder()
         enc.from_geometry(self._GEO).to_binary()
         self.assertEqual(enc.report()["modality"], "hardware")
+
+    # -- thermal runaway gate -------------------------------------------
+
+    _RUNAWAY = {"component_type": "diode", "failure_mode": "short_circuit",
+                "health_score": 0.95, "temperature_c": 150.0, "current_a": 12.0,
+                "salvageable": True, "fallback_ready": True}
+
+    def test_thermal_runaway_needs_both_bands(self):
+        enc = HardwareBridgeEncoder()
+        self.assertTrue(enc.from_geometry(self._RUNAWAY).thermal_runaway())
+        hot_only = dict(self._RUNAWAY, current_a=1e-6)
+        cold_only = dict(self._RUNAWAY, temperature_c=25.0)
+        self.assertFalse(enc.from_geometry(hot_only).thermal_runaway())
+        self.assertFalse(enc.from_geometry(cold_only).thermal_runaway())
+
+    def test_runaway_uses_band_order_not_gray_value(self):
+        """Gray codes are not order-preserving; the gate must not decode them."""
+        from bridges.common import band_index, gray_bits
+        # Band 4 Gray-decodes to 6, which would spuriously trip a >= 6 test.
+        self.assertEqual(band_index(85.0, _TEMP_BANDS), 4)
+        self.assertEqual(gray_bits(85.0, _TEMP_BANDS), "110")
+        enc = HardwareBridgeEncoder()
+        self.assertFalse(enc.from_geometry(
+            dict(self._RUNAWAY, temperature_c=85.0)).thermal_runaway())
+
+    def test_runaway_overrides_healthy_score(self):
+        enc = HardwareBridgeEncoder().from_geometry(self._RUNAWAY)
+        self.assertEqual(enc.drill_depth(), "quarantine")
+        healthy = dict(self._RUNAWAY, temperature_c=25.0, current_a=1e-6)
+        self.assertEqual(
+            HardwareBridgeEncoder().from_geometry(healthy).drill_depth(), "pass")
+
+    def test_runaway_clears_salvage_bits(self):
+        bits = HardwareBridgeEncoder().from_geometry(self._RUNAWAY).to_binary()
+        self.assertEqual(bits[31], "0")      # salvageable
+        self.assertEqual(bits[32], "0")      # fallback_ready
+
+    def test_drill_depth_ladder_without_runaway(self):
+        enc = HardwareBridgeEncoder()
+        for health, expected in ((0.9, "pass"), (0.6, "monitor"),
+                                 (0.4, "alert"), (0.1, "quarantine")):
+            geo = {"health_score": health, "temperature_c": 25.0, "current_a": 0.0}
+            self.assertEqual(enc.from_geometry(geo).drill_depth(), expected)
+
+    def test_gate_requires_geometry(self):
+        with self.assertRaises(ValueError):
+            HardwareBridgeEncoder().thermal_runaway()
+        with self.assertRaises(ValueError):
+            HardwareBridgeEncoder().drill_depth()
+
+    def test_output_is_still_39_bits_under_runaway(self):
+        self.assertEqual(
+            len(HardwareBridgeEncoder().from_geometry(self._RUNAWAY).to_binary()), 39)
+
+
+class TestBandIndex(unittest.TestCase):
+    """band_index is the shared band lookup gray_bits is built on."""
+
+    def test_matches_gray_bits(self):
+        from bridges.common import band_index, gray_bits, gray_code
+        bands = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+        for v in (0.0, 0.5, 1.0, 3.7, 6.9, 99.0):
+            idx = band_index(v, bands)
+            self.assertEqual(gray_bits(v, bands), format(gray_code(idx), "03b"))
+
+    def test_below_first_edge_is_band_zero(self):
+        from bridges.common import band_index
+        self.assertEqual(band_index(-999.0, [0.0, 1.0, 2.0]), 0)
+
+    def test_monotone_in_value(self):
+        from bridges.common import band_index
+        bands = [0.0, 1.0, 2.0, 3.0]
+        seen = [band_index(v, bands) for v in (0.0, 1.5, 2.5, 10.0)]
+        self.assertEqual(seen, sorted(seen))
 
 
 # ═══════════════════════════════════════════════════════════════════════════

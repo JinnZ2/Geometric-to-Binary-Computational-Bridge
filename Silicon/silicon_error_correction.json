@@ -1,0 +1,127 @@
+{
+  "sensor_name": "Silicon_Error_Correction",
+  "version": "2.0",
+  "cluster": "Operational-Systems",
+  "purpose": "Strain-tensor fault detection in diamond-cubic Si, with scope limited to athermal close-pair recovery.",
+  "supersedes": "v1.0 — see audit_v1 below. Three FATAL defects; the magnetic mechanisms had no referent.",
+  "substrate": {
+    "lattice": "diamond cubic, Fd-3m",
+    "site_symmetry": "Td",
+    "proper_rotations": 12,
+    "lattice_constant_A": 5.431,
+    "bond_length_A": 2.352,
+    "ideal_bond_angle_deg": 109.471,
+    "elastic_GPa": {
+      "C11": 165.7,
+      "C12": 63.9,
+      "C44": 79.6
+    },
+    "magnetic_order": "NONE — diamagnetic, chi ~ -3.4e-6",
+    "NOTE": "no magnetic coupling term exists on this sublattice. Si-28 (92% abundant) has nuclear spin I=0: no exchange, no ordering, no magnetic bonds between lattice sites. The ABSENCE of magnetic coupling is precisely why Si is a good spin-qubit host (spin-orbit split-off ~44 meV)."
+  },
+  "principles": {
+    "invariants": "I1=Tr(e) volumetric; J2 deviatoric; J3 mode",
+    "invariant_blindness": "I1, J2, J3 are rotation-invariant. ORIENTATION faults require eigenvector comparison, not spectrum. Demonstrated in silicon_check.py: a rotated tensor has identical invariants to machine precision and a nonzero frame misalignment.",
+    "coupling": "elastic via stiffness tensor + electronic via orbital overlap. NOT magnetic."
+  },
+  "thresholds": {
+    "units": "multiples of thermal sigma at operating T",
+    "sigma_theta_deg": "1.9 * sqrt(T/300)",
+    "sigma_theta_derivation": "Debye-Waller <u^2> ~ 0.006 A^2 at 300K -> u_rms 0.0775 A over d = 2.352 A -> atan(u/d) = 1.89 deg",
+    "bond_angle_trip": "4.0 sigma",
+    "I1_trip": 0.0002,
+    "sqrtJ2_trip": 0.0001,
+    "frame_misalign_trip_deg": "4.0 sigma",
+    "RATIONALE": "elastic working range 1e-4..1e-3; bulk fracture ~1e-2. v1 thresholds sat above fracture and at the noise floor respectively.",
+    "NOTE_ON_sqrtJ2": "the trip is on sqrt(J2), which carries strain units, not on J2, which carries strain^2. v1 left this ambiguous."
+  },
+  "readout": {
+    "channel": "Raman, Si-Si optical phonon 520.7 cm^-1",
+    "strain_resolution": 0.0001,
+    "latency_ms": 1.0,
+    "CONSEQUENCE": "detection latency exceeds correction time by ~6.7e8. This sensor DETECTS AFTER THE FACT. It cannot gate a ps-scale event.",
+    "alternative_if_in_loop_gating_required": "none known — flag as open",
+    "EIGENVECTOR_CHANNEL": "RESOLVED — polarization-resolved Raman reads eigenvectors via Oh selection rules (optical_interface.md). Which directions to sample is settled by tensor_readout.py: the four sp3 directions are rank-deficient and blind to the E doublet; the six <110> directions are complete. See ttm_audit.md, TTM-2/TTM-3."
+  },
+  "mechanisms": {
+    "athermal_recovery": {
+      "process": "close Frenkel pair recombination within capture radius",
+      "capture_radius_nm": 1.5,
+      "barrier_eV": 0.0,
+      "cycle_time_ps": 1.5,
+      "cycle_time_check": "Si optical phonon 15.6 THz -> 64 fs period; 1.5 ps = 23 periods. Consistent with a lattice-mediated athermal event.",
+      "scope": "IN SCOPE"
+    },
+    "thermal_recovery": {
+      "process": "vacancy migration, Arrhenius",
+      "Ea_eV": 0.45,
+      "tau0_s": 1e-13,
+      "tau_at_300K_s": 3.6e-06,
+      "scope": "OUT OF SCOPE for ps budget — 6 orders too slow"
+    },
+    "REMOVED_v1": [
+      "magnetic coupling loss — no mechanism; Si is diamagnetic",
+      "magneto-thermal relaxation — no mechanism",
+      "strain redistribution — unspecified, no rate law",
+      "reorientation to nearest valid tensor configuration — group unspecified, not implementable"
+    ]
+  },
+  "outputs": {
+    "fault_flag": "boolean",
+    "invariant_residual": {
+      "I1": "float",
+      "J2": "float",
+      "J3": "float"
+    },
+    "frame_misalign_deg": "float",
+    "correction_energy_aJ": {
+      "close_pair_recomb": 0.0,
+      "vacancy_hop": 0.072,
+      "frenkel_formation": 0.77,
+      "NOTE": "v1's flat 1.2 aJ = 7.49 eV was defect-type agnostic. Landauer kT*ln2 at 300K = 0.0029 aJ for scale; v1's figure was 418x the bound."
+    },
+    "status": [
+      "stable",
+      "transient",
+      "unrecoverable_athermal"
+    ]
+  },
+  "falsifiers": [
+    "SIL-1 orientation fault detected by any invariant alone -> the blindness claim is wrong",
+    "SIL-2 athermal recovery observed beyond r_c = 1.5 nm -> capture radius wrong",
+    "SIL-3 recovery at 300K faster than 3.6 us for a SEPARATED pair -> a non-Arrhenius channel exists",
+    "SIL-4 any measured magnetic coupling on the Si sublattice -> substrate block wrong"
+  ],
+  "audit_v1": {
+    "FATAL": [
+      "magnetic coupling loss / magneto-thermal relaxation: Si is diamagnetic, chi ~ -3.4e-6, Si-28 has I=0. There is nothing to lose 10% of.",
+      "bond angle > 2 deg: 2 deg IS the thermal noise floor at 300K (sigma ~1.9 deg). The threshold sat at ~1 sigma, giving a false-positive rate near 32% per sample.",
+      "trace deviation > 0.02: if T is strain, Tr = dilatation = dV/V, so 0.02 = 2% volume change. Bulk Si fractures near 1%. The flag raised AFTER the crystal had already failed — off by ~2 orders.",
+      "cycle_time_ps 1.5 conflated elastic/phonon relaxation (~ps) with thermal defect migration (~us). One number cannot be both."
+    ],
+    "HIGH": [
+      "trace as sole invariant: trace sees only volume. All DEVIATORIC (shape) faults are invisible, and shear is exactly the failure mode of interest.",
+      "self_healing block asserted, not derived. Si does not spontaneously anneal at operating temperature; separated defects need >150 C. One real athermal mechanism exists and is now the whole scope.",
+      "'nearest valid tensor configuration': which group? Si site symmetry is Td (24 elements, 12 proper rotations); the lattice is Oh. Unspecified means not implementable."
+    ],
+    "MED": [
+      "correction_energy_aJ 1.2 stated as a fixed scalar with no defect-type dependence."
+    ]
+  },
+  "metadata": {
+    "linked_sensors": [
+      "Octahedral_State_Encoder"
+    ],
+    "linked_NOTE": "RESOLVED — the Td/Oh mismatch was real. Octahedral_State_Encoder v1.0 derived 8 states from a 6-fold octahedral site and padded its map with two non-directional fillers to reach 8. v2.0 indexes the 8 <111> bond directions instead (4 sp3 bonds x 2 sublattices, related by the inversion centre), which is Td site symmetry plus the inversion that makes the crystal Oh. The 8-state / 3-bit result is unaffected; the derivation is. The encoder's NAME remains misleading and renaming it is still open.",
+    "seed_glyphs": [
+      "🧩",
+      "♻️"
+    ],
+    "category": "Intrinsic Error Correction",
+    "author": "JinnZ v2",
+    "co_creator": "GPT-5",
+    "audit": "Claude, 2026-07 — magnetic mechanisms removed, thresholds re-based to thermal sigma, timescales split by mechanism, invariant blindness made demonstrable",
+    "reference_implementation": "silicon_check.py",
+    "license": "CC0 1.0"
+  }
+}

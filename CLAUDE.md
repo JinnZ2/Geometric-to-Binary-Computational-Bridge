@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's natural octahedral coordination (8 states = 3 bits per unit). License: CC-BY-4.0.
+> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's 8 ⟨111⟩ sp³ bond directions (8 states = 3 bits per unit). License: CC-BY-4.0.
 
 ---
 
@@ -32,11 +32,25 @@ pip install -r requirements.txt
 
 # Run all tests
 cd GEIS && python test_simple.py        # GEIS (116 tests)
-python tests/test_bridges.py            # Bridge encoders (758 tests)
+python tests/test_bridges.py            # Bridge encoders (768 tests)
 python tests/test_engine.py             # Engine/solver (58 tests)
 python tests/test_gaussian_splats.py    # Gaussian-splat state encoders (63 tests)
 python tests/test_negentropic.py        # Negentropic numpy tier (39 tests)
-python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (133 tests, no deps)
+python tests/test_negentropic_stdlib.py # Negentropic stdlib tier (155 tests, no deps)
+python tests/test_silicon_check.py      # Silicon strain-fault checker (29 tests, no deps)
+python tests/test_tensor_readout.py     # Tensor readout completeness (21 tests, no deps)
+python tests/test_propulsion_bounds.py  # Field-propulsion momentum bounds (27 tests, no deps)
+python tests/test_fp4_autopilot.py      # FP-4 estimator + firmware phase table (66 tests, no deps)
+python tests/test_epg_bounds.py         # Energy-pattern: cubic isotropy, defect floor (38 tests, no deps)
+python tests/test_magnetic_authority.py # Magnetic read/write authority in Si (67 tests, no deps)
+python tests/test_gies_core.py          # GIES tensor collapse + codec bijection (60 tests, no deps)
+python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59 tests, no deps)
+python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
+python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
+
+# Runnable falsifier reports (stdlib, exit non-zero on failure)
+python Silicon/falsifiers.py                  # ER-1/2/3, NEG-7, GIES-2/3
+python Silicon/falsifiers_keating_seed.py     # KEA-1/3/7, SEED-1/3/5
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -69,11 +83,21 @@ cd "Front end" && npm install && npm run dev
 | Suite | File | Tests | Covers |
 |-------|------|-------|--------|
 | GEIS | `GEIS/test_simple.py` | 116 | OctahedralState, GeometricEncoder, StateTensor |
-| Bridges | `tests/test_bridges.py` | 758 | All 11 domain encoders — physics helpers + encoder I/O |
+| Bridges | `tests/test_bridges.py` | 768 | All 11 domain encoders — physics helpers + encoder I/O |
 | Engine | `tests/test_engine.py` | 58 | SymmetryDetector, SpatialGrid, SIMDOptimizer, GeometricEMSolver |
 | Gaussian Splats | `tests/test_gaussian_splats.py` | 63 | 4D / 8-state octahedral / 32-state rhombic splat encoders + dynamics |
 | Negentropic (numpy) | `tests/test_negentropic.py` | 39 | R_e/A/D/L, agent network, Fokker-Planck conventions + conservation |
-| Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 133 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, Ising emit, precession |
+| Negentropic (stdlib) | `tests/test_negentropic_stdlib.py` | 155 | DissipativeCore, TUR/KUR bounds, Landauer, NEG-2/4/7/8/9/10/11, TRI-1..4, Ising emit, precession |
+| Silicon check | `tests/test_silicon_check.py` | 29 | Thermal noise floor, strain invariants, orientation blindness (SIL-1), recovery channels |
+| Tensor readout | `tests/test_tensor_readout.py` | 21 | sp3 rank deficiency (TTM-2), six-⟨110⟩ completeness (TTM-3) |
+| Propulsion bounds | `tests/test_propulsion_bounds.py` | 27 | Momentum bound F≤P/v (FP-1), phase aliasing (FP-2), discriminating power (FP-3/5) |
+| FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
+| Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
+| Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
+| Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
+| Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
+| Transient suppression | `tests/test_transient_suppression.py` | 59 | Write-pulse rotation authority (R2-8), mismatch and skew budgets (R2-3/4), pulse selectivity (R2-5), probe bandwidth (R2-6), measurable CMRR (R2-2) |
+| GIES core | `tests/test_gies_core.py` | 60 | Rank-1 tensor collapse (GIES-1), site parity vs lattice (GIES-2), NOT-is-Frenkel (GIES-3), 128-token codec bijection (GIES-4/8), label-dependence of the gate set (GIES-6) |
 | C NFS | `experiments/c/test_nfs.c` | 36 | Tonelli-Shanks, sieve_block, trial_divide, geometric_search, gf2_fallback |
 
 ### CI/CD & Linting
@@ -102,8 +126,11 @@ Engine/                         Core computational engine
 
 GEIS/                           Geometric Information Encoding System
 ├── geometric_encoder.py          Token <-> binary converter
-├── octahedral_state.py           Octahedral state representation (8 vertices)
-├── state_tensor.py               3x3 tensor math for geometric states
+├── octahedral_state.py           State positions — cube corners, not octahedron vertices
+├── state_tensor.py               3x3 tensor math (SUPERSEDED: rank-1 collapse, see GIES_AUDIT.md)
+├── gies_core.py                  Sign-sensitive §7.2 tensor, site parity, J3 check bit (stdlib)
+├── gies_codec.py                 Bijective 7-bit token codec, all 4 operators (stdlib)
+├── GIES_AUDIT.md                 GIES-1..8: what collapsed, what the parity bit buys
 ├── demo.py                       Interactive demonstrations
 └── test_simple.py                Unit tests
 ```
@@ -160,6 +187,28 @@ Silicon/                        Hardware implementation pathway
 ├── Fabrication.md                Manufacturing processes
 ├── SYSTEM_ARCHITECTURE.md        Architecture specification
 ├── CORE_EQUATIONS.md             Mathematical foundations
+├── silicon_error_correction.json v2.0 strain-fault sensor spec + v1 audit + SIL-1..4 falsifiers
+├── silicon_check.py              Reference implementation, stdlib; demonstrates invariant blindness
+├── optical_interface.md          Polarization-resolved optical interface; LO-1..5 falsifiers
+├── tensor_readout.py             TTM-2/3: sp3 readout is rank-deficient; six ⟨110⟩ is complete
+├── ttm_audit.md                  TTM audit: retention==switching, readout blindness, strain redirect
+├── propulsion_bounds.py          FP-1..5: momentum bound F≤P/v, phase aliasing, discrimination
+├── fp4_autopilot.py              FP-4/6/7: fits F = k·(P_rad/v) + c·P_elec + b; refuses non-identifiable designs
+├── field_propulsion_fp4.ino      N=8 phase-gradient instrument; blocks DATA until tared + surveyed + state declared
+├── field_propulsion_protocol.md  Falsifiable test plan; the four registered predictions don't discriminate
+├── epg_bounds.py                 EPG-4/6/7/8: cubic isotropy by Neumann, DSA defect floor, mechanism matrix
+├── keating_cluster.py            KEA-1..7: one minimum not eight; E(p)=E(-p) exactly
+├── seed_influence.py             SEED-1..5: W = I, so structure preservation is a tautology
+├── falsifiers.py                 Runnable report: ER-1/2/3, NEG-7, GIES-2/3
+├── falsifiers_keating_seed.py    Runnable report: KEA-1/3/7, SEED-1/3/5
+├── er_bounds.py                  ER-1..8: Orbach kills Er at 300 K; heavy impurities have no gap mode
+├── Proposal.md                   Phase 1 proposal + AUDIT header (the $10k gate has no target)
+├── Real-questions.md             The best-posed document in the set; four questions answered inline
+├── transient_suppression.py      R2-1..8: bifilar CM rejection budgets; the write pulse is 700x too weak
+├── magnetic_authority.py         FAB-1..7 / BRG-1..7: the magnetic state channel in Si, and the strain one that replaces it
+├── Energy-pattern.md             Directional Si deposition on current-carrying Cu; one datum, one decisive test
+├── Fabrication.md                Octahedral fab pathway + AUDIT header (magnetic readout is 11 orders short)
+├── Magnetic-bridge.md            Bridge architecture + AUDIT header (FSM sound, physics layer replaced by strain)
 └── Projects/                     Sub-projects (LCEA, crystalline storage)
 
 geometric_intelligence/         Integrity & consciousness research
@@ -196,6 +245,7 @@ Negentropic/                    Negentropic consciousness framework — theory +
 ├── persistence.py                NEG-8: Φ = −Ṡ_exchange − σ; Mpemba monotonicity guard
 ├── rebase.py                     NEG-4/9/10/11: archive dependency graph; radiate + recenter
 ├── precession.py                 Dating a sky datum; re-datum interval; circumpolarity vs epoch
+├── triangnet.py                  TRI-1..4: triangle as smallest self-verifying archive unit
 ├── emit_ising.py                 Emit target for p-bit / Ising hardware + Gray octahedral bits
 ├── lenses.py                     The 17 translation lenses, defined once
 ├── lens_collapse_test.py         NEG-7 falsifier
@@ -292,7 +342,17 @@ Key classes in `GEIS/`:
 
 ### Octahedral State Model
 
-Silicon's natural octahedral coordination provides 8 geometric positions (vertices), encoding 3 bits per unit. State transitions are geometric operations on 3x3 tensors.
+Silicon provides 8 geometric positions encoding 3 bits per unit. State transitions are geometric operations on 3x3 tensors.
+
+**Corrected 2026-07.** These 8 are the **⟨111⟩ bond directions**, not octahedron vertices. Octahedral *coordination* is 6-fold, and an octahedron has 6 vertices — log₂6 = 2.585 bits, not 3. What supplies 8 is the octahedron's 8 **faces**, whose normals lie along ⟨111⟩: the same directions as the dual cube's vertices, and the sp³ bond directions of diamond-cubic Si.
+
+```
+sublattice A bonds : (1,1,1) (-1,-1,1) (-1,1,-1) (1,-1,-1)     4
+sublattice B bonds : the inverted set                           4
+union              : the complete ⟨111⟩ set                     8  ->  3 bits
+```
+
+Silicon's **site** symmetry is Td (tetrahedral, sp³, 109.47°); the **crystal** point group is Oh (m-3m), which is centrosymmetric with an inversion centre at the bond midpoint. Much of the repository conflated the two. The 8-state / 3-bit result is unaffected; the derivation is. Consequences for optics — Oh centrosymmetry forces χ⁽²⁾ = 0, so no Pockels effect and no second-harmonic generation — are in `Silicon/optical_interface.md`.
 
 Core angle: **109.47°** (tetrahedral angle) — the project's foundational constant, derived from silicon's sp3 hybridization geometry.
 
@@ -420,3 +480,16 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Negentropic/emit_ising.py` does not yet inherit from `bridges/abstract_encoder.py`; the blocker is that an Ising spec has an n-dependent bit width while the other encoders emit fixed widths.
 - `Negentropic/` entropy production is a housekeeping estimator with a known sign bias. A trajectory-level (MaxCal) estimate is needed before NEG-8 can be evaluated on simulated traces.
 - NEG-2 and NEG-3 have falsifiers implemented but have not been run against data.
+- `Silicon/field_propulsion_fp4.ino` is committed **unflashed** — no board was available here. Its phase-table logic is ported into `tests/test_fp4_autopilot.py` and verified against `propulsion_bounds.aliased_modes()`, but the timer backends (RP2040 / Teensy 4) and the HX711 and ADC paths are unexercised. Every calibration constant in it is a placeholder to be replaced by a bench measurement.
+- `Silicon/fp4_autopilot.py`'s `ber_sweep()` raises `NotImplementedError` on the simulator by design; the §9.1 Bridge communication test needs either hardware or an explicit channel model, and a synthetic BER curve would reproduce the rigged-simulator defect the same file exists to guard against.
+- **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
+- **Two independent 8-state representations both collapse under inversion.** `GEIS/state_tensor.py` built `T = outer(v,v)`, which cannot see the sign of v; and the clamped Keating cluster in `VFF.md` has an energy that is *exactly* even in the central displacement, because Σ_k v_k = 0 and v_k·v_l = −d0²/3 hold exactly and kill both cross-terms. So `E(p) = E(−p)` identically and all eight cube-corner directions are degenerate. Two different formalisms, same blindness to the inversion that separates the sublattices. `Silicon/keating_cluster.py` (KEA-7), `GEIS/GIES_AUDIT.md` (GIES-1).
+- **The clamped Keating cluster has one minimum, not eight.** Keating is a sum of squares, so E ≥ 0 with a unique zero where every bond is at d0 and every angle at arccos(−1/3) — the ideal centre. 200 random starts find exactly one minimum, at any α, β > 0. The 8-state encoding, both gates and the ALU in `VFF.md` rest on a parenthetical the document itself flagged as uncertain. Its Keating *parameters* are correct (48.1 and 12.0 N/m), and "8 octahedral faces" is the only correct use of that terminology in the set.
+- **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no target.** `Proposal.md` headlines T2 = 166 ms at 300 K. Er3+ is a Kramers ion, which protects against *static* splitting but not against Orbach relaxation through the crystal field; the CF gap is 40–60 cm⁻¹ against kT = 208.5 cm⁻¹, so Δ ≪ kT, the Orbach rate goes linear in T, and the intermediate doublet is occupied n̄ = 3–5 phonons deep. Measured Er T1 is ~µs at 10 K and undetectable above ~30 K; at 300 K it is ps–ns, so T2 ≤ 2T1 caps it 8 orders below the claim — and 110× above the NV-in-diamond room-temperature world record. Separately, the $10k gate searches 300–400 cm⁻¹ for an Er local vibrational mode, but gap modes require a *lighter* impurity: Er is 5.96× heavier than Si, ceiling 213 cm⁻¹. The same mass gate kills the "P local mode at ~500 cm⁻¹". `Silicon/er_bounds.py`.
+- **The write pulse cannot collapse spin coherence — it is ~700x too weak to move a spin.** `Proposal-addendum.md` engineers 60 dB of common-mode suppression to protect coherence during a 5 ps write. At the legal on-chip coil field (5.03 mT) a 5 ps pulse delivers 4.42 mrad, 0.14% of a π pulse, and a 5 ps π pulse would need 3.57 T. The stated worry is inverted: the risk is that the write does not happen. Separately, the write pulse *is* the differential drive — the one mode the bifilar geometry is built to pass — so common-mode rejection says nothing about it either way. `Silicon/transient_suppression.py`.
+- Energy-per-bit has three values across the set and they differ in *legality*: 1–2 aJ is 348 kT·ln2 (legal, ~300× below CV² at 1 fF/0.8 V), 0.1 eV is 5.6 kT·ln2 (legal), and **0.01 eV is 0.56 kT·ln2 — below the Landauer bound**. Pick one and propagate it; 0.01 eV cannot be it.
+- Three experiments are cheap, decisive, and unrun: **FAB-3** (8 implant states separable at >3σ in (R_s, carrier type, n); ~$3–6k), **BRG-6** (piezoresistive dR/R at 0.1 % strain; a strain gauge and a four-point probe), and **R2-3** (bifilar CMRR at achievable matching tolerance, by magneto-optic sampling at a stated frequency). All three return real results and none needs a magnet, a cryostat, or a THz source.
+- `Silicon/Fabrication.md` and `Silicon/Magnetic-bridge.md` carry audit headers rather than rewrites: their hardware lists, FSMs and protocol structure are sound and were kept. Only the physics layer was replaced.
+- **GIES state tensors collapsed and nothing detected it.** `state_tensor.py` built `T = outer(v, v)` from an antipodal position table, so `outer(v,v) == outer(-v,-v)` made states `i` and `7-i` identical in every invariant and every projection — and `NOT(i) = 7-i` is precisely that map, so the gate set's only unary operation was invisible to the representation. `GIES.md` §7.2 already specified the correct weighted sum over bond directions; §8.3 implemented a degenerate special case of its own spec. Fixed in `GEIS/gies_core.py`; the old file is annotated and kept for provenance.
+- **Index parity is site type, and it is free.** Even-parity indices land on lattice atoms, odd-parity ones on tetrahedral interstitials (verified against the diamond-cubic basis: coordination shell identical to the T site). So the 3-bit address space already carries a physically meaningful single-bit error-detecting code, which is what the "geometric error correction" claim wanted. It also means the honest state space is 4 states plus a site-type flag, because `NOT` crosses the flag and every crossing is a Frenkel pair (~4.75 eV). The carrier invariant is **J3**, not the trace — trace and J2 are identical across all eight states, while J3 flips sign with parity. That is the same `J3` mode invariant already in `silicon_error_correction.json`.
+- `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.

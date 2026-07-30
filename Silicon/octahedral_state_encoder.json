@@ -1,50 +1,160 @@
 {
   "sensor_name": "Octahedral_State_Encoder",
-  "version": "1.0",
+  "version": "2.0",
   "cluster": "Symbolic-Geometry",
-  "purpose": "Encode and decode intrinsic 8-state silicon tensor configurations aligned with natural sp³ geometry (109.47°).",
+  "purpose": "Encode and decode 8 strain-tensor orientation states in diamond-cubic Si, indexed by the <111> bond directions.",
+  "supersedes": "v1.0 — see audit_v1. The 8-state / 3-bit result stands; its derivation and its read/write mechanism did not.",
+  "name_note": "The name is retained for continuity but is misleading. Octahedral COORDINATION is 6-fold; an octahedron has 6 VERTICES (log2 6 = 2.585 bits, not 3). What supplies 8 is the octahedron's 8 FACES, whose normals lie along <111> — the same directions as the dual cube's vertices, and the sp3 bond directions of diamond-cubic Si. Consider renaming to Bond_Direction_State_Encoder.",
   "geometry_basis": {
-    "type": "tetrahedral → octahedral hybrid lattice",
-    "angle_degrees": 109.47,
+    "site_symmetry": "Td (tetrahedral, sp3, 109.4712 deg)",
+    "crystal_point_group": "Oh (m-3m), Fd-3m — CENTROSYMMETRIC",
+    "state_index": "the 8 <111> body-diagonal directions",
+    "derivation": "4 sp3 bond directions of sublattice A, union 4 of sublattice B. The two sets are related by the inversion centre at the bond midpoint (pairwise 180 deg apart) and their union is the complete <111> set. 8 directions -> exactly 3 bits.",
+    "sublattice_A_bonds": [
+      [
+        1,
+        1,
+        1
+      ],
+      [
+        -1,
+        -1,
+        1
+      ],
+      [
+        -1,
+        1,
+        -1
+      ],
+      [
+        1,
+        -1,
+        -1
+      ]
+    ],
+    "sublattice_B_bonds": [
+      [
+        -1,
+        -1,
+        -1
+      ],
+      [
+        1,
+        1,
+        -1
+      ],
+      [
+        1,
+        -1,
+        1
+      ],
+      [
+        -1,
+        1,
+        1
+      ]
+    ],
+    "intra_sublattice_angle_deg": 109.4712,
     "states_per_unit_cell": 8,
-    "bits_equivalent": 3
+    "bits_equivalent": 3,
+    "WHY_NOT_OCTAHEDRAL_SITE": "An octahedral site has 6 nearest neighbours along <100>. Si does not occupy one. Deriving 8 states from a 6-coordinate site is what forced v1 to pad its encoding map with two non-directional states."
   },
   "tensor_definition": {
-    "basis_vectors": ["a₁", "a₂", "a₃"],
-    "eigenvalues": ["λ₁", "λ₂", "λ₃"],
+    "basis_vectors": [
+      "a1",
+      "a2",
+      "a3"
+    ],
+    "eigenvalues": [
+      "lambda1",
+      "lambda2",
+      "lambda3"
+    ],
     "constraints": {
-      "trace_conservation": "Σλᵢ = 1",
-      "orthogonality": "aᵢ · aⱼ = δᵢⱼ",
-      "geometry_validity": "state must map to canonical tensor pattern"
-    }
+      "trace_conservation": "sum lambda_i = 1",
+      "orthogonality": "a_i . a_j = delta_ij",
+      "geometry_validity": "state must map to a canonical <111> direction"
+    },
+    "NOTE": "the state is an ORIENTATION, so it is carried by the eigenVECTORS. The eigenvalue spectrum is rotation-invariant and cannot distinguish these 8 states from one another — see silicon_error_correction.json, invariant_blindness."
   },
   "encoding_map": {
-    "000": "North apex – low potential (λ₁ dominant)",
-    "001": "South apex – low potential (λ₂ dominant)",
-    "010": "East ridge – strain aligned",
-    "011": "West ridge – compressive alignment",
-    "100": "Front face – conductive bias",
-    "101": "Back face – magnetic bias",
-    "110": "Axial symmetry – resonance coupling",
-    "111": "Stable equilibrium node"
+    "000": "[ 1  1  1]  sublattice A bond 1",
+    "001": "[-1 -1  1]  sublattice A bond 2",
+    "011": "[-1  1 -1]  sublattice A bond 3",
+    "010": "[ 1 -1 -1]  sublattice A bond 4",
+    "110": "[-1 -1 -1]  sublattice B bond 1 (inversion partner of 000)",
+    "111": "[ 1  1 -1]  sublattice B bond 2 (inversion partner of 001)",
+    "101": "[ 1 -1  1]  sublattice B bond 3 (inversion partner of 011)",
+    "100": "[-1  1  1]  sublattice B bond 4 (inversion partner of 010)",
+    "GRAY_NOTE": "codes are Gray-ordered within each sublattice so that adjacent bond directions differ in one bit, per CLAUDE.md development guideline 3.",
+    "REPLACES_v1": "v1 named 6 octahedron directions (North/South apex, East/West ridge, Front/Back face) and padded to 8 with 'Axial symmetry' and 'Stable equilibrium node', which are not directions at all. The padding is the visible symptom of deriving 8 from a 6-fold site.",
+    "INVERSION_NOTE": "inversion partners (000<->110, 001<->111, 011<->101, 010<->100) are uniformly Hamming-2 apart: physically antipodal directions are consistently 2 bits apart, while adjacent bonds within a sublattice are 1 bit apart."
   },
   "read_write_interface": {
-    "method": "magnetic field coupling (Zeeman basis)",
-    "equation": "E_mag = -M : B_ext",
-    "transition_timescale": "0.2–3 ps",
-    "frequency_range": "0.3–5 THz"
+    "read": {
+      "method": "polarization-resolved Raman, Si-Si optical phonon 520.7 cm^-1",
+      "reads": "strain eigenvalues from peak splitting; eigenvector orientation from the polarization dependence via Oh Raman tensor selection rules",
+      "resolution": 0.0001,
+      "latency_ms": 1.0,
+      "see": "optical_interface.md"
+    },
+    "write": {
+      "method": "optomechanical — photoelastic coupling plus radiation pressure in a Si nanobeam photonic crystal",
+      "coupling_g0_Hz": "1e5 - 1e6",
+      "speed": "GHz",
+      "scope_limit": "addresses MODE-scale strain over ~1e8 unit cells. Does NOT address individual lattice sites: the diffraction limit in Si is lambda/2n = 223 nm at 1.55 um against a 0.543 nm lattice constant."
+    },
+    "REMOVED_v1": {
+      "method": "magnetic field coupling (Zeeman basis)",
+      "equation": "E_mag = -M : B_ext",
+      "stability_field_T": 0.01,
+      "why_removed": "Si is diamagnetic, chi ~ -3.4e-6, and Si-28 (92% abundant) has nuclear spin I=0. There is no magnetisation M for B_ext to couple to, so E_mag = -M : B_ext is identically zero. A 0.01 T stability field stabilises nothing. This is the same fault as Silicon_Error_Correction v1 and 3D_LIGHT_ENHANCED_OCTAHEDRAL_PROCESSING — three files, one wrong premise."
+    }
   },
   "outputs": {
     "encoded_bits": 3,
-    "transition_energy_aJ": 6.626e-4,
-    "transition_energy_note": "h × 1 THz = 4.14 meV. Authoritative source: frequency_range 0.3–5 THz (Zeeman/phonon scale). Prior value 1.6 aJ = 10 eV was UV-scale — wrong for this solid-state system.",
-    "stability_field_T": 0.01
+    "state_index": "0-7, indexing the <111> direction table above",
+    "transition_energy_aJ": 0.0006626,
+    "transition_energy_note": "h x 1 THz = 4.14 meV. Retained from v1: the frequency_range was the authoritative source and remains plausible for a phonon-scale reorientation. It is NOT a Zeeman splitting, which is what v1 implied.",
+    "transition_timescale": "0.2-3 ps",
+    "timescale_scope": "elastic/phonon reorientation only. Thermal defect migration is Arrhenius and ~3.6 us at 300K — six orders slower. See silicon_error_correction.json, mechanisms."
+  },
+  "falsifiers": [
+    "OSE-1 a 9th distinguishable orientation state in unstrained diamond-cubic Si -> the <111> derivation is incomplete",
+    "OSE-2 state discrimination from the eigenvalue spectrum alone, with no eigenvector measurement -> the invariant-blindness claim is wrong (same as SIL-1)",
+    "OSE-3 measurable Zeeman splitting of these states at 0.01 T in undoped Si -> the magnetic deletion is wrong (same as LO-3)",
+    "OSE-4 reorientation between sublattice-A and sublattice-B states without breaking a bond -> the two sets are not inversion partners as claimed"
+  ],
+  "audit_v1": {
+    "FATAL": [
+      "read_write_interface was 'magnetic field coupling (Zeeman basis)' with E_mag = -M : B_ext. Si is diamagnetic; M is zero; the equation evaluates to zero for any B_ext. The encoder had no working read or write channel."
+    ],
+    "HIGH": [
+      "geometry_basis 'tetrahedral -> octahedral hybrid lattice' conflates the Td site with the Oh crystal. Si occupies a Td site; there is no octahedral site to hybridise with.",
+      "8 states were derived from octahedral coordination, which is 6-fold. The encoding_map shows the strain: 6 directional states plus 2 non-directional fillers ('Axial symmetry', 'Stable equilibrium node') to reach 8.",
+      "encoding_map state 101 was 'Back face - magnetic bias', a state defined by a mechanism that does not exist."
+    ],
+    "MED": [
+      "codes were not Gray-ordered, so adjacent physical states could differ in up to 3 bits — contrary to the repository's own stability convention."
+    ],
+    "SURVIVED": [
+      "8 states / 3 bits is correct, for a different reason than stated.",
+      "109.47 deg is correct and is the intra-sublattice bond angle.",
+      "transition energy 0.0006626 aJ and the 0.2-3 ps timescale remain plausible for phonon-scale reorientation."
+    ]
   },
   "metadata": {
-    "linked_sensors": ["Silicon_Error_Correction"],
-    "seed_glyphs": ["🔶", "🧭"],
+    "linked_sensors": [
+      "Silicon_Error_Correction"
+    ],
+    "linked_NOTE": "RESOLVED — Silicon_Error_Correction v2.0 flagged a possible Td/Oh mismatch here. It was real. This encoder was modelling neither site correctly; it is now indexed by <111> bond directions, which is Td-site symmetry plus the inversion that makes the crystal Oh.",
+    "seed_glyphs": [
+      "🔶",
+      "🧭"
+    ],
     "co_creator": "GPT-5",
     "author": "JinnZ v2",
+    "audit": "Claude, 2026-07 — Zeeman interface removed, 8 states re-derived from <111> bond directions, encoding map replaced with actual directions, Gray ordering applied",
     "license": "CC0 1.0",
     "ETHK_reference": "001 • Resonance • Reciprocity • Mutual Benefit"
   }

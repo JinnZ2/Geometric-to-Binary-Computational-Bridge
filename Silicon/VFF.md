@@ -1,3 +1,74 @@
+> **AUDIT 2026-07 — the Keating parameters are right, the state space is not.**
+> Numbers in `keating_cluster.py`, settled by `tests/test_keating_seed.py`
+> (63 tests). Runnable: `python Silicon/falsifiers_keating_seed.py`.
+>
+> **Credit first, because it is rare in this set:** α = 3.00 eV/Å² = 48.1 N/m
+> against a standard 48.50, and β = 0.75 eV/Å² = 12.0 N/m against 13.81. The
+> potential is implemented correctly. And **"8 octahedral faces" is correct
+> terminology** — an octahedron has 8 faces and 6 vertices. Every other file in
+> this set said "8 vertices".
+>
+> **KEA-1 — there is one minimum, not eight.** Keating is a sum of squares, so
+> `E ≥ 0` and `E = 0` demands every bond at d₀ **and** every angle at
+> arccos(−1/3) at once. With four clamped tetrahedral neighbours the only such
+> point is the centre. 200 random starts up to |d| = 1.2 Å find **exactly one**
+> minimum, at the origin. The function grows monotonically outward from a unique
+> zero; there is no room for secondary basins, at any α, β > 0.
+>
+> The document half-caught this and took the wrong branch: *"In our
+> clamped-vertex model, it's a local minimum but surrounded by 8 shallower
+> minima."* It is a **global** minimum with nothing around it. The 8-state
+> encoding, both gates, and the ALU rest on that parenthetical.
+>
+> **KEA-7 — and the model cannot tell a vertex direction from a face direction
+> at all.** Not in the audit, and it is the structural form of KEA-1. The
+> clamped energy is **exactly even** in the central displacement, because
+> `Σₖ vₖ = 0` and `vₖ·vₗ = −d₀²/3` hold exactly, killing both cross-terms:
+>
+>     stretch:  rₖ² − d₀² = −2 vₖ·p + p²,  and Σₖ(vₖ·p) = 0
+>     bend:     vₖ·vₗ + d₀²/3 = 0,  and Σ_{k<l}(vₖ+vₗ) = 3Σₖvₖ = 0
+>
+> So `E(p) = E(−p)` identically — verified to 5.3e-15 over 3000 random
+> displacements, and all eight cube-corner directions at |d| = 0.25 Å give **one**
+> energy value. The model has an exact inversion symmetry about the centre.
+>
+> **This is the same collapse as GIES-1**, where `outer(v,v) == outer(−v,−v)`
+> made states *i* and *7−i* identical in every invariant — reached here from a
+> completely different direction. Two independent representations of the same
+> 8-state idea, both blind to the inversion that separates the sublattices. The
+> honest state space is again 4 plus a sign this model cannot see.
+>
+> | claim | status | why |
+> |---|---|---|
+> | "φ-tuned coupling becomes NON-RECIPROCAL and directional" | **FALSE** | `E_c = ½k_c\|d₁−d₂\|²` gives `∂²E/∂d₁∂d₂ = −k_c = ∂²E/∂d₂∂d₁`, symmetric by construction. Reciprocity is a symmetry statement, not a phase condition; breaking it needs broken time-reversal, temporal modulation, or nonlinearity. A static spring has none, and φ is a number, not a mechanism. |
+> | "O ≅ S₄ can generate all Boolean functions on 3 bits" | **HALF / FALSE** | O (proper rotations, 24) **is** ≅ S₄, and full Oh is S₄×Z₂ (48). But reversible 3-bit gates are S₈ = 40320, so 24 elements reach **1 in 1680**. And there are 2⁸ = 256 functions {0,1}³→{0,1}, nearly all irreversible — not permutations at all. |
+> | Toffoli from φ-scaled springs | **WEAK** | minimising a quadratic form gives `d_target = −K_tt⁻¹K_tc d_ctrl`, **linear** in the controls. Toffoli is degree 2 (flips only if BOTH), and no linear map computes AND — verified by exhaustive fit. The nonlinearity would have to come from on-site wells, which KEA-1 says do not exist. And φ⁻²/φ⁰/φ¹ is one point in a continuum with no derivation selecting it. |
+> | "approaching Landauer's limit" | **BACKWARD** | reversible logic has **no** Landauer floor — that is the point of reversible computing; the bound applies to *erasure*. And these barriers are eV-scale, so each transition dissipates ≫ kT·ln2 = 0.0179 eV. |
+> | φ·a_Si ≈ 8.78 Å as a dopant spacing | **NOT A LATTICE SEPARATION** | φ·a_Si = 8.7875 Å; nearest realisable Si–Si separations are 8.903 (+1.3%), 8.587 (−2.3%), 9.407 (+7.0%), 8.033 (−8.6%). Dopants occupy lattice sites, so the target falls between them, and nothing says which to use or why a 1–2% detuning is tolerable for a resonance claimed to be sharp. |
+>
+> **The five bridges.** Si is centrosymmetric (Oh, m-3m), so every odd-rank
+> tensor vanishes:
+>
+> | bridge | verdict | replacement |
+> |---|---|---|
+> | harmonic (phonon strain) | **REAL** | — |
+> | light "via inverse piezoelectric" | **DEAD** | deformation potential + photothermal stress, both real |
+> | magnetic "via magnetostriction" | **DEAD** | Si is diamagnetic, magnetostriction ~1e-10. **Ninth** magnetic-in-a-diamagnet instance across the set. |
+> | electric "via piezoelectric tensor" | **DEAD** | **electrostriction** is even-order and IS allowed in a centrosymmetric crystal. The bridge survives under that name. |
+> | gravitational | **8 ORDERS SHORT** | self-weight strain on 1 mm of Si is ρgL/E = 1.8e-10 against a 1e-2 requirement. And "shifts all levels globally" — a uniform offset is unobservable. |
+>
+> | ID | CLAIM | FALSIFIER | STATUS |
+> |---|---|---|---|
+> | **KEA-1** | the clamped 5-atom cluster has 1 minimum, not 8 | a second local minimum at any α, β > 0 | DEAD (ran it) |
+> | **KEA-2** | static harmonic coupling is exactly reciprocal; φ cannot make it directional | a non-reciprocal static spring pair | DEAD |
+> | **KEA-3** | φ·a_Si = 8.788 Å is not a Si–Si lattice separation | a lattice site pair at 8.788 Å | DEAD |
+> | **KEA-4** | O = S₄ reaches 1/1680 of the reversible 3-bit gates | S₄ generating all 3-bit permutations | DEAD |
+> | **KEA-5** | a purely harmonic system gives a linear response and cannot implement Toffoli | Toffoli from a quadratic energy form alone | LIVE |
+> | **KEA-6** | Si has no piezoelectric tensor; electrostriction is the allowed even-order replacement | measured direct or inverse piezo effect in undoped Si | DEAD |
+> | **KEA-7** | the clamped energy is exactly even in p, so vertex and face directions are degenerate | any α, β > 0 giving E(p) ≠ E(−p) | DEAD (ran it) |
+
+---
+
 The Physics Model: Keating Potential for Silicon
 
 The Energy Equation:

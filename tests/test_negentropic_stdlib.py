@@ -65,6 +65,20 @@ from Negentropic.precession import (
     separation_from_pole,
 )
 from Negentropic.rebase import Archive
+from Negentropic.triangnet import (
+    ARCSEC,
+    Net,
+    Triangle,
+    adjusted,
+    closure_ok,
+    d2r,
+    deform_check,
+    misclosure,
+    pair_strength,
+    rel_scale_var,
+    strength,
+    to_rebase,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -968,6 +982,193 @@ class TestCircumpolarity(unittest.TestCase):
         alkaid = separation_from_pole(*_ecl("Alkaid"), year=2000)
         dubhe = separation_from_pole(*_ecl("Dubhe"), year=2000)
         self.assertLess(dubhe, alkaid)
+
+
+# ---------------------------------------------------------------------------
+# triangnet -- TRI-1..4
+# ---------------------------------------------------------------------------
+
+E60 = d2r(60.0)
+SIG = 10 * ARCSEC
+
+
+def _equilateral(name="T", sigma=SIG, verts=("a", "b", "c")):
+    return Triangle(name, verts, (E60, E60, E60), sigma=sigma)
+
+
+class TestTriangleSelfVerification(unittest.TestCase):
+    """TRI-4: angle-only storage; the figure checks itself with no standard."""
+
+    def test_equilateral_closes_exactly(self):
+        self.assertAlmostEqual(misclosure(_equilateral()), 0.0, places=12)
+
+    def test_closure_tolerance_scales_with_sigma(self):
+        skewed = Triangle("S", ("a", "b", "c"),
+                          (E60 + 80 * ARCSEC, E60, E60), sigma=SIG)
+        self.assertFalse(closure_ok(skewed))
+        self.assertTrue(closure_ok(Triangle("S", ("a", "b", "c"),
+                                            (E60 + 80 * ARCSEC, E60, E60),
+                                            sigma=100 * ARCSEC)))
+
+    def test_adjustment_forces_closure_without_mutating(self):
+        t = Triangle("T", ("a", "b", "c"),
+                     (E60 + 30 * ARCSEC, E60, E60), sigma=SIG)
+        before = tuple(t.angles)
+        self.assertAlmostEqual(sum(adjusted(t)) - math.pi, 0.0, places=12)
+        self.assertEqual(tuple(t.angles), before)
+
+    def test_shape_is_scale_free(self):
+        """The whole storage rule: no length appears anywhere in a Triangle."""
+        t = _equilateral()
+        self.assertNotIn("length", t.__dict__)
+        self.assertEqual(strength(t), strength(_equilateral(sigma=SIG * 100)))
+
+    def test_rejects_malformed_figures(self):
+        for bad in (
+            {"verts": ("a", "b"), "angles": (E60, E60, E60)},
+            {"verts": ("a", "a", "c"), "angles": (E60, E60, E60)},
+            {"verts": ("a", "b", "c"), "angles": (E60, E60, -1.0)},
+        ):
+            with self.assertRaises(ValueError):
+                Triangle("bad", **bad)
+        with self.assertRaises(ValueError):
+            Triangle("bad", ("a", "b", "c"), (E60, E60, E60), sigma=0.0)
+
+
+class TestStrengthOfFigure(unittest.TestCase):
+    """TRI-1: equilateral minimises worst-case strength, at exactly 1.0."""
+
+    def test_equilateral_is_exactly_one(self):
+        self.assertAlmostEqual(strength(_equilateral()), 1.0, places=12)
+
+    def test_no_figure_beats_equilateral(self):
+        """The falsifier for TRI-1: a figure with strength < 1.0."""
+        rng = random.Random(11)
+        for _ in range(3000):
+            a = rng.uniform(1.0, 178.0)
+            b = rng.uniform(1.0, 179.0 - a)
+            angles = (d2r(a), d2r(b), d2r(180.0 - a - b))
+            s = strength(Triangle("R", ("a", "b", "c"), angles, sigma=SIG))
+            self.assertGreaterEqual(s, 1.0 - 1e-9,
+                                    msg=f"{a:.2f}/{b:.2f} gave {s}")
+
+    def test_thin_figures_are_much_weaker(self):
+        thin = Triangle("W", ("a", "b", "c"),
+                        (d2r(15.0), d2r(15.0), d2r(150.0)), sigma=SIG)
+        self.assertGreater(strength(thin) / strength(_equilateral()), 40.0)
+
+    def test_pair_strength_is_symmetric(self):
+        self.assertAlmostEqual(pair_strength(d2r(30), d2r(70)),
+                               pair_strength(d2r(70), d2r(30)))
+
+    def test_rel_scale_var_scales_with_sigma_squared(self):
+        base = rel_scale_var(_equilateral(sigma=SIG))
+        doubled = rel_scale_var(_equilateral(sigma=2 * SIG))
+        self.assertAlmostEqual(doubled / base, 4.0, places=9)
+
+
+class TestDeformationDiscrimination(unittest.TestCase):
+    """TRI-3: closure tests the observation, drift tests the figure."""
+
+    def setUp(self):
+        self.recorded = Triangle("T1", ("a", "b", "c"),
+                                 (E60, E60, E60), sigma=SIG)
+
+    def test_stable_figure_is_green(self):
+        again = Triangle("T1", ("a", "b", "c"),
+                         (E60 + 2 * ARCSEC, E60 - 1 * ARCSEC, E60 - 1 * ARCSEC),
+                         sigma=SIG, epoch=1)
+        self.assertEqual(deform_check(self.recorded, again)["verdict"], "GREEN")
+
+    def test_movement_with_good_closure_is_yellow(self):
+        moved = Triangle("T1", ("a", "b", "c"),
+                         (E60 + 84 * ARCSEC, E60 - 42 * ARCSEC, E60 - 42 * ARCSEC),
+                         sigma=SIG, epoch=1)
+        result = deform_check(self.recorded, moved)
+        self.assertEqual(result["verdict"], "YELLOW")
+        self.assertEqual(result["moved"], ["a"])
+
+    def test_closure_failure_is_red_and_checked_first(self):
+        """A bad survey must not be reported as a moved monument."""
+        broken = Triangle("T1", ("a", "b", "c"),
+                          (E60 + 300 * ARCSEC, E60, E60), sigma=SIG, epoch=1)
+        result = deform_check(self.recorded, broken)
+        self.assertEqual(result["verdict"], "RED")
+        self.assertEqual(result["why"], "CLOSURE_FAIL")
+        self.assertNotIn("moved", result)
+
+    def test_lost_vertex_is_red(self):
+        other = Triangle("T1", ("a", "b", "d"), (E60, E60, E60), sigma=SIG)
+        result = deform_check(self.recorded, other)
+        self.assertEqual(result["verdict"], "RED")
+        self.assertEqual(result["why"], "VERTEX_SET_CHANGED")
+
+
+class TestNetCarry(unittest.TestCase):
+    """TRI-2: chain shape decides how fast error accumulates."""
+
+    def _chain(self, angles, hops=6):
+        net = Net(base_length=100.0, base_sigma_rel=0.0)
+        for i in range(hops):
+            net.extend(Triangle(f"N{i}", (f"p{i}", f"q{i}", f"r{i}"),
+                                angles, sigma=SIG), 0, 1)
+        return net.carry()
+
+    def test_equilateral_chain_preserves_length(self):
+        for row in self._chain((E60, E60, E60)):
+            self.assertAlmostEqual(row["length"], 100.0, places=9)
+
+    def test_error_grows_monotonically_along_the_chain(self):
+        rows = self._chain((E60, E60, E60))
+        sigmas = [r["rel_sigma"] for r in rows]
+        bearings = [r["bearing_sigma_arcsec"] for r in rows]
+        for a, b in zip(sigmas, sigmas[1:]):
+            self.assertLess(a, b)
+        for a, b in zip(bearings, bearings[1:]):
+            self.assertLess(a, b)
+
+    def test_thin_chain_accumulates_faster(self):
+        strong = self._chain((E60, E60, E60))[-1]["rel_sigma"]
+        thin = self._chain((d2r(15.0), d2r(15.0), d2r(150.0)))[-1]["rel_sigma"]
+        self.assertGreater(thin / strong, 5.0)
+
+    def test_net_validates_its_inputs(self):
+        with self.assertRaises(ValueError):
+            Net(base_length=0.0)
+        with self.assertRaises(ValueError):
+            Net(100.0).extend(_equilateral(), 0, 0)
+        with self.assertRaises(ValueError):
+            Net(100.0).extend(_equilateral(), 0, 5)
+
+
+class TestRebaseHook(unittest.TestCase):
+    """A figure that fails closure is a node that cannot carry the archive."""
+
+    def setUp(self):
+        self.archive = Archive()
+        self.archive.add("base", validated=1900)
+        self.archive.add("leaf", rests_on=["base"], validated=1900)
+
+    def test_green_validates_the_node(self):
+        op = to_rebase("leaf", {"verdict": "GREEN"}, self.archive, now=2026)
+        self.assertEqual(op["op"], "VALIDATE")
+        self.assertEqual(self.archive.validated["leaf"], 2026)
+
+    def test_yellow_holds(self):
+        op = to_rebase("leaf", {"verdict": "YELLOW", "why": "FIGURE_DEFORMED"},
+                       self.archive, now=2026)
+        self.assertEqual(op["op"], "HOLD")
+        self.assertEqual(self.archive.validated["leaf"], 1900)
+
+    def test_red_at_the_center_demands_recenter(self):
+        op = to_rebase(self.archive.center, {"verdict": "RED", "why": "CLOSURE_FAIL"},
+                       self.archive, now=2026)
+        self.assertEqual(op["op"], "RECENTER_REQUIRED")
+
+    def test_red_elsewhere_quarantines(self):
+        op = to_rebase("leaf", {"verdict": "RED", "why": "CLOSURE_FAIL"},
+                       self.archive, now=2026)
+        self.assertEqual(op["op"], "QUARANTINE")
 
 
 if __name__ == "__main__":

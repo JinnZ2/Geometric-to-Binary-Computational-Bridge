@@ -1,3 +1,43 @@
+> **AUDIT 2026-07 — different project from the Silicon set; brief pass.**
+> The biology arithmetic checks out. Five numbers and two functional forms do
+> not.
+>
+> **CORRECT:** glucose → 30–32 ATP (older texts say 36–38); ATP ~30.5 kJ/mol;
+> 32 × 30.5 / 2870 = **34.0 %**, matching the stated 34–40 %; Q₁₀ = 2 within
+> tolerance.
+>
+> | claim | status | correct value |
+> |---|---|---|
+> | "AI (digital) ~1e8 J/kg (battery)" | **WRONG** | Li-ion is 0.9–2.6 MJ/kg ≈ **1e6 J/kg**, so this is 38–110× high. It also **exceeds gasoline** (4.6e7 J/kg) by 2.2× and every known chemistry. |
+> | "1–10 pJ per operation, modern GPUs" | **HIGH 1.4–14×** | H100 dense FP16: ~990 TFLOPS / 700 W = **0.71 pJ/FLOP**. Transistor-level logic is 1–100 aJ. |
+> | "AI efficiency 10–20 % overall" | **NO DENOMINATOR** | efficiency of what, over what? Unstated. |
+> | `E_bit = C·V²` | **STATE THE CONVENTION** | CV² per full charge–discharge cycle; **½CV² dissipated per transition**. At 1 fF and 0.8 V that is 640 aJ vs 320 aJ — a factor 2 that matters when comparing against a 1–2 aJ target. |
+> | `E_social = N·(C_comm + C_maint)` | **WRONG TOPOLOGY** | coordination cost is not linear in N. Pairwise is N(N−1)/2; hierarchical is N log N. Linear is the one topology it cannot be. |
+> | `E_cog = k_focus · ln(S)` | **ASSERTED, AND NOT A PEER TERM** | no basis given for the form. On magnitude: the brain is ~20 W total and whole-brain metabolic rate is nearly **constant** under task load (local reallocation, not global increase). Task-dependent variation is ~1–5 % of 20 W = 0.2–1 W, so ~**33×** below E_core — not a peer term. (The audit said ~1000×; that would require 0.02 W of variation. The conclusion stands, the factor is 33.) |
+> | "Mechanical (industrial): Variable" | **EMPTY ROW** | |
+>
+> **§4.1, the measurement objection.** "Cold-climate populations maintain higher
+> BMR" does not survive adjustment. BMR scales with **fat-free mass**; once lean
+> mass, body size, diet composition (high-protein diets raise the thermic effect)
+> and activity are controlled, the climate effect largely disappears in
+> meta-analysis. The classic Arctic-BMR finding is substantially attributable to
+> diet and body composition. Real adaptations exist and are **locus-level**
+> (fatty-acid metabolism variants; high-altitude oxygen transport), not a scalar
+> multiplier on BMR.
+>
+> `f_climate` and `f_adapt` have no operational definition, no units and no
+> measurement procedure. **A coefficient assigned by population membership rather
+> than measured per subject is not a physical parameter** — and §6.4 states the
+> goal is to *prevent* biased efficiency assumptions. As specified, `f_adapt` is
+> the mechanism that would produce them.
+>
+> **Fix that keeps the intent:** drop `f_climate` and `f_adapt`; use measured
+> fat-free mass and measured acclimatization state as regressors. Both are
+> per-subject, both have units, both are falsifiable. The anti-bias goal is
+> better served by measuring the individual than by a group coefficient.
+
+---
+
 1. Overview
 
 This document establishes a comparative framework for analyzing biological, mechanical, and AI energy systems using consistent physical principles.

@@ -1,5 +1,111 @@
 # Phase 1 Research Proposal: Octahedral Silicon Encoding
 
+> **AUDIT 2026-07 — the flagship $10k gate searches a window where its target
+> cannot exist, and the headline T₂ is 8 orders high.** Numbers in
+> `er_bounds.py`, settled by `tests/test_er_bounds.py` (66 tests, no apparatus).
+>
+> **ER-1 — T₂ = 166 ms at 300 K for Er³⁺.** Er³⁺ is 4f¹¹, odd electron count, so
+> it is a Kramers ion and the doublet *is* protected against static strain and
+> E-field splitting. That protection says nothing about phonon-driven relaxation
+> through the crystal field, which is **Orbach**, and Orbach is what kills Er at
+> temperature.
+>
+> The crystal-field gap to the first excited doublet is ~40–60 cm⁻¹ against
+> kT = **208.5 cm⁻¹** at 300 K. The audit quoted `exp(−Δ/kT) ≈ 0.8` and called
+> the channel "fully open"; **it is worse than that.** Δ ≪ kT means
+> `exp(Δ/kT) − 1 ≈ Δ/kT`, so the Orbach rate goes **linear in T** rather than
+> activated, and the Bose occupation of the intermediate doublet is
+> **n̄ = 3–5** — the level Er relaxes through is populated several phonons deep.
+> There is no activation barrier left.
+>
+> Measured Er³⁺ T₁ in the best host (Er:Y₂SiO₅): ~10 ms at 1.5–2 K, ~µs at 10 K,
+> and above ~20–30 K the EPR lines are lifetime-broadened past detection. At
+> 300 K T₁ is at the phonon floor, ps–ns. With `T₂ ≤ 2T₁` that caps T₂ in the ns
+> class, so 166 ms is **~8 orders high**. Grant a 1000× improvement on T₁ and it
+> is still 5 orders out.
+>
+> Independent calibration: the best room-temperature solid-state spin coherence
+> in **any** material is the NV centre in isotopically purified diamond, T₂ ~
+> 1–2 ms. **166 ms is ~110× that world record** — claimed for an ion from the
+> fast-relaxing end of the lanthanides, in a host with 4.7 % ²⁹Si (I = ½) and no
+> isotopic enrichment mentioned anywhere. Er is used for quantum memory *because*
+> of its 1.5 µm telecom line, and always below 4 K. That is Orbach, not funding.
+>
+> **ER-2 — the $10k gate has no target, and the check is one mass ratio.** A
+> localized mode above the host phonon maximum requires a **lighter** impurity:
+>
+> | impurity | m/m_Si | gap mode? | observed in Si |
+> |---|---|---|---|
+> | B | 0.38 | possible | 620 / 644 cm⁻¹ |
+> | C | 0.43 | possible | 607 cm⁻¹ |
+> | N | 0.50 | possible | 653 / 766 cm⁻¹ |
+> | O | 0.57 | possible | 1136 cm⁻¹ |
+> | Si | 1.00 | no | 520.7 (host max) |
+> | **P** | **1.10** | **no** | none |
+> | **Er** | **5.96** | **no** | none |
+>
+> Every sharp LVM in Si comes from something lighter than Si. Er's ceiling is
+> `520.7·√(28.09/167.26)` = **213 cm⁻¹**, and heavy defects land well below even
+> that, inside the acoustic continuum where the mode is a **broadened resonance,
+> not a sharp Raman line** — which is exactly why heavy-impurity LVMs are hard to
+> see. The document searches **300–400 cm⁻¹, above the ceiling.** The same gate
+> kills "P local mode at ~500 cm⁻¹": P is heavier than Si, and 500 cm⁻¹ sits in
+> the tail of the far stronger 520.7 line.
+>
+> Concentration is a third barrier even if the mode existed: Raman LVM detection
+> in Si needs ~1e18–1e19 cm⁻³, and the stated Er is 1e17 cm⁻³ = 2 ppm. FTIR is
+> the sensitive tool (B/C/O to 1e14–1e15) but 300–400 cm⁻¹ is inside the Si
+> lattice-absorption region, not a transparent window.
+>
+> | claim | status | correct value |
+> |---|---|---|
+> | `k_well = 150 N/m` with `ω_LVM = 350 cm⁻¹` | **INCONSISTENT 8.0×** | m_Er = 2.777e-25 kg, so 350 cm⁻¹ → **1207 N/m**, and 150 N/m → **123 cm⁻¹**. Both cannot hold. |
+> | pivot "k < 100 N/m ↔ ω < 250 cm⁻¹" | **MIS-SET 6.2×** | k = 100 N/m ↔ **101 cm⁻¹**; ω = 250 cm⁻¹ ↔ **616 N/m**. The threshold deciding 60 % of the budget is wrong. |
+> | k_well validates T₂ = 166 ms | **DIMENSIONALLY IMPOSSIBLE** | k_well is M·T⁻²; T₂ is a time. The only time in (k, m) is `√(m/k) = 1/ω` = **95.3 fs** at 350 cm⁻¹, **12.2 orders** from 166 ms. T₂ needs a spin-phonon coupling coefficient and a phonon DOS; neither appears. And `k = mω²` returns the frequency just measured — zero new information. |
+> | `k_well = F_P/δr` with F_P from DFT | **MODEL IN THE NUMERATOR** | δr is measured, F_P comes from the model k_well is meant to test. Same shape as `Proposal-addendum.md`'s theoretical R₂ numerator and the FRET simulator whose estimator was its own generative process. **Third instance** of the model supplying the part that would falsify it. |
+> | Er 5e16 cm⁻², P 2e17 cm⁻² into 50 nm | **10⁵ TOO HIGH** | 1e22 cm⁻³ = **20 at.%** Er and 4e22 = **80 at.%** P. That is amorphization plus ErSi₂ precipitation, not doping; Er solubility is ~1e18 cm⁻³. The document's own 1e17 cm⁻³ needs **5e11 cm⁻²**. Two numbers five orders apart for one quantity. |
+> | RBS-C "sub-pm precision" | **WILL NOT SEE IT** | 5e11 cm⁻² areal against a 1e13–1e14 RBS limit: 20–200× short. And RBS-C displacement sensitivity is 0.01–0.1 Å, not sub-pm — off by 1–2 orders. |
+> | Si₀.₉₈Ge₀.₀₂ gives 0.8 % mismatch | **0.084 %** | Vegard: a = 5.4355 Å, Δa/a = 0.084 %. Off by 10×. |
+> | 2 % Ge buffer supplies +1.2 % strain | **NEEDS 29 % Ge** | a = 5.4962 Å requires x = 0.287. Off by 14×. |
+> | phononic bandgap at 2 % Ge | **NO GAP** | gaps need large acoustic impedance contrast; 2 % Ge gives δv/v ~ 1.6 % → a 1.5–3 GHz minigap. Measurable SiGe minigaps need 30–70 % Ge. |
+> | a phonon gap suppresses dislocation nucleation | **WRONG MECHANISM** | nucleation and glide are set by elastic vs line energy (Matthews–Blakeslee) and the Peierls barrier. Phonons are the thermal **bath** supplying activation, not a transportable carrier you can reflect. kT/h at 550 °C is **17.2 THz**; blocking 0.2 THz removes **1.2 %** of it. And M–B is an *energy balance* — a kinetic barrier does not move it. Critical thickness at 1.2 % is ~5–10 nm; the design wants 50 nm (5–10× over). |
+> | <1e4 cm⁻² dislocations | **EXPECT 1e8–1e10** | 1e4 is what fully-relaxed graded buffers give, not a 5–10× over-critical metastable layer. |
+> | process vs validation temperature | **600 °C APART** | RTA 1000 °C / 5 s in the recipe; validation specified "after 400 °C anneal". A metastable 1.2 % layer relaxes fast at 1000 °C. |
+> | Obj 2.1: "δB < 10 µT at 1 nT → R₂ > 10³" | **1e-4** | 1 nT / 10 µT = 1e-4. With the 1 T static field used everywhere else it is 1e5. Neither is 1e3. R₂ is also **redefined** from `Proposal-addendum.md` (B_CM,in/B_CM,res) — two definitions of one symbol across two documents. |
+> | Track 2 total | **1e5, not 1e2** | R₂ = 1e3 × R₃ = 1e2 gives 1e5; the stated "1e-11 → 1e-13" uses R₃ only. |
+> | equipment "Stability < 10 ppm" | **8 ORDERS SHORT** | the metric needs δB/B = 1e-13 at 1 T = **0.1 pT**; 10 ppm of 1 T is **10 µT**. Same document. |
+> | Track 3 Rabi ~1 ns | **200× vs the 5 ps write** | 1 ns → 1 GHz → B₁ = 36 mT. Earlier documents specify a 5 ps pulse. And a "THz pulse" driving a 28 GHz transition is 2 orders off band — see `transient_suppression.py`, R2-5. |
+> | Track 3 readout "σ⁺ → m_J = +½" | **NOT AN EIGENSTATE** | ⁴I₁₅/₂ splits into 8 **Kramers doublets** in a crystal field; eigenstates are mixtures, not pure m_J. And g_eff for Er³⁺ ranges ~2–18 and is strongly anisotropic, so free-electron 28 GHz/T is the wrong conversion. |
+> | Obj 1.1 STEM "0.2 Å centroid" | **RIGHT TOOL, WRONG TARGET** | 0.2 Å is fine for a **column average** over many identical sites. For a *single* Er in a 50 nm lamella (~8 % contrast against ~180 Si atoms) single-atom precision is 20–50 pm at best, and the zone axis is unspecified so the projected component of a ⟨111⟩ displacement is undefined. |
+>
+> **ER-8 note.** The audit's piezoresistance figures (`π_l ~ 6e-11 Pa⁻¹`,
+> `dR/R = 7.8 %` at 1 % strain) repeat a coefficient already corrected in
+> `magnetic_authority.PIEZO_NOTE`: 6.6e-11 is **π₁₁, the ⟨100⟩ value**. The ⟨110⟩
+> longitudinal coefficient is (π₁₁+π₁₂+π₄₄)/2 = **7.18e-10**, 12× larger, and it
+> is the one consistent with the audit's own "gauge factor ~100" (π_l·E = 93).
+> So dR/R = GF × ε: **93 % at 1 % strain** — unphysical, Si fractures at 1–2 % —
+> or **9.3 % at a realistic 0.1 %**. The conclusion is unchanged and stronger:
+> piezoresistance remains ~10⁴× better than any readout proposed across these
+> ten documents.
+>
+> | ID | CLAIM | FALSIFIER | STATUS |
+> |---|---|---|---|
+> | **ER-1** | Er³⁺ T₂ at 300 K is ns-class, set by Orbach through low-lying CF levels; 166 ms is ~8 orders high | observable Er³⁺ EPR above ~30 K in any host | LIVE |
+> | **ER-2** | no Er LVM exists at 300–400 cm⁻¹; Er is 6× heavier than Si so its mode is a broadened in-band resonance | a sharp Er gap mode above 520 cm⁻¹ | LIVE **← KILLS THE GATE** |
+> | **ER-3** | k_well and ω_LVM in the same table are inconsistent by 8× | a consistent pair | DEAD |
+> | **ER-4** | k_well does not determine T₂; no equation in the document links them | an equation linking k_well to T₂ | LIVE |
+> | **ER-5** | 2 % Ge cannot produce +1.2 % tensile strain; ~29 % is required | 1.2 % strain from a 2 % Ge buffer | DEAD |
+> | **ER-6** | a phonon bandgap cannot suppress dislocation nucleation; M–B is an energy balance | dislocation density <1e4 cm⁻² at 1.2 %, 50 nm, 1000 °C RTA | LIVE |
+> | **ER-7** | the stated implant doses give 20–80 at.%, not 1e17 cm⁻³ | SIMS showing 1e17 cm⁻³ from 5e16 cm⁻² | DEAD |
+> | **ER-8** | Si piezoresistance gives dR/R ≈ 9 % at 0.1 % strain, 300 K, no magnet, no spins | measured dR/R < 1 % at 0.1 % strain | LIVE **← RUN** |
+>
+> **ER-2 is the one to check first, because it is free** — it decides whether the
+> flagship $10k experiment has a target, and the answer is a mass ratio you can
+> do on a napkin. **ER-8 is still the one to run.**
+
+---
+
+
 ## Project Goal
 
 Validate the foundational material science and multi-layer control systems required to achieve the target **100 ms coherence time** and **THz-parallelized write/read** of the Octahedral Silicon Encoding architecture at **300 K**.
