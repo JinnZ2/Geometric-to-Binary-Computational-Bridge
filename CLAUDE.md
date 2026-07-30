@@ -46,6 +46,11 @@ python tests/test_magnetic_authority.py # Magnetic read/write authority in Si (6
 python tests/test_gies_core.py          # GIES tensor collapse + codec bijection (60 tests, no deps)
 python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59 tests, no deps)
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
+python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
+
+# Runnable falsifier reports (stdlib, exit non-zero on failure)
+python Silicon/falsifiers.py                  # ER-1/2/3, NEG-7, GIES-2/3
+python Silicon/falsifiers_keating_seed.py     # KEA-1/3/7, SEED-1/3/5
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -89,6 +94,7 @@ cd "Front end" && npm install && npm run dev
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
+| Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
 | Transient suppression | `tests/test_transient_suppression.py` | 59 | Write-pulse rotation authority (R2-8), mismatch and skew budgets (R2-3/4), pulse selectivity (R2-5), probe bandwidth (R2-6), measurable CMRR (R2-2) |
 | GIES core | `tests/test_gies_core.py` | 60 | Rank-1 tensor collapse (GIES-1), site parity vs lattice (GIES-2), NOT-is-Frenkel (GIES-3), 128-token codec bijection (GIES-4/8), label-dependence of the gate set (GIES-6) |
@@ -191,6 +197,10 @@ Silicon/                        Hardware implementation pathway
 ├── field_propulsion_fp4.ino      N=8 phase-gradient instrument; blocks DATA until tared + surveyed + state declared
 ├── field_propulsion_protocol.md  Falsifiable test plan; the four registered predictions don't discriminate
 ├── epg_bounds.py                 EPG-4/6/7/8: cubic isotropy by Neumann, DSA defect floor, mechanism matrix
+├── keating_cluster.py            KEA-1..7: one minimum not eight; E(p)=E(-p) exactly
+├── seed_influence.py             SEED-1..5: W = I, so structure preservation is a tautology
+├── falsifiers.py                 Runnable report: ER-1/2/3, NEG-7, GIES-2/3
+├── falsifiers_keating_seed.py    Runnable report: KEA-1/3/7, SEED-1/3/5
 ├── er_bounds.py                  ER-1..8: Orbach kills Er at 300 K; heavy impurities have no gap mode
 ├── Proposal.md                   Phase 1 proposal + AUDIT header (the $10k gate has no target)
 ├── Real-questions.md             The best-posed document in the set; four questions answered inline
@@ -473,6 +483,8 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Silicon/field_propulsion_fp4.ino` is committed **unflashed** — no board was available here. Its phase-table logic is ported into `tests/test_fp4_autopilot.py` and verified against `propulsion_bounds.aliased_modes()`, but the timer backends (RP2040 / Teensy 4) and the HX711 and ADC paths are unexercised. Every calibration constant in it is a placeholder to be replaced by a bench measurement.
 - `Silicon/fp4_autopilot.py`'s `ber_sweep()` raises `NotImplementedError` on the simulator by design; the §9.1 Bridge communication test needs either hardware or an explicit channel model, and a synthetic BER curve would reproduce the rigged-simulator defect the same file exists to guard against.
 - **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
+- **Two independent 8-state representations both collapse under inversion.** `GEIS/state_tensor.py` built `T = outer(v,v)`, which cannot see the sign of v; and the clamped Keating cluster in `VFF.md` has an energy that is *exactly* even in the central displacement, because Σ_k v_k = 0 and v_k·v_l = −d0²/3 hold exactly and kill both cross-terms. So `E(p) = E(−p)` identically and all eight cube-corner directions are degenerate. Two different formalisms, same blindness to the inversion that separates the sublattices. `Silicon/keating_cluster.py` (KEA-7), `GEIS/GIES_AUDIT.md` (GIES-1).
+- **The clamped Keating cluster has one minimum, not eight.** Keating is a sum of squares, so E ≥ 0 with a unique zero where every bond is at d0 and every angle at arccos(−1/3) — the ideal centre. 200 random starts find exactly one minimum, at any α, β > 0. The 8-state encoding, both gates and the ALU in `VFF.md` rest on a parenthetical the document itself flagged as uncertain. Its Keating *parameters* are correct (48.1 and 12.0 N/m), and "8 octahedral faces" is the only correct use of that terminology in the set.
 - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no target.** `Proposal.md` headlines T2 = 166 ms at 300 K. Er3+ is a Kramers ion, which protects against *static* splitting but not against Orbach relaxation through the crystal field; the CF gap is 40–60 cm⁻¹ against kT = 208.5 cm⁻¹, so Δ ≪ kT, the Orbach rate goes linear in T, and the intermediate doublet is occupied n̄ = 3–5 phonons deep. Measured Er T1 is ~µs at 10 K and undetectable above ~30 K; at 300 K it is ps–ns, so T2 ≤ 2T1 caps it 8 orders below the claim — and 110× above the NV-in-diamond room-temperature world record. Separately, the $10k gate searches 300–400 cm⁻¹ for an Er local vibrational mode, but gap modes require a *lighter* impurity: Er is 5.96× heavier than Si, ceiling 213 cm⁻¹. The same mass gate kills the "P local mode at ~500 cm⁻¹". `Silicon/er_bounds.py`.
 - **The write pulse cannot collapse spin coherence — it is ~700x too weak to move a spin.** `Proposal-addendum.md` engineers 60 dB of common-mode suppression to protect coherence during a 5 ps write. At the legal on-chip coil field (5.03 mT) a 5 ps pulse delivers 4.42 mrad, 0.14% of a π pulse, and a 5 ps π pulse would need 3.57 T. The stated worry is inverted: the risk is that the write does not happen. Separately, the write pulse *is* the differential drive — the one mode the bifilar geometry is built to pass — so common-mode rejection says nothing about it either way. `Silicon/transient_suppression.py`.
 - Energy-per-bit has three values across the set and they differ in *legality*: 1–2 aJ is 348 kT·ln2 (legal, ~300× below CV² at 1 fF/0.8 V), 0.1 eV is 5.6 kT·ln2 (legal), and **0.01 eV is 0.56 kT·ln2 — below the Landauer bound**. Pick one and propagate it; 0.01 eV cannot be it.

@@ -1,3 +1,71 @@
+> **AUDIT 2026-07 — the influence matrix is the identity, so structure
+> preservation is a tautology.** Numbers in `seed_influence.py`, settled by
+> `tests/test_keating_seed.py`. Runnable:
+> `python Silicon/falsifiers_keating_seed.py`.
+>
+> **SEED-1.** `W_ij = max(0, u_i·u_j)` on the signed axis directions `±e_k`:
+> parallel gives +1 → 1, antiparallel gives −1 → **max(0,−1) = 0**, orthogonal
+> gives 0. So **W is exactly the identity** — in 3D (6 directions) and 8D (16)
+> alike, and in every dimension tested. No direction influences any other; the
+> channels are independent scalars.
+>
+> **SEED-2, the consequences, all forced:**
+>
+> - every channel is multiplied by the *same* radial envelope f(r), so
+>   `S_i / ΣS` is invariant **by construction, for any σ**;
+> - "Structure preservation: exact, 1e-16" is IEEE-754 round-off on the map
+>   `x → c·x`. It is a property of binary floating point, not of the expansion;
+> - the **proportional-σ insight is real as a design idea but cannot bite here**
+>   — it would only matter if channels had different radial profiles, and they
+>   do not;
+> - "verified 1e-16 under dynamic physics `W' = W + α·T`" was measured on the
+>   Euclidean identity, because `get_phi_torsion_tensor()` is a stub whose body
+>   is `pass` and returns `None`.
+>
+> **SEED-5 — and the recommended fix is necessary but not sufficient.** Not in
+> the audit. Switching to the eight cube-corner directions `(±1,±1,±1)/√3` does
+> make W non-trivial: entries **{0, 1/3, 1}**, and the channels genuinely
+> couple. But **every row sums to exactly 2.0**, so under one shared envelope
+>
+>     S_i = Σ_j W_ij f(r) = (row sum) · f(r) = 2 f(r)   for every i
+>
+> and the proportions are *still* invariant — measured drift 6.9e-17. This holds
+> for **any vertex-transitive direction set**, because transitivity forces equal
+> row sums. The tautology survives the fix.
+>
+> What actually breaks it is a **direction-dependent radial profile** `f_i(r)`,
+> or a set that is not vertex-transitive so the row sums differ. With per-channel
+> profiles the drift becomes 0.347 and preservation becomes something you can
+> lose — which is what would make preserving it a result. A "we fixed W and still
+> get 1e-16" outcome should be read as the tautology persisting, not as
+> validation.
+>
+> **SEED-3 — the precision claim contradicts the encoding.** Five 8-bit values
+> give a quantisation step of 1/256 = 3.9e-3, against a claimed fidelity of
+> 1e-16: **13.6 orders apart**. The forward map's numerical precision is being
+> reported as the compression fidelity. The real seed resolution is 1/256.
+>
+> **SEED-4 — optimiser recovery is not a bijectivity proof.** L-BFGS-B or
+> differential evolution finding the original for the seeds tested shows exactly
+> that. Injectivity needs a proof or an adversarial search; Dirichlet sampling
+> plus pairwise collision detection is neither. And under W = I the map is
+> trivially injective on proportions, which is not a finding either.
+>
+> **What survives, and is worth keeping:** the proportional-σ insight, once the
+> channels differ; "pause anywhere, resume without loss" as a design goal; and
+> unusually honest scoping — *"not a general-purpose compression algorithm … it
+> encodes structure"* and *"not optimized, production-ready, or battle-tested"*.
+>
+> | ID | CLAIM | FALSIFIER | STATUS |
+> |---|---|---|---|
+> | **SEED-1** | `W_ij = max(0,u_i·u_j)` on axis directions IS the identity, 3D and 8D | any nonzero off-diagonal | DEAD (ran it) |
+> | **SEED-2** | structure preservation is therefore a tautology, not a result | a seed whose proportions change across shells | LIVE |
+> | **SEED-3** | 8-bit seed quantisation (3.9e-3) is 13 orders coarser than the claimed 1e-16 | lossless recovery below 1/256 resolution | LIVE |
+> | **SEED-4** | optimiser-based recovery is not a bijectivity proof | a proof of injectivity | LIVE |
+> | **SEED-5** | the cube-corner fix leaves row sums equal, so proportions stay invariant | a vertex-transitive set with unequal row sums | DEAD (ran it) |
+
+---
+
 # Seed Physics
 
 **A 40-bit seed that expands according to physics.**
