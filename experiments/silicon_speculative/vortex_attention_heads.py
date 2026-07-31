@@ -49,6 +49,91 @@ Run:
     python Silicon/vortex_attention_heads.py
 """
 
+# > **AUDIT 2026-07 — this file contains the strongest negative result in the
+# > archive, and then adopts the wrong remedy.** Numbers in `topological_pin.py`,
+# > settled by `tests/test_experiments_topology.py`.
+# >
+# > **Correct, and published rather than buried:** *"Topological CHARGE is
+# > invariant. Core POSITION is NOT."* / *"the winding core POSITION is a
+# > collective coordinate that IS dynamical"* / *"the position of a vortex core is
+# > a zero mode of the action (free to move at no energy cost) unless a pinning
+# > potential is added"*. All three are textbook KT physics, correctly applied.
+# > Across the archive this is the only place a claim was tested, found wrong, and
+# > written up as wrong.
+# >
+# > **ATT-1 — the remedy does not follow.** A registry is an array index:
+# > bookkeeping, no energy cost to violate. A pin is a term in the Hamiltonian,
+# > `V_pin(r − r₀)`, that makes displacement cost energy. The file just proved the
+# > core drifts, so after drift the registered address holds ordinary phase and
+# > the head is a fixed-coordinate Gaussian with no defect under it. *"Winding
+# > charge is preserved AT THE REGISTERED ADDRESS"* is the one wrong sentence —
+# > charge is preserved in the FIELD, not at an address. The last paragraph names
+# > the right fix (*"unless a pinning potential is added"*) and the code
+# > implements the other thing.
+# >
+# > **And the obvious pin does not work either — this part was missed.** Coupling
+# > the pin to the winding density cannot be optimised, because
+# > `d(plaquette circulation)/d(φᵢ) = 0` **identically**: each φ enters two links
+# > of a plaquette with opposite signs. Measured worst gradient over 400 random
+# > probes: 4.4e-10, including at a core. So **the same topological invariance
+# > that protects the charge makes the charge-based pin gradient-free.** A pin
+# > must couple to something non-topological — which is the deeper reason a
+# > registry does nothing.
+# >
+# > **The fix, implemented and measured.** A template pin,
+# > `V_pin = (k_p/2) Σ_r wrap(φ − φ_ref)²`, has a nonzero gradient precisely
+# > because it is not purely topological. `k_p = 0` is the registry control:
+# >
+# > | k_p | mean \|r_core\| | hop fraction | survived |
+# > |---|---|---|---|
+# > | **0.00** | 0.0556 | **1.00** | 1.00 |
+# > | 0.01 | 0.0000 | 0.00 | 1.00 |
+# > | 0.05 | 0.0000 | 0.00 | 1.00 |
+# > | 1.00 | 0.0000 | 0.00 | 1.00 |
+# >
+# > Charge survives in every row — it always did. What changes with `k_p` is
+# > POSITION, the quantity the registry claimed to protect and could not. The
+# > drift experiment in this file becomes the measurement that shows the pin
+# > worked.
+# >
+# > | claim | status | correct value |
+# > |---|---|---|
+# > | `topological_position(..., x_hint, y_hint)` | **HANDED THE ANSWER** | `x_hint` is the true source position and is also the fallback return value |
+# > | cores indexed at the plaquette's lower-left corner | **dx/2 OFFSET** | cores live on plaquettes; a 40×40 grid over [−1,1] carries a systematic 0.0256 field-unit bias that reads as drift. `core_position()` uses plaquette centres |
+# > | `head_contrast = \|s₊−s₋\|/(\|s₊\|+\|s₋\|)` | **TWO DEGENERATE CASES** | one lobe (s₋ = 0) scores a perfect **1.0**; both zero is **0/0 = NaN**, not 1.0 |
+# > | Model S "position locked near zero" | **DIFFERENT OBJECT** | a soft-argmax centroid of 1600 near-uniform weights sits at the grid centre by symmetry and is stable by the law of large numbers. Comparing its drift to a discrete core hopping between pixels compares two different things |
+# > | `g_stab` | **RENAMES THE OBJECTIVE** | it is `d‖out‖/dφ`, an L2 penalty, correctly computed but undocumented as changing the objective to `loss + β‖out‖` |
+# > | `winding_number_field` | **CORRECT — KEEP** | plaquette circulation from wrapped differences, right orientation |
+# >
+# > **TOP-1/TOP-2, on `topological_attention.py`.** `run()` reaches loss = 0
+# > exactly at `W = [0,0]`, for the vortex, the smooth field, and a constant-zero
+# > field alike — because `target = source_x` and `source_x` defaults to **0.0**.
+# > The degeneracy is a property of the default test configuration, so moving the
+# > source off-axis is a one-line fix. And `run_fixed_W`'s target is
+# > `s₊(φ_gt) − s₋(φ_gt)` — the vortex model's own output — so "V beats S and X"
+# > is a definition, not a measurement. **TOP-3 is the replacement:** the Gauss
+# > flux of a charge-k vortex is `2πk`, an integer, exactly known and independent
+# > of any φ.
+# >
+# > **VOR-2, on `vortex_phase_learning.py`.** `phi_v` spans ±π while
+# > `phi_flat = uniform(−0.3, 0.3)` gives `cos(φ) ∈ [0.955, 1.0]` — effectively
+# > the identity map. The two conditions differ in phase AMPLITUDE as well as
+# > topology, so it is not "the same random init". The verdict then compares
+# > percentage reductions from different denominators, and a run that starts worse
+# > can show a larger drop while ending higher. `controlled_vortex_comparison()`
+# > shares one init, adds the vortex on top, and reports final absolute values.
+# >
+# > **VOR-1.** The vortices could not have annihilated: diffusion length over
+# > 200 steps is 2.0 px against an 8.3 px pair separation. But the deeper point is
+# > that winding number is a topological invariant of the continuum field, so no
+# > smooth gradient flow can change it — the protection is a theorem, and what was
+# > measured is whether two cores happened to collide. Also note a lone vortex is
+# > illegal on a periodic grid (net winding must vanish on a torus); it dissolves
+# > rather than drifting, which is a boundary artifact and not a result.
+# 
+# ---
+#
+
 from __future__ import annotations
 import numpy as np
 import sys, os

@@ -47,6 +47,53 @@ Run
     python -c "from Silicon.vacuum_geff_sim import run; run()"
 """
 
+# > **AUDIT 2026-07 — the three "Tests passed" assertions pass for random
+# > matrices.** Numbers in `vacuum_bounds.py`, settled by
+# > `tests/test_experiments_topology.py`.
+# >
+# > | matrix | E<E | f<1 | ≥1 | supp | surv | max λ |
+# > |---|---|---|---|---|---|---|
+# > | random gaussian | True | True | True | 0.211 | 0.100 | **0.00e+00** |
+# > | random uniform [0,1] | True | True | True | 0.358 | 0.033 | **0.00e+00** |
+# > | diag(1..30) | True | True | True | 0.301 | 0.167 | **0.00e+00** |
+# > | random rank-1 outer(v,v) | True | True | True | 1.000 | 0.033 | **0.00e+00** |
+# > | all-ones | True | True | True | 1.000 | 0.033 | **0.00e+00** |
+# > | identity | False | False | True | 1.000 | 1.000 | **0.00e+00** |
+# >
+# > **VAC-1.** `max λ = 0` in every row, exactly. `λ = ln(\|μ\|/ρ)` with
+# > `ρ = max\|μ\|`, so the dominant mode has `λ = ln(1) = 0` **by construction, for
+# > any matrix whatsoever**. "At least one mode survives" is a strict tautology —
+# > `\|λ\| < ε` always admits it. `E_eff < E_raw` is a subset-sum of positives, and
+# > `surviving_frac < 1` fails only when every `\|μ\|` is equal (the identity row).
+# > No real coupling matrix is degenerate that way. The suite validates the
+# > arithmetic of `ln` and a subset sum; random noise passes it. Same shape as
+# > NEG-7.
+# >
+# > **VAC-4, and this was missed: no exponential suppression is available at all.**
+# > Because the dominant mode always survives, `E_eff ≥ ω_max`, so
+# > `E_eff/E_raw ≥ ω_max/Σω > 0` with a floor of `1/N` at best. The functional form
+# > cannot produce exponential suppression at any lattice size — which is stronger
+# > than the mode-count argument, because it does not depend on how many shells
+# > you add.
+# >
+# > **VAC-2.** Minimum nonzero surviving fraction is `1/N`: 3.3e-2 at 5 shells
+# > (N = 30), 1.7e-3 at 100 shells, 1.7e-7 at a million. Reaching 1e-120 needs
+# > `N ≥ 1e120` modes ≈ 1.7e119 shells — **119 orders** from the 30-mode floor.
+# > "Requires a physical mapping of lattice units to eV" does not close it: the
+# > binding constraint is the mode COUNT, which is combinatorial, not a unit
+# > conversion.
+# >
+# > **VAC-3, units.** `ω_n = \|μ_n\|/ρ` is a normalised eigenvalue —
+# > dimensionless, in (0,1]. For an oscillator system `ω = √(eigenvalue)` of the
+# > dynamical matrix and `E_vac = Σ ½ħω`, so "E_vac = Σω" sums dimensionless
+# > numbers. And `g(ω) ~ ω²` is a continuum 3D result from counting k-states in a
+# > sphere; 30 eigenvalues histogrammed into 40 bins is not a density of states.
+# > Finally, "measure the spectral gap as a function of ξ" measures the simulation
+# > against its own parameter — evaluating a function, not testing it.
+# 
+# ---
+#
+
 import numpy as np
 
 # Reuse the phi-lattice builder from crystalline_nn_sim
