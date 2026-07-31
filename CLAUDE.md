@@ -47,6 +47,11 @@ python tests/test_gies_core.py          # GIES tensor collapse + codec bijection
 python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59 tests, no deps)
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
 python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
+python tests/test_repo_guard.py         # Null harness / symmetry veto / reach check (32 tests, no deps)
+python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
+
+# Pre-commit guard: null harness, symmetry veto, instrument reach
+python repo_guard.py
 
 # Runnable falsifier reports (stdlib, exit non-zero on failure)
 python Silicon/falsifiers.py                  # ER-1/2/3, NEG-7, GIES-2/3
@@ -94,6 +99,8 @@ cd "Front end" && npm install && npm run dev
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
+| Repo guard | `tests/test_repo_guard.py` | 32 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands |
+| Experiments topology | `tests/test_experiments_topology.py` | 47 | Vacuum assertion tautology (VAC-1/4), mode-count floor (VAC-2), zero circulation gradient, pin removes the zero mode (ATT-1) |
 | Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
 | Transient suppression | `tests/test_transient_suppression.py` | 59 | Write-pulse rotation authority (R2-8), mismatch and skew budgets (R2-3/4), pulse selectivity (R2-5), probe bandwidth (R2-6), measurable CMRR (R2-2) |
@@ -282,6 +289,16 @@ experiments/c/                  C library for NFS hot paths
 ### Supporting
 
 ```
+repo_guard.py                   Stage 5.5 — the null stage. Three mechanical
+                                checks (null harness, symmetry veto, reach) plus
+                                the human checklist for circular targets and units
+
+experiments/silicon_speculative/
+├── topological_pin.py            ATT-1: a registry is not a pin; V_pin removes the zero mode
+├── vacuum_bounds.py              VAC-1..4: max lambda = 0 by construction; no exponential suppression
+├── vortex_attention_heads.py     + AUDIT header (the archive's best negative result, wrong remedy)
+└── vacuum_geff_sim.py            + AUDIT header (three assertions that random matrices pass)
+
 symbols/                        Symbolic-to-geometric mapping plugin
 docs/                           Architecture docs, roadmaps, field notes
 examples/                       Sample .gshape and .json files
@@ -483,6 +500,8 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Silicon/field_propulsion_fp4.ino` is committed **unflashed** — no board was available here. Its phase-table logic is ported into `tests/test_fp4_autopilot.py` and verified against `propulsion_bounds.aliased_modes()`, but the timer backends (RP2040 / Teensy 4) and the HX711 and ADC paths are unexercised. Every calibration constant in it is a placeholder to be replaced by a bench measurement.
 - `Silicon/fp4_autopilot.py`'s `ber_sweep()` raises `NotImplementedError` on the simulator by design; the §9.1 Bridge communication test needs either hardware or an explicit channel model, and a synthetic BER curve would reproduce the rigged-simulator defect the same file exists to guard against.
 - **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
+- **`repo_guard.py` is the pre-commit check that would have caught most of this archive's fatal findings.** Three mechanical stages: a null harness (does the result survive replacing structure with noise — killed the 17-lens isomorphism, the vacuum assertions, and topological attention's `run()`), a symmetry veto (does the material permit the mechanism — 9 instances across 6 files, free), and a reach check (is the signal above the instrument floor — the 11-order Hall gap, the 500x Er swamp, the RBS shortfall). Circular targets and unit errors are not mechanisable and get a human checklist.
+- **A registry is not a pin, and the obvious pin has no gradient.** `vortex_attention_heads.py` correctly finds that topological charge is invariant while core *position* is a zero mode, then adopts a registry — bookkeeping, which costs nothing to violate. Coupling a pin to the winding density instead fails for a deeper reason: `d(plaquette circulation)/d(phi) = 0` identically, so the same invariance that protects the charge makes the charge-based pin gradient-free. A pin must couple to something non-topological. `experiments/silicon_speculative/topological_pin.py` implements a template pin and measures it: at `k_p = 0` the core hops in 100% of seeds, at `k_p >= 0.01` in 0%, with charge conserved throughout.
 - **Two independent 8-state representations both collapse under inversion.** `GEIS/state_tensor.py` built `T = outer(v,v)`, which cannot see the sign of v; and the clamped Keating cluster in `VFF.md` has an energy that is *exactly* even in the central displacement, because Σ_k v_k = 0 and v_k·v_l = −d0²/3 hold exactly and kill both cross-terms. So `E(p) = E(−p)` identically and all eight cube-corner directions are degenerate. Two different formalisms, same blindness to the inversion that separates the sublattices. `Silicon/keating_cluster.py` (KEA-7), `GEIS/GIES_AUDIT.md` (GIES-1).
 - **The clamped Keating cluster has one minimum, not eight.** Keating is a sum of squares, so E ≥ 0 with a unique zero where every bond is at d0 and every angle at arccos(−1/3) — the ideal centre. 200 random starts find exactly one minimum, at any α, β > 0. The 8-state encoding, both gates and the ALU in `VFF.md` rest on a parenthetical the document itself flagged as uncertain. Its Keating *parameters* are correct (48.1 and 12.0 N/m), and "8 octahedral faces" is the only correct use of that terminology in the set.
 - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no target.** `Proposal.md` headlines T2 = 166 ms at 300 K. Er3+ is a Kramers ion, which protects against *static* splitting but not against Orbach relaxation through the crystal field; the CF gap is 40–60 cm⁻¹ against kT = 208.5 cm⁻¹, so Δ ≪ kT, the Orbach rate goes linear in T, and the intermediate doublet is occupied n̄ = 3–5 phonons deep. Measured Er T1 is ~µs at 10 K and undetectable above ~30 K; at 300 K it is ps–ns, so T2 ≤ 2T1 caps it 8 orders below the claim — and 110× above the NV-in-diamond room-temperature world record. Separately, the $10k gate searches 300–400 cm⁻¹ for an Er local vibrational mode, but gap modes require a *lighter* impurity: Er is 5.96× heavier than Si, ceiling 213 cm⁻¹. The same mass gate kills the "P local mode at ~500 cm⁻¹". `Silicon/er_bounds.py`.
