@@ -15,6 +15,11 @@ import unittest
 # ---------------------------------------------------------------------------
 # Magnetic
 # ---------------------------------------------------------------------------
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from bridges.magnetic_encoder import (
     MagneticBridgeEncoder,
     biot_savart_magnitude,

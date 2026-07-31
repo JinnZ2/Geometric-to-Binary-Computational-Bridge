@@ -24,6 +24,11 @@ from __future__ import annotations
 
 import unittest
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from bridges.octahedral_canon import (
     NUM_VERTICES,
     engine_position_to_geis_position,

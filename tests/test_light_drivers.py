@@ -23,6 +23,11 @@ import time
 import unittest
 from unittest import mock
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from bridges.hidden_channel_detector import (
     SHAPE_CHANNEL_REGISTRY,
     HiddenChannelReport,

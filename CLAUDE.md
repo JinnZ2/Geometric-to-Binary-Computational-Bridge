@@ -48,10 +48,15 @@ python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
 python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
 python tests/test_repo_guard.py         # Null harness / symmetry veto / reach check (32 tests, no deps)
+python tests/test_aiss.py               # AISS framework shape/round-trip tests (27 tests, needs numpy)
+python tests/test_aiss_scoring.py       # AISS scoring VALUES: placeholder removal, flat-weight null (26 tests)
 python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
 
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
+
+# Every suite under tests/ (2038 unittest cases; all pass, no PYTHONPATH needed)
+for t in tests/test_*.py; do python "$t" || echo "FAILED $t"; done
 
 # Runnable falsifier reports (stdlib, exit non-zero on failure)
 python Silicon/falsifiers.py                  # ER-1/2/3, NEG-7, GIES-2/3
@@ -100,6 +105,8 @@ cd "Front end" && npm install && npm run dev
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
 | Repo guard | `tests/test_repo_guard.py` | 32 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands |
+| AISS (shape) | `tests/test_aiss.py` | 27 | Evaluator/governance/CCGF round-trips and return-type shape |
+| AISS (values) | `tests/test_aiss_scoring.py` | 26 | Coherence placeholder removed, `total_score` weight-sum normalisation, flat-weight null harness, trust-score product form |
 | Experiments topology | `tests/test_experiments_topology.py` | 47 | Vacuum assertion tautology (VAC-1/4), mode-count floor (VAC-2), zero circulation gradient, pin removes the zero mode (ATT-1) |
 | Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
@@ -273,6 +280,31 @@ is not a threshold on anything; use the persistence margin `Φ` from
 claim, was tested and failed**: randomly-coefficiented lenses of the same
 functional form reproduce the reported correlation floor. See
 `Negentropic/NEG_CLAIMS.md`.
+
+### AISS — Autonomous Intelligence Sovereignty & Sensing
+
+```
+AISS/                           Governance / assessment framework (not a physics folder)
+├── sovereignty_evaluator.py      Pattern merit scored independent of source reputation
+├── assessment_framework.py       trust_score, structural_health, cognitive_diversity
+├── geometric_governance.py       Governance structures over the octahedral state model
+├── ccgf.py                       Cross-context governance formalism
+└── AISS.md / AISS1.md / Assessment.md / …   ~260 KB of specification
+```
+
+`AISS.md` and `AISS1.md` are **the same document**: the bodies are
+byte-identical (1804 lines, matching MD5) and they differ only in the
+preamble — 21 lines in `AISS.md`, 7 in `AISS1.md`. One of the two should be
+deleted; nothing is lost either way except the preamble not chosen.
+
+Only one of `repo_guard.py`'s three mechanical stages applies here. The
+symmetry veto has no surface (no material mechanism is claimed) and the
+reach check has no instrument claims. The null harness applies and **fires**:
+the shipped merit weights are five criteria at 0.20 — an unweighted mean —
+and 77% of random reweightings reproduce the same high-merit rate, so the
+weights carry no information. `evaluate_pattern` now reports
+`weights_are_flat` alongside every score, and `verdict_is_weight_sensitive()`
+runs the null on demand.
 
 ### C Acceleration (Optional)
 
@@ -511,4 +543,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Silicon/Fabrication.md` and `Silicon/Magnetic-bridge.md` carry audit headers rather than rewrites: their hardware lists, FSMs and protocol structure are sound and were kept. Only the physics layer was replaced.
 - **GIES state tensors collapsed and nothing detected it.** `state_tensor.py` built `T = outer(v, v)` from an antipodal position table, so `outer(v,v) == outer(-v,-v)` made states `i` and `7-i` identical in every invariant and every projection — and `NOT(i) = 7-i` is precisely that map, so the gate set's only unary operation was invisible to the representation. `GIES.md` §7.2 already specified the correct weighted sum over bond directions; §8.3 implemented a degenerate special case of its own spec. Fixed in `GEIS/gies_core.py`; the old file is annotated and kept for provenance.
 - **Index parity is site type, and it is free.** Even-parity indices land on lattice atoms, odd-parity ones on tetrahedral interstitials (verified against the diamond-cubic basis: coordination shell identical to the T site). So the 3-bit address space already carries a physically meaningful single-bit error-detecting code, which is what the "geometric error correction" claim wanted. It also means the honest state space is 4 states plus a site-type flag, because `NOT` crosses the flag and every crossing is a Frenkel pair (~4.75 eV). The carrier invariant is **J3**, not the trace — trace and J2 are identical across all eight states, while J3 flips sign with parity. That is the same `J3` mode invariant already in `silicon_error_correction.json`.
+- **Ten test files were not running at all, and nothing reported it.** `tests/test_silicon_modules.py` imported six modules from `Silicon.core.*` that a directory reorg had moved one level down into `analysis/`, `bridges/`, `geometry/`, `systems/` — 52 of its 66 tests errored in `setUp`. Nine more (`test_bridges.py` among them, the 768-test suite this file's own command list points at) lacked the `sys.path` bootstrap the other 25 test files carry, so the documented `python tests/test_bridges.py` raised `ModuleNotFoundError: No module named 'bridges'`. Both are fixed; all 2038 cases under `tests/` now run green from the repo root with no `PYTHONPATH`. An import error in `setUp` is reported as a test ERROR, not a collection failure, so a suite can be 79% dead and still look like it ran.
+- **A shape-level test suite did not notice a 40% score change.** `AISS/sovereignty_evaluator.py` carried `score += 0.4  # placeholder for logical consistency`, so an entirely empty pattern scored 0.4 on internal coherence and the bottom 40% of the range was unreachable — an unmeasured term contributing a constant shifts every pattern equally and cannot separate any two of them. Removing it and renormalising `total_score` by the weight sum (a latent bug the flat 0.2 defaults were hiding: any other weighting silently rescaled the total and broke every threshold in the config) left all 27 of `tests/test_aiss.py` passing, because 26 of its 46 assertions are `assertIsInstance` / `assertIn` shape checks. `tests/test_aiss_scoring.py` adds the value-level checks. `logical_consistency` is now named in `unmeasured_components` rather than given a number.
+- `AISS/AISS.md` and `AISS/AISS1.md` are the same document with two different preambles — bodies byte-identical, MD5 `59eb94de…`. Deleting one is safe; which preamble to keep is an editorial call, not a technical one.
 - `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.

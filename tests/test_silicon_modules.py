@@ -16,7 +16,7 @@ class TestCoreEquations(unittest.TestCase):
     """Tests for Silicon/core_equations.py"""
 
     def setUp(self):
-        from Silicon.core.core_equations import (
+        from Silicon.core.analysis.core_equations import (
             force, work, kinetic_energy, potential_energy,
             michaelis_menten, hill_equation, nernst_potential,
             hookes_law, fourier_heat_flux, logistic_growth,
@@ -72,7 +72,7 @@ class TestMagneticBridgeProtocol(unittest.TestCase):
     """Tests for Silicon/magnetic_bridge_protocol.py"""
 
     def setUp(self):
-        from Silicon.core.magnetic_bridge_protocol import (
+        from Silicon.core.bridges.magnetic_bridge_protocol import (
             MagneticBridgeProtocol, BridgeCommand, ErrorCode,
             CANONICAL_EIGENVALUES, TRANSITION_TABLE,
         )
@@ -100,7 +100,7 @@ class TestOctahedralTensor(unittest.TestCase):
     """Tests for Silicon/octahedral_tensor.py"""
 
     def setUp(self):
-        from Silicon.core.octahedral_tensor import (
+        from Silicon.core.geometry.octahedral_tensor import (
             SP3_VECTORS, VERTEX_POSITIONS,
             tensor_for_position, all_eigenvalue_triplets,
             orbital_tensor, spectral_decomposition,
@@ -135,7 +135,7 @@ class TestTetrahedralSymmetry(unittest.TestCase):
     """Tests for Silicon/tetrahedral_symmetry.py"""
 
     def setUp(self):
-        from Silicon.core.tetrahedral_symmetry import (
+        from Silicon.core.geometry.tetrahedral_symmetry import (
             J2, J3, lode_angle,
             isotropic_part, deviatoric_part,
         )
@@ -172,7 +172,7 @@ class TestCrystallineStorage(unittest.TestCase):
     """Tests for Silicon/crystalline_storage.py"""
 
     def setUp(self):
-        from Silicon.core.crystalline_storage import (
+        from Silicon.core.systems.crystalline_storage import (
             storage_integral, access_energy, phi_node_radius,
             phi_lattice_positions, coupling_matrix, hamiltonian,
             spectral_gap, participation_ratio, critical_shell_index,
@@ -285,7 +285,7 @@ class TestLCEAAnalysis(unittest.TestCase):
     """Tests for Silicon/lcea_analysis.py"""
 
     def setUp(self):
-        from Silicon.core.lcea_analysis import (
+        from Silicon.core.analysis.lcea_analysis import (
             HumanLCEA, AILCEA,
             amortized_manufacturing_energy, true_food_cost,
             mfg_to_metabolic_ratio, gibbs_free_energy, excess_gibbs,
