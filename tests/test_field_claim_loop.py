@@ -35,14 +35,23 @@ class Store(unittest.TestCase):
         os.chdir(self._old)
         shutil.rmtree(self._dir, ignore_errors=True)
 
-    def band_breaking(self, n=40, every=3, anchor_dev=0.0, cov=None, seed=0):
-        """n readings on one channel, 1-in-`every` outside the claim band."""
+    def band_breaking(self, n=40, p=0.34, anchor_dev=0.0, cov=None, seed=0,
+                      clock=False):
+        """n readings, a random ~p of them outside the band.
+
+        Breaks are drawn independently, NOT every k-th reading. A fixed stride
+        is a periodic rider, and since FCL-11 uncensored the series the
+        correlation branch sees it -- correctly. That is its own test below,
+        not something a NOVEL fixture should smuggle in.
+        """
         rng = random.Random(seed)
         F.claim("piezo baseline", "piezo_trunk_n", 0.0, 1.0)
         for i in range(n):
-            v = 2.0 + rng.random() if i % every == 0 else 0.5
+            v = (2.0 + rng.random() if rng.random() < p
+                 else rng.gauss(0.5, 0.08))
             F.reading("piezo_trunk_n", v, anchor_dev=anchor_dev,
-                      covariates=cov, ts="t%03d" % i)
+                      covariates=cov, ts="t%03d" % i,
+                      t_s=float(i) if clock else None)
 
 
 # ---------------------------------------------------------------- FCL-1
@@ -394,7 +403,7 @@ class TestClaimIds(Store):
         self.assertEqual(F.claim("c", "ch", 0, 1)["id"], "c003")
 
     def test_refresh_writes_the_support_count_that_was_always_zero(self):
-        self.band_breaking(n=30, every=3, anchor_dev=0.0)
+        self.band_breaking(n=30, anchor_dev=0.0)
         c = F.refresh("c001")
         self.assertEqual(c["support"] + c["n_residuals"], 30)
         self.assertGreater(c["support"], 0)
@@ -436,6 +445,242 @@ class TestHoldoutBeforePromotion(unittest.TestCase):
         r = F.promote_channel("drift", self._rider(6, 200, 1),
                               self._rider(20, 200, 2))
         self.assertFalse(r["promoted"])
+
+
+# ---------------------------------------------------------------- FCL-11
+class TestSeriesIsUncensored(unittest.TestCase):
+    """test() is censored on purpose; deviation() is what gets correlated."""
+
+    def _drifting(self, n=120, period=10.0, amp=0.9, seed=4):
+        """Sinusoid about the band centre, crossing the edge on the peaks."""
+        rng = random.Random(seed)
+        return [0.5 + amp * math.sin(2 * math.pi * i / period)
+                + rng.gauss(0, 0.05) for i in range(n)]
+
+    def _censor(self, vals, lo=0.0, hi=1.0):
+        out = []
+        for v in vals:
+            if v < lo:
+                out.append(v - lo)
+            elif v > hi:
+                out.append(v - hi)
+        return out
+
+    def test_censoring_discards_most_of_the_record(self):
+        vals = self._drifting()
+        self.assertLess(len(self._censor(vals)), len(vals))
+
+    def test_censoring_recovers_the_wrong_lag(self):
+        """It does not always blind you -- it biases you, which is worse."""
+        vals = self._drifting()
+        cens = F.autocorr_scan(self._censor(vals))
+        unc = F.autocorr_scan([v - 0.5 for v in vals])
+        self.assertEqual(cens["status"], "STRUCTURED")
+        self.assertEqual(unc["status"], "STRUCTURED")
+        self.assertEqual(unc["lag"], 5)          # true half-period
+        self.assertNotEqual(cens["lag"], 5)
+
+    def test_the_uncensored_series_correlates_more_strongly(self):
+        vals = self._drifting()
+        self.assertGreater(
+            abs(F.autocorr_scan([v - 0.5 for v in vals])["rho"]),
+            abs(F.autocorr_scan(self._censor(vals))["rho"]))
+
+
+class TestDeviationVsTest(Store):
+
+    def setUp(self):
+        Store.setUp(self)
+        F.claim("piezo baseline", "piezo_trunk_n", 0.0, 1.0)
+
+    def test_test_is_zero_inside_the_band_and_deviation_is_not(self):
+        r = F.reading("piezo_trunk_n", 0.9)
+        self.assertEqual(F.test("c001", r), 0.0)
+        self.assertAlmostEqual(F.deviation("c001", r), 0.4)
+
+    def test_deviation_is_signed_about_the_centre(self):
+        lo = F.reading("piezo_trunk_n", 0.1)
+        hi = F.reading("piezo_trunk_n", 0.9)
+        self.assertAlmostEqual(F.deviation("c001", lo),
+                               -F.deviation("c001", hi))
+
+    def test_they_agree_on_direction_outside_the_band(self):
+        r = F.reading("piezo_trunk_n", 3.0)
+        self.assertGreater(F.test("c001", r), 0.0)
+        self.assertGreater(F.deviation("c001", r), 0.0)
+
+    def test_the_router_uses_every_reading_not_just_the_breaks(self):
+        rng = random.Random(4)
+        for i in range(120):
+            F.reading("piezo_trunk_n",
+                      0.5 + 0.9 * math.sin(2 * math.pi * i / 10.0)
+                      + rng.gauss(0, 0.05), ts="t%03d" % i)
+        r = F.route("c001")
+        self.assertIn("NOISE_AS_SIGNAL", [c["route"] for c in r["candidates"]])
+        self.assertIn("n=120", r["candidates"][0]["evidence"])
+
+
+# ---------------------------------------------------------------- FCL-12
+class TestLagIsADuration(unittest.TestCase):
+
+    def _poisson(self, n, seed, rate=1.0):
+        rng = random.Random(seed)
+        t, out = 0.0, []
+        for _ in range(n):
+            t += rng.expovariate(rate)
+            out.append(t)
+        return out
+
+    def test_a_regular_clock_recovers_the_half_period_in_seconds(self):
+        rng = random.Random(4)
+        ts = [i * 2.5 for i in range(120)]
+        xs = [0.9 * math.sin(2 * math.pi * i / 10.0) + rng.gauss(0, 0.05)
+              for i in range(120)]
+        s = F.slotted_scan(ts, xs, n_perm=200, seed=0)
+        self.assertEqual(s["status"], "STRUCTURED")
+        self.assertAlmostEqual(s["lag_s"], 12.5, places=6)   # T/2, T = 25 s
+        self.assertLess(s["rho"], -0.9)
+
+    def test_the_slot_width_tracks_the_sampling_interval(self):
+        """Deriving it from the record SPAN made each slot half a period wide,
+        which averaged a real rider down to rho=0.23 at an arbitrary lag."""
+        ts = [i * 2.5 for i in range(120)]
+        s = F.slotted_scan(ts, [0.0] * 119 + [1.0], n_perm=20, seed=0)
+        self.assertAlmostEqual(s["slot_width"], 2.5, places=6)
+
+    def test_null_rate_on_an_irregular_clock_is_near_alpha(self):
+        fires = 0
+        for s in range(150):
+            ts = self._poisson(80, s)
+            rng = random.Random(1000 + s)
+            xs = [rng.gauss(0, 1) for _ in range(80)]
+            fires += F.slotted_scan(ts, xs, n_perm=100,
+                                    seed=s)["status"] == "STRUCTURED"
+        self.assertLess(fires / 150.0, 0.10)
+
+    def test_it_finds_a_rider_that_index_lag_cannot_even_express(self):
+        for T in (3.0, 6.0, 12.0):
+            hits = 0
+            for s in range(20):
+                ts = self._poisson(80, s)
+                rng = random.Random(2000 + s)
+                xs = [math.sin(2 * math.pi * t / T) + rng.gauss(0, 0.5)
+                      for t in ts]
+                hits += F.slotted_scan(ts, xs, n_perm=100,
+                                       seed=s)["status"] == "STRUCTURED"
+            self.assertEqual(hits, 20, msg="period %.1f s" % T)
+
+    def test_the_scanned_lag_range_is_reported(self):
+        """So WHITE cannot quietly mean 'white inside a window I never named'."""
+        ts = [i * 2.5 for i in range(120)]
+        s = F.slotted_scan(ts, [float(i % 7) for i in range(120)],
+                           n_slots=12, n_perm=20, seed=0)
+        self.assertAlmostEqual(s["lag_range_s"], 30.0, places=6)
+
+    def test_no_period_is_claimed(self):
+        """Both textbook handles were measured and both were refused."""
+        ts = [i * 2.5 for i in range(120)]
+        rng = random.Random(4)
+        xs = [math.sin(2 * math.pi * i / 10.0) + rng.gauss(0, 0.05)
+              for i in range(120)]
+        s = F.slotted_scan(ts, xs, n_perm=50, seed=0)
+        self.assertIsNone(s["period_s"])
+        self.assertIn("Lomb-Scargle", s["period_note"])
+
+    def test_a_dead_clock_is_reported_not_assumed(self):
+        s = F.slotted_scan([7.0] * 40, [float(i) for i in range(40)])
+        self.assertEqual(s["status"], "NO_CLOCK")
+
+    def test_slotted_autocorr_rejects_mismatched_lengths(self):
+        with self.assertRaises(ValueError):
+            F.slotted_autocorr([1.0, 2.0], [1.0], 1.0, 3)
+
+    def test_local_normalisation_keeps_rho_bounded(self):
+        rng = random.Random(2)
+        ts = self._poisson(120, 3)
+        xs = [rng.gauss(0, 1) * (1 + 10 * (i % 5 == 0)) for i in range(120)]
+        for s in F.slotted_autocorr(ts, xs, 0.5, 20):
+            if s["rho"] is not None:
+                self.assertLessEqual(abs(s["rho"]), 1.0 + 1e-12)
+
+
+class TestClockOnTheRouter(Store):
+
+    def test_without_a_clock_the_router_says_lag_is_a_reading_count(self):
+        self.band_breaking(clock=False)
+        n = F.route("c001")["negative_evidence"]
+        self.assertTrue(any("not a duration" in x for x in n))
+
+    def test_with_a_clock_it_does_not(self):
+        self.band_breaking(clock=True)
+        n = F.route("c001")["negative_evidence"]
+        self.assertFalse(any("not a duration" in x for x in n))
+
+    def test_reading_times_prefers_the_monotonic_clock(self):
+        self.assertEqual(F._reading_times([{"t_s": 3.0, "ts": "t000"}]), [3.0])
+
+    def test_reading_times_falls_back_to_iso(self):
+        t = F._reading_times([{"t_s": None, "ts": "2026-08-05T12:00:00"},
+                              {"t_s": None, "ts": "2026-08-05T12:00:30"}])
+        self.assertAlmostEqual(t[1] - t[0], 30.0)
+
+    def test_reading_times_gives_up_on_an_unparseable_stamp(self):
+        self.assertIsNone(F._reading_times([{"t_s": None, "ts": "t000"}]))
+
+
+# ---------------------------------------------------------------- FCL-13
+class TestMultiplicityCorrection(unittest.TestCase):
+
+    def test_bh_and_bonferroni_agree_on_the_single_smallest_p(self):
+        """At rank 1, k*alpha/m IS alpha/m. BH buys nothing with one effect,
+        and saying so is the point of measuring it."""
+        p = [0.001, 0.4, 0.6, 0.9]
+        self.assertEqual(F.bh_reject(p, 0.05, "bh")[0],
+                         F.bh_reject(p, 0.05, "bonferroni")[0])
+
+    def test_bh_rejects_more_when_several_are_truly_small(self):
+        p = [0.008, 0.012, 0.02, 0.9]
+        bh, _ = F.bh_reject(p, 0.05, "bh")
+        bon, _ = F.bh_reject(p, 0.05, "bonferroni")
+        self.assertGreater(len(bh), len(bon))
+        self.assertTrue(bon.issubset(bh))
+
+    def test_by_is_strictly_more_conservative_than_bh(self):
+        p = [0.008, 0.012, 0.02, 0.9]
+        by, _ = F.bh_reject(p, 0.05, "by")
+        bh, _ = F.bh_reject(p, 0.05, "bh")
+        self.assertTrue(by.issubset(bh))
+
+    def test_nothing_small_means_nothing_rejected(self):
+        self.assertEqual(F.bh_reject([0.4, 0.6, 0.9], 0.05, "bh")[0], set())
+
+    def test_an_empty_family_is_not_a_division(self):
+        self.assertEqual(F.bh_reject([], 0.05, "bh"), (set(), 0.0))
+
+    def test_an_unknown_method_is_refused(self):
+        with self.assertRaises(ValueError):
+            F.bh_reject([0.01], 0.05, "holm")
+
+    def test_the_null_rate_holds_under_bh_too(self):
+        rng = random.Random(7)
+        fires = 0
+        for _ in range(400):
+            rs = [{"covariates": {"phase": rng.randrange(4)}}
+                  for _ in range(200)]
+            hit = {i for i in range(200) if rng.random() < 0.1}
+            if F.covariate_concentration(hit, rs, method="bh"):
+                fires += 1
+        self.assertLessEqual(fires / 400.0, 0.05)
+
+    def test_the_method_used_is_recorded_on_every_finding(self):
+        rng = random.Random(9)
+        rs, hit = [], set()
+        for i in range(200):
+            rain = 1 if i % 4 == 0 else 0
+            rs.append({"covariates": {"rain": rain}})
+            if rng.random() < (0.9 if rain else 0.05):
+                hit.add(i)
+        self.assertEqual(F.covariate_concentration(hit, rs)[0]["method"], "bh")
 
 
 class TestBinomTail(unittest.TestCase):

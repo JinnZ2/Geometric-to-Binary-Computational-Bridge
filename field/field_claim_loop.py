@@ -116,15 +116,73 @@ FCL-10 `cid = "c%03d" % (len(_load(CLAIMS)) + 1)` counts log LINES,
        the next id collides with a live claim. FIX: max over existing
        ids.
 
+FCL-11 The series fed to the correlation branch was CENSORED. test()
+       returns 0.0 inside the band, and only nonzero entries were kept,
+       so every reading the claim covered was discarded before any
+       correlation ran -- most of the record, and the survivors
+       unevenly spaced. Measured on a claim whose value drifts
+       sinusoidally about the band centre (period 10 readings,
+       amplitude 0.9, so it crosses the edge on peaks and stays inside
+       on troughs): 120 readings, censored keeps 87. Censoring did NOT
+       blind it -- it BIASED it, which is worse. Censored recovered
+       lag 4, uncensored recovered lag 5, and 5 is the true
+       half-period. |rho| 0.79 censored against 0.95 uncensored.
+       FIX: deviation() gives the signed distance from the band CENTRE
+       for every reading. test() stays censored -- it answers a
+       different question, "did the claim break" -- and now says so.
+
+FCL-12 Lag had no units. With the series uncensored, every reading has
+       a timestamp, so the fix is available: slotted autocorrelation
+       (Mayo 1974; Gaster & Roberts 1975 -- the same estimator is
+       Edelson & Krolik's 1988 discrete correlation function), which
+       buckets PAIRS by their separation in time. Locally normalised
+       (van Maanen & Tummers) so |rho| <= 1 by Cauchy-Schwarz.
+       The threshold is a permutation null: shuffle values against
+       timestamps, which destroys time structure while preserving the
+       sampling pattern and the marginal distribution exactly, and
+       take the max inside each permutation so the multiple-slot cost
+       is paid without assuming the slots are independent.
+       Measured on a Poisson clock: 4.0% false alarm at alpha 0.05,
+       100% power at rider periods 3, 6 and 12 s. On a regular 2.5 s
+       clock against a 25 s rider it returns rho = -0.99 at lag
+       12.5 s, exactly T/2.
+       Two of my own defects, found by testing the fix: the default
+       slot width came from the record SPAN, which made each slot half
+       a period wide and reported rho=0.23 at an arbitrary 148.8 s --
+       it must track the SAMPLING INTERVAL. And the argmax lag is not
+       a period: a periodic rider peaks at every multiple of T/2, so
+       noise picks the winner (median 8.8 s against a true T/2 of
+       3.0 s). Both textbook handles were measured and both refused --
+       the smallest significant lag is always slot 1 because rho -> 1
+       as tau -> 0, and the first local minimum ran biased low and got
+       worse with period (7.5 s against a true 10.0). NO PERIOD IS
+       REPORTED. For that, Lomb-Scargle.
+
+FCL-13 The covariate correction was Bonferroni, which controls the
+       chance of ANY false call. These findings all get re-tested by
+       next_query, so the quantity to hold is the expected PROPORTION
+       of false calls: Benjamini-Hochberg (1995).
+       Measured honestly, the gain here is small. BH rejects the k-th
+       smallest p at k*alpha/m, and at k=1 that IS Bonferroni, so with
+       ONE true effect the two are identical -- 85.2% recovery each.
+       BH pulls ahead only with several: +4.6 points at two true
+       effects, +1.8 at three, +0.6 at four. It is the right error
+       target and never does worse, and that is the whole claim.
+       The bigger lever is elsewhere and is now visible: the exact
+       binomial is discrete, so the achieved level sits near 1% rather
+       than the nominal 5%. That conservatism costs more power than
+       the correction choice does. method='by' (Benjamini-Yekutieli)
+       is available for arbitrary dependence at a log(m) cost, since
+       the bins of one covariate partition the readings and are
+       therefore not independent.
+
 Not fixed, and stated rather than papered over:
-  - The residual series is indexed by POSITION, not time. Readings
-    inside the band are dropped before the autocorrelation runs, so
-    lag k is "k residuals ago", not a duration. Against an irregular
-    sampling schedule the lag scan is measuring something without
-    units. It needs resampling onto a time grid, which needs a
-    sampling policy that does not exist yet.
   - Section 5e, the conservation ledger, is not implemented. See the
     OPEN QUESTION in section 5e.
+  - A rider whose period exceeds the scanned lag range is invisible.
+    The range is now reported (`lag_range_s`) so that WHITE cannot
+    quietly mean "white inside a window nobody named" -- the FCL-4
+    lesson generalised -- but nothing widens it automatically.
 
 =====================================================================
 1. WHAT THIS IS                          (author's spec, from here on)
@@ -204,7 +262,12 @@ the checksum.
      hold-out window before any demodulated channel is promoted.
      STATUS: hold-out is enforced by promote_channel().
   c. MISSING_VARIABLE routing is correlational. Needs a minimum-sample
-     gate and a base-rate comparison.  STATUS: see FCL-5.
+     gate and a base-rate comparison.  STATUS: see FCL-5 and FCL-13.
+     Still correlational: "concentrates under" is not "is caused by".
+     The gap is conditional-independence testing -- Peters, Janzing &
+     Schoelkopf, Elements of Causal Inference. Simpson's paradox is
+     the specific way this branch can be right about the correlation
+     and wrong about the variable.
   d. SELF-INITIATED ACTUATION burns a real energy budget.
      STATUS: implemented, see FCL-8. Costs are placeholders.
   e. No conservation ledger yet.
@@ -216,6 +279,7 @@ import datetime
 import json
 import math
 import os
+import random
 import sys
 
 READINGS = "READINGS.jsonl"
@@ -227,7 +291,10 @@ ROUTES = ("INSTRUMENT", "NOISE_AS_SIGNAL", "NOVEL", "MISSING_VARIABLE")
 
 # --- gates. every one of these was calibrated against a null. see FCL-3..5.
 MIN_SAMPLES = 8         # per-covariate-bin floor
-COVAR_ALPHA = 0.05      # family-wise, Bonferroni over bins tested
+COVAR_ALPHA = 0.05      # FDR over bins tested, Benjamini-Hochberg
+COVAR_METHOD = "bh"     # 'bh' | 'by' (arbitrary dependence) | 'bonferroni'
+SLOT_N = 12             # lag-time slots scanned by the correlation branch
+SLOT_PERM = 200         # permutations behind the correlation threshold
 AUTOCORR_MIN_N = 20     # below this the branch reports INSUFFICIENT, not white
 AUTOCORR_MAX_LAG = 12   # scan 1..this. a single fixed lag is blind. FCL-4.
 AUTOCORR_Z = 2.9        # ~alpha 0.05 after multiplicity over 12 lags
@@ -270,7 +337,7 @@ def _load(path):
 # READINGS -- direct transducer only
 # ---------------------------------------------------------------------
 def reading(channel, value, shape=None, covariates=None, anchor_dev=None,
-            anchor_raw=None, projection=None, ts=None):
+            anchor_raw=None, projection=None, ts=None, t_s=None):
     """
     channel    : transducer id ('piezo_trunk_n', 'chem_soil_a', 'lux_canopy')
     value      : scalar summary. kept for math ONLY.
@@ -284,13 +351,16 @@ def reading(channel, value, shape=None, covariates=None, anchor_dev=None,
     anchor_dev : stability reference MINUS its own expected value, in
                  reference units. A deviation, not a reading. FCL-2.
     anchor_raw : the reference reading itself, for provenance. Never routed on.
+    t_s        : monotonic clock, SECONDS. Preferred over parsing `ts`, which
+                 is wall-clock and jumps. Without a clock the correlation
+                 branch is indexed by reading number and says so. FCL-12.
     """
     if shape is not None and not projection:
         raise ValueError(
             "shape given without projection: name what produced `value` from "
             "it. Silent scalarization is the failure this loop is against.")
     return _append(READINGS, {
-        "ts": ts or _now(), "channel": channel, "value": value,
+        "ts": ts or _now(), "t_s": t_s, "channel": channel, "value": value,
         "shape": shape, "projection": projection,
         "covariates": covariates or {},
         "anchor_dev": anchor_dev, "anchor_raw": anchor_raw})
@@ -333,6 +403,10 @@ def _claims():
 def test(cid, r, claims=None):
     """Signed residual of reading r against claim cid. 0.0 = inside band.
 
+    This answers ONE question: did the claim break. It is censored on purpose
+    -- inside the band there is no break. Do not feed it to a correlation;
+    use deviation() for that. FCL-11.
+
     Compares `value` only. A claim has no shape-level band yet -- FCL-9.
     """
     c = (claims or _claims())[cid]
@@ -342,6 +416,38 @@ def test(cid, r, claims=None):
     if v > c["hi"]:
         return v - c["hi"]
     return 0.0
+
+
+def deviation(cid, r, claims=None):
+    """Signed distance from the band CENTRE. Defined for every reading.
+
+    test() is zero everywhere inside the band, so a series built from it is
+    censored: every reading the claim covered is discarded before any
+    correlation runs. That threw away most of the record, left the survivors
+    non-uniformly spaced in time, and made the series short enough that the
+    small-n regime was the normal one. FCL-11.
+    """
+    c = (claims or _claims())[cid]
+    return r["value"] - 0.5 * (c["lo"] + c["hi"])
+
+
+def _reading_times(rs):
+    """Seconds for each reading, or None if the log has no usable clock.
+
+    Prefers an explicit numeric `t_s`; falls back to parsing the ISO `ts`.
+    Without one of those, lag has no units and the caller must say so.
+    """
+    if not rs:
+        return None
+    if all(isinstance(r.get("t_s"), (int, float)) for r in rs):
+        return [float(r["t_s"]) for r in rs]
+    out = []
+    for r in rs:
+        try:
+            out.append(datetime.datetime.fromisoformat(r["ts"]).timestamp())
+        except (ValueError, TypeError, KeyError):
+            return None
+    return out
 
 
 def refresh(cid):
@@ -423,6 +529,181 @@ def autocorr_scan(xs, max_lag=AUTOCORR_MAX_LAG, z=AUTOCORR_Z,
             "lags_scanned": len(lags)}
 
 
+def _slot_pairs(times, slot_width, n_slots, max_pairs=200000):
+    """Pair indices bucketed by lag TIME. Depends only on the clock.
+
+    Computed once and reused across permutations. Slot 0 (dt < slot_width) is
+    kept but never scanned -- it is the zero-lag bucket.
+    """
+    n = len(times)
+    buckets = [[] for _ in range(n_slots + 1)]
+    count = 0
+    for i in range(n):
+        ti = times[i]
+        for j in range(i + 1, n):
+            k = int(abs(times[j] - ti) / slot_width)
+            if k > n_slots:
+                continue
+            buckets[k].append((i, j))
+            count += 1
+            if count >= max_pairs:
+                return buckets, True
+    return buckets, False
+
+
+def slotted_autocorr(times, xs, slot_width, n_slots, buckets=None):
+    """Autocorrelation binned by lag TIME, for irregularly sampled data.
+
+    The slotting technique from laser Doppler anemometry (Mayo 1974; Gaster &
+    Roberts 1975); the same estimator appears in astronomy as the discrete
+    correlation function (Edelson & Krolik 1988). Every pair of samples whose
+    separation falls in slot k contributes to rho at lag k*slot_width, so lag
+    is a DURATION and not a count of readings.
+
+    Locally normalised (van Maanen & Tummers): dividing by the square root of
+    the two within-slot sums of squares rather than the global variance keeps
+    |rho| <= 1 by Cauchy-Schwarz, which matters because the caller thresholds
+    on it.
+    """
+    n = len(xs)
+    if n != len(times):
+        raise ValueError("times and xs differ in length: %d vs %d"
+                         % (len(times), n))
+    m = sum(xs) / n
+    d = [x - m for x in xs]
+    if buckets is None:
+        buckets, _ = _slot_pairs(times, slot_width, n_slots)
+    out = []
+    for k in range(1, n_slots + 1):
+        pairs = buckets[k]
+        if not pairs:
+            out.append({"lag_s": k * slot_width, "rho": None, "pairs": 0})
+            continue
+        num = si = sj = 0.0
+        for i, j in pairs:
+            num += d[i] * d[j]
+            si += d[i] * d[i]
+            sj += d[j] * d[j]
+        den = math.sqrt(si * sj)
+        out.append({"lag_s": k * slot_width, "pairs": len(pairs),
+                    "rho": (num / den) if den > 0 else None})
+    return out
+
+
+def slotted_scan(times, xs, slot_width=None, n_slots=12, min_pairs=10,
+                 n_perm=200, alpha=0.05, seed=0, min_n=AUTOCORR_MIN_N):
+    """Max |rho| over lag slots, against a permutation null.
+
+    The null shuffles the VALUES against the timestamps. That destroys any
+    time structure while preserving the sampling pattern and the marginal
+    distribution exactly, so the threshold is calibrated to this clock rather
+    than to an assumption about it -- and taking the max inside each
+    permutation pays the multiple-slot cost automatically, with no Bonferroni
+    and no assumption that the slots are independent.
+    """
+    n = len(xs)
+    if n < min_n:
+        return {"status": "INSUFFICIENT", "n": n, "min_n": min_n,
+                "rho": 0.0, "lag_s": None, "p": None}
+    span = max(times) - min(times)
+    if span <= 0:
+        return {"status": "NO_CLOCK", "n": n, "rho": 0.0, "lag_s": None,
+                "p": None, "reason": "all readings share one timestamp"}
+    if slot_width is None:
+        # Track the SAMPLING INTERVAL, not the record length. Deriving the
+        # slot width from the span made each slot half a period wide against
+        # a 25 s rider sampled every 2.5 s, which averaged the rider to
+        # rho=0.23 and put the peak at an arbitrary lag of 148.8 s.
+        st = sorted(times)
+        gaps = sorted(b - a for a, b in zip(st, st[1:]) if b > a)
+        slot_width = (gaps[len(gaps) // 2] if gaps else span / float(n_slots))
+    buckets, capped = _slot_pairs(times, slot_width, n_slots)
+
+    def slots(vals):
+        return [s for s in slotted_autocorr(times, vals, slot_width, n_slots,
+                                            buckets)
+                if s["rho"] is not None and s["pairs"] >= min_pairs]
+
+    obs = slots(xs)
+    if not obs:
+        return {"status": "INSUFFICIENT", "n": n, "min_n": min_n, "rho": 0.0,
+                "lag_s": None, "p": None,
+                "reason": "no slot reached min_pairs=%d" % min_pairs}
+    best = max(obs, key=lambda s: abs(s["rho"]))
+    rho, lag_s = best["rho"], best["lag_s"]
+    rng = random.Random(seed)
+    shuf = list(xs)
+    hits = 0
+    nulls = []
+    for _ in range(n_perm):
+        rng.shuffle(shuf)
+        nm = max((abs(s["rho"]) for s in slots(shuf)), default=0.0)
+        nulls.append(nm)
+        if nm >= abs(rho):
+            hits += 1
+    p = (1.0 + hits) / (1.0 + n_perm)
+    nulls.sort()
+    crit = nulls[min(len(nulls) - 1, int(math.ceil((1 - alpha) * len(nulls))))]
+    sig = [s["lag_s"] for s in obs if abs(s["rho"]) >= crit]
+    return {"status": "STRUCTURED" if p <= alpha else "WHITE",
+            "n": n, "min_n": min_n, "rho": rho, "lag_s": lag_s, "p": p,
+            "alpha": alpha, "slot_width": slot_width, "n_slots": n_slots,
+            "n_perm": n_perm, "pairs_capped": capped,
+            # A rider whose period exceeds this is outside what was looked at.
+            # The FCL-4 lesson generalised: state the scanned range, do not
+            # let "WHITE" quietly mean "white within a window I never named".
+            "lag_range_s": n_slots * slot_width,
+            "significant_lags_s": sig, "crit": crit,
+            # NO PERIOD IS CLAIMED, and lag_s must not be read as one. A
+            # periodic rider peaks at every multiple of T/2 with comparable
+            # magnitude, so which peak wins is decided by noise: on a Poisson
+            # clock the argmax came back at a median 8.8 s against a true T/2
+            # of 3.0 s. The two textbook handles were both measured and both
+            # refused -- the smallest significant lag is always slot 1
+            # (rho -> 1 as tau -> 0 for any smooth signal), and the first
+            # local minimum ran biased low and got worse with period
+            # (7.5 s against a true 10.0 s at T=20). Period estimation is a
+            # different tool: Lomb-Scargle (Lomb 1976, Scargle 1982), or the
+            # floating-mean generalisation (Zechmeister & Kuerster 2009).
+            "period_s": None,
+            "period_note": "not estimated; use Lomb-Scargle"}
+
+
+def bh_reject(pvals, alpha=COVAR_ALPHA, method="bh"):
+    """Indices to reject, and the effective cutoff. Benjamini-Hochberg 1995.
+
+    Bonferroni controls the family-wise error rate -- the chance of ANY false
+    call -- which is the wrong target for an exploratory scan over covariates
+    and costs most of the power. BH controls the expected PROPORTION of calls
+    that are false, which is what an engine that will re-test everything it
+    finds actually needs.
+
+    method='by' is Benjamini-Yekutieli, valid under arbitrary dependence at a
+    log(m) cost. The bins of a single covariate partition the readings, so
+    they are negatively dependent; BH is proven under independence and PRDS,
+    and the measured behaviour under this partition structure is in the tests.
+    """
+    m = len(pvals)
+    if m == 0:
+        return set(), 0.0
+    if method == "bonferroni":
+        cut = alpha / m
+        return {i for i, p in enumerate(pvals) if p <= cut}, cut
+    c = 1.0
+    if method == "by":
+        c = sum(1.0 / i for i in range(1, m + 1))
+    elif method != "bh":
+        raise ValueError("method must be 'bh', 'by' or 'bonferroni'")
+    order = sorted(range(m), key=lambda i: pvals[i])
+    kmax = 0
+    for rank, i in enumerate(order, start=1):
+        if pvals[i] <= (rank / (m * c)) * alpha:
+            kmax = rank
+    if kmax == 0:
+        return set(), 0.0
+    return set(order[:kmax]), (kmax / (m * c)) * alpha
+
+
 def _binom_tail(k, n, p):
     """P(X >= k) for X ~ Binomial(n, p), exact, in log space.
 
@@ -452,12 +733,17 @@ def _binom_tail(k, n, p):
 
 
 def covariate_concentration(hit_idx, all_rs, alpha=COVAR_ALPHA,
-                            min_samples=MIN_SAMPLES):
+                            min_samples=MIN_SAMPLES, method=COVAR_METHOD):
     """Bins where residuals concentrate beyond chance.
 
-    Exact one-sided binomial tail against the base rate, Bonferroni over the
-    bins actually tested. The shipped `rate > 1.5 * base` fired on 35-41% of
-    null covariate sets. FCL-5.
+    Exact one-sided binomial tail against the base rate, then a multiplicity
+    correction over the bins actually tested. The shipped `rate > 1.5 * base`
+    fired on 35-41% of null covariate sets. FCL-5.
+
+    The correction defaults to Benjamini-Hochberg rather than Bonferroni: this
+    is an exploratory scan whose findings all get re-tested downstream by
+    next_query, so the expected proportion of false calls is the quantity to
+    hold, not the chance of any false call at all. FCL-13.
 
     hit_idx is a set of INDICES into all_rs. Membership was `r in hits`, dict
     equality, which counts duplicate readings as residuals. FCL-6.
@@ -477,15 +763,16 @@ def covariate_concentration(hit_idx, all_rs, alpha=COVAR_ALPHA,
     tested = [(key, tv) for key, tv in bins.items() if tv[0] >= min_samples]
     if not tested:
         return []
-    adj = alpha / len(tested)
+    pvals = [_binom_tail(hit, tot, base) for _, (tot, hit) in tested]
+    keep, cut = bh_reject(pvals, alpha, method)
     out = []
-    for (k, v), (tot, hit) in tested:
-        p = _binom_tail(hit, tot, base)
-        if p <= adj:
-            out.append({"covariate": k, "value": v, "n": tot, "hits": hit,
-                        "rate": round(hit / float(tot), 3),
-                        "base": round(base, 3), "p": p,
-                        "alpha_adj": adj, "bins_tested": len(tested)})
+    for idx in keep:
+        (k, v), (tot, hit) = tested[idx]
+        out.append({"covariate": k, "value": v, "n": tot, "hits": hit,
+                    "rate": round(hit / float(tot), 3),
+                    "base": round(base, 3), "p": pvals[idx],
+                    "method": method, "alpha_adj": cut,
+                    "bins_tested": len(tested)})
     return sorted(out, key=lambda d: d["p"])
 
 
@@ -502,12 +789,11 @@ def route(cid, anchor_tol=ANCHOR_TOL):
     cs = _claims()
     c = cs[cid]
     rs = [r for r in _load(READINGS) if r["channel"] == c["channel"]]
-    hit_idx, series = set(), []
-    for i, r in enumerate(rs):
-        d = test(cid, r, cs)
-        if d != 0.0:
-            hit_idx.add(i)
-            series.append(d)
+    hit_idx = {i for i, r in enumerate(rs) if test(cid, r, cs) != 0.0}
+    # Uncensored: every reading, signed from band centre. The censored series
+    # discarded every reading the claim covered before correlating. FCL-11.
+    series = [deviation(cid, r, cs) for r in rs]
+    times = _reading_times(rs)
     cands, negative = [], []
 
     # INSTRUMENT: did the stability anchor move at the same timestamps?
@@ -528,22 +814,35 @@ def route(cid, anchor_tol=ANCHOR_TOL):
         negative.append("no anchor logged on any residual sample -- "
                         "INSTRUMENT could not be ruled out, only unmeasured")
 
-    # NOISE_AS_SIGNAL: structured or white, scanned over lags.
-    ac = autocorr_scan(series)
+    # NOISE_AS_SIGNAL: structured or white. Lag is a duration when there is a
+    # clock, and a count of readings when there is not -- which is said out
+    # loud rather than left to be assumed. FCL-12.
+    if times is not None:
+        ac = slotted_scan(times, series, n_slots=SLOT_N, n_perm=SLOT_PERM)
+        unit, lag = "s", ac.get("lag_s")
+    else:
+        ac = autocorr_scan(series)
+        unit, lag = "readings", ac.get("lag")
     if ac["status"] == "STRUCTURED":
+        detail = ("p=%.3g by %d permutations" % (ac["p"], ac["n_perm"])
+                  if times is not None
+                  else "band %.2f, %d lags" % (ac["threshold"],
+                                               ac["lags_scanned"]))
         cands.append({
             "route": "NOISE_AS_SIGNAL",
-            "evidence": "residual autocorr = %.2f at lag %d (band %.2f, "
-                        "n=%d, %d lags scanned) -- candidate second channel"
-                        % (ac["rho"], ac["lag"], ac["threshold"], ac["n"],
-                           ac["lags_scanned"]),
+            "evidence": "deviation autocorr = %.2f at lag %s %s (n=%d, %s) -- "
+                        "candidate second channel"
+                        % (ac["rho"], lag, unit, ac["n"], detail),
             "weight": min(1.0, abs(ac["rho"]))})
-    elif ac["status"] == "INSUFFICIENT":
-        negative.append("residual series n=%d below AUTOCORR_MIN_N=%d -- "
-                        "not white, unjudged" % (ac["n"], ac["min_n"]))
+    elif ac["status"] in ("INSUFFICIENT", "NO_CLOCK"):
+        negative.append("correlation branch %s (n=%d) -- not white, unjudged"
+                        % (ac["status"], ac["n"]))
     else:
-        negative.append("residual white: max|rho|=%.2f at lag %d under band "
-                        "%.2f" % (ac["rho"], ac["lag"], ac["threshold"]))
+        negative.append("deviation white: max|rho|=%.2f at lag %s %s"
+                        % (ac["rho"], lag, unit))
+    if times is None:
+        negative.append("no clock on these readings -- lag is a reading "
+                        "count, not a duration; log t_s to fix")
 
     # MISSING_VARIABLE: does the break concentrate under a covariate?
     conc = covariate_concentration(hit_idx, rs)

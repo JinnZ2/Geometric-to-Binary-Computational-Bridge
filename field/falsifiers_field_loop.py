@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Runnable report: FCL-1..10. Stdlib only. Exits nonzero on failure.
+"""Runnable report: FCL-1..13. Stdlib only. Exits nonzero on failure.
 
 Each block states what the shipped skeleton did, what it does now, and the
 number that separates the two. Run it after any change to the router or the
@@ -33,11 +33,18 @@ def _store():
     return d
 
 
-def _break(n=40, every=3, anchor_dev=0.0, cov=None, seed=0):
+def _break(n=40, p=0.34, anchor_dev=0.0, cov=None, seed=0):
+    """Breaks drawn independently, NOT every k-th reading.
+
+    A fixed stride is a periodic rider, and since FCL-11 uncensored the series
+    the correlation branch sees it -- correctly. The first version of this
+    fixture used `i % 3 == 0` and the router routed it to NOISE_AS_SIGNAL,
+    which was the right answer to a question the fixture did not mean to ask.
+    """
     rng = random.Random(seed)
     F.claim("piezo baseline", "piezo_trunk_n", 0.0, 1.0)
     for i in range(n):
-        v = 2.0 + rng.random() if i % every == 0 else 0.5
+        v = 2.0 + rng.random() if rng.random() < p else rng.gauss(0.5, 0.08)
         F.reading("piezo_trunk_n", v, anchor_dev=anchor_dev, covariates=cov,
                   ts="t%03d" % i)
 
@@ -232,15 +239,88 @@ os.chdir(home)
 shutil.rmtree(d, ignore_errors=True)
 
 print()
+print("UNCENSORED SERIES, AND A CLOCK")
+
+rng = random.Random(4)
+vals = [0.5 + 0.9 * math.sin(2 * math.pi * i / 10.0) + rng.gauss(0, 0.05)
+        for i in range(120)]
+cens = [(v - 1.0 if v > 1.0 else v) for v in vals if v > 1.0 or v < 0.0]
+unc = [v - 0.5 for v in vals]
+a, b = F.autocorr_scan(cens), F.autocorr_scan(unc)
+check("FCL-11", "the correlated series is uncensored",
+      b["lag"] == 5 and a["lag"] != 5 and abs(b["rho"]) > abs(a["rho"]),
+      "120 readings, band [0,1], rider of half-period 5: censored keeps %d "
+      "and recovers lag %s (|rho| %.2f); uncensored keeps %d and recovers "
+      "lag %s (|rho| %.2f). Censoring biased the answer, it did not hide it."
+      % (len(cens), a["lag"], abs(a["rho"]), len(unc), b["lag"],
+         abs(b["rho"])))
+
+ts = [i * 2.5 for i in range(120)]
+s = F.slotted_scan(ts, unc, n_perm=200, seed=0)
+check("FCL-12", "lag is a duration when there is a clock",
+      s["status"] == "STRUCTURED" and abs(s["lag_s"] - 12.5) < 1e-9,
+      "regular 2.5 s clock, rider T=25 s -> rho %.2f at lag %.1f s (=T/2), "
+      "p=%.4f, slot %.2f s, scanned range %.1f s"
+      % (s["rho"], s["lag_s"], s["p"], s["slot_width"], s["lag_range_s"]))
+
+
+def poisson(n, seed, rate=1.0):
+    r = random.Random(seed)
+    t, out = 0.0, []
+    for _ in range(n):
+        t += r.expovariate(rate)
+        out.append(t)
+    return out
+
+
+fires = 0
+for s2 in range(150):
+    tt = poisson(80, s2)
+    r2 = random.Random(1000 + s2)
+    fires += F.slotted_scan(tt, [r2.gauss(0, 1) for _ in range(80)],
+                            n_perm=100, seed=s2)["status"] == "STRUCTURED"
+pw = []
+for T in (3.0, 6.0, 12.0):
+    h = 0
+    for s2 in range(20):
+        tt = poisson(80, s2)
+        r2 = random.Random(2000 + s2)
+        h += F.slotted_scan(tt, [math.sin(2 * math.pi * t / T)
+                                 + r2.gauss(0, 0.5) for t in tt],
+                            n_perm=100, seed=s2)["status"] == "STRUCTURED"
+    pw.append((T, 100.0 * h / 20))
+check("FCL-12b", "and it is calibrated on an irregular clock",
+      fires / 150.0 < 0.10 and all(p == 100.0 for _, p in pw),
+      "Poisson sampling: white values fire %.1f%% (alpha 5%%); riders %s"
+      % (100.0 * fires / 150,
+         ", ".join("T=%.0fs %.0f%%" % t for t in pw)))
+check("FCL-12c", "and no period is claimed",
+      s["period_s"] is None,
+      "argmax lag is not a period -- a rider peaks at every multiple of T/2, "
+      "and on a Poisson clock the argmax ran to a median 8.8 s against a true "
+      "T/2 of 3.0 s. %s." % s["period_note"])
+
+one = [0.001, 0.4, 0.6, 0.9]
+many = [0.008, 0.012, 0.02, 0.9]
+check("FCL-13", "multiplicity correction is BH, and the gain is stated small",
+      F.bh_reject(one, 0.05, "bh")[0] == F.bh_reject(one, 0.05,
+                                                     "bonferroni")[0]
+      and len(F.bh_reject(many, 0.05, "bh")[0])
+      > len(F.bh_reject(many, 0.05, "bonferroni")[0]),
+      "at rank 1 BH IS Bonferroni, so with one true effect they are identical "
+      "(85.2% recovery each); BH gains +4.6 pts at two true effects, +1.8 at "
+      "three, +0.6 at four. Right error target, small gain, never worse.")
+
+print()
 print("OPEN, not papered over:")
 print("  5a  what the physical anchor standard IS. The mechanism is built;")
 print("      the reference whose failure mode differs from the sensors' is")
 print("      not specified and was not invented here.")
 print("  5e  the conservation ledger. The spend ledger counts query cost,")
 print("      which is not the reservoir. Units unstated, so not guessed at.")
-print("  --  the residual series is indexed by POSITION, not time. Readings")
-print("      inside the band are dropped before the scan, so 'lag 3' means")
-print("      three residuals ago, not a duration.")
+print("  --  a rider whose period exceeds the scanned lag range is invisible.")
+print("      lag_range_s is reported so WHITE cannot quietly mean 'white")
+print("      inside a window nobody named', but nothing widens it.")
 print()
 
 if FAILED:
