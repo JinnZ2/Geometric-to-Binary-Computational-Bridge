@@ -89,12 +89,47 @@ def coverage(path=LIBRARY):
 
 
 def tags(path=LIBRARY):
-    """Every instance tag -> the principle it belongs to."""
+    """Every instance claim id -> the principles citing it.
+
+    Location-only instances do not appear here; they have no id by design.
+    """
     out = {}
     for p in principles(path):
         for i in p["instances"]:
-            out.setdefault(i["tag"], []).append(p["id"])
+            if i.get("claim"):
+                out.setdefault(i["claim"], []).append(p["id"])
     return out
+
+
+def unresolved(path=LIBRARY, root=ROOT):
+    """Instances whose location does not exist or whose id names no claim.
+
+    The reason this function exists: 19 of 36 instance tags were shorthand
+    invented while writing the library -- "KEA-kwell", "SIL-reorg",
+    "AISS-dup" -- and nothing checked them, so they read as claim ids and
+    pointed at nothing. Two things changed. `where` is a repo path and is
+    always required, because a path can be checked and an id someone made up
+    cannot. `claim` is optional and, when present, must resolve against
+    claims_index.py or OPEN_PROBLEMS.json -- 20 of 36 have a real one; the
+    other 16 legitimately do not, and now say so by omission rather than by
+    inventing one.
+    """
+    import json as _json
+    import claims_index as _ci
+    idx = _ci.scan(root)
+    with open(os.path.join(root, "playground", "OPEN_PROBLEMS.json"),
+              encoding="utf-8") as fh:
+        probs = {q["id"] for q in _json.load(fh)["problems"]}
+    bad = []
+    for p in principles(path):
+        for i in p["instances"]:
+            where = i.get("where")
+            if not where or not os.path.exists(os.path.join(root, where)):
+                bad.append((p["id"], where, "no such path"))
+            cid = i.get("claim")
+            if cid and cid not in idx and cid not in probs:
+                bad.append((p["id"], cid, "id resolves to no claim or problem"))
+    return bad
 
 
 def match(record, path=LIBRARY):
@@ -126,7 +161,8 @@ def _fmt(p, full=False):
                                            or "nothing. " + (p.get("gap_note")
                                                              or "gap.")), ""]
     out += ["  INSTANCES"]
-    out += ["    %-14s %s" % (i["tag"], i["what"]) for i in p["instances"]]
+    out += ["    %-10s %-46s %s" % (i.get("claim") or "-", i["where"],
+                                     i["what"]) for i in p["instances"]]
     if p.get("cost_when_missed"):
         out += ["", "  COST WHEN MISSED", "    %s" % p["cost_when_missed"]]
     return "\n".join(out)
@@ -180,8 +216,23 @@ def main(argv):
     elif cmd == "tags":
         for tag, pids in sorted(tags().items()):
             print("  %-14s %s" % (tag, ", ".join(pids)))
+    elif cmd == "resolve":
+        bad = unresolved()
+        n = sum(len(p["instances"]) for p in principles())
+        withid = sum(1 for p in principles() for i in p["instances"]
+                     if i.get("claim"))
+        print("%d instances: %d carry a resolvable claim or problem id, "
+              "%d are located by path only" % (n, withid, n - withid))
+        if bad:
+            print()
+            print("UNRESOLVED (%d):" % len(bad))
+            for pid, what, why in bad:
+                print("  %-26s %-40s %s" % (pid, what, why))
+            return 1
+        print("every instance points at something that exists.")
     else:
-        print("usage: principles.py [list | show ID | coverage | gaps | tags]")
+        print("usage: principles.py [list | show ID | coverage | gaps | "
+              "tags | resolve]")
         return 2
     return 0
 

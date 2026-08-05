@@ -285,15 +285,15 @@ class TestPrinciples(unittest.TestCase):
                 self.assertIn(k, p, msg=p.get("id"))
             self.assertTrue(p["detector"].strip(), msg=p["id"])
             for i in p["instances"]:
-                self.assertTrue(i["tag"].strip(), msg=p["id"])
+                self.assertTrue(i["where"].strip(), msg=p["id"])
                 self.assertGreater(len(i["what"]), 20, msg=p["id"])
 
-    def test_ids_are_unique_and_so_are_instance_tags_within_a_principle(self):
+    def test_ids_are_unique_and_so_are_instance_locations(self):
         ids = [p["id"] for p in self.PR.principles()]
         self.assertEqual(len(ids), len(set(ids)))
         for p in self.PR.principles():
-            tags = [i["tag"] for i in p["instances"]]
-            self.assertEqual(len(tags), len(set(tags)), msg=p["id"])
+            pairs = [(i["where"], i["what"]) for i in p["instances"]]
+            self.assertEqual(len(pairs), len(set(pairs)), msg=p["id"])
 
     def test_an_unmechanised_principle_says_so_rather_than_going_quiet(self):
         gaps = [p for p in self.PR.principles() if not p.get("mechanised_by")]
@@ -317,13 +317,16 @@ class TestPrinciples(unittest.TestCase):
     def test_the_shape_that_caught_its_own_auditor_is_recorded(self):
         """P-SELF-SUPPLIED-FALSIFIER cites the playground's own candidate."""
         p = self.PR.principle("P-SELF-SUPPLIED-FALSIFIER")
-        self.assertIn("PG-lomb", [i["tag"] for i in p["instances"]])
+        self.assertIn("playground/candidates/lomb_scargle_gls.py",
+                      [i["where"] for i in p["instances"]])
         self.assertIsNone(p.get("mechanised_by"))
 
     def test_two_formalisms_that_never_met_share_one_principle(self):
         p = self.PR.principle("P-SYMMETRY-COLLAPSE")
         self.assertEqual({"GIES-1", "KEA-7"},
-                         {i["tag"] for i in p["instances"]})
+                         {i["claim"] for i in p["instances"]})
+        self.assertEqual({"GEIS/gies_core.py", "Silicon/keating_cluster.py"},
+                         {i["where"] for i in p["instances"]})
 
     def test_match_reports_cited_and_unknown_separately(self):
         m = self.PR.match({"principles": ["P-UNFALSIFIABLE", "P-MADE-UP"]})
