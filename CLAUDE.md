@@ -48,14 +48,39 @@ python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
 python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
 python tests/test_repo_guard.py         # Null harness / symmetry veto / reach check (32 tests, no deps)
+python tests/test_field_claim_loop.py   # Field claim loop: router + calibrated gates (93 tests, no deps)
+python tests/test_playground.py         # Open bench: can each verdict actually fire (41 tests, no deps)
+python tests/test_playground_review.py  # Archive provenance, principles, staleness (52 tests, no deps)
+python tests/test_aiss.py               # AISS framework shape/round-trip tests (27 tests, needs numpy)
+python tests/test_aiss_scoring.py       # AISS scoring VALUES: placeholder removal, flat-weight null (26 tests)
 python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
 
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
 
+# Every suite under tests/ (2224 unittest cases; all pass, no PYTHONPATH needed)
+for t in tests/test_*.py; do python "$t" || echo "FAILED $t"; done
+
 # Runnable falsifier reports (stdlib, exit non-zero on failure)
 python Silicon/falsifiers.py                  # ER-1/2/3, NEG-7, GIES-2/3
 python Silicon/falsifiers_keating_seed.py     # KEA-1/3/7, SEED-1/3/5
+python field/falsifiers_field_loop.py         # FCL-1..13 + the 5b hold-out
+
+# Open bench for the unsolved problems (CC0, stdlib, anyone may submit)
+python playground/playground.py problems      # what is open, and what would settle it
+python playground/playground.py show FCL-12b  # one problem in full: leads, prior failures
+python playground/playground.py contract      # the candidate template
+python playground/playground.py run-all       # score every candidate
+python playground/playground.py archive      # verdicts, and why each resides where it does
+python playground/review.py                  # re-score the archive against today's gates
+python playground/principles.py list         # the 11 recurring failure shapes
+python playground/principles.py gaps         # the 5 that nothing catches automatically
+
+# Field claim loop (writes READINGS/CLAIMS/QUERIES/LEDGER.jsonl to cwd)
+python field/field_claim_loop.py spec         # the handoff spec + audit header
+python field/field_claim_loop.py status       # claims, residual counts, top route
+python field/field_claim_loop.py route c001   # the four-way fork, with evidence
+python field/field_claim_loop.py ledger       # spend and curiosity yield
 
 # Run GEIS demo
 python GEIS/demo.py
@@ -100,6 +125,11 @@ cd "Front end" && npm install && npm run dev
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
 | Repo guard | `tests/test_repo_guard.py` | 32 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands |
+| Playground review | `tests/test_playground_review.py` | 52 | RV-1..6 + PR-1..5: threshold extraction, every review finding incl. a loosened tolerance under an unchanged verdict, the two-instance rule, git-blob source recovery |
+| Playground | `tests/test_playground.py` | 41 | PG-1..8: every verdict tested by constructing a candidate that must receive it — unfalsifiable, null-artifact, contract, veto |
+| Field claim loop | `tests/test_field_claim_loop.py` | 93 | FCL-1..13: NOVEL reachability, anchor-as-deviation, both statistical gates against their nulls AND for power, deepen tightening, spend ledger, hold-out promotion, uncensored series, slotted lag-in-seconds, BH vs Bonferroni |
+| AISS (shape) | `tests/test_aiss.py` | 27 | Evaluator/governance/CCGF round-trips and return-type shape |
+| AISS (values) | `tests/test_aiss_scoring.py` | 26 | Coherence placeholder removed, `total_score` weight-sum normalisation, flat-weight null harness, trust-score product form |
 | Experiments topology | `tests/test_experiments_topology.py` | 47 | Vacuum assertion tautology (VAC-1/4), mode-count floor (VAC-2), zero circulation gradient, pin removes the zero mode (ATT-1) |
 | Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
@@ -273,6 +303,108 @@ is not a threshold on anything; use the persistence margin `Φ` from
 claim, was tested and failed**: randomly-coefficiented lenses of the same
 functional form reproduce the reported correlation floor. See
 `Negentropic/NEG_CLAIMS.md`.
+
+### Playground — the open bench
+
+```
+playground/                     CC0 bench for what this repo has not solved
+├── OPEN_PROBLEMS.json            15 open problems, machine-readable
+├── playground.py                 Harness. Docstring is the contract.
+├── review.py                     Re-scores the archive against today's gates
+├── PRINCIPLES.json               11 recurring failure shapes, 36 instances
+├── principles.py                 The library, and which shapes nothing catches
+├── ARCHIVE.jsonl                 Durable: verdict + why + what would flip it
+├── README.md                     The two gates, and why they are those two
+└── candidates/
+    ├── lomb_scargle_gls.py         SURVIVES — closes FCL-12b
+    └── tautology_demo.py           REJECTED_UNFALSIFIABLE, on purpose
+```
+
+Anyone may submit a candidate against a registered problem. Two gates are
+mechanical and are not ordinary code review. **`broken()`** requires a
+candidate to supply a deliberately wrong version of its own solution, which
+its own checks must reject — the `repo_guard` question *does this assertion
+have any input that would make it FAIL?* asked of the submitter instead of a
+reviewer. **`null()`** is required whenever the claim is statistical.
+`SURVIVES` is not "true"; it means the candidate cleared the gates this
+archive's own failures were caught by. Graduating one is a human decision.
+
+A verdict decays. `ARCHIVE.jsonl` records the constants that decided each one
+alongside why it came out that way, what would flip it, and where the
+candidate resides and on whose reasoning; `review.py` re-scores and exits
+nonzero when the archive stops describing reality. The case it exists for is
+not "a rejected candidate now passes" — that is knowledge moving — but a
+candidate that still passes **because it loosened its own tolerance**, which
+the review names by value: `TOL_FRAC 0.01 -> 0.05`.
+
+`PRINCIPLES.json` compresses ~60 findings across this archive into **11
+recurring failure shapes** with 36 instances. Several turned up in files
+sharing no code — `GIES-1`'s `outer(v,v)` and `KEA-7`'s exactly-even Keating
+energy are one shape in two formalisms that never met. A principle needs **two
+independent instances**; the status is computed from the count, so an entry
+cannot be promoted by editing a field, and one-instance entries are
+PROVISIONAL rather than dropped or inflated. The column that matters is
+`mechanised_by`: **6 of 11 are caught automatically, 5 are not**, and that gap
+list is the file's point. Tags are for transfer and screening — they do not
+restore a deleted module, which is what the 40-byte git blob sha in each
+archive record is for.
+
+### Field claim loop
+
+```
+field/                          Curiosity engine over direct transducers
+├── field_claim_loop.py           Router, claim table, gates, spend ledger.
+│                                 Docstring is the handoff spec + FCL-1..10 audit.
+└── falsifiers_field_loop.py      Runnable report, exits nonzero on failure
+```
+
+Five stages: `TRANSDUCER → BRIDGE → CLAIM TABLE → ROUTER → QUERY`, with the
+query actuating back onto the transducer. Readings test claims; the residual
+is the product. A residual forks four ways — INSTRUMENT, NOISE_AS_SIGNAL,
+NOVEL, MISSING_VARIABLE — and the router **proposes ranked candidates with
+evidence, it does not conclude**. A supported claim is not closed: `deepen()`
+spawns a child at a strictly tighter band or a named new axis.
+
+Both statistical gates are calibrated against their own nulls and tested for
+power in the same suite. The two failure modes are symmetric and the original
+had both at once: the NOISE_AS_SIGNAL branch fired on **21.9% of white-noise
+residual series** while having **0% power** against riders of period 4, 10,
+12, 14, 16 — because `ρ(lag) = cos(2π·lag/T)` vanishes at the one fixed lag it
+scanned.
+
+The correlation branch now runs on the **uncensored** series (`deviation()`,
+signed from band centre, every reading) and buckets pairs by separation in
+**time** (slotted autocorrelation — Mayo 1974; Gaster & Roberts 1975; the same
+estimator is Edelson & Krolik's 1988 DCF), thresholded by a permutation null
+that shuffles values against timestamps. On a Poisson clock: 4.0% false alarm
+at α = 0.05, 100% power at rider periods 3, 6 and 12 s. **No period is
+reported** — the argmax lag is not one, and both textbook handles were
+measured and refused. For period estimation, Lomb–Scargle.
+
+### AISS — Autonomous Intelligence Sovereignty & Sensing
+
+```
+AISS/                           Governance / assessment framework (not a physics folder)
+├── sovereignty_evaluator.py      Pattern merit scored independent of source reputation
+├── assessment_framework.py       trust_score, structural_health, cognitive_diversity
+├── geometric_governance.py       Governance structures over the octahedral state model
+├── ccgf.py                       Cross-context governance formalism
+└── AISS.md / AISS1.md / Assessment.md / …   ~260 KB of specification
+```
+
+`AISS.md` and `AISS1.md` are **the same document**: the bodies are
+byte-identical (1804 lines, matching MD5) and they differ only in the
+preamble — 21 lines in `AISS.md`, 7 in `AISS1.md`. One of the two should be
+deleted; nothing is lost either way except the preamble not chosen.
+
+Only one of `repo_guard.py`'s three mechanical stages applies here. The
+symmetry veto has no surface (no material mechanism is claimed) and the
+reach check has no instrument claims. The null harness applies and **fires**:
+the shipped merit weights are five criteria at 0.20 — an unweighted mean —
+and 77% of random reweightings reproduce the same high-merit rate, so the
+weights carry no information. `evaluate_pattern` now reports
+`weights_are_flat` alongside every score, and `verdict_is_weight_sensitive()`
+runs the null on demand.
 
 ### C Acceleration (Optional)
 
@@ -511,4 +643,15 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Silicon/Fabrication.md` and `Silicon/Magnetic-bridge.md` carry audit headers rather than rewrites: their hardware lists, FSMs and protocol structure are sound and were kept. Only the physics layer was replaced.
 - **GIES state tensors collapsed and nothing detected it.** `state_tensor.py` built `T = outer(v, v)` from an antipodal position table, so `outer(v,v) == outer(-v,-v)` made states `i` and `7-i` identical in every invariant and every projection — and `NOT(i) = 7-i` is precisely that map, so the gate set's only unary operation was invisible to the representation. `GIES.md` §7.2 already specified the correct weighted sum over bond directions; §8.3 implemented a degenerate special case of its own spec. Fixed in `GEIS/gies_core.py`; the old file is annotated and kept for provenance.
 - **Index parity is site type, and it is free.** Even-parity indices land on lattice atoms, odd-parity ones on tetrahedral interstitials (verified against the diamond-cubic basis: coordination shell identical to the T site). So the 3-bit address space already carries a physically meaningful single-bit error-detecting code, which is what the "geometric error correction" claim wanted. It also means the honest state space is 4 states plus a site-type flag, because `NOT` crosses the flag and every crossing is a Frenkel pair (~4.75 eV). The carrier invariant is **J3**, not the trace — trace and J2 are identical across all eight states, while J3 flips sign with parity. That is the same `J3` mode invariant already in `silicon_error_correction.json`.
+- **A four-way router forked one way, and the branch that finds new ground could not fire.** `field/field_claim_loop.py`'s INSTRUMENT route appended a candidate whenever any anchor was logged — including at weight 0.0 for a perfectly stable rig — and NOVEL was guarded by `if hits and not cands`. So NOVEL was unreachable precisely when instrumentation was good, and the emitted experiment was "cross-check against a second transducer" when the answer was "spawn a claim". Compounding it, `anchor` is specified as "reading from the stability-reference channel" but tested as `abs(anchor) > 0`, which is a test on a *deviation*: fed an actual reading (1004 hPa), INSTRUMENT won every claim forever at weight 1.0. Both fixed; a route now contributes a candidate only with positive evidence, and NOVEL records the negative evidence it rests on. FCL-1/2.
+- **A detector with a 22% false-alarm rate and 0% power, in the same configuration.** The NOISE_AS_SIGNAL branch tested `|autocorr(lag=3)| > 0.35` with no minimum-sample gate — on a series that holds *only* band-breaking readings, so small n is the normal case, not the edge: 23.5% false alarm at n=5, 21.9% at n=8. And for a periodic rider of period T, `ρ(lag) = cos(2π·lag/T)`, which at lag 3 is **exactly zero at T=12** and small at T ∈ {4, 10, 14, 16} — measured power 0.0% at those periods against 98–100% at T ∈ {6, 8, 24, 48}. A single fixed lag cannot detect structure in general. Replaced with a scan over lags 1–12 against a multiplicity-widened band: 2.6% on white noise, 100% power at T = 6, 12, 24. FCL-3/4.
+- **`rate > 1.5 × base` fired on a third of null covariate sets, and got worse with more data.** The MISSING_VARIABLE branch had no significance test; the folder's own notes called it "too permissive" without measuring it. Null covariates independent of residuals: 34.7% (40 readings / 4 levels), 34.0% (200 / 8), **41.0%** (200 / 4 at base rate 0.10) — rising with n because more bins clear `MIN_SAMPLES` and each is another chance to fire. Replaced with an exact one-sided binomial tail, Bonferroni-corrected over bins actually tested: ≤0.8% on the same nulls, and it still finds a real rain-driven concentration at p = 1.2e-26. Separately, `hit + (r in hits)` was dict equality, so 20 duplicate readings with **one** actual residual reported "rate 1.00 under phase=dusk vs base 0.05". FCL-5/6.
+- **Ten test files were not running at all, and nothing reported it.** `tests/test_silicon_modules.py` imported six modules from `Silicon.core.*` that a directory reorg had moved one level down into `analysis/`, `bridges/`, `geometry/`, `systems/` — 52 of its 66 tests errored in `setUp`. Nine more (`test_bridges.py` among them, the 768-test suite this file's own command list points at) lacked the `sys.path` bootstrap the other 25 test files carry, so the documented `python tests/test_bridges.py` raised `ModuleNotFoundError: No module named 'bridges'`. Both are fixed; all 2224 cases under `tests/` now run green from the repo root with no `PYTHONPATH`. An import error in `setUp` is reported as a test ERROR, not a collection failure, so a suite can be 79% dead and still look like it ran.
+- **A shape-level test suite did not notice a 40% score change.** `AISS/sovereignty_evaluator.py` carried `score += 0.4  # placeholder for logical consistency`, so an entirely empty pattern scored 0.4 on internal coherence and the bottom 40% of the range was unreachable — an unmeasured term contributing a constant shifts every pattern equally and cannot separate any two of them. Removing it and renormalising `total_score` by the weight sum (a latent bug the flat 0.2 defaults were hiding: any other weighting silently rescaled the total and broke every threshold in the config) left all 27 of `tests/test_aiss.py` passing, because 26 of its 46 assertions are `assertIsInstance` / `assertIn` shape checks. `tests/test_aiss_scoring.py` adds the value-level checks. `logical_consistency` is now named in `unmeasured_components` rather than given a number.
+- **Censoring a series does not blind a correlation — it biases it, which is worse.** The field loop fed its correlation branch the output of `test()`, which is 0.0 inside the claim band, keeping only the breaks. On a claim whose value drifts sinusoidally about the band centre (period 10 readings, amplitude 0.9), 120 readings became 87, and the censored series still came back STRUCTURED — at **lag 4 against a true half-period of 5**, |ρ| 0.79 versus 0.95 uncensored. A wrong answer delivered confidently. `deviation()` now gives the signed distance from band centre for every reading; `test()` stays censored because it answers a different question, and now says so. FCL-11.
+- **Three of my own defects, found by testing the fixes rather than by reading them.** The slotted-autocorrelation default derived slot width from the record *span*, making each slot half a period wide against a 25 s rider sampled every 2.5 s — it reported ρ = 0.23 at an arbitrary 148.8 s where the truth was ρ = −0.99 at 12.5 s; slot width must track the *sampling interval*. The argmax lag is not a period: a rider peaks at every multiple of T/2, so noise picks the winner (median 8.8 s against a true T/2 of 3.0 s), and both textbook handles were measured and refused — smallest-significant is always slot 1 since ρ→1 as τ→0, and first-local-minimum ran biased low and worsened with period (7.5 s against a true 10.0). **No period is reported**; that is Lomb–Scargle's job. And both test fixtures broke the band on a fixed `i % 3` stride, which *is* a period-3 rider — once the series was uncensored the router correctly routed it to NOISE_AS_SIGNAL, the right answer to a question the fixture never meant to ask. FCL-12.
+- **A recommended fix that mostly did not help, reported as such.** Swapping Bonferroni for Benjamini–Hochberg on the covariate scan is the right error target — FDR, not family-wise, since every finding gets re-tested by `next_query` — but BH rejects the k-th smallest p at k·α/m, and **at k=1 that is Bonferroni exactly**. With one true effect the two are identical: 85.2% recovery each. BH gains +4.6 points at two true effects, +1.8 at three, +0.6 at four. It never does worse, and that is the whole claim. The bigger lever turned out to be visible only once measured: the exact binomial tail is discrete, so the achieved level sits near **1%** against a nominal 5%, and that conservatism costs more power than the correction choice does. FCL-13.
+- **The field loop's two open problems that were not closed, and why.** (5a) The anchor mechanism is built — `anchor_dev` is a declared deviation against an explicit `ANCHOR_TOL` — but *what the physical standard is* remains unspecified. It needs a reference whose failure mode differs from the working sensors', and that was not invented here. `ANCHOR_TOL` ships at 0.0, which for a float sensor means "any nonzero"; set it from the anchor's own noise floor before trusting INSTRUMENT. (5e) The conservation ledger is not implemented: the spend ledger counts query cost, which is not the reservoir, and the units were not stated so they were not guessed. Still open in a narrower form: a rider whose period exceeds the scanned lag range is invisible — `lag_range_s` is now reported so WHITE cannot quietly mean "white inside a window nobody named", but nothing widens it automatically.
+- `field/field_claim_loop.py`'s `shape` is documented canonical ("Do NOT scalarize on ingest") and **no code path reads it** — `test()` compares `value` only, so every claim in the system is a claim about one scalar projection. Storing the shape without testing against it is scalarizing with a receipt. Partial fix only: a reading carrying a shape must now name the `projection` that produced `value`, making the scalarization explicit and auditable. What a shape-level band should *be* is a physics question, not a coding one. FCL-9.
+- `AISS/AISS.md` and `AISS/AISS1.md` are the same document with two different preambles — bodies byte-identical, MD5 `59eb94de…`. Deleting one is safe; which preamble to keep is an editorial call, not a technical one.
 - `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.

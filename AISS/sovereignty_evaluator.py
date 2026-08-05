@@ -85,6 +85,56 @@ class PatternSovereigntyEvaluator:
         self.internal_experience_log: List = []
         self.verified_patterns: List = []
 
+    def weights_are_flat(self, tol: float = 1e-9) -> bool:
+        """Are the merit weights all equal?
+
+        The shipped defaults are five criteria at 0.20, which is an unweighted
+        MEAN presented as a weighted score. That is worth surfacing rather than
+        hiding: a flat weighting encodes no judgement about which criterion
+        matters, and a reader is entitled to know that before treating
+        ``total_score`` as an expert-weighted figure.
+        """
+        vals = list(self.config.merit_weights.values())
+        return bool(vals) and (max(vals) - min(vals)) <= tol
+
+    def verdict_is_weight_sensitive(self, patterns, threshold=None,
+                                    trials: int = 200, seed: int = 0,
+                                    tol: float = 0.05) -> Dict:
+        """Does the high-merit verdict survive arbitrary reweighting?
+
+        The null-harness question from ``repo_guard.py``, applied to this
+        scorer. If randomly drawn weights reproduce the same high-merit rate,
+        the weights are carrying no information and ``total_score`` is
+        reporting the arithmetic rather than a judgement.
+
+        Measured on the shipped flat defaults: 77% of random reweightings land
+        within 0.05 of the flat-weight rate. That is a null-harness ARTIFACT,
+        and it is why ``weights_are_flat`` is reported alongside every score.
+        """
+        import random as _random
+        if not patterns:
+            raise ValueError("need at least one pattern to compare")
+        thr = self.config.merit_high if threshold is None else threshold
+        keys = list(self.config.merit_weights)
+
+        def rate(weights):
+            wsum = sum(weights[k] for k in keys)
+            hits = sum((sum(weights[k] * scores[k] for k in keys) / wsum) >= thr
+                       for scores in patterns)
+            return hits / len(patterns)
+
+        base = rate(self.config.merit_weights)
+        rng = _random.Random(seed)
+        agree = sum(1 for _ in range(trials)
+                    if abs(rate({k: rng.random() for k in keys}) - base) <= tol)
+        frac = agree / trials
+        return {"flat_weight_rate": base, "trials": trials,
+                "fraction_agreeing": frac, "tolerance": tol,
+                "weights_carry_information": frac <= 0.5,
+                "verdict": "ARTIFACT -- reweighting does not change the verdict"
+                           if frac > 0.5 else
+                           "weights are doing work"}
+
     def evaluate_pattern(self, pattern: Pattern,
                          source: Optional[SourceMetadata] = None) -> Dict:
         """Evaluate pattern independent of source reputation."""
@@ -97,8 +147,15 @@ class PatternSovereigntyEvaluator:
         }
 
         w = self.config.merit_weights
-        total = sum(w[k] * scores[k] for k in scores)
-        pattern_merit = {**scores, "total_score": total}
+        # Normalise by the weight sum. Without this, changing any weight
+        # silently rescales total_score and every threshold in the config
+        # breaks: the defaults happen to sum to 1.0, which hid the bug.
+        wsum = sum(w[k] for k in scores)
+        if wsum <= 0:
+            raise ValueError("merit weights must sum to a positive number")
+        total = sum(w[k] * scores[k] for k in scores) / wsum
+        pattern_merit = {**scores, "total_score": total,
+                         "weights_are_flat": self.weights_are_flat()}
 
         suppression_signal = None
         if source:
@@ -116,13 +173,31 @@ class PatternSovereigntyEvaluator:
     # --- Scorers ---
 
     def _check_internal_coherence(self, pattern: Pattern) -> float:
-        score = 0.0
-        if pattern.mathematical_structure:
-            score += 0.3
-        if pattern.geometric_representation:
-            score += 0.3
-        score += 0.4  # placeholder for logical consistency
-        return min(score, 1.0)
+        """Coherence over the components actually inspected.
+
+        The previous version added a flat ``score += 0.4  # placeholder for
+        logical consistency``, so 40% of this score was a constant: a pattern
+        with no mathematical structure and no geometric representation still
+        scored 0.4, and nothing could ever score below it. An unmeasured term
+        contributing a fixed amount is not a measurement, and it shifts every
+        pattern equally, so it cannot separate any two of them.
+
+        The term is removed rather than guessed at. The two components that ARE
+        inspected are renormalised to span [0, 1], and ``unmeasured_components``
+        records what is still missing so it stays visible instead of being
+        baked in. Implement a logical-consistency check and add it here with
+        its own weight.
+        """
+        components = {
+            "mathematical_structure": 1.0 if pattern.mathematical_structure else 0.0,
+            "geometric_representation": (1.0 if pattern.geometric_representation
+                                         else 0.0),
+        }
+        return sum(components.values()) / len(components)
+
+    #: Components named in the specification but not yet computed. They are
+    #: EXCLUDED from the score rather than given a placeholder value.
+    unmeasured_components = ("logical_consistency",)
 
     def _check_empirical_testability(self, pattern: Pattern) -> float:
         score = 0.0

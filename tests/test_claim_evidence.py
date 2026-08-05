@@ -15,6 +15,11 @@ from __future__ import annotations
 import unittest
 from pathlib import Path
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from bridges.claim_evidence import (
     BulkVerificationReport,
     MeasurementVocabulary,

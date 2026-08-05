@@ -18,6 +18,11 @@ from __future__ import annotations
 import math
 import unittest
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from bridges.adapters import AlternativeAdapter, BinaryAdapter
 from bridges.alternative_spice import AlternativeSPICE
 from bridges.encode_state import (

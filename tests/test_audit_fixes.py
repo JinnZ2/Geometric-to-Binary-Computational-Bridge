@@ -14,6 +14,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 from sensing.firmware.sensor_drivers.base import SensorReading
 from sensing.processing.primitives_encoder import (
     MAX_OBS_LINE_BYTES,
