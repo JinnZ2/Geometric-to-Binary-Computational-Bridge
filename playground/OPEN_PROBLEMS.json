@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "license": "CC0",
+  "note": "Machine-readable registry of what is actually unsolved in this repo. Add an entry the moment something is found open; do not let it live only in prose. `kind` says what class of evidence would settle it, not how hard it is.",
+  "kinds": {
+    "CODE": "settled by a runnable implementation plus a falsifier",
+    "DERIVATION": "settled by an argument from stated premises, checkable by computation",
+    "DEFINITION": "settled by choosing and defending a definition; the gap is conceptual, not computational",
+    "BENCH": "settled only by an instrument reading. Cost and instrument are named."
+  },
+  "problems": [
+    {
+      "id": "FCL-5a",
+      "title": "What the physical anchor standard IS",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "The INSTRUMENT route asks whether a stability reference moved at the same timestamp as a residual. The mechanism is built: anchor_dev is a declared deviation against an explicit ANCHOR_TOL. What is not specified is the reference itself.",
+      "why_open": "It needs a standard whose failure mode does not correlate with the working sensors'. An anchor that drifts the same way as the sensor it checks is not an anchor.",
+      "would_count": [
+        "A named physical reference per channel whose value is set by something other than the sensor electronics",
+        "An Allan-deviation curve for that reference, at rest, giving ANCHOR_TOL as a function of averaging time",
+        "A stated failure mode, and an argument that it is uncorrelated with the working sensor's"
+      ],
+      "prior_attempts": [
+        {"what": "ANCHOR_TOL = 0.0", "why_it_failed": "for a float sensor that means 'any nonzero', which is always true"}
+      ],
+      "leads": [
+        "Allan variance (Allan 1966; IEEE Std 952) separates white / flicker / random-walk drift by log-log slope",
+        "Dissimilar redundancy: sensors of different physical principle, so failure modes do not correlate",
+        "Analytical redundancy / parity space (Chow & Willsky 1984) needs no reference standard at all, only redundancy plus a model",
+        "Thermodynamically-fixed anchors: ice bath, saturated salt slurries (ASTM E104: LiCl 11.3% RH, MgCl2 33%, NaCl 75%), calibration mass, shorted/open input, Spectralon reflectance target",
+        "Westgard multi-rule QC has published error-detection and false-rejection rates per rule"
+      ],
+      "acceptance": {"needs_null": false, "material": null}
+    },
+    {
+      "id": "FCL-5e",
+      "title": "The conservation ledger: what is the reservoir, in what units",
+      "state": "OPEN",
+      "kind": "DEFINITION",
+      "statement": "The spend ledger counts query cost and credits whether the funded query moved a claim. That is a budget with a yield, not a conservation law. Without a reservoir there is no way to state that the loop is not creating information from nothing.",
+      "why_open": "Units were never stated, so they were not guessed. Three candidate reservoirs exist and they are not the same quantity.",
+      "would_count": [
+        "A named conserved quantity with units",
+        "A measurement procedure for it from the existing logs",
+        "A demonstration that the loop cannot increase it without an input"
+      ],
+      "leads": [
+        "Expected information gain (Lindley 1956), in bits or nats: KL from prior to posterior",
+        "Value of information (Howard 1966), units of whatever the decision pays in",
+        "Stochastic thermodynamics: Sagawa-Ueda; Parrondo, Horowitz & Sagawa 2015. Continuous with the Landauer work already in Negentropic/",
+        "Empowerment (Klyubin, Polani & Nehaniv 2005): channel capacity actuators -> sensors, in bits"
+      ],
+      "acceptance": {"needs_null": false, "material": null}
+    },
+    {
+      "id": "FCL-9",
+      "title": "What a shape-level claim band IS",
+      "state": "OPEN",
+      "kind": "DEFINITION",
+      "statement": "shape is documented canonical -- 'Do NOT scalarize on ingest' -- and no code path reads it. test() compares value only, so every claim in the system is a claim about one scalar projection.",
+      "why_open": "Storing the shape without testing against it is scalarizing with a receipt. A reading carrying a shape must now name its projection, which makes the loss explicit and auditable, but does not remove it. What a band on a vector, a spectrum, or a multi-axis reading should BE is a physics question.",
+      "would_count": [
+        "A definition of 'inside the band' for a non-scalar reading that is not a norm in disguise",
+        "A signed residual for it, so the correlation branch still has something to correlate",
+        "A demonstration on a real multi-axis reading where the shape-level test and the scalar test disagree, and an argument for which is right"
+      ],
+      "acceptance": {"needs_null": false, "material": null}
+    },
+    {
+      "id": "FCL-12b",
+      "title": "Period estimation, and the scanned lag range",
+      "state": "OPEN",
+      "kind": "CODE",
+      "statement": "The slotted autocorrelation reports STRUCTURED with a calibrated p-value but refuses to name a period, because the argmax lag is not one: a rider peaks at every multiple of T/2 and noise picks the winner. Separately, a rider whose period exceeds n_slots*slot_width is invisible; lag_range_s is reported but nothing widens it.",
+      "why_open": "Both textbook autocorrelation handles were measured and both refused. Smallest-significant is always slot 1 because rho -> 1 as tau -> 0. First-local-minimum ran biased low and worsened with period: 7.5 s against a true 10.0.",
+      "would_count": [
+        "A period estimate on irregularly sampled data with measured error against known riders",
+        "A false-alarm rate on white noise at a stated alpha",
+        "Stdlib only, no numpy"
+      ],
+      "prior_attempts": [
+        {"what": "argmax of slotted |rho|", "why_it_failed": "median 8.8 s against a true T/2 of 3.0 s on a Poisson clock"},
+        {"what": "first local minimum of rho", "why_it_failed": "biased low, worsening with period: 7.5 s against a true 10.0 at T=20"}
+      ],
+      "leads": [
+        "Lomb-Scargle (Lomb 1976; Scargle 1982); floating-mean generalisation (Zechmeister & Kuerster 2009)",
+        "CLEAN deconvolution of the spectral window (Roberts, Lehar & Dreher 1987)"
+      ],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "FCL-13b",
+      "title": "The exact binomial tail is discrete, and the conservatism costs power",
+      "state": "OPEN",
+      "kind": "CODE",
+      "statement": "The covariate gate uses an exact one-sided binomial tail. Because the distribution is discrete, the achieved level sits near 1% against a nominal 5%. That conservatism costs more power than the choice between Bonferroni and Benjamini-Hochberg does.",
+      "why_open": "Measured but not fixed. Recovering the level is a known problem with known answers, none of which were implemented.",
+      "would_count": [
+        "A gate whose achieved false-positive rate is close to the nominal alpha on the same nulls",
+        "Measured power gain against the current gate on the same real effect",
+        "No increase in false-positive rate"
+      ],
+      "leads": ["mid-p correction", "randomised / fuzzy decision at the boundary", "Berger-Boos or similar"],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "FCL-14",
+      "title": "MISSING_VARIABLE is correlational and cannot conclude",
+      "state": "OPEN",
+      "kind": "DERIVATION",
+      "statement": "The branch tests whether residuals concentrate under a covariate. It is now correctly calibrated, and it still cannot distinguish a cause from a confounder.",
+      "why_open": "'Concentrates under' is not 'is caused by'. With enough logged covariates something always concentrates, which the calibration fixes; it does not fix the inferential gap.",
+      "would_count": [
+        "A conditional-independence test over the logged covariates, stdlib",
+        "A worked case where the marginal and conditional verdicts differ",
+        "An honest statement of what the loop can and cannot conclude from observational logging alone"
+      ],
+      "leads": ["Peters, Janzing & Schoelkopf, Elements of Causal Inference (free online)", "Simpson's paradox as the concrete failure"],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "NEG-8",
+      "title": "Trajectory-level entropy production",
+      "state": "OPEN",
+      "kind": "CODE",
+      "statement": "Negentropic/ entropy production is a housekeeping estimator with a known sign bias. NEG-8 (persistence margin Phi = -S_exchange - sigma) cannot be evaluated on simulated traces until sigma is estimated at trajectory level.",
+      "would_count": ["A MaxCal or equivalent trajectory-level estimator", "Sign-bias measured against a known-sigma simulation", "Stdlib tier"],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "NEG-2-3",
+      "title": "Two falsifiers implemented and never run against data",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "NEG-2 (archive lifetime under an expanding maintenance schedule) and NEG-3 (finite-time Landauer erasure, tau^-1 excess scaling) have runnable falsifiers and no data.",
+      "would_count": ["A dataset, its provenance, and the falsifier's verdict on it"],
+      "acceptance": {"needs_null": false, "material": null}
+    },
+    {
+      "id": "AISS-1",
+      "title": "Derive the merit weights from something, or call it a mean",
+      "state": "OPEN",
+      "kind": "DERIVATION",
+      "statement": "The five sovereignty criteria ship at 0.20 each. 77% of random reweightings reproduce the same high-merit rate, so the weights carry no information. evaluate_pattern now reports weights_are_flat alongside every score.",
+      "would_count": [
+        "Weights derived from a stated procedure, not asserted",
+        "verdict_is_weight_sensitive() returning weights_carry_information = True on real patterns",
+        "Or: an argument that an unweighted mean is correct, in which case rename total_score"
+      ],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "AISS-2",
+      "title": "Measure logical consistency instead of naming it unmeasured",
+      "state": "OPEN",
+      "kind": "CODE",
+      "statement": "_check_internal_coherence carried a flat 0.4 placeholder for logical consistency. The term was removed rather than guessed at, and logical_consistency is now listed in unmeasured_components.",
+      "would_count": ["A computable check over Pattern.mathematical_structure", "Its own weight, stated", "A pair of patterns it separates that the current two components do not"],
+      "acceptance": {"needs_null": true, "material": null}
+    },
+    {
+      "id": "SI-E",
+      "title": "Energy per bit has three values and they differ in legality",
+      "state": "OPEN",
+      "kind": "DERIVATION",
+      "statement": "1-2 aJ is 348 kT ln2 (legal). 0.1 eV is 5.6 kT ln2 (legal). 0.01 eV is 0.56 kT ln2, below the Landauer bound at 300 K.",
+      "why_open": "Pick one and propagate it through the documents that depend on it. 0.01 eV cannot be it.",
+      "would_count": ["One value, chosen with a stated basis", "Every downstream figure recomputed", "reach(E, 'landauer 300K') returning DETECTABLE"],
+      "acceptance": {"needs_null": false, "material": "silicon"}
+    },
+    {
+      "id": "FAB-3",
+      "title": "Are 8 implant states separable at >3 sigma?",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "Eight doping states, measured as (sheet resistance, carrier type, carrier concentration). Separable at >3 sigma or not.",
+      "why_open": "Cheap, decisive, unrun. Needs no magnet, no cryostat, no THz source.",
+      "would_count": ["Measured (R_s, type, n) for 8 states with error bars", "Pairwise separation in sigma", "Cost and instrument named"],
+      "cost_usd": "3000-6000",
+      "acceptance": {"needs_null": false, "material": "silicon"}
+    },
+    {
+      "id": "BRG-6",
+      "title": "Piezoresistive dR/R at 0.1% strain",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "The strain channel that replaces every magnetic proposal predicts dR/R about 9% at 0.1% strain, gauge factor about 121 for pi_l along <110> paired with E<110> = 169 GPa.",
+      "why_open": "A strain gauge and a four-point probe settle it. Unrun.",
+      "would_count": ["Measured dR/R vs strain", "Extracted gauge factor with the crystal direction stated", "Agreement or disagreement with 121"],
+      "acceptance": {"needs_null": false, "material": "silicon"}
+    },
+    {
+      "id": "R2-3",
+      "title": "Bifilar common-mode rejection at achievable matching tolerance",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "The 60 dB common-mode suppression budget depends on a matching tolerance that was assumed, not measured.",
+      "would_count": ["Measured CMRR by magneto-optic sampling at a stated frequency", "The matching tolerance actually achieved", "Comparison against the budget in transient_suppression.py"],
+      "acceptance": {"needs_null": false, "material": "silicon"}
+    },
+    {
+      "id": "NEG-EMIT",
+      "title": "An n-dependent bit width against a fixed-width encoder contract",
+      "state": "OPEN",
+      "kind": "DEFINITION",
+      "statement": "Negentropic/emit_ising.py does not inherit from bridges/abstract_encoder.py. The blocker is that an Ising spec has a bit width that depends on n, while every other encoder emits a fixed width.",
+      "would_count": ["A contract that admits both, or an argument that they are different kinds of thing and should not share one"],
+      "acceptance": {"needs_null": false, "material": null}
+    }
+  ]
+}
