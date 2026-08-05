@@ -73,6 +73,7 @@ USE
     python playground/playground.py show FCL-12b      # one problem, in full
     python playground/playground.py run NAME          # one candidate
     python playground/playground.py run-all           # every candidate
+    python playground/playground.py archive           # verdicts + why they reside
     python playground/playground.py contract          # the template
 
 Appends every verdict to playground/VERDICTS.jsonl.
@@ -90,7 +91,8 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 REGISTRY = os.path.join(HERE, "OPEN_PROBLEMS.json")
-VERDICTS = os.path.join(HERE, "VERDICTS.jsonl")
+VERDICTS = os.path.join(HERE, "VERDICTS.jsonl")      # ephemeral run log
+ARCHIVE = os.path.join(HERE, "ARCHIVE.jsonl")        # durable, committed
 CANDIDATE_DIR = os.path.join(HERE, "candidates")
 
 REQUIRED = {"PROBLEM": str, "CLAIM": str, "KIND": str, "AUTHOR": str,
@@ -241,6 +243,116 @@ def record(res, path=VERDICTS):
 
 
 # ---------------------------------------------------------------------
+# PROVENANCE  --  a verdict is not a fact, it is a fact under gates
+# ---------------------------------------------------------------------
+# VERDICTS.jsonl is an ephemeral run log and is gitignored. ARCHIVE.jsonl is
+# the durable curated record: one entry per candidate, committed, carrying WHY
+# the verdict came out that way, WHAT would change it, and WHERE the candidate
+# now lives and on whose reasoning.
+#
+# The point is that verdicts decay. The autocorrelation gate in field/ was
+# recalibrated three times in one session; anything scored against the old one
+# was silently non-comparable afterwards and nothing said so. review.py exists
+# to say so.
+
+RESIDENCE = {
+    "ACTIVE": "live candidate, re-scored on every review",
+    "GRADUATED": "passed and was promoted into the repo proper; names where",
+    "ARCHIVED": "not adopted, kept for provenance; names why",
+    "SUPERSEDED": "a later candidate does this better; names which",
+    "WITHDRAWN": "author pulled it; names why",
+}
+
+CONTRACT_FIELDS = ("PROBLEM", "CLAIM", "KIND", "AUTHOR", "NEEDS_NULL",
+                   "MATERIAL")
+
+
+def thresholds(mod):
+    """The module-level constants that decided the verdict.
+
+    Hashing the whole source would fire on a typo fix. These are the numbers a
+    candidate could quietly loosen to make itself pass, so these are what the
+    review diffs -- by value, so the report can name the change rather than
+    show two different hashes.
+    """
+    out = {}
+    for k in dir(mod):
+        if not k.isupper() or k in CONTRACT_FIELDS or k.startswith("_"):
+            continue
+        v = getattr(mod, k)
+        if isinstance(v, (int, float, str, bool)):
+            out[k] = v
+        elif isinstance(v, (list, tuple)) and all(
+                isinstance(x, (int, float, str, bool)) for x in v):
+            out[k] = list(v)
+    return out
+
+
+def checks_sha(mod):
+    """Short hash of the checks() source. The assertions themselves."""
+    import hashlib
+    import inspect
+    try:
+        src = inspect.getsource(mod.checks)
+    except (OSError, TypeError):
+        return None
+    return hashlib.sha256(src.encode("utf-8")).hexdigest()[:12]
+
+
+def _git_commit():
+    import subprocess
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              cwd=ROOT, capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except Exception:
+        return None
+
+
+def archive_records(path=ARCHIVE):
+    """Latest archive entry per candidate. Append-only, last write wins."""
+    if not os.path.exists(path):
+        return {}
+    out = {}
+    with open(path, encoding="utf-8") as fh:
+        for ln in fh:
+            if ln.strip():
+                r = json.loads(ln)
+                out[r["candidate"]] = r
+    return out
+
+
+def archive(name, residence, residence_reason, why, would_change_verdict,
+            revisit_if_changed=(), path=ARCHIVE):
+    """Score a candidate and write a durable record of the verdict.
+
+    residence and residence_reason are the part a machine cannot supply: WHERE
+    this candidate now lives and on whose reasoning. would_change_verdict is
+    the part that keeps a rejection from reading as final -- name the fact that
+    would flip it.
+    """
+    if residence not in RESIDENCE:
+        raise ValueError("residence must be one of %s" % (tuple(RESIDENCE),))
+    for field, val in (("residence_reason", residence_reason), ("why", why),
+                       ("would_change_verdict", would_change_verdict)):
+        if not (isinstance(val, str) and val.strip()):
+            raise ValueError("%s must be a non-empty string" % field)
+    mod = load(name)
+    res = evaluate_module(mod, name)
+    rec = {"candidate": name, "ts": res["ts"], "problem": res["problem"],
+           "claim": res["claim"], "author": res["author"],
+           "verdict": res["verdict"], "reason": res["reason"],
+           "residence": residence, "residence_reason": residence_reason,
+           "why": why, "would_change_verdict": would_change_verdict,
+           "revisit_if_changed": list(revisit_if_changed),
+           "thresholds": thresholds(mod), "checks_sha": checks_sha(mod),
+           "checks": res.get("checks", []), "commit": _git_commit()}
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    return rec
+
+
+# ---------------------------------------------------------------------
 CONTRACT_TEMPLATE = '''"""One paragraph: what you are claiming and how you know.
 
 Keep it flat. The checks are the argument; this is the handle.
@@ -336,6 +448,32 @@ def main(argv):
         print(CONTRACT_TEMPLATE)
     elif cmd == "run" and len(argv) > 2:
         _print_verdict(record(evaluate(argv[2])))
+    elif cmd == "archive":
+        recs = archive_records()
+        if not recs:
+            print("archive is empty")
+            return 0
+        print("ARCHIVE  (%d candidates)" % len(recs))
+        print("  residence: " + "; ".join("%s = %s" % kv
+                                          for kv in RESIDENCE.items()))
+        for n in sorted(recs):
+            r = recs[n]
+            print()
+            print("  %-22s %-10s %-24s %s"
+                  % (n, r["verdict"], r["problem"], r["residence"]))
+            print("      WHY        %s" % r["why"])
+            print("      RESIDES    %s" % r["residence_reason"])
+            print("      WOULD FLIP %s" % r["would_change_verdict"])
+            if r.get("revisit_if_changed"):
+                print("      REVISIT IF %s"
+                      % ", ".join(r["revisit_if_changed"]))
+            if r.get("thresholds"):
+                print("      DECIDED BY %s"
+                      % ", ".join("%s=%s" % kv
+                                  for kv in sorted(r["thresholds"].items())))
+            print("      AT COMMIT  %s" % r.get("commit"))
+        print()
+        print("  python playground/review.py   # re-score against today's gates")
     elif cmd == "run-all":
         names = candidates()
         if not names:
@@ -351,7 +489,7 @@ def main(argv):
               % (len(names), len(names) - bad, bad))
     else:
         print("usage: playground.py [problems | show ID | run NAME | "
-              "run-all | contract]")
+              "run-all | archive | contract]")
         return 2
     return 0
 

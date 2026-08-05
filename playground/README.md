@@ -8,6 +8,8 @@ python playground/playground.py problems       # what is open
 python playground/playground.py show FCL-12b   # one problem, in full
 python playground/playground.py contract       # the candidate template
 python playground/playground.py run-all        # score every candidate
+python playground/playground.py archive        # verdicts, and why each resides where it does
+python playground/review.py                    # re-score the archive against today's gates
 ```
 
 ## The two gates that are not ordinary code review
@@ -70,6 +72,44 @@ at a median 8.8 s against a true 3.0 s. Not yet graduated into `field/`.
 `tautology_demo` — REJECTED_UNFALSIFIABLE, on purpose. Three checks that no
 input can fail: a variance is never negative, a set is never empty, a norm is
 never below zero. It is here so the bench can be seen to reject something.
+
+## The archive, and why a verdict decays
+
+`VERDICTS.jsonl` is an ephemeral run log and is gitignored. `ARCHIVE.jsonl` is
+the durable committed record — one entry per candidate carrying **why** the
+verdict came out that way, **what would change it**, and **where the candidate
+now lives and on whose reasoning**. `residence` is one of ACTIVE, GRADUATED,
+ARCHIVED, SUPERSEDED, WITHDRAWN, and `residence_reason` is the part a machine
+cannot supply. The three reasoning fields cannot be left blank.
+
+A verdict is not a fact. It is a fact under a set of gates, at a commit, with
+stated tolerances, and all three move — the field loop's correlation gate was
+recalibrated three times in one session, and everything scored against an
+earlier version was silently non-comparable afterwards.
+
+`review.py` re-scores the archive against today's gates and exits nonzero when
+the archive no longer describes reality. Findings: `UNCHANGED`,
+`VERDICT_CHANGED`, `THRESHOLDS_MOVED`, `CHECKS_REWRITTEN`, `UNRECORDED`,
+`ORPHANED`, `TRIGGERED`.
+
+The dangerous case is **not** "a rejected candidate now passes" — knowledge
+moves, that is the point of `would_change_verdict`. It is a candidate that
+still passes because it quietly loosened its own tolerance. So the record
+keeps the constants that decided each verdict and the review diffs them **by
+value**, naming the change:
+
+```
+TRIGGERED    lomb_scargle_gls       ACTIVE
+    verdict still SURVIVES, but the numbers that decided it moved:
+     !  TOL_FRAC 0.01 -> 0.05
+    a verdict under different constants is not the same verdict. re-record it.
+```
+
+`revisit_if_changed` names the constants a record wants to be woken on; a
+delta in one of those upgrades `THRESHOLDS_MOVED` to `TRIGGERED`.
+
+A rejected candidate is not deleted. Deleting one deletes why it failed, and
+`would_change_verdict` is what keeps the rejection from reading as final.
 
 ## Adding a problem
 
