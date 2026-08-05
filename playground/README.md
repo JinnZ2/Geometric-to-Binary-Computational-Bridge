@@ -10,6 +10,8 @@ python playground/playground.py contract       # the candidate template
 python playground/playground.py run-all        # score every candidate
 python playground/playground.py archive        # verdicts, and why each resides where it does
 python playground/review.py                    # re-score the archive against today's gates
+python playground/principles.py list           # the recurring failure shapes
+python playground/principles.py gaps           # the ones nothing catches yet
 ```
 
 ## The two gates that are not ordinary code review
@@ -110,6 +112,39 @@ delta in one of those upgrades `THRESHOLDS_MOVED` to `TRIGGERED`.
 
 A rejected candidate is not deleted. Deleting one deletes why it failed, and
 `would_change_verdict` is what keeps the rejection from reading as final.
+
+## Principles: what compresses, and what does not
+
+`PRINCIPLES.json` holds ~60 findings compressed into **11 recurring failure
+shapes**, 36 instances. Several appeared in files sharing no code and no
+author intent — `GIES-1` (`outer(v,v)` cannot see the sign of `v`) and `KEA-7`
+(the clamped Keating energy is exactly even in the central displacement) are
+the same blindness in two formalisms that never met.
+
+A principle needs **two independent instances**. One is an anecdote. The
+status is *computed* from the instance count rather than trusted from the
+file, so nothing gets promoted by editing a field, and a one-instance entry is
+marked PROVISIONAL rather than dropped or inflated.
+
+The column that matters is `mechanised_by` — **6 of 11 are caught
+automatically today, 5 are not**. That gap list is the point of the file: a
+principle nothing checks is a principle you will re-learn. The largest gap is
+`P-SELF-SUPPLIED-FALSIFIER`, the model supplying the very quantity that would
+falsify it, which this playground's own passing candidate cites against
+itself — `TOL_FRAC = 0.01` is not derived, it is what the estimator happened
+to achieve.
+
+**Tags do not replace the module.** You cannot re-run a candidate from its
+principles; compression buys transfer and screening, not re-execution. The
+re-execution problem has a separate answer costing 40 bytes: each record
+carries the git blob sha of its source, so a deleted candidate is recoverable
+with `git cat-file -p <sha>`. Git is already a content-addressed store; the
+archive only has to point at it.
+
+`principles.match()` reports which shapes a record *cites*. It deliberately
+does not infer them from source — pattern-matching a failure shape out of code
+would look clever and be unfalsifiable, which is the shape it would be
+claiming to detect.
 
 ## Adding a problem
 

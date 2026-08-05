@@ -299,6 +299,27 @@ def checks_sha(mod):
     return hashlib.sha256(src.encode("utf-8")).hexdigest()[:12]
 
 
+def source_sha(name):
+    """Git blob sha of the candidate's source. The answer to ORPHANED.
+
+    A deleted candidate cannot be re-scored, and no summary of its principles
+    brings that back -- compression is for transfer, not re-execution. But the
+    source does not need duplicating into the archive either: git is already a
+    content-addressed store of it. Forty bytes here makes a deleted candidate
+    recoverable with `git cat-file -p <sha>`, as long as it was ever committed.
+    """
+    import subprocess
+    path = os.path.join(CANDIDATE_DIR, "%s.py" % name)
+    if not os.path.exists(path):
+        return None
+    try:
+        return subprocess.run(["git", "hash-object", path], cwd=ROOT,
+                              capture_output=True, text=True,
+                              timeout=5).stdout.strip() or None
+    except Exception:
+        return None
+
+
 def _git_commit():
     import subprocess
     try:
@@ -323,7 +344,7 @@ def archive_records(path=ARCHIVE):
 
 
 def archive(name, residence, residence_reason, why, would_change_verdict,
-            revisit_if_changed=(), path=ARCHIVE):
+            revisit_if_changed=(), principles=(), path=ARCHIVE):
     """Score a candidate and write a durable record of the verdict.
 
     residence and residence_reason are the part a machine cannot supply: WHERE
@@ -337,6 +358,12 @@ def archive(name, residence, residence_reason, why, would_change_verdict,
                        ("would_change_verdict", would_change_verdict)):
         if not (isinstance(val, str) and val.strip()):
             raise ValueError("%s must be a non-empty string" % field)
+    from playground import principles as _pr
+    known = {p["id"] for p in _pr.principles()}
+    unknown = [c for c in principles if c not in known]
+    if unknown:
+        raise ValueError("unknown principle id(s): %s. known: %s"
+                         % (", ".join(unknown), ", ".join(sorted(known))))
     mod = load(name)
     res = evaluate_module(mod, name)
     rec = {"candidate": name, "ts": res["ts"], "problem": res["problem"],
@@ -345,8 +372,10 @@ def archive(name, residence, residence_reason, why, would_change_verdict,
            "residence": residence, "residence_reason": residence_reason,
            "why": why, "would_change_verdict": would_change_verdict,
            "revisit_if_changed": list(revisit_if_changed),
+           "principles": list(principles),
            "thresholds": thresholds(mod), "checks_sha": checks_sha(mod),
-           "checks": res.get("checks", []), "commit": _git_commit()}
+           "checks": res.get("checks", []), "commit": _git_commit(),
+           "source_sha": source_sha(name)}
     with open(path, "a", encoding="utf-8") as fh:
         fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
     return rec

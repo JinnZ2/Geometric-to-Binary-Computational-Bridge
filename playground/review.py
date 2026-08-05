@@ -117,6 +117,7 @@ def review(path=None):
               "was": recs[n].get("verdict"), "now": None, "deltas": [],
               "triggered": [], "problem": recs[n].get("problem"),
               "residence": recs[n].get("residence"),
+              "source_sha": recs[n].get("source_sha"),
               "would_change_verdict": recs[n].get("would_change_verdict")}
              for n in sorted(set(recs) - live)]
     return rows
@@ -152,8 +153,15 @@ def report(rows, out=sys.stdout):
             print("      scores but has no archive entry. Nothing records why "
                   "it lives where it does.", file=out)
         elif r["finding"] == "ORPHANED":
-            print("      archive says %s, but the module is gone. Deleting a "
-                  "candidate deletes why it failed." % r["was"], file=out)
+            print("      archive says %s, but the module is gone." % r["was"],
+                  file=out)
+            if r.get("source_sha"):
+                print("      recover: git cat-file -p %s" % r["source_sha"],
+                      file=out)
+            else:
+                print("      no source_sha recorded, so it cannot be "
+                      "recovered or re-scored. Principles transfer the "
+                      "lesson; they do not restore the module.", file=out)
     print(file=out)
     if stale:
         print("  archive is out of date for: %s"

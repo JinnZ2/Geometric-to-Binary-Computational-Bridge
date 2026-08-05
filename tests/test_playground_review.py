@@ -254,5 +254,158 @@ class TestShippedArchiveContent(unittest.TestCase):
             self.assertTrue(r.get("commit"), msg=n)
 
 
+
+class TestPrinciples(unittest.TestCase):
+    """PR-1..5: the compressed failure shapes, and the rule that keeps the
+    library from inflating."""
+
+    def setUp(self):
+        from playground import principles as PR
+        self.PR = PR
+
+    def test_a_principle_needs_two_independent_instances(self):
+        """One instance is an anecdote. The status is COMPUTED from the
+        instance count, so an entry cannot be promoted by editing a field."""
+        for p in self.PR.principles():
+            want = ("ESTABLISHED" if len(p["instances"]) >= self.PR.MIN_INSTANCES
+                    else "PROVISIONAL")
+            self.assertEqual(self.PR.status_of(p), want, msg=p["id"])
+
+    def test_the_declared_status_matches_the_computed_one(self):
+        self.assertEqual(self.PR.disagreements(), [])
+
+    def test_a_provisional_entry_says_why_it_is_provisional(self):
+        for p in self.PR.principles():
+            if self.PR.status_of(p) == "PROVISIONAL":
+                self.assertTrue(p.get("provisional_because"), msg=p["id"])
+
+    def test_every_principle_is_well_formed(self):
+        for p in self.PR.principles():
+            for k in ("id", "name", "statement", "detector", "instances"):
+                self.assertIn(k, p, msg=p.get("id"))
+            self.assertTrue(p["detector"].strip(), msg=p["id"])
+            for i in p["instances"]:
+                self.assertTrue(i["tag"].strip(), msg=p["id"])
+                self.assertGreater(len(i["what"]), 20, msg=p["id"])
+
+    def test_ids_are_unique_and_so_are_instance_tags_within_a_principle(self):
+        ids = [p["id"] for p in self.PR.principles()]
+        self.assertEqual(len(ids), len(set(ids)))
+        for p in self.PR.principles():
+            tags = [i["tag"] for i in p["instances"]]
+            self.assertEqual(len(tags), len(set(tags)), msg=p["id"])
+
+    def test_an_unmechanised_principle_says_so_rather_than_going_quiet(self):
+        gaps = [p for p in self.PR.principles() if not p.get("mechanised_by")]
+        self.assertTrue(gaps, "if nothing is a gap, the list has stopped "
+                              "being honest")
+        self.assertLess(len(gaps), len(self.PR.principles()))
+
+    def test_coverage_counts_agree_with_the_library(self):
+        c = self.PR.coverage()
+        self.assertEqual(c["total"], len(self.PR.principles()))
+        self.assertEqual(c["instances"],
+                         sum(len(p["instances"])
+                             for p in self.PR.principles()))
+        self.assertEqual(len(c["gaps"]) + c["mechanised"], c["total"])
+
+    def test_lookup_of_an_unknown_id_lists_the_known_ones(self):
+        with self.assertRaises(KeyError) as ctx:
+            self.PR.principle("P-NOPE")
+        self.assertIn("P-UNFALSIFIABLE", str(ctx.exception))
+
+    def test_the_shape_that_caught_its_own_auditor_is_recorded(self):
+        """P-SELF-SUPPLIED-FALSIFIER cites the playground's own candidate."""
+        p = self.PR.principle("P-SELF-SUPPLIED-FALSIFIER")
+        self.assertIn("PG-lomb", [i["tag"] for i in p["instances"]])
+        self.assertIsNone(p.get("mechanised_by"))
+
+    def test_two_formalisms_that_never_met_share_one_principle(self):
+        p = self.PR.principle("P-SYMMETRY-COLLAPSE")
+        self.assertEqual({"GIES-1", "KEA-7"},
+                         {i["tag"] for i in p["instances"]})
+
+    def test_match_reports_cited_and_unknown_separately(self):
+        m = self.PR.match({"principles": ["P-UNFALSIFIABLE", "P-MADE-UP"]})
+        self.assertEqual(m["cited"], ["P-UNFALSIFIABLE"])
+        self.assertEqual(m["unknown"], ["P-MADE-UP"])
+
+    def test_match_does_not_infer_shapes_from_source(self):
+        """Inferring a failure shape from code would look clever and be
+        unfalsifiable -- which is the shape it would claim to detect."""
+        self.assertEqual(self.PR.match({})["cited"], [])
+
+
+class TestArchiveCitesPrinciples(unittest.TestCase):
+
+    def setUp(self):
+        self.recs = P.archive_records()
+        self.path = os.path.join(tempfile.mkdtemp(), "A.jsonl")
+
+    def test_an_unknown_principle_id_is_refused(self):
+        with self.assertRaises(ValueError) as ctx:
+            P.archive("tautology_demo", "ARCHIVED", "x", "y", "z",
+                      principles=["P-INVENTED"], path=self.path)
+        self.assertIn("unknown principle", str(ctx.exception))
+
+    def test_the_self_test_cites_the_shape_it_demonstrates(self):
+        self.assertEqual(self.recs["tautology_demo"]["principles"],
+                         ["P-UNFALSIFIABLE"])
+
+    def test_the_passing_candidate_cites_a_shape_against_itself(self):
+        r = self.recs["lomb_scargle_gls"]
+        self.assertEqual(r["verdict"], "SURVIVES")
+        self.assertIn("P-SELF-SUPPLIED-FALSIFIER", r["principles"])
+
+    def test_every_cited_principle_exists(self):
+        from playground import principles as PR
+        known = {p["id"] for p in PR.principles()}
+        for n, r in self.recs.items():
+            for c in r.get("principles", []):
+                self.assertIn(c, known, msg=n)
+
+
+class TestSourceRecovery(unittest.TestCase):
+    """Compression is for transfer. Re-execution needs the source, and git
+    already has it -- the archive only has to point."""
+
+    def test_every_record_carries_a_git_blob_sha(self):
+        for n, r in P.archive_records().items():
+            self.assertTrue(r.get("source_sha"), msg=n)
+            self.assertEqual(len(r["source_sha"]), 40, msg=n)
+
+    def test_the_sha_resolves_to_the_current_source(self):
+        import subprocess
+        n = "tautology_demo"
+        sha = P.archive_records()[n]["source_sha"]
+        got = subprocess.run(["git", "cat-file", "-p", sha],
+                             cwd=os.path.join(os.path.dirname(__file__), ".."),
+                             capture_output=True, text=True, timeout=10)
+        self.assertEqual(got.returncode, 0)
+        self.assertIn("REJECTED_UNFALSIFIABLE", got.stdout)
+
+    def test_a_missing_candidate_has_no_sha(self):
+        self.assertIsNone(P.source_sha("never_existed"))
+
+    def test_an_orphan_report_names_the_recovery_command(self):
+        path = os.path.join(tempfile.mkdtemp(), "A.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"candidate": "gone", "verdict": "FAILED",
+                                 "problem": "FCL-9", "residence": "ARCHIVED",
+                                 "source_sha": "a" * 40}) + "\n")
+        buf = io.StringIO()
+        R.report(R.review(path), out=buf)
+        self.assertIn("git cat-file -p " + "a" * 40, buf.getvalue())
+
+    def test_an_orphan_without_a_sha_says_it_is_unrecoverable(self):
+        path = os.path.join(tempfile.mkdtemp(), "A.jsonl")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps({"candidate": "gone", "verdict": "FAILED",
+                                 "problem": "FCL-9",
+                                 "residence": "ARCHIVED"}) + "\n")
+        buf = io.StringIO()
+        R.report(R.review(path), out=buf)
+        self.assertIn("they do not restore the module", buf.getvalue())
+
 if __name__ == "__main__":
     unittest.main()
