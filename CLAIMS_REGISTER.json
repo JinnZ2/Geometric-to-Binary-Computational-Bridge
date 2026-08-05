@@ -1,0 +1,463 @@
+{
+ "schema": 1,
+ "license": "CC0",
+ "note": "Claim register. Only what the index CANNOT derive lives here: the statement, whether it holds, and why not when it does not. Where a claim is written, and what can make it fail, are scanned by claims_index.py -- putting them here too would be a second authority over the same facts.",
+ "namespace_warning": "The id namespace is not uniform in what it points at. Some ids name a PROPOSAL (NEG-7: seventeen lenses are one grammar -- dead). Others name the REFUTATION that killed a proposal (ER-1: Orbach is saturated at 300 K -- live, and it is what killed the Er coherence claim). `names` records which, because the same status word means opposite things otherwise.",
+ "status_values": {
+  "live": "the statement holds and something can make it fail",
+  "dead": "falsified; `because` says how",
+  "open": "stated, nothing has tested it",
+  "superseded": "replaced; `because` names by what"
+ },
+ "claims": [
+  {
+   "id": "NEG-10",
+   "family": "NEG",
+   "statement": "Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-11",
+   "family": "NEG",
+   "statement": "The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-2",
+   "family": "NEG",
+   "statement": "An archive is a dissipative structure. Lifetime is set by `sigma - W_care/T`, not by the medium.",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-3",
+   "family": "NEG",
+   "statement": "Finite-time erasure costs `kT ln2 + C/tau`; resurfacing of an overwritten trace scales as `tau^-1`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-4",
+   "family": "NEG",
+   "statement": "Dependency re-rooting is the correct update operation; radiate and recenter are the only two evidence moves",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-7",
+   "family": "NEG",
+   "statement": "Seventeen cultural and scientific lenses are surface renderings of one deep grammar",
+   "status": "dead",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md",
+   "because": "randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor; see Negentropic/lens_collapse_test.py"
+  },
+  {
+   "id": "NEG-8",
+   "family": "NEG",
+   "statement": "A structure persists iff it exports entropy at least as fast as it produces it: `Phi = -S_exchange_dot - sigma >= 0`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-9",
+   "family": "NEG",
+   "statement": "A cycle after inversion is a contradiction detector: two claims cannot both be foundational to each other, so one is wrong",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-1",
+   "family": "TRI",
+   "statement": "Equilateral minimises worst-case strength of figure, at exactly 1.0",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-2",
+   "family": "TRI",
+   "statement": "Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-3",
+   "family": "TRI",
+   "statement": "Closure failure and record drift are separable: closure tests the observation, drift tests the figure",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-4",
+   "family": "TRI",
+   "statement": "Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "ER-1",
+   "family": "ER",
+   "statement": "Orbach is saturated at 300 K, not merely open",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "ER-2",
+   "family": "ER",
+   "statement": "no Er gap mode exists in the searched window",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "ER-2b",
+   "family": "ER",
+   "statement": "the same criterion kills 'P local mode at ~500 cm^-1'",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "ER-3",
+   "family": "ER",
+   "statement": "the stated (omega, k) pair is inconsistent by ~8x",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "FCL-1",
+   "family": "FCL",
+   "statement": "NOVEL is reachable with a stable anchor logged",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-10",
+   "family": "FCL",
+   "statement": "claim ids come from live ids, not the log line count",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-11",
+   "family": "FCL",
+   "statement": "the correlated series is uncensored",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-12",
+   "family": "FCL",
+   "statement": "lag is a duration when there is a clock",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-12b",
+   "family": "FCL",
+   "statement": "and it is calibrated on an irregular clock",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-12c",
+   "family": "FCL",
+   "statement": "and no period is claimed",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-13",
+   "family": "FCL",
+   "statement": "multiplicity correction is BH, and the gain is stated small",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-1b",
+   "family": "FCL",
+   "statement": "and it emits the experiment that route implies",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-2",
+   "family": "FCL",
+   "statement": "anchor_dev is a deviation against an explicit tolerance",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-2b",
+   "family": "FCL",
+   "statement": "and the tolerance actually gates it",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-3",
+   "family": "FCL",
+   "statement": "NOISE_AS_SIGNAL has a sample floor and a scaled band",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-4",
+   "family": "FCL",
+   "statement": "a lag scan sees the rider periods a fixed lag cannot",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-5",
+   "family": "FCL",
+   "statement": "MISSING_VARIABLE is a corrected binomial tail, not 1.5x base",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-5b",
+   "family": "FCL",
+   "statement": "and it still finds a real concentration",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-6",
+   "family": "FCL",
+   "statement": "residual membership is by index, not dict equality",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-7",
+   "family": "FCL",
+   "statement": "deepen requires a tighter band or a named axis",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-8",
+   "family": "FCL",
+   "statement": "self-initiated actuation is metered, capped and credited",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-9",
+   "family": "FCL",
+   "statement": "a shape cannot be scalarized without naming the projection",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "GIES-2",
+   "family": "GIES",
+   "statement": "index parity equals site type, 8/8",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "GIES-3",
+   "family": "GIES",
+   "statement": "every NOT crosses sublattices, so every NOT is a Frenkel pair",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py"
+  },
+  {
+   "id": "KEA-1",
+   "family": "KEA",
+   "statement": "exactly one minimum, at the ideal centre",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "KEA-3",
+   "family": "KEA",
+   "statement": "no lattice separation lands on phi*a",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "KEA-7",
+   "family": "KEA",
+   "statement": "energy is exactly even, so vertex and face are degenerate",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "SEED-1",
+   "family": "SEED",
+   "statement": "W is the identity, so the channels are independent scalars",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "SEED-3",
+   "family": "SEED",
+   "statement": "the claimed fidelity is 13 orders below the seed resolution",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "SEED-5",
+   "family": "SEED",
+   "statement": "the fix makes W non-trivial but keeps proportions invariant",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py"
+  },
+  {
+   "id": "GIES-1",
+   "family": "GIES",
+   "statement": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "VAC-1",
+   "family": "VAC",
+   "statement": "the vacuum criterion 'at least one mode survives' is true by construction",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "ATT-1",
+   "family": "ATT",
+   "statement": "a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "FAB-1",
+   "family": "FAB",
+   "statement": "a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "R2-8",
+   "family": "R2",
+   "statement": "the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "TTM-2",
+   "family": "TTM",
+   "statement": "sp3 readout is rank-deficient",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "TTM-3",
+   "family": "TTM",
+   "statement": "the six <110> directions are a complete readout basis",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded"
+  },
+  {
+   "id": "SIL-1",
+   "family": "SIL",
+   "statement": "the shipped strain invariants are blind to crystal orientation",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "EPG-6",
+   "family": "EPG",
+   "statement": "109.47 degrees is the tetrahedral maximin bound, from |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded"
+  },
+  {
+   "id": "EPG-7",
+   "family": "EPG",
+   "statement": "cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded"
+  },
+  {
+   "id": "BRG-6",
+   "family": "BRG",
+   "statement": "piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110>",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "FAB-3",
+   "family": "FAB",
+   "statement": "the eight implant states are separable at >3 sigma in (R_s, carrier type, n)",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "R2-3",
+   "family": "R2",
+   "statement": "the bifilar CMRR budget holds at an achievable matching tolerance",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "ER-7",
+   "family": "ER",
+   "statement": "the stated implant dose is achievable",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  }
+ ]
+}

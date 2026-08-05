@@ -63,9 +63,12 @@ python repo_guard.py
 python claims_index.py                       # by evidence class
 python claims_index.py prose                 # written down, nothing executes on it
 python claims_index.py show FCL-4            # one claim, every site
+python claims_index.py status                # register joined with the scan
+python claims_index.py unregistered          # claims with no recorded statement
+python claims_index.py render                # regenerate the per-folder CLAIMS.md
 python playground/principles.py resolve      # do the principle instances point anywhere
 
-# Every suite under tests/ (2245 unittest cases; all pass, no PYTHONPATH needed)
+# Every suite under tests/ (2265 unittest cases; all pass, no PYTHONPATH needed)
 for t in tests/test_*.py; do python "$t" || echo "FAILED $t"; done
 
 # Runnable falsifier reports (stdlib, exit non-zero on failure)
@@ -132,7 +135,7 @@ cd "Front end" && npm install && npm run dev
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
 | Repo guard | `tests/test_repo_guard.py` | 32 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands |
-| Claim index | `tests/test_claims_index.py` | 21 | CI-1..5: evidence classes, family derivation without a denylist, every principle instance resolving to a real path and id |
+| Claim index | `tests/test_claims_index.py` | 41 | CI-1..5: evidence classes, family derivation without a denylist, every principle instance resolving to a real path and id, the register's live-without-a-falsifier check, underscore class names, generated-file exclusion |
 | Playground review | `tests/test_playground_review.py` | 52 | RV-1..6 + PR-1..5: threshold extraction, every review finding incl. a loosened tolerance under an unchanged verdict, the two-instance rule, git-blob source recovery |
 | Playground | `tests/test_playground.py` | 41 | PG-1..8: every verdict tested by constructing a candidate that must receive it — unfalsifiable, null-artifact, contract, veto |
 | Field claim loop | `tests/test_field_claim_loop.py` | 93 | FCL-1..13: NOVEL reachability, anchor-as-deviation, both statistical gates against their nulls AND for power, deepen tightening, spend ledger, hold-out promotion, uncensored series, slotted lag-in-seconds, BH vs Bonferroni |
@@ -377,6 +380,28 @@ than a test that asserts it. Claim families are derived from executable
 evidence rather than a denylist, so `FNV-1a`, `AGPL-3` and `FR-4` drop out on
 their own.
 
+**Every folder that owns a claim family now has a generated `CLAIMS.md`** —
+`Silicon/`, `GEIS/`, `field/`, `experiments/silicon_speculative/` — rendered
+from `CLAIMS_REGISTER.json` plus the scan, so the table is a view and not a
+second authority. `Negentropic/NEG_CLAIMS.md` is deliberately excluded: it is
+the *source* the register parses for NEG/TRI, and generating a table there
+would invert the authority.
+
+The register carries only what scanning cannot establish — the statement,
+whether it holds, and why not when it does not. **56 of 130 claims are
+recorded; the other 74 are reported as unregistered rather than given
+statements nobody verified.** Two mechanical checks make it more than
+bookkeeping: a `dead` claim must say how it died, and **nothing may be
+recorded `live` that nothing in the tree can falsify**. That second one fired
+on real data — `R2-8` was marked live while the index saw only prose, because
+a Python class name cannot contain a hyphen and `TestR2_8WritePulseAuthority`
+was invisible. Adding the underscore form moved **6 claims** out of PROSE.
+
+The id namespace is not uniform in what it points at, and the register records
+which rather than smoothing it over: `NEG-7` names a **proposal** and is dead;
+`ER-1` names the **refutation** that killed the Er coherence claim and is
+live. Without the `names` field the same status word means opposite things.
+
 ### Field claim loop
 
 ```
@@ -452,6 +477,12 @@ experiments/c/                  C library for NFS hot paths
 claims_index.py                 Derived index of every claim id, classified by
                                 what can make it FAIL: FALSIFIER, NAMED_IN_TEST,
                                 REGISTER, PROSE. Scanned, not maintained.
+                                `render` writes the per-folder CLAIMS.md tables.
+
+CLAIMS_REGISTER.json            The statement, whether it holds, and why not
+                                when it does not. ONLY what scanning cannot
+                                establish. 56 of 130 recorded; the rest are
+                                reported as unregistered rather than invented.
 
 repo_guard.py                   Stage 5.5 — the null stage. Three mechanical
                                 checks (null harness, symmetry veto, reach) plus
@@ -678,7 +709,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - **A four-way router forked one way, and the branch that finds new ground could not fire.** `field/field_claim_loop.py`'s INSTRUMENT route appended a candidate whenever any anchor was logged — including at weight 0.0 for a perfectly stable rig — and NOVEL was guarded by `if hits and not cands`. So NOVEL was unreachable precisely when instrumentation was good, and the emitted experiment was "cross-check against a second transducer" when the answer was "spawn a claim". Compounding it, `anchor` is specified as "reading from the stability-reference channel" but tested as `abs(anchor) > 0`, which is a test on a *deviation*: fed an actual reading (1004 hPa), INSTRUMENT won every claim forever at weight 1.0. Both fixed; a route now contributes a candidate only with positive evidence, and NOVEL records the negative evidence it rests on. FCL-1/2.
 - **A detector with a 22% false-alarm rate and 0% power, in the same configuration.** The NOISE_AS_SIGNAL branch tested `|autocorr(lag=3)| > 0.35` with no minimum-sample gate — on a series that holds *only* band-breaking readings, so small n is the normal case, not the edge: 23.5% false alarm at n=5, 21.9% at n=8. And for a periodic rider of period T, `ρ(lag) = cos(2π·lag/T)`, which at lag 3 is **exactly zero at T=12** and small at T ∈ {4, 10, 14, 16} — measured power 0.0% at those periods against 98–100% at T ∈ {6, 8, 24, 48}. A single fixed lag cannot detect structure in general. Replaced with a scan over lags 1–12 against a multiplicity-widened band: 2.6% on white noise, 100% power at T = 6, 12, 24. FCL-3/4.
 - **`rate > 1.5 × base` fired on a third of null covariate sets, and got worse with more data.** The MISSING_VARIABLE branch had no significance test; the folder's own notes called it "too permissive" without measuring it. Null covariates independent of residuals: 34.7% (40 readings / 4 levels), 34.0% (200 / 8), **41.0%** (200 / 4 at base rate 0.10) — rising with n because more bins clear `MIN_SAMPLES` and each is another chance to fire. Replaced with an exact one-sided binomial tail, Bonferroni-corrected over bins actually tested: ≤0.8% on the same nulls, and it still finds a real rain-driven concentration at p = 1.2e-26. Separately, `hit + (r in hits)` was dict equality, so 20 duplicate readings with **one** actual residual reported "rate 1.00 under phase=dusk vs base 0.05". FCL-5/6.
-- **Ten test files were not running at all, and nothing reported it.** `tests/test_silicon_modules.py` imported six modules from `Silicon.core.*` that a directory reorg had moved one level down into `analysis/`, `bridges/`, `geometry/`, `systems/` — 52 of its 66 tests errored in `setUp`. Nine more (`test_bridges.py` among them, the 768-test suite this file's own command list points at) lacked the `sys.path` bootstrap the other 25 test files carry, so the documented `python tests/test_bridges.py` raised `ModuleNotFoundError: No module named 'bridges'`. Both are fixed; all 2245 cases under `tests/` now run green from the repo root with no `PYTHONPATH`. An import error in `setUp` is reported as a test ERROR, not a collection failure, so a suite can be 79% dead and still look like it ran.
+- **Ten test files were not running at all, and nothing reported it.** `tests/test_silicon_modules.py` imported six modules from `Silicon.core.*` that a directory reorg had moved one level down into `analysis/`, `bridges/`, `geometry/`, `systems/` — 52 of its 66 tests errored in `setUp`. Nine more (`test_bridges.py` among them, the 768-test suite this file's own command list points at) lacked the `sys.path` bootstrap the other 25 test files carry, so the documented `python tests/test_bridges.py` raised `ModuleNotFoundError: No module named 'bridges'`. Both are fixed; all 2265 cases under `tests/` now run green from the repo root with no `PYTHONPATH`. An import error in `setUp` is reported as a test ERROR, not a collection failure, so a suite can be 79% dead and still look like it ran.
 - **A shape-level test suite did not notice a 40% score change.** `AISS/sovereignty_evaluator.py` carried `score += 0.4  # placeholder for logical consistency`, so an entirely empty pattern scored 0.4 on internal coherence and the bottom 40% of the range was unreachable — an unmeasured term contributing a constant shifts every pattern equally and cannot separate any two of them. Removing it and renormalising `total_score` by the weight sum (a latent bug the flat 0.2 defaults were hiding: any other weighting silently rescaled the total and broke every threshold in the config) left all 27 of `tests/test_aiss.py` passing, because 26 of its 46 assertions are `assertIsInstance` / `assertIn` shape checks. `tests/test_aiss_scoring.py` adds the value-level checks. `logical_consistency` is now named in `unmeasured_components` rather than given a number.
 - **Censoring a series does not blind a correlation — it biases it, which is worse.** The field loop fed its correlation branch the output of `test()`, which is 0.0 inside the claim band, keeping only the breaks. On a claim whose value drifts sinusoidally about the band centre (period 10 readings, amplitude 0.9), 120 readings became 87, and the censored series still came back STRUCTURED — at **lag 4 against a true half-period of 5**, |ρ| 0.79 versus 0.95 uncensored. A wrong answer delivered confidently. `deviation()` now gives the signed distance from band centre for every reading; `test()` stays censored because it answers a different question, and now says so. FCL-11.
 - **Three of my own defects, found by testing the fixes rather than by reading them.** The slotted-autocorrelation default derived slot width from the record *span*, making each slot half a period wide against a 25 s rider sampled every 2.5 s — it reported ρ = 0.23 at an arbitrary 148.8 s where the truth was ρ = −0.99 at 12.5 s; slot width must track the *sampling interval*. The argmax lag is not a period: a rider peaks at every multiple of T/2, so noise picks the winner (median 8.8 s against a true T/2 of 3.0 s), and both textbook handles were measured and refused — smallest-significant is always slot 1 since ρ→1 as τ→0, and first-local-minimum ran biased low and worsened with period (7.5 s against a true 10.0). **No period is reported**; that is Lomb–Scargle's job. And both test fixtures broke the band on a fixed `i % 3` stride, which *is* a period-3 rider — once the series was uncensored the router correctly routed it to NOISE_AS_SIGNAL, the right answer to a question the fixture never meant to ask. FCL-12.

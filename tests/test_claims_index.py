@@ -198,5 +198,149 @@ class TestPrincipleInstancesResolve(unittest.TestCase):
         self.assertLess(sum(len(v) for v in PR.tags().values()), n)
 
 
+
+class TestRegister(unittest.TestCase):
+    """CI-6..8. The register carries only what scanning cannot establish."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.idx = CI.scan()
+        cls.reg = CI.register()
+
+    def test_every_registered_claim_exists_in_the_tree(self):
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertEqual(rep["ORPHANED"], [])
+
+    def test_nothing_is_live_that_nothing_can_falsify(self):
+        """The check that makes the register more than bookkeeping. It fired
+        on real data: R2-8 was recorded live while the index saw only prose,
+        because a Python class name cannot contain a hyphen."""
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertEqual(rep["UNSUPPORTED_LIVE"], [])
+
+    def test_a_dead_claim_must_say_how_it_died(self):
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertEqual(rep["MISSING_BECAUSE"], [])
+        dead = [c for c in self.reg.values() if c["status"] == "dead"]
+        self.assertTrue(dead)
+        for c in dead:
+            self.assertGreater(len(c["because"]), 30, msg=c["id"])
+
+    def test_the_unsupported_live_check_can_actually_fire(self):
+        fake = {"XX-1": {"id": "XX-1", "family": "XX", "statement": "s",
+                         "status": "live", "names": "proposal"}}
+        idx = {"XX-1": {"PROSE": ["doc.md"]}}
+        self.assertEqual(CI.status_report(idx, fake)["UNSUPPORTED_LIVE"],
+                         ["XX-1"])
+
+    def test_a_prose_only_claim_is_recorded_open_not_live(self):
+        for cid, c in self.reg.items():
+            if CI.evidence(cid, self.idx) == "PROSE":
+                self.assertNotEqual(c["status"], "live", msg=cid)
+
+    def test_every_status_is_a_known_value(self):
+        for c in self.reg.values():
+            self.assertIn(c["status"], CI.STATUSES, msg=c["id"])
+
+    def test_the_namespace_ambiguity_is_recorded_not_smoothed_over(self):
+        """Some ids name a proposal, some name the refutation that killed one.
+        NEG-7 is dead as a proposal; ER-1 is live as a refutation."""
+        self.assertEqual(self.reg["NEG-7"]["names"], "proposal")
+        self.assertEqual(self.reg["NEG-7"]["status"], "dead")
+        self.assertEqual(self.reg["ER-1"]["names"], "refutation")
+        self.assertEqual(self.reg["ER-1"]["status"], "live")
+
+    def test_statements_are_derived_where_they_could_be(self):
+        derived = [c for c in self.reg.values()
+                   if c["source"].startswith("derived:")]
+        self.assertGreater(len(derived), 30)
+
+    def test_the_neg_family_is_sourced_from_its_own_register(self):
+        """NEG_CLAIMS.md predates this and stays the authority for NEG/TRI."""
+        for cid, c in self.reg.items():
+            if cid.split("-")[0] in ("NEG", "TRI"):
+                self.assertIn("NEG_CLAIMS.md", c["source"], msg=cid)
+
+    def test_unregistered_claims_are_reported_not_invented(self):
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertTrue(rep["UNREGISTERED"])
+        self.assertLess(len(self.reg), len(self.idx))
+
+
+class TestUnderscoreForm(unittest.TestCase):
+    """A Python identifier cannot contain a hyphen."""
+
+    def test_a_claim_named_only_in_a_class_name_is_found(self):
+        d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(d, "tests"))
+        fam = "QQ"
+        with open(os.path.join(d, "f.py"), "w", encoding="utf-8") as fh:
+            fh.write('check("%s-1: it holds", True)\n' % fam)
+        with open(os.path.join(d, "tests", "test_x.py"), "w",
+                  encoding="utf-8") as fh:
+            fh.write("class Test%s_2Thing:\n    pass\n" % fam)
+        idx = CI.scan(d)
+        self.assertEqual(CI.evidence(fam + "-2", idx), "NAMED_IN_TEST")
+
+    def test_it_only_applies_to_families_the_hyphen_form_established(self):
+        d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(d, "tests"))
+        with open(os.path.join(d, "tests", "test_x.py"), "w",
+                  encoding="utf-8") as fh:
+            fh.write("FIG_2 = 1\nPART_3 = 2\n")
+        self.assertEqual(CI.scan(d), {})
+
+    def test_an_uppercase_prefix_does_not_smuggle_a_family_in(self):
+        d = tempfile.mkdtemp()
+        os.makedirs(os.path.join(d, "tests"))
+        with open(os.path.join(d, "f.py"), "w", encoding="utf-8") as fh:
+            fh.write('check("QQ-1: it holds", True)\n')
+        with open(os.path.join(d, "tests", "test_x.py"), "w",
+                  encoding="utf-8") as fh:
+            fh.write("XQQ_9 = 1\n")
+        self.assertNotIn("QQ-9", CI.scan(d))
+
+    def test_the_real_case_that_found_this(self):
+        idx = CI.scan()
+        self.assertEqual(CI.evidence("R2-8", idx), "NAMED_IN_TEST")
+        self.assertIn("tests/test_transient_suppression.py",
+                      idx["R2-8"]["NAMED_IN_TEST"])
+
+
+class TestRender(unittest.TestCase):
+
+    def test_it_writes_one_file_per_folder_not_per_family(self):
+        w = CI.render(write=False)
+        self.assertIn(os.path.join("Silicon", "CLAIMS.md"), w)
+        body = w[os.path.join("Silicon", "CLAIMS.md")]
+        for fam in ("ER", "KEA", "R2", "TTM", "FAB"):
+            self.assertIn("## %s" % fam, body)
+
+    def test_generated_output_is_not_scanned_back_in(self):
+        """Rendered tables are markdown rows shaped exactly like a register
+        entry. Reading them back made the index cite its own output."""
+        idx = CI.scan()
+        self.assertNotIn("REGISTER", idx.get("FCL-13b", {}))
+
+    def test_rendering_is_idempotent(self):
+        a = CI.render(write=False)
+        CI.render(write=True)
+        self.assertEqual(a, CI.render(write=False))
+
+    def test_unregistered_rows_are_shown_not_omitted(self):
+        body = CI.render(write=False)[os.path.join("field", "CLAIMS.md")]
+        self.assertIn("_no recorded statement_", body)
+
+    def test_negentropic_is_not_overwritten(self):
+        """NEG_CLAIMS.md is the source this register parses; generating a
+        table there would invert the authority."""
+        self.assertNotIn("Negentropic", CI.FAMILY_HOME.values())
+        self.assertNotIn(os.path.join("Negentropic", "CLAIMS.md"),
+                         CI.render(write=False))
+
+    def test_every_generated_file_declares_that_it_is_generated(self):
+        for path, body in CI.render(write=False).items():
+            self.assertIn(CI.GENERATED_MARK, body[:400], msg=path)
+
 if __name__ == "__main__":
     unittest.main()
