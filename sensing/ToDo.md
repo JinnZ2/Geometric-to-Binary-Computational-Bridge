@@ -385,3 +385,46 @@ Re-testable Every tick_callback reruns all active claims deterministically. The 
 Falsification A claim is marked falsified after a configurable number of high‑confidence failures. This mirrors the scientific method’s emphasis on disconfirmation.
 Confidence / Bias The confidence_interval is derived from support/falsify counts, giving a Bayesian posterior. Bias terms are recorded in the table for full transparency.
 
+
+
+
+from sensing.exploration.exploration_engine import FrameRouter, FrameContext
+
+router = FrameRouter(config_path=Path("sensing/exploration/frame_config.json"))
+context = FrameContext(
+    manifold=manifold,
+    claim_table=claim_table,
+    llm_bridge=llm_bridge,
+    extra={"sensor_id": node_id}
+)
+
+def tick_callback(primitive: Primitive):
+    # 1. Update context with new primitive data
+    context.sensor_type = primitive.sensor_type
+    # (binary_vec would be extracted from primitive here)
+    
+    # 2. Run the multiple‑choice engine
+    result = router.step(context)
+    
+    # 3. Use the selected frame's narrative
+    print(f"[{result['active_frame']}] {result['narrative']}")
+    
+    # 4. Log trial results
+    for trial in result["trial_results"]:
+        if trial.is_falsification:
+            print(f"Falsified: {trial.claim_id}")
+    
+    # 5. Attach frame info to primitive's form
+    form_dict = json.loads(primitive.form)
+    form_dict["active_frame"] = result["active_frame"]
+    primitive.form = json.dumps(form_dict)
+    
+    # ... transmit ...
+
+    Feature Benefit
+Automatic Frame Switching The system doesn't commit to one epistemology. It uses Bayesian when uncertain, Falsificationist when data is clear, Resonance when patterns repeat, and LLM‑Gated when exploring.
+Configurable Scoring The choose_frame() method can be replaced with a learned router (a small neural net) that predicts the best frame based on historical performance.
+Drop‑in Extensibility To add a new frame (e.g., GDB, PyGeom), just subclass ExplorationFrame and register it. No other code changes.
+Traceable Decisions The history log records every switch with a timestamp and reason—making the system fully auditable.
+Multiple‑Choice as a Scientific Strategy The engine effectively runs a meta‑scientific experiment: "Which frame yields the most falsifiable claims, the lowest uncertainty, and the most coherent narrative over time?"
+
