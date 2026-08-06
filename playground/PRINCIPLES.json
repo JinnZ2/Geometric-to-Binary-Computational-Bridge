@@ -12,11 +12,28 @@
       "detector": "Feed the check a deliberately broken artifact. If it still passes, the check is not a check.",
       "mechanised_by": "playground broken() gate; repo_guard CHECKLIST 'would make it FAIL'",
       "instances": [
-        {"tag": "VAC-1", "what": "'at least one mode survives' -- the construction guaranteed a survivor"},
-        {"tag": "ATT-1", "what": "topological_pin's original run() asserted a topological invariant is invariant"},
-        {"tag": "AISS", "what": "26 of 46 assertions were assertIsInstance / assertIn; a 40% score change did not move them"},
-        {"tag": "GIES-test", "what": "an `or True` inside an assertion"},
-        {"tag": "FCL-self", "what": "a `pass` test body left in the field-loop suite by its own author"}
+        {
+          "where": "experiments/silicon_speculative/vacuum_bounds.py",
+          "what": "'at least one mode survives' -- the construction guaranteed a survivor",
+          "claim": "VAC-1"
+        },
+        {
+          "where": "experiments/silicon_speculative/topological_pin.py",
+          "what": "topological_pin's original run() asserted a topological invariant is invariant",
+          "claim": "ATT-1"
+        },
+        {
+          "where": "tests/test_aiss.py",
+          "what": "26 of 46 assertions were assertIsInstance / assertIn; a 40% score change did not move them"
+        },
+        {
+          "where": "tests/test_gies_core.py",
+          "what": "an `or True` inside an assertion"
+        },
+        {
+          "where": "tests/test_field_claim_loop.py",
+          "what": "a `pass` test body left in the field-loop suite by its own author"
+        }
       ],
       "cost_when_missed": "A suite can be 79% dead and still look green. tests/test_silicon_modules.py was."
     },
@@ -28,9 +45,21 @@
       "detector": "Replace the structure with noise of the same shape and re-run. Compare rates, not anecdotes.",
       "mechanised_by": "repo_guard.null_harness; playground null() gate",
       "instances": [
-        {"tag": "NEG-7", "what": "seventeen-lens isomorphism: randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor"},
-        {"tag": "AISS-1", "what": "77% of random reweightings reproduce the flat-weight high-merit rate"},
-        {"tag": "VAC-3", "what": "three vacuum assertions that random matrices pass"}
+        {
+          "where": "Negentropic/lens_collapse_test.py",
+          "what": "seventeen-lens isomorphism: randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor",
+          "claim": "NEG-7"
+        },
+        {
+          "where": "AISS/sovereignty_evaluator.py",
+          "what": "77% of random reweightings reproduce the flat-weight high-merit rate",
+          "claim": "AISS-1"
+        },
+        {
+          "where": "experiments/silicon_speculative/vacuum_geff_sim.py",
+          "what": "three vacuum assertions that random matrices pass",
+          "claim": "VAC-3"
+        }
       ],
       "cost_when_missed": "A framework's central claim can be a property of its arithmetic."
     },
@@ -43,11 +72,26 @@
       "mechanised_by": null,
       "gap_note": "NOT mechanised. The strongest unaddressed shape in this list, and the one that caught its own auditor -- see the lomb_scargle_gls instance.",
       "instances": [
-        {"tag": "R2-theory", "what": "the CMRR numerator was the theoretical value, not a measured one"},
-        {"tag": "FRET", "what": "the estimator WAS the generative process"},
-        {"tag": "SEED-fixedW", "what": "run_fixed_W's target was the model's own output"},
-        {"tag": "KEA-kwell", "what": "k_well taken from the DFT the cluster model was meant to test"},
-        {"tag": "PG-lomb", "what": "TOL_FRAC = 0.01 is not derived -- it is what the estimator happened to achieve, so the tolerance check is partly circular. Recorded in that candidate's own archive entry."}
+        {
+          "where": "Silicon/transient_suppression.py",
+          "what": "the CMRR numerator was the theoretical value, not a measured one"
+        },
+        {
+          "where": "Silicon/FRET/fret_core.py",
+          "what": "the estimator WAS the generative process"
+        },
+        {
+          "where": "Silicon/seed_influence.py",
+          "what": "run_fixed_W's target was the model's own output"
+        },
+        {
+          "where": "Silicon/keating_cluster.py",
+          "what": "k_well taken from the DFT the cluster model was meant to test"
+        },
+        {
+          "where": "playground/candidates/lomb_scargle_gls.py",
+          "what": "TOL_FRAC = 0.01 is not derived -- it is what the estimator happened to achieve, so the tolerance check is partly circular. Recorded in that candidate's own archive entry."
+        }
       ],
       "cost_when_missed": "A test that cannot fail, wearing the shape of one that can."
     },
@@ -60,8 +104,16 @@
       "mechanised_by": null,
       "gap_note": "NOT mechanised. Two independent formalisms hit it and neither caught the other.",
       "instances": [
-        {"tag": "GIES-1", "what": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical -- and NOT(i) = 7-i is precisely that map"},
-        {"tag": "KEA-7", "what": "the clamped Keating energy is EXACTLY even in the central displacement, E(p) = E(-p), because two cross-terms vanish identically"}
+        {
+          "where": "GEIS/gies_core.py",
+          "what": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical -- and NOT(i) = 7-i is precisely that map",
+          "claim": "GIES-1"
+        },
+        {
+          "where": "Silicon/keating_cluster.py",
+          "what": "the clamped Keating energy is EXACTLY even in the central displacement, E(p) = E(-p), because two cross-terms vanish identically",
+          "claim": "KEA-7"
+        }
       ],
       "cost_when_missed": "An 8-state encoding that is really 4 states, with the gate set's only unary operation invisible."
     },
@@ -73,9 +125,21 @@
       "detector": "Write the response as a function of the probe coordinate and look for its zeros. Then measure power across the family, not at one member.",
       "mechanised_by": null,
       "instances": [
-        {"tag": "FCL-4", "what": "autocorrelation at fixed lag 3: rho(lag) = cos(2*pi*lag/T) is exactly zero at T=12, giving 0% power at periods 4, 10, 12, 14, 16 alongside a 22% false-alarm rate"},
-        {"tag": "FCL-12", "what": "slot width derived from record span rather than sampling interval: each slot half a period wide, rho 0.23 at an arbitrary lag where the truth was -0.99"},
-        {"tag": "FP-2", "what": "traveling-wave phase aliasing at delta-phi = 2*pi*m/N -- the same blindness in the drive rather than the detector"}
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "autocorrelation at fixed lag 3: rho(lag) = cos(2*pi*lag/T) is exactly zero at T=12, giving 0% power at periods 4, 10, 12, 14, 16 alongside a 22% false-alarm rate",
+          "claim": "FCL-4"
+        },
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "slot width derived from record span rather than sampling interval: each slot half a period wide, rho 0.23 at an arbitrary lag where the truth was -0.99",
+          "claim": "FCL-12"
+        },
+        {
+          "where": "Silicon/propulsion_bounds.py",
+          "what": "traveling-wave phase aliasing at delta-phi = 2*pi*m/N -- the same blindness in the drive rather than the detector",
+          "claim": "FP-2"
+        }
       ],
       "cost_when_missed": "A detector with a 22% false-alarm rate and 0% power in the same configuration."
     },
@@ -87,9 +151,20 @@
       "detector": "Generate the null, run the gate, count. Then generate the effect and count again. Two numbers, both required.",
       "mechanised_by": "playground null() gate for candidates; nothing repo-wide",
       "instances": [
-        {"tag": "FCL-3", "what": "|rho| > 0.35 with no minimum-sample gate: 23.5% false alarm at n=5, 21.9% at n=8"},
-        {"tag": "FCL-5", "what": "rate > 1.5x base with no significance test: 34.7%, 34.0%, 41.0% on null covariates -- and worse with more data"},
-        {"tag": "SIL-noise", "what": "a thermal noise floor quoted without the bandwidth it was integrated over"}
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "|rho| > 0.35 with no minimum-sample gate: 23.5% false alarm at n=5, 21.9% at n=8",
+          "claim": "FCL-3"
+        },
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "rate > 1.5x base with no significance test: 34.7%, 34.0%, 41.0% on null covariates -- and worse with more data",
+          "claim": "FCL-5"
+        },
+        {
+          "where": "Silicon/silicon_check.py",
+          "what": "a thermal noise floor quoted without the bandwidth it was integrated over"
+        }
       ],
       "cost_when_missed": "The folder's own notes said 'too permissive'. It was 41%."
     },
@@ -101,9 +176,20 @@
       "detector": "Ask what was thrown away and whether anything downstream could have used it. If the answer is not recorded, it was thrown away silently.",
       "mechanised_by": "field reading() requires a shape to name its projection (partial -- naming it is not testing against it)",
       "instances": [
-        {"tag": "FCL-9", "what": "shape documented canonical, no code path reads it; test() compares value only"},
-        {"tag": "GIES-1", "what": "the rank-1 tensor is a projection that discards the sign"},
-        {"tag": "MS-units", "what": "M(S) collapses a variance and a power into one score"}
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "shape documented canonical, no code path reads it; test() compares value only",
+          "claim": "FCL-9"
+        },
+        {
+          "where": "GEIS/gies_core.py",
+          "what": "the rank-1 tensor is a projection that discards the sign",
+          "claim": "GIES-1"
+        },
+        {
+          "where": "Negentropic/consciousness_metric.py",
+          "what": "M(S) collapses a variance and a power into one score"
+        }
       ],
       "cost_when_missed": "Storing the shape without testing against it is scalarizing with a receipt."
     },
@@ -115,10 +201,25 @@
       "detector": "Write the units of both sides. If either cannot be written, there is no threshold.",
       "mechanised_by": "repo_guard.reach for instrument floors; CHECKLIST 'UNITS AND ORDERS' for the rest",
       "instances": [
-        {"tag": "NEG-MS", "what": "M(S) >= 10: D is a variance and L a power, so the ratio has units and 10 is not a threshold on anything"},
-        {"tag": "SI-E", "what": "energy per bit quoted as 1-2 aJ, 0.1 eV and 0.01 eV in one archive; the last is 0.56 kT ln2, below Landauer"},
-        {"tag": "FCL-12", "what": "'lag 3' meant three residuals ago, not a duration, on an irregular clock"},
-        {"tag": "FCL-5e", "what": "the conservation ledger's reservoir, still unstated -- which is why it was not guessed"}
+        {
+          "where": "Negentropic/consciousness_metric.py",
+          "what": "M(S) >= 10: D is a variance and L a power, so the ratio has units and 10 is not a threshold on anything"
+        },
+        {
+          "where": "Silicon/er_bounds.py",
+          "what": "energy per bit quoted as 1-2 aJ, 0.1 eV and 0.01 eV in one archive; the last is 0.56 kT ln2, below Landauer",
+          "claim": "SI-E"
+        },
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "'lag 3' meant three residuals ago, not a duration, on an irregular clock",
+          "claim": "FCL-12"
+        },
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "the conservation ledger's reservoir, still unstated -- which is why it was not guessed",
+          "claim": "FCL-5e"
+        }
       ],
       "cost_when_missed": "A threshold that cannot be met or missed."
     },
@@ -130,10 +231,24 @@
       "detector": "Count what ran, not what passed. An import error inside setUp is reported as a test ERROR, not a collection failure.",
       "mechanised_by": "the full-sweep command with a per-file failure echo; nothing automatic",
       "instances": [
-        {"tag": "SIL-reorg", "what": "test_silicon_modules.py: 52 of 66 tests errored in setUp after a directory reorg moved six modules one level down"},
-        {"tag": "BRIDGE-path", "what": "nine test files lacked the sys.path bootstrap, so the documented command raised ModuleNotFoundError"},
-        {"tag": "FCL-1", "what": "the NOVEL route was unreachable whenever an anchor was logged -- a branch that could not fire"},
-        {"tag": "NEG-2-3", "what": "two falsifiers implemented and never run against data"}
+        {
+          "where": "tests/test_silicon_modules.py",
+          "what": "test_silicon_modules.py: 52 of 66 tests errored in setUp after a directory reorg moved six modules one level down"
+        },
+        {
+          "where": "tests/test_bridges.py",
+          "what": "nine test files lacked the sys.path bootstrap, so the documented command raised ModuleNotFoundError"
+        },
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "the NOVEL route was unreachable whenever an anchor was logged -- a branch that could not fire",
+          "claim": "FCL-1"
+        },
+        {
+          "where": "Negentropic/maintenance.py",
+          "what": "two falsifiers implemented and never run against data",
+          "claim": "NEG-2"
+        }
       ],
       "cost_when_missed": "A suite 79% dead that still looks like it ran."
     },
@@ -145,9 +260,18 @@
       "detector": "Hash the bodies. Then ask which one the code imports.",
       "mechanised_by": null,
       "instances": [
-        {"tag": "AISS-dup", "what": "AISS.md and AISS1.md: byte-identical bodies, 1804 lines, differing only in preamble"},
-        {"tag": "GIES-spec", "what": "GIES.md 7.2 specified the correct weighted sum; 8.3 implemented a degenerate special case of its own spec"},
-        {"tag": "NEG-lenses", "what": "the 17 lenses defined twice before being centralised"}
+        {
+          "where": "AISS/AISS1.md",
+          "what": "AISS.md and AISS1.md: byte-identical bodies, 1804 lines, differing only in preamble"
+        },
+        {
+          "where": "GEIS/GIES_AUDIT.md",
+          "what": "GIES.md 7.2 specified the correct weighted sum; 8.3 implemented a degenerate special case of its own spec"
+        },
+        {
+          "where": "Negentropic/lenses.py",
+          "what": "the 17 lenses defined twice before being centralised"
+        }
       ],
       "cost_when_missed": "The implementation quietly wins over the specification, and the specification is what gets read."
     },
@@ -160,9 +284,18 @@
       "detector": "Run the analysis on the full record and on the filtered one. Compare the answers, not just the detection rates.",
       "mechanised_by": null,
       "instances": [
-        {"tag": "FCL-11", "what": "the correlation branch was fed only band-breaking readings: 120 became 87, and it still came back STRUCTURED -- at lag 4 against a true half-period of 5, |rho| 0.79 versus 0.95 uncensored"}
+        {
+          "where": "field/field_claim_loop.py",
+          "what": "the correlation branch was fed only band-breaking readings: 120 became 87, and it still came back STRUCTURED -- at lag 4 against a true half-period of 5, |rho| 0.79 versus 0.95 uncensored",
+          "claim": "FCL-11"
+        }
       ],
       "cost_when_missed": "A wrong answer delivered confidently, which is worse than silence."
     }
-  ]
+  ],
+  "instance_fields": {
+    "where": "repo-relative path, checked to exist. Always present.",
+    "claim": "a claim or problem id from claims_index.py, when one really exists. Absent when it does not -- 19 of 36 instances originally carried an invented shorthand id that resolved nowhere, so the id is now optional and the location is not.",
+    "what": "one line of prose"
+  }
 }

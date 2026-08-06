@@ -1,0 +1,697 @@
+{
+ "schema": 1,
+ "license": "CC0",
+ "note": "Claim register. Only what the index CANNOT derive lives here: the statement, whether it holds, and why not when it does not. Where a claim is written, and what can make it fail, are scanned by claims_index.py -- putting them here too would be a second authority over the same facts.",
+ "namespace_warning": "The id namespace is not uniform in what it points at. Some ids name a PROPOSAL (NEG-7: seventeen lenses are one grammar -- dead). Others name the REFUTATION that killed a proposal (ER-1: Orbach is saturated at 300 K -- live, and it is what killed the Er coherence claim). `names` records which, because the same status word means opposite things otherwise.",
+ "status_values": {
+  "live": "the statement holds and something can make it fail",
+  "dead": "falsified; `because` says how",
+  "open": "stated, nothing has tested it",
+  "superseded": "replaced; `because` names by what"
+ },
+ "claims": [
+  {
+   "id": "NEG-10",
+   "family": "NEG",
+   "statement": "Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-11",
+   "family": "NEG",
+   "statement": "The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-2",
+   "family": "NEG",
+   "statement": "An archive is a dissipative structure. Lifetime is set by `sigma - W_care/T`, not by the medium.",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-3",
+   "family": "NEG",
+   "statement": "Finite-time erasure costs `kT ln2 + C/tau`; resurfacing of an overwritten trace scales as `tau^-1`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-4",
+   "family": "NEG",
+   "statement": "Dependency re-rooting is the correct update operation; radiate and recenter are the only two evidence moves",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-7",
+   "family": "NEG",
+   "statement": "Seventeen cultural and scientific lenses are surface renderings of one deep grammar",
+   "status": "dead",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md",
+   "because": "randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor; see Negentropic/lens_collapse_test.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "The seventeen lenses remain a usable phrasebook between vocabularies -- what died is the claim that they are ONE grammar, not that translating between them helps. And the harness that killed it generalised: repo_guard.null_harness now runs the same test on anything.",
+    "principle": "P-NULL-ARTIFACT",
+    "screen": {
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness"
+    }
+   }
+  },
+  {
+   "id": "NEG-8",
+   "family": "NEG",
+   "statement": "A structure persists iff it exports entropy at least as fast as it produces it: `Phi = -S_exchange_dot - sigma >= 0`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-9",
+   "family": "NEG",
+   "statement": "A cycle after inversion is a contradiction detector: two claims cannot both be foundational to each other, so one is wrong",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-1",
+   "family": "TRI",
+   "statement": "Equilateral minimises worst-case strength of figure, at exactly 1.0",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-2",
+   "family": "TRI",
+   "statement": "Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-3",
+   "family": "TRI",
+   "statement": "Closure failure and record drift are separable: closure tests the observation, drift tests the figure",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-4",
+   "family": "TRI",
+   "statement": "Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "ER-1",
+   "family": "ER",
+   "statement": "Orbach is saturated at 300 K, not merely open",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The Orbach screen generalises to any deep-level or rare-earth coherence claim in any host: compare the crystal-field gap to kT, check the Bose occupation, and if Delta << kT the rate is linear in T and the claim is finished. Two lines, no apparatus. Er's 1.5 um optical transition is untouched and is where the real literature works -- at cryogenic temperature.",
+    "killed": "Er3+ holds T2 = 166 ms at 300 K in silicon",
+    "screen": {
+     "name": "orbach-vs-kT",
+     "rule": "Compare the crystal-field gap to kT. If Delta << kT the Orbach rate goes linear in T and any coherence claim at that temperature is finished.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "ER-2",
+   "family": "ER",
+   "statement": "no Er gap mode exists in the searched window",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The gap-mode mass criterion m_impurity < m_host is a one-line screen for every local-vibrational-mode proposal. It killed the $10k Er search and the 'P local mode at ~500 cm^-1' claim in the same stroke, for free.",
+    "killed": "a $10k search for an Er local vibrational mode at 300-400 cm^-1",
+    "screen": {
+     "name": "gap-mode-mass",
+     "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "ER-2b",
+   "family": "ER",
+   "statement": "the same criterion kills 'P local mode at ~500 cm^-1'",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "Same mass criterion, second target. That a single screen kills two independent claims in one archive is the argument for writing screens down rather than re-deriving them.",
+    "killed": "a phosphorus local mode at ~500 cm^-1",
+    "screen": {
+     "name": "gap-mode-mass",
+     "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "ER-3",
+   "family": "ER",
+   "statement": "the stated (omega, k) pair is inconsistent by ~8x",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "Checking (omega, k) for mutual consistency before quoting either is a two-line screen and it caught an 8x discrepancy.",
+    "killed": "the stated omega and k_well pair",
+    "screen": {
+     "name": "check-the-pair",
+     "rule": "Two quantities quoted as a pair must be mutually consistent. Check before either is used.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "FCL-1",
+   "family": "FCL",
+   "statement": "NOVEL is reachable with a stable anchor logged",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The general form: a route that appends a zero-weight candidate silently disables any branch guarded on the candidate list being empty. A branch contributes only with positive evidence now, and NOVEL records the negative evidence it rests on.",
+    "killed": "the four-way router, which forked one way whenever an anchor was logged"
+   }
+  },
+  {
+   "id": "FCL-10",
+   "family": "FCL",
+   "statement": "claim ids come from live ids, not the log line count",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-11",
+   "family": "FCL",
+   "statement": "the correlated series is uncensored",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "Censoring biases rather than blinds -- the censored series still returned STRUCTURED, at lag 4 against a true half-period of 5. A confident wrong answer is worse than silence, and that is the general shape.",
+    "killed": "feeding the correlation branch only band-breaking readings",
+    "screen": {
+     "name": "compare-filtered-to-full",
+     "rule": "Run the analysis on the full record and on the filtered one and compare the ANSWERS, not the detection rates. Filtering biases before it blinds.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "FCL-12",
+   "family": "FCL",
+   "statement": "lag is a duration when there is a clock",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-12b",
+   "family": "FCL",
+   "statement": "and it is calibrated on an irregular clock",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-12c",
+   "family": "FCL",
+   "statement": "and no period is claimed",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-13",
+   "family": "FCL",
+   "statement": "multiplicity correction is BH, and the gain is stated small",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py",
+   "salvage": {
+    "cause": "OUT_OF_SCOPE",
+    "keep": "The honest negative: at k=1 Benjamini-Hochberg IS Bonferroni, so with one true effect the swap buys exactly nothing. The larger lever was found by measuring instead -- the exact binomial is discrete, so the achieved level sits near 1% against a nominal 5%.",
+    "killed": "the expectation that the FDR swap would recover meaningful power"
+   }
+  },
+  {
+   "id": "FCL-1b",
+   "family": "FCL",
+   "statement": "and it emits the experiment that route implies",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-2",
+   "family": "FCL",
+   "statement": "anchor_dev is a deviation against an explicit tolerance",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-2b",
+   "family": "FCL",
+   "statement": "and the tolerance actually gates it",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-3",
+   "family": "FCL",
+   "statement": "NOISE_AS_SIGNAL has a sample floor and a scaled band",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-4",
+   "family": "FCL",
+   "statement": "a lag scan sees the rider periods a fixed lag cannot",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "rho(lag) = cos(2*pi*lag/T) is the whole lesson: a detector that probes a continuous space at one fixed coordinate is blind wherever the response vanishes there. Reusable for any single-point probe, not just autocorrelation.",
+    "killed": "the fixed-lag-3 structure detector, 0% power at periods 4, 10, 12, 14, 16",
+    "principle": "P-FIXED-PROBE",
+    "screen": {
+     "name": "probe-the-whole-family",
+     "rule": "Write the response as a function of the probe coordinate and find its zeros. A detector fixed at one coordinate has zero power wherever the response vanishes there.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "FCL-5",
+   "family": "FCL",
+   "statement": "MISSING_VARIABLE is a corrected binomial tail, not 1.5x base",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The measured null rates are the reusable part: 34.7%, 34.0%, 41.0%, rising with n because more bins clear the sample floor. 'Too permissive' in a comment is not a number, and the number was a third.",
+    "killed": "rate > 1.5x base as a covariate concentration test",
+    "screen": {
+     "name": "measure-the-null",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "FCL-5b",
+   "family": "FCL",
+   "statement": "and it still finds a real concentration",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-6",
+   "family": "FCL",
+   "statement": "residual membership is by index, not dict equality",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-7",
+   "family": "FCL",
+   "statement": "deepen requires a tighter band or a named axis",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-8",
+   "family": "FCL",
+   "statement": "self-initiated actuation is metered, capped and credited",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "FCL-9",
+   "family": "FCL",
+   "statement": "a shape cannot be scalarized without naming the projection",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:field/falsifiers_field_loop.py"
+  },
+  {
+   "id": "GIES-2",
+   "family": "GIES",
+   "statement": "index parity equals site type, 8/8",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "Index parity IS site type, verified against the diamond-cubic basis, which hands the 3-bit address space a free single-bit error-detecting code -- exactly what the 'geometric error correction' claim wanted and could not derive. The carrier is J3, not the trace: trace and J2 are identical across all eight states.",
+    "killed": "the trace as the state-distinguishing invariant",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "GIES-3",
+   "family": "GIES",
+   "statement": "every NOT crosses sublattices, so every NOT is a Frenkel pair",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers.py",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "NOT crosses the sublattice, so every NOT is a Frenkel pair at ~4.75 eV. That converts a gate-set question into an energy budget, which is answerable. The honest state space is 4 states plus a site-type flag.",
+    "killed": "NOT as a free unary operation on the 8-state encoding",
+    "screen": {
+     "name": "frenkel-cost",
+     "rule": "An operation that moves an atom between sublattices costs a Frenkel pair. Price it before calling the operation free.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "KEA-1",
+   "family": "KEA",
+   "statement": "exactly one minimum, at the ideal centre",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The Keating parameters alpha = 48.1 and beta = 12.0 N/m are correct and reusable. 'Eight octahedral faces' is the one correct use of that terminology in the whole set. And the general form of the error is a screen: a sum of squares has ONE zero, so any 'N degenerate minima' claim about a VFF model is checkable by inspection before anyone runs an optimiser.",
+    "killed": "the 8-state clamped Keating encoding, its gate set and its ALU",
+    "screen": {
+     "name": "sum-of-squares-has-one-zero",
+     "rule": "A sum of squares has exactly one zero. Any 'N degenerate minima' claim about a positive-definite form is checkable before an optimiser is written.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "KEA-3",
+   "family": "KEA",
+   "statement": "no lattice separation lands on phi*a",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The phi-spacing check is reusable: enumerate the real lattice separations before claiming any of them lands on an irrational multiple of a.",
+    "killed": "phi-spaced sites coinciding with lattice separations"
+   }
+  },
+  {
+   "id": "KEA-7",
+   "family": "KEA",
+   "statement": "energy is exactly even, so vertex and face are degenerate",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The tetrahedral identities sum(v_k) = 0 and v_k.v_l = -d0^2/3 are exact and reusable anywhere the cluster appears. The error's general form is the more valuable half: an encoding must be tested against the operation that is supposed to distinguish its states, which is the same blindness GIES-1 hit in a formalism that never met this one.",
+    "killed": "vertex-versus-face distinguishability in the clamped cluster",
+    "principle": "P-SYMMETRY-COLLAPSE",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "SEED-1",
+   "family": "SEED",
+   "statement": "W is the identity, so the channels are independent scalars",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "W = I is itself a usable fact: the channels are independent scalars, so anything built on cross-channel structure needs a different matrix, and SEED-5 shows one that is non-trivial while keeping proportions invariant.",
+    "killed": "the claim that the seed influence matrix preserves structure"
+   }
+  },
+  {
+   "id": "SEED-3",
+   "family": "SEED",
+   "statement": "the claimed fidelity is 13 orders below the seed resolution",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "UNITS",
+    "keep": "The resolution comparison is the reusable part: state the seed's own resolution before claiming a fidelity against it. Thirteen orders is not a tuning problem.",
+    "killed": "the stated seed reconstruction fidelity",
+    "screen": {
+     "name": "state-the-resolution-first",
+     "rule": "State the instrument's own resolution before quoting a fidelity against it.",
+     "mechanised_by": null
+    }
+   }
+  },
+  {
+   "id": "SEED-5",
+   "family": "SEED",
+   "statement": "the fix makes W non-trivial but keeps proportions invariant",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Silicon/falsifiers_keating_seed.py",
+   "salvage": {
+    "cause": "SUPERSEDED",
+    "keep": "Carried forward as the working influence matrix. This is the constructive half of the SEED audit -- non-trivial W, proportions invariant."
+   }
+  },
+  {
+   "id": "GIES-1",
+   "family": "GIES",
+   "statement": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
+   "id": "VAC-1",
+   "family": "VAC",
+   "statement": "the vacuum criterion 'at least one mode survives' is true by construction",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "UNFALSIFIABLE",
+    "keep": "VAC-2's mode-count floor is real and survives. What died is the criterion, not the folder: restating 'at least one mode survives' as a count with a floor makes it able to fail.",
+    "killed": "'at least one mode survives' as a vacuum criterion",
+    "principle": "P-UNFALSIFIABLE",
+    "screen": {
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness"
+    }
+   }
+  },
+  {
+   "id": "ATT-1",
+   "family": "ATT",
+   "statement": "a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The correct half is load-bearing and was kept: topological charge is invariant while core POSITION is a zero mode. The remedy was wrong, not the finding. A pin coupling to something non-topological removes the zero mode -- measured, 100% hop at k_p = 0 and 0% at k_p >= 0.01, charge conserved throughout.",
+    "killed": "a registry as a vortex pin -- bookkeeping costs nothing to violate",
+    "principle": "P-UNFALSIFIABLE"
+   }
+  },
+  {
+   "id": "FAB-1",
+   "family": "FAB",
+   "statement": "a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority.",
+    "killed": "a magnetic state channel in silicon, 11 orders below a Hall sensor",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach"
+    }
+   }
+  },
+  {
+   "id": "R2-8",
+   "family": "R2",
+   "statement": "the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The bifilar geometry and the common-mode budget are sound engineering and stand. What died is the direction of the worry: at 4.42 mrad the risk is not that the write destroys coherence, it is that the write does not happen.",
+    "killed": "the concern that the 5 ps write pulse collapses spin coherence",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach"
+    }
+   }
+  },
+  {
+   "id": "TTM-2",
+   "family": "TTM",
+   "statement": "sp3 readout is rank-deficient",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "Rank deficiency is checkable by construction, and TTM-3 supplies the fix: the six <110> directions are a complete basis. One audit produced both the refutation and its replacement.",
+    "killed": "sp3 directions as a complete readout basis"
+   }
+  },
+  {
+   "id": "TTM-3",
+   "family": "TTM",
+   "statement": "the six <110> directions are a complete readout basis",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded",
+   "salvage": {
+    "cause": "SUPERSEDED",
+    "keep": "The constructive replacement for TTM-2, and it fixed three separate readout failures at once."
+   }
+  },
+  {
+   "id": "SIL-1",
+   "family": "SIL",
+   "statement": "the shipped strain invariants are blind to crystal orientation",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Invariants chosen for convenience discard the thing being measured. The recovery channels in the same spec are unaffected and were kept.",
+    "killed": "the shipped strain invariants as an orientation-sensitive fault signal"
+   }
+  },
+  {
+   "id": "EPG-6",
+   "family": "EPG",
+   "statement": "109.47 degrees is the tetrahedral maximin bound, from |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The two-line identity |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0 proves the 109.47 degree maximin bound outright. It replaced a numerical search that stalled half a degree short -- worth remembering when an optimiser is standing in for an identity."
+   }
+  },
+  {
+   "id": "EPG-7",
+   "family": "EPG",
+   "statement": "cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded",
+   "salvage": {
+    "cause": "SYMMETRY_FORBIDDEN",
+    "keep": "Neumann's principle on a cubic crystal forces any rank-2 transport tensor to lambda*I. Free to check, kills every 'preferred direction in cubic Si' claim at once, and generalises to every material in that point group.",
+    "killed": "directional thermal or electrical transport anisotropy in cubic silicon",
+    "screen": {
+     "name": "neumann-cubic",
+     "rule": "Neumann's principle: a rank-2 tensor invariant under a cubic group is lambda*I. Any 'preferred direction in a cubic crystal' claim dies by inspection.",
+     "mechanised_by": "repo_guard.veto"
+    }
+   }
+  },
+  {
+   "id": "BRG-6",
+   "family": "BRG",
+   "statement": "piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110>",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "FAB-3",
+   "family": "FAB",
+   "statement": "the eight implant states are separable at >3 sigma in (R_s, carrier type, n)",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "R2-3",
+   "family": "R2",
+   "statement": "the bifilar CMRR budget holds at an achievable matching tolerance",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "ER-7",
+   "family": "ER",
+   "statement": "the stated implant dose is achievable",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  }
+ ],
+ "causes": {
+  "MATH_ERROR": "the derivation is wrong. The algebra is reusable once corrected, and the error itself usually generalises into a screen.",
+  "CODE_ERROR": "the implementation contradicts its own specification. The spec is often still right.",
+  "PHYSICS_BOUND": "a real physical limit forbids it. The bound is a reusable screen for the whole class of proposal.",
+  "SYMMETRY_FORBIDDEN": "the material's symmetry forbids the mechanism. Free to check, and it generalises to every material of that point group.",
+  "UNFALSIFIABLE": "no input could have made it fail. What survives is whatever it was gesturing at, restated so it can fail.",
+  "NULL_ARTIFACT": "noise of the same shape reproduces it. The structure may still be useful for something other than what was claimed.",
+  "UNITS": "a dimensional error. The quantities are usually fine; the comparison was not.",
+  "SUPERSEDED": "replaced by something that does the job better. `keep` names what carried over.",
+  "OUT_OF_SCOPE": "not wrong, and not this project's question any more."
+ },
+ "salvage_rule": "A claim recorded dead MUST carry salvage.keep. A dead claim that records nothing recyclable is one somebody deleted rather than learned from. Refutations carry salvage too: `killed` names the proposal that died, and `keep` says what of it survives. Being wrong is expensive; the arithmetic, the bound, the sound half of the design and the error's own general form are the return on it.",
+ "screen_note": "A screen is the reusable half of a refutation: the two-line check that kills the whole CLASS of claim, not just the one that died. Screens with reach >= 2 have already proved they generalise, and the ones not yet mechanised are the highest-value work in this file -- each is a mistake this archive has already paid for once."
+}
