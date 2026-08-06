@@ -61,7 +61,12 @@
    "salvage": {
     "cause": "NULL_ARTIFACT",
     "keep": "The seventeen lenses remain a usable phrasebook between vocabularies -- what died is the claim that they are ONE grammar, not that translating between them helps. And the harness that killed it generalised: repo_guard.null_harness now runs the same test on anything.",
-    "principle": "P-NULL-ARTIFACT"
+    "principle": "P-NULL-ARTIFACT",
+    "screen": {
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness"
+    }
    }
   },
   {
@@ -122,7 +127,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "The Orbach screen generalises to any deep-level or rare-earth coherence claim in any host: compare the crystal-field gap to kT, check the Bose occupation, and if Delta << kT the rate is linear in T and the claim is finished. Two lines, no apparatus. Er's 1.5 um optical transition is untouched and is where the real literature works -- at cryogenic temperature.",
-    "killed": "Er3+ holds T2 = 166 ms at 300 K in silicon"
+    "killed": "Er3+ holds T2 = 166 ms at 300 K in silicon",
+    "screen": {
+     "name": "orbach-vs-kT",
+     "rule": "Compare the crystal-field gap to kT. If Delta << kT the Orbach rate goes linear in T and any coherence claim at that temperature is finished.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -135,7 +145,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "The gap-mode mass criterion m_impurity < m_host is a one-line screen for every local-vibrational-mode proposal. It killed the $10k Er search and the 'P local mode at ~500 cm^-1' claim in the same stroke, for free.",
-    "killed": "a $10k search for an Er local vibrational mode at 300-400 cm^-1"
+    "killed": "a $10k search for an Er local vibrational mode at 300-400 cm^-1",
+    "screen": {
+     "name": "gap-mode-mass",
+     "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -148,7 +163,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "Same mass criterion, second target. That a single screen kills two independent claims in one archive is the argument for writing screens down rather than re-deriving them.",
-    "killed": "a phosphorus local mode at ~500 cm^-1"
+    "killed": "a phosphorus local mode at ~500 cm^-1",
+    "screen": {
+     "name": "gap-mode-mass",
+     "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -161,7 +181,12 @@
    "salvage": {
     "cause": "MATH_ERROR",
     "keep": "Checking (omega, k) for mutual consistency before quoting either is a two-line screen and it caught an 8x discrepancy.",
-    "killed": "the stated omega and k_well pair"
+    "killed": "the stated omega and k_well pair",
+    "screen": {
+     "name": "check-the-pair",
+     "rule": "Two quantities quoted as a pair must be mutually consistent. Check before either is used.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -195,7 +220,12 @@
    "salvage": {
     "cause": "MATH_ERROR",
     "keep": "Censoring biases rather than blinds -- the censored series still returned STRUCTURED, at lag 4 against a true half-period of 5. A confident wrong answer is worse than silence, and that is the general shape.",
-    "killed": "feeding the correlation branch only band-breaking readings"
+    "killed": "feeding the correlation branch only band-breaking readings",
+    "screen": {
+     "name": "compare-filtered-to-full",
+     "rule": "Run the analysis on the full record and on the filtered one and compare the ANSWERS, not the detection rates. Filtering biases before it blinds.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -278,7 +308,12 @@
     "cause": "MATH_ERROR",
     "keep": "rho(lag) = cos(2*pi*lag/T) is the whole lesson: a detector that probes a continuous space at one fixed coordinate is blind wherever the response vanishes there. Reusable for any single-point probe, not just autocorrelation.",
     "killed": "the fixed-lag-3 structure detector, 0% power at periods 4, 10, 12, 14, 16",
-    "principle": "P-FIXED-PROBE"
+    "principle": "P-FIXED-PROBE",
+    "screen": {
+     "name": "probe-the-whole-family",
+     "rule": "Write the response as a function of the probe coordinate and find its zeros. A detector fixed at one coordinate has zero power wherever the response vanishes there.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -291,7 +326,12 @@
    "salvage": {
     "cause": "MATH_ERROR",
     "keep": "The measured null rates are the reusable part: 34.7%, 34.0%, 41.0%, rising with n because more bins clear the sample floor. 'Too permissive' in a comment is not a number, and the number was a third.",
-    "killed": "rate > 1.5x base as a covariate concentration test"
+    "killed": "rate > 1.5x base as a covariate concentration test",
+    "screen": {
+     "name": "measure-the-null",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -344,7 +384,12 @@
    "salvage": {
     "cause": "MATH_ERROR",
     "keep": "Index parity IS site type, verified against the diamond-cubic basis, which hands the 3-bit address space a free single-bit error-detecting code -- exactly what the 'geometric error correction' claim wanted and could not derive. The carrier is J3, not the trace: trace and J2 are identical across all eight states.",
-    "killed": "the trace as the state-distinguishing invariant"
+    "killed": "the trace as the state-distinguishing invariant",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -357,7 +402,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "NOT crosses the sublattice, so every NOT is a Frenkel pair at ~4.75 eV. That converts a gate-set question into an energy budget, which is answerable. The honest state space is 4 states plus a site-type flag.",
-    "killed": "NOT as a free unary operation on the 8-state encoding"
+    "killed": "NOT as a free unary operation on the 8-state encoding",
+    "screen": {
+     "name": "frenkel-cost",
+     "rule": "An operation that moves an atom between sublattices costs a Frenkel pair. Price it before calling the operation free.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -370,7 +420,12 @@
    "salvage": {
     "cause": "MATH_ERROR",
     "keep": "The Keating parameters alpha = 48.1 and beta = 12.0 N/m are correct and reusable. 'Eight octahedral faces' is the one correct use of that terminology in the whole set. And the general form of the error is a screen: a sum of squares has ONE zero, so any 'N degenerate minima' claim about a VFF model is checkable by inspection before anyone runs an optimiser.",
-    "killed": "the 8-state clamped Keating encoding, its gate set and its ALU"
+    "killed": "the 8-state clamped Keating encoding, its gate set and its ALU",
+    "screen": {
+     "name": "sum-of-squares-has-one-zero",
+     "rule": "A sum of squares has exactly one zero. Any 'N degenerate minima' claim about a positive-definite form is checkable before an optimiser is written.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -397,7 +452,12 @@
     "cause": "MATH_ERROR",
     "keep": "The tetrahedral identities sum(v_k) = 0 and v_k.v_l = -d0^2/3 are exact and reusable anywhere the cluster appears. The error's general form is the more valuable half: an encoding must be tested against the operation that is supposed to distinguish its states, which is the same blindness GIES-1 hit in a formalism that never met this one.",
     "killed": "vertex-versus-face distinguishability in the clamped cluster",
-    "principle": "P-SYMMETRY-COLLAPSE"
+    "principle": "P-SYMMETRY-COLLAPSE",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -423,7 +483,12 @@
    "salvage": {
     "cause": "UNITS",
     "keep": "The resolution comparison is the reusable part: state the seed's own resolution before claiming a fidelity against it. Thirteen orders is not a tuning problem.",
-    "killed": "the stated seed reconstruction fidelity"
+    "killed": "the stated seed reconstruction fidelity",
+    "screen": {
+     "name": "state-the-resolution-first",
+     "rule": "State the instrument's own resolution before quoting a fidelity against it.",
+     "mechanised_by": null
+    }
    }
   },
   {
@@ -457,7 +522,12 @@
     "cause": "UNFALSIFIABLE",
     "keep": "VAC-2's mode-count floor is real and survives. What died is the criterion, not the folder: restating 'at least one mode survives' as a count with a floor makes it able to fail.",
     "killed": "'at least one mode survives' as a vacuum criterion",
-    "principle": "P-UNFALSIFIABLE"
+    "principle": "P-UNFALSIFIABLE",
+    "screen": {
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness"
+    }
    }
   },
   {
@@ -484,7 +554,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority.",
-    "killed": "a magnetic state channel in silicon, 11 orders below a Hall sensor"
+    "killed": "a magnetic state channel in silicon, 11 orders below a Hall sensor",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach"
+    }
    }
   },
   {
@@ -497,7 +572,12 @@
    "salvage": {
     "cause": "PHYSICS_BOUND",
     "keep": "The bifilar geometry and the common-mode budget are sound engineering and stand. What died is the direction of the worry: at 4.42 mrad the risk is not that the write destroys coherence, it is that the write does not happen.",
-    "killed": "the concern that the 5 ps write pulse collapses spin coherence"
+    "killed": "the concern that the 5 ps write pulse collapses spin coherence",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach"
+    }
    }
   },
   {
@@ -560,7 +640,12 @@
    "salvage": {
     "cause": "SYMMETRY_FORBIDDEN",
     "keep": "Neumann's principle on a cubic crystal forces any rank-2 transport tensor to lambda*I. Free to check, kills every 'preferred direction in cubic Si' claim at once, and generalises to every material in that point group.",
-    "killed": "directional thermal or electrical transport anisotropy in cubic silicon"
+    "killed": "directional thermal or electrical transport anisotropy in cubic silicon",
+    "screen": {
+     "name": "neumann-cubic",
+     "rule": "Neumann's principle: a rank-2 tensor invariant under a cubic group is lambda*I. Any 'preferred direction in a cubic crystal' claim dies by inspection.",
+     "mechanised_by": "repo_guard.veto"
+    }
    }
   },
   {
@@ -607,5 +692,6 @@
   "SUPERSEDED": "replaced by something that does the job better. `keep` names what carried over.",
   "OUT_OF_SCOPE": "not wrong, and not this project's question any more."
  },
- "salvage_rule": "A claim recorded dead MUST carry salvage.keep. A dead claim that records nothing recyclable is one somebody deleted rather than learned from. Refutations carry salvage too: `killed` names the proposal that died, and `keep` says what of it survives. Being wrong is expensive; the arithmetic, the bound, the sound half of the design and the error's own general form are the return on it."
+ "salvage_rule": "A claim recorded dead MUST carry salvage.keep. A dead claim that records nothing recyclable is one somebody deleted rather than learned from. Refutations carry salvage too: `killed` names the proposal that died, and `keep` says what of it survives. Being wrong is expensive; the arithmetic, the bound, the sound half of the design and the error's own general form are the return on it.",
+ "screen_note": "A screen is the reusable half of a refutation: the two-line check that kills the whole CLASS of claim, not just the one that died. Screens with reach >= 2 have already proved they generalise, and the ones not yet mechanised are the highest-value work in this file -- each is a mistake this archive has already paid for once."
 }
