@@ -428,3 +428,23 @@ Drop‑in Extensibility To add a new frame (e.g., GDB, PyGeom), just subclass Ex
 Traceable Decisions The history log records every switch with a timestamp and reason—making the system fully auditable.
 Multiple‑Choice as a Scientific Strategy The engine effectively runs a meta‑scientific experiment: "Which frame yields the most falsifiable claims, the lowest uncertainty, and the most coherent narrative over time?"
 
+
+from .safe_parser import safe_evaluate
+
+def _test_predicate(self, state: ManifoldState, context: Dict[str, float], corrected_input: float) -> bool:
+    cond_str = self.predicate["condition"]
+    # Build context dict for safe evaluator
+    eval_ctx = {
+        "u": state.u,
+        "omega": state.omega,
+        "uncertainty": state.uncertainty,
+        "x": corrected_input,
+        **context
+    }
+    try:
+        return safe_evaluate(cond_str, eval_ctx)
+    except ValueError:
+        return False  # if condition fails to evaluate, treat as failed
+
+
+        
