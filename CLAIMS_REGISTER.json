@@ -65,7 +65,8 @@
     "screen": {
      "name": "null-harness",
      "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
-     "mechanised_by": "repo_guard.null_harness"
+     "mechanised_by": "repo_guard.null_harness",
+     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
     }
    }
   },
@@ -131,7 +132,8 @@
     "screen": {
      "name": "orbach-vs-kT",
      "rule": "Compare the crystal-field gap to kT. If Delta << kT the Orbach rate goes linear in T and any coherence claim at that temperature is finished.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a claim of retained coherence in a solid at a stated temperature, where a crystal-field or level splitting exists"
     }
    }
   },
@@ -149,7 +151,8 @@
     "screen": {
      "name": "gap-mode-mass",
      "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a claim that an impurity produces a vibrational mode above the host band"
     }
    }
   },
@@ -167,7 +170,8 @@
     "screen": {
      "name": "gap-mode-mass",
      "rule": "A local vibrational mode above the host band needs m_impurity < m_host. Heavier impurity, no gap mode, no search worth funding.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a claim that an impurity produces a vibrational mode above the host band"
     }
    }
   },
@@ -185,7 +189,8 @@
     "screen": {
      "name": "check-the-pair",
      "rule": "Two quantities quoted as a pair must be mutually consistent. Check before either is used.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "two quantities quoted together as a consistent pair"
     }
    }
   },
@@ -224,7 +229,8 @@
     "screen": {
      "name": "compare-filtered-to-full",
      "rule": "Run the analysis on the full record and on the filtered one and compare the ANSWERS, not the detection rates. Filtering biases before it blinds.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "an analysis run on a filtered subset of a record"
     }
    }
   },
@@ -312,7 +318,8 @@
     "screen": {
      "name": "probe-the-whole-family",
      "rule": "Write the response as a function of the probe coordinate and find its zeros. A detector fixed at one coordinate has zero power wherever the response vanishes there.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a detector that samples a continuous parameter at one fixed value"
     }
    }
   },
@@ -330,7 +337,8 @@
     "screen": {
      "name": "measure-the-null",
      "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "any threshold or gate whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },
@@ -388,7 +396,8 @@
     "screen": {
      "name": "test-the-distinguishing-operation",
      "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
     }
    }
   },
@@ -406,7 +415,8 @@
     "screen": {
      "name": "frenkel-cost",
      "rule": "An operation that moves an atom between sublattices costs a Frenkel pair. Price it before calling the operation free.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a claimed operation that moves an atom between sublattices or sites"
     }
    }
   },
@@ -424,7 +434,8 @@
     "screen": {
      "name": "sum-of-squares-has-one-zero",
      "rule": "A sum of squares has exactly one zero. Any 'N degenerate minima' claim about a positive-definite form is checkable before an optimiser is written.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a claim of N degenerate minima in a positive-definite energy form"
     }
    }
   },
@@ -456,7 +467,8 @@
     "screen": {
      "name": "test-the-distinguishing-operation",
      "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
     }
    }
   },
@@ -487,7 +499,8 @@
     "screen": {
      "name": "state-the-resolution-first",
      "rule": "State the instrument's own resolution before quoting a fidelity against it.",
-     "mechanised_by": null
+     "mechanised_by": null,
+     "applies_when": "a fidelity or accuracy quoted against an instrument or representation"
     }
    }
   },
@@ -526,7 +539,8 @@
     "screen": {
      "name": "null-harness",
      "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
-     "mechanised_by": "repo_guard.null_harness"
+     "mechanised_by": "repo_guard.null_harness",
+     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
     }
    }
   },
@@ -558,7 +572,8 @@
     "screen": {
      "name": "instrument-floor",
      "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
-     "mechanised_by": "repo_guard.reach"
+     "mechanised_by": "repo_guard.reach",
+     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
     }
    }
   },
@@ -576,7 +591,8 @@
     "screen": {
      "name": "instrument-floor",
      "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
-     "mechanised_by": "repo_guard.reach"
+     "mechanised_by": "repo_guard.reach",
+     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
     }
    }
   },
@@ -644,7 +660,8 @@
     "screen": {
      "name": "neumann-cubic",
      "rule": "Neumann's principle: a rank-2 tensor invariant under a cubic group is lambda*I. Any 'preferred direction in a cubic crystal' claim dies by inspection.",
-     "mechanised_by": "repo_guard.veto"
+     "mechanised_by": "repo_guard.veto",
+     "applies_when": "a claim of directional anisotropy in a material whose point group forbids it"
     }
    }
   },
@@ -693,5 +710,6 @@
   "OUT_OF_SCOPE": "not wrong, and not this project's question any more."
  },
  "salvage_rule": "A claim recorded dead MUST carry salvage.keep. A dead claim that records nothing recyclable is one somebody deleted rather than learned from. Refutations carry salvage too: `killed` names the proposal that died, and `keep` says what of it survives. Being wrong is expensive; the arithmetic, the bound, the sound half of the design and the error's own general form are the return on it.",
- "screen_note": "A screen is the reusable half of a refutation: the two-line check that kills the whole CLASS of claim, not just the one that died. Screens with reach >= 2 have already proved they generalise, and the ones not yet mechanised are the highest-value work in this file -- each is a mistake this archive has already paid for once."
+ "screen_note": "A screen is the reusable half of a refutation: the two-line check that kills the whole CLASS of claim, not just the one that died. Screens with reach >= 2 have already proved they generalise, and the ones not yet mechanised are the highest-value work in this file -- each is a mistake this archive has already paid for once.",
+ "applies_when_note": "A screen is not universally applicable. `applies_when` states the precondition, and it is the field that keeps explore.py's coverage matrix from becoming a suggestion generator: the tool shows which screens have never been carried into which families, and a human reads the precondition to decide whether the empty cell is a real gap or a category error."
 }
