@@ -342,5 +342,102 @@ class TestRender(unittest.TestCase):
         for path, body in CI.render(write=False).items():
             self.assertIn(CI.GENERATED_MARK, body[:400], msg=path)
 
+class TestSalvage(unittest.TestCase):
+    """CI-9. `dead` is not one state. A claim dies OF something, and the cause
+    decides what is recyclable -- a maths error leaves reusable algebra, a
+    physics bound leaves a screen for the whole class, an unfalsifiable claim
+    leaves whatever it was gesturing at."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.idx = CI.scan()
+        cls.reg = CI.register()
+
+    def test_a_dead_claim_must_say_what_survives(self):
+        """The anti-waste rule. Being wrong is expensive; refusing to record
+        what survives it throws away the return."""
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertEqual(rep["MISSING_SALVAGE"], [])
+
+    def test_that_rule_can_actually_fire(self):
+        fake = {"XX-1": {"id": "XX-1", "family": "XX", "statement": "s",
+                         "status": "dead", "because": "b" * 40,
+                         "names": "proposal"}}
+        idx = {"XX-1": {"FALSIFIER": ["f.py"]}}
+        self.assertEqual(CI.status_report(idx, fake)["MISSING_SALVAGE"],
+                         ["XX-1"])
+
+    def test_empty_keep_does_not_satisfy_it(self):
+        fake = {"XX-1": {"id": "XX-1", "family": "XX", "statement": "s",
+                         "status": "dead", "because": "b" * 40,
+                         "names": "proposal",
+                         "salvage": {"cause": "MATH_ERROR", "keep": ""}}}
+        idx = {"XX-1": {"FALSIFIER": ["f.py"]}}
+        self.assertEqual(CI.status_report(idx, fake)["MISSING_SALVAGE"],
+                         ["XX-1"])
+
+    def test_every_cause_is_one_the_register_defines(self):
+        rep = CI.status_report(self.idx, self.reg)
+        self.assertEqual(rep["BAD_CAUSE"], [])
+        known = set(CI.causes())
+        self.assertTrue(known)
+        for c in self.reg.values():
+            if c.get("salvage"):
+                self.assertIn(c["salvage"]["cause"], known, msg=c["id"])
+
+    def test_an_unknown_cause_is_caught(self):
+        fake = {"XX-1": {"id": "XX-1", "family": "XX", "statement": "s",
+                         "status": "live", "names": "proposal",
+                         "salvage": {"cause": "VIBES", "keep": "k"}}}
+        idx = {"XX-1": {"FALSIFIER": ["f.py"]}}
+        self.assertEqual(CI.status_report(idx, fake)["BAD_CAUSE"], ["XX-1"])
+
+    def test_causes_are_defined_where_they_are_used(self):
+        """Loaded from the register, so the enum and its entries cannot drift
+        into separate files."""
+        for cause, text in CI.causes().items():
+            self.assertEqual(cause, cause.upper())
+            self.assertGreater(len(text), 30, msg=cause)
+
+    def test_a_refutation_records_what_it_killed(self):
+        """The salvage is on the entry that HAS an id. Most dead proposals in
+        this archive were never given one; only the findings that killed them
+        were, so `killed` is where the proposal is named."""
+        with_killed = [c for c in self.reg.values()
+                       if c.get("salvage", {}).get("killed")]
+        self.assertGreater(len(with_killed), 15)
+        for c in with_killed:
+            # A refutation kills by contradicting; a mechanism kills by
+            # forbidding -- EPG-7's cubic isotropy is the second kind. A
+            # PROPOSAL kills nothing, which is the part worth asserting.
+            self.assertIn(c["names"], ("refutation", "mechanism"), msg=c["id"])
+
+    def test_salvage_keeps_are_substantive(self):
+        for c in self.reg.values():
+            if c.get("salvage"):
+                self.assertGreater(len(c["salvage"]["keep"]), 60,
+                                   msg=c["id"])
+
+    def test_the_causes_actually_used_span_more_than_one_kind(self):
+        used = {c["salvage"]["cause"] for c in self.reg.values()
+                if c.get("salvage")}
+        self.assertGreaterEqual(len(used), 5)
+        for expect in ("MATH_ERROR", "PHYSICS_BOUND", "CODE_ERROR",
+                       "UNFALSIFIABLE", "NULL_ARTIFACT"):
+            self.assertIn(expect, used)
+
+    def test_a_cited_principle_is_a_real_one(self):
+        known = {p["id"] for p in PR.principles()}
+        for c in self.reg.values():
+            sv = c.get("salvage") or {}
+            if sv.get("principle"):
+                self.assertIn(sv["principle"], known, msg=c["id"])
+
+    def test_the_generated_table_carries_the_salvage(self):
+        body = CI.render(write=False)[os.path.join("Silicon", "CLAIMS.md")]
+        self.assertIn("PHYSICS_BOUND", body)
+        self.assertIn("Orbach screen generalises", body)
+
+
 if __name__ == "__main__":
     unittest.main()

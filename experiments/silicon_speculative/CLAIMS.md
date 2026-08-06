@@ -7,32 +7,32 @@
 
 ## ATT
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| ATT-1 | a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode | live | refutation | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| ATT-1 | a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode | live | refutation | NAMED_IN_TEST | **CODE_ERROR** — The correct half is load-bearing and was kept: topological charge is invariant while core POSITION is a zero mode. The remedy was wrong, not the finding. A pin coupling to something non-topological removes the zero mode -- measured, 100% hop at k_p = 0 and 0% at k_p >= 0.01, charge conserved throughout. |
 
 ## TOP
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| TOP-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| TOP-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| TOP-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| TOP-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| TOP-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| TOP-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 
 ## VAC
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| VAC-1 | the vacuum criterion 'at least one mode survives' is true by construction | live | refutation | NAMED_IN_TEST |
-| VAC-2 | _no recorded statement_ | unregistered | - | PROSE |
-| VAC-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| VAC-4 | _no recorded statement_ | unregistered | - | PROSE |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| VAC-1 | the vacuum criterion 'at least one mode survives' is true by construction | live | refutation | NAMED_IN_TEST | **UNFALSIFIABLE** — VAC-2's mode-count floor is real and survives. What died is the criterion, not the folder: restating 'at least one mode survives' as a count with a floor makes it able to fail. |
+| VAC-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| VAC-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| VAC-4 | _no recorded statement_ | unregistered | - | PROSE | |
 
 ## VOR
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| VOR-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| VOR-2 | _no recorded statement_ | unregistered | - | PROSE |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| VOR-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| VOR-2 | _no recorded statement_ | unregistered | - | PROSE | |
 
 2 of 10 recorded. `python claims_index.py status` checks that nothing is marked live which nothing can falsify.

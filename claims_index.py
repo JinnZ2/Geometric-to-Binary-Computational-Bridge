@@ -4,6 +4,7 @@ claims_index.py  --  which claim IDs exist, and what can make each one fail.
 
     python claims_index.py              # the index, by evidence class
     python claims_index.py status       # index JOINED with the register
+    python claims_index.py salvage      # what is reusable from being wrong
     python claims_index.py unregistered # claims with no recorded statement
     python claims_index.py prose        # claims nothing can fail on
     python claims_index.py show FCL-4   # one claim, every site
@@ -73,6 +74,15 @@ NOT_CLAIMS = {"CC0", "CC", "BY", "SA", "ND", "ISO", "UTF", "RFC", "IEEE",
 FALSIFIER_RX = re.compile(r'check\(\s*["\'](%s)\b' % ID)
 REGISTER = os.path.join(ROOT, "CLAIMS_REGISTER.json")
 STATUSES = ("live", "dead", "open", "superseded")
+
+# A claim dies OF something, and the cause decides what is recyclable. Loaded
+# from the register so the two cannot drift apart.
+def causes(path=None):
+    p = path or REGISTER
+    if not os.path.exists(p):
+        return {}
+    with open(p, encoding="utf-8") as fh:
+        return json.load(fh).get("causes", {})
 
 REGISTER_RX = re.compile(r'^\s*\|\s*(%s)\s*\|\s*\S' % ID, re.M)
 
@@ -235,7 +245,9 @@ def status_report(index=None, reg=None):
     """
     index = scan() if index is None else index
     reg = register() if reg is None else reg
+    known_causes = set(causes())
     out = {k: [] for k in ("UNSUPPORTED_LIVE", "MISSING_BECAUSE",
+                           "MISSING_SALVAGE", "BAD_CAUSE",
                            "ORPHANED", "UNREGISTERED", "BAD_STATUS")}
     for cid, c in reg.items():
         if cid not in index:
@@ -247,6 +259,13 @@ def status_report(index=None, reg=None):
             out["UNSUPPORTED_LIVE"].append(cid)
         if c["status"] in ("dead", "superseded") and not c.get("because"):
             out["MISSING_BECAUSE"].append(cid)
+        sv = c.get("salvage")
+        if c["status"] == "dead" and not (sv and sv.get("keep")):
+            # The anti-waste rule. Being wrong is expensive; refusing to
+            # record what survives it is throwing away the return.
+            out["MISSING_SALVAGE"].append(cid)
+        if sv and known_causes and sv.get("cause") not in known_causes:
+            out["BAD_CAUSE"].append(cid)
     for cid in index:
         if cid not in reg:
             out["UNREGISTERED"].append(cid)
@@ -302,19 +321,25 @@ def render(root=ROOT, write=True):
         for fam in sorted(famlist):
             ids = sorted(fams[fam])
             lines += ["## %s" % fam, "",
-                      "| id | statement | status | names | can fail via |",
-                      "|----|-----------|--------|-------|--------------|"]
+                      "| id | statement | status | names | can fail via | "
+                      "salvage |",
+                      "|----|-----------|--------|-------|--------------|"
+                      "---------|"]
             for cid in ids:
                 c, ev = reg.get(cid), evidence(cid, idx)
                 tot += 1
                 if c:
                     rec += 1
-                    lines.append("| %s | %s | %s | %s | %s |"
+                    sv = c.get("salvage") or {}
+                    cell = ("**%s** — %s" % (sv["cause"],
+                                             sv["keep"].replace("|", "\\|"))
+                            if sv else "")
+                    lines.append("| %s | %s | %s | %s | %s | %s |"
                                  % (cid, c["statement"].replace("|", "\\|"),
-                                    c["status"], c["names"], ev))
+                                    c["status"], c["names"], ev, cell))
                 else:
                     lines.append("| %s | _no recorded statement_ | "
-                                 "unregistered | - | %s |" % (cid, ev))
+                                 "unregistered | - | %s | |" % (cid, ev))
             lines.append("")
         lines += ["%d of %d recorded. `python claims_index.py status` checks "
                   "that nothing is marked live which nothing can falsify."
@@ -383,18 +408,56 @@ def main(argv):
                                              for kv in names.most_common()))
         print()
         bad = 0
-        for k in ("UNSUPPORTED_LIVE", "MISSING_BECAUSE", "ORPHANED",
-                  "BAD_STATUS"):
+        for k in ("UNSUPPORTED_LIVE", "MISSING_BECAUSE", "MISSING_SALVAGE",
+                  "BAD_CAUSE", "ORPHANED", "BAD_STATUS"):
             if rep[k]:
                 bad += len(rep[k])
                 print("  %-18s %s" % (k, ", ".join(rep[k])))
         if not bad:
             print("  no contradictions: nothing is recorded live that nothing "
-                  "can falsify.")
+                  "can falsify, and nothing died without saying what survives.")
+        sv = [c for c in reg.values() if c.get("salvage")]
+        print()
+        print("  %d of %d carry salvage -- what is reusable from being wrong."
+              % (len(sv), len(reg)))
+        print("  python claims_index.py salvage")
         print()
         print("  %d unregistered. python claims_index.py unregistered"
               % len(rep["UNREGISTERED"]))
         return 1 if bad else 0
+    elif cmd == "salvage":
+        reg = register()
+        cz = causes()
+        want = argv[2] if len(argv) > 2 else None
+        groups = collections.defaultdict(list)
+        for c in reg.values():
+            if c.get("salvage"):
+                groups[c["salvage"]["cause"]].append(c)
+        if want and want not in groups:
+            print("no salvage recorded under %r. causes: %s"
+                  % (want, ", ".join(sorted(groups))))
+            return 1
+        total = sum(len(v) for v in groups.values())
+        print("WHAT SURVIVES BEING WRONG  (%d records)" % total)
+        print("  A claim dies of something, and the cause decides what is")
+        print("  recyclable. Being wrong is expensive -- the arithmetic, the")
+        print("  bound, the sound half of the design and the error's own")
+        print("  general form are the return on it.")
+        for cause in sorted(groups):
+            if want and cause != want:
+                continue
+            print()
+            print("== %s  (%d)" % (cause, len(groups[cause])))
+            print("   %s" % cz.get(cause, ""))
+            for c in sorted(groups[cause], key=lambda x: x["id"]):
+                sv = c["salvage"]
+                print()
+                print("   %-8s %s" % (c["id"], c["statement"]))
+                if sv.get("killed"):
+                    print("            KILLED  %s" % sv["killed"])
+                print("            KEEP    %s" % sv["keep"])
+                if sv.get("principle"):
+                    print("            SHAPE   %s" % sv["principle"])
     elif cmd == "unregistered":
         rep = status_report(idx)
         print("IN THE TREE, NO RECORDED STATEMENT  (%d)" % len(rep["UNREGISTERED"]))
@@ -418,7 +481,8 @@ def main(argv):
             print("  %-8s %3d" % (fam, n))
     else:
         print("usage: claims_index.py [index | prose | status | "
-              "unregistered | render | show ID | families]")
+              "unregistered | salvage [CAUSE] | render | show ID | "
+              "families]")
         return 2
     return 0
 

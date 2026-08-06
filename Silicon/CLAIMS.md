@@ -7,119 +7,119 @@
 
 ## BRG
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| BRG-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| BRG-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| BRG-3 | _no recorded statement_ | unregistered | - | PROSE |
-| BRG-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| BRG-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| BRG-6 | piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110> | open | proposal | NAMED_IN_TEST |
-| BRG-7 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| BRG-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| BRG-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| BRG-3 | _no recorded statement_ | unregistered | - | PROSE | |
+| BRG-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| BRG-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| BRG-6 | piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110> | open | proposal | NAMED_IN_TEST |  |
+| BRG-7 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 
 ## EPG
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| EPG-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| EPG-2 | _no recorded statement_ | unregistered | - | PROSE |
-| EPG-3 | _no recorded statement_ | unregistered | - | PROSE |
-| EPG-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| EPG-5 | _no recorded statement_ | unregistered | - | PROSE |
-| EPG-6 | 109.47 degrees is the tetrahedral maximin bound, from \|sum v_i\|^2 = 4 + 2 sum v_i.v_j >= 0 | live | mechanism | NAMED_IN_TEST |
-| EPG-7 | cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic | live | mechanism | NAMED_IN_TEST |
-| EPG-8 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| EPG-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| EPG-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| EPG-3 | _no recorded statement_ | unregistered | - | PROSE | |
+| EPG-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| EPG-5 | _no recorded statement_ | unregistered | - | PROSE | |
+| EPG-6 | 109.47 degrees is the tetrahedral maximin bound, from \|sum v_i\|^2 = 4 + 2 sum v_i.v_j >= 0 | live | mechanism | NAMED_IN_TEST | **MATH_ERROR** — The two-line identity \|sum v_i\|^2 = 4 + 2 sum v_i.v_j >= 0 proves the 109.47 degree maximin bound outright. It replaced a numerical search that stalled half a degree short -- worth remembering when an optimiser is standing in for an identity. |
+| EPG-7 | cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic | live | mechanism | NAMED_IN_TEST | **SYMMETRY_FORBIDDEN** — Neumann's principle on a cubic crystal forces any rank-2 transport tensor to lambda*I. Free to check, kills every 'preferred direction in cubic Si' claim at once, and generalises to every material in that point group. |
+| EPG-8 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 
 ## ER
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| ER-1 | Orbach is saturated at 300 K, not merely open | live | refutation | FALSIFIER |
-| ER-2 | no Er gap mode exists in the searched window | live | refutation | FALSIFIER |
-| ER-2b | the same criterion kills 'P local mode at ~500 cm^-1' | live | refutation | FALSIFIER |
-| ER-3 | the stated (omega, k) pair is inconsistent by ~8x | live | refutation | FALSIFIER |
-| ER-4 | _no recorded statement_ | unregistered | - | PROSE |
-| ER-5 | _no recorded statement_ | unregistered | - | PROSE |
-| ER-6 | _no recorded statement_ | unregistered | - | PROSE |
-| ER-7 | the stated implant dose is achievable | open | proposal | PROSE |
-| ER-8 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| ER-1 | Orbach is saturated at 300 K, not merely open | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The Orbach screen generalises to any deep-level or rare-earth coherence claim in any host: compare the crystal-field gap to kT, check the Bose occupation, and if Delta << kT the rate is linear in T and the claim is finished. Two lines, no apparatus. Er's 1.5 um optical transition is untouched and is where the real literature works -- at cryogenic temperature. |
+| ER-2 | no Er gap mode exists in the searched window | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The gap-mode mass criterion m_impurity < m_host is a one-line screen for every local-vibrational-mode proposal. It killed the $10k Er search and the 'P local mode at ~500 cm^-1' claim in the same stroke, for free. |
+| ER-2b | the same criterion kills 'P local mode at ~500 cm^-1' | live | refutation | FALSIFIER | **PHYSICS_BOUND** — Same mass criterion, second target. That a single screen kills two independent claims in one archive is the argument for writing screens down rather than re-deriving them. |
+| ER-3 | the stated (omega, k) pair is inconsistent by ~8x | live | refutation | FALSIFIER | **MATH_ERROR** — Checking (omega, k) for mutual consistency before quoting either is a two-line screen and it caught an 8x discrepancy. |
+| ER-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| ER-5 | _no recorded statement_ | unregistered | - | PROSE | |
+| ER-6 | _no recorded statement_ | unregistered | - | PROSE | |
+| ER-7 | the stated implant dose is achievable | open | proposal | PROSE |  |
+| ER-8 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 
 ## FAB
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| FAB-1 | a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID | live | refutation | NAMED_IN_TEST |
-| FAB-2 | _no recorded statement_ | unregistered | - | PROSE |
-| FAB-3 | the eight implant states are separable at >3 sigma in (R_s, carrier type, n) | open | proposal | PROSE |
-| FAB-4 | _no recorded statement_ | unregistered | - | PROSE |
-| FAB-5 | _no recorded statement_ | unregistered | - | PROSE |
-| FAB-6 | _no recorded statement_ | unregistered | - | PROSE |
-| FAB-7 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| FAB-1 | a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID | live | refutation | NAMED_IN_TEST | **PHYSICS_BOUND** — The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority. |
+| FAB-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| FAB-3 | the eight implant states are separable at >3 sigma in (R_s, carrier type, n) | open | proposal | PROSE |  |
+| FAB-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| FAB-5 | _no recorded statement_ | unregistered | - | PROSE | |
+| FAB-6 | _no recorded statement_ | unregistered | - | PROSE | |
+| FAB-7 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 
 ## FP
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| FP-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FP-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FP-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FP-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FP-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FP-6 | _no recorded statement_ | unregistered | - | PROSE |
-| FP-7 | _no recorded statement_ | unregistered | - | PROSE |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| FP-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FP-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FP-3 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FP-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FP-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FP-6 | _no recorded statement_ | unregistered | - | PROSE | |
+| FP-7 | _no recorded statement_ | unregistered | - | PROSE | |
 
 ## KEA
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| KEA-1 | exactly one minimum, at the ideal centre | live | refutation | FALSIFIER |
-| KEA-2 | _no recorded statement_ | unregistered | - | PROSE |
-| KEA-3 | no lattice separation lands on phi*a | live | refutation | FALSIFIER |
-| KEA-4 | _no recorded statement_ | unregistered | - | PROSE |
-| KEA-5 | _no recorded statement_ | unregistered | - | PROSE |
-| KEA-6 | _no recorded statement_ | unregistered | - | PROSE |
-| KEA-7 | energy is exactly even, so vertex and face are degenerate | live | refutation | FALSIFIER |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| KEA-1 | exactly one minimum, at the ideal centre | live | refutation | FALSIFIER | **MATH_ERROR** — The Keating parameters alpha = 48.1 and beta = 12.0 N/m are correct and reusable. 'Eight octahedral faces' is the one correct use of that terminology in the whole set. And the general form of the error is a screen: a sum of squares has ONE zero, so any 'N degenerate minima' claim about a VFF model is checkable by inspection before anyone runs an optimiser. |
+| KEA-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| KEA-3 | no lattice separation lands on phi*a | live | refutation | FALSIFIER | **MATH_ERROR** — The phi-spacing check is reusable: enumerate the real lattice separations before claiming any of them lands on an irrational multiple of a. |
+| KEA-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| KEA-5 | _no recorded statement_ | unregistered | - | PROSE | |
+| KEA-6 | _no recorded statement_ | unregistered | - | PROSE | |
+| KEA-7 | energy is exactly even, so vertex and face are degenerate | live | refutation | FALSIFIER | **MATH_ERROR** — The tetrahedral identities sum(v_k) = 0 and v_k.v_l = -d0^2/3 are exact and reusable anywhere the cluster appears. The error's general form is the more valuable half: an encoding must be tested against the operation that is supposed to distinguish its states, which is the same blindness GIES-1 hit in a formalism that never met this one. |
 
 ## R2
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| R2-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| R2-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| R2-3 | the bifilar CMRR budget holds at an achievable matching tolerance | open | proposal | NAMED_IN_TEST |
-| R2-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| R2-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| R2-6 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| R2-7 | _no recorded statement_ | unregistered | - | PROSE |
-| R2-8 | the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse | live | refutation | NAMED_IN_TEST |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| R2-1 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| R2-2 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| R2-3 | the bifilar CMRR budget holds at an achievable matching tolerance | open | proposal | NAMED_IN_TEST |  |
+| R2-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| R2-5 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| R2-6 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| R2-7 | _no recorded statement_ | unregistered | - | PROSE | |
+| R2-8 | the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse | live | refutation | NAMED_IN_TEST | **PHYSICS_BOUND** — The bifilar geometry and the common-mode budget are sound engineering and stand. What died is the direction of the worry: at 4.42 mrad the risk is not that the write destroys coherence, it is that the write does not happen. |
 
 ## SEED
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| SEED-1 | W is the identity, so the channels are independent scalars | live | refutation | FALSIFIER |
-| SEED-2 | _no recorded statement_ | unregistered | - | PROSE |
-| SEED-3 | the claimed fidelity is 13 orders below the seed resolution | live | refutation | FALSIFIER |
-| SEED-4 | _no recorded statement_ | unregistered | - | PROSE |
-| SEED-5 | the fix makes W non-trivial but keeps proportions invariant | live | refutation | FALSIFIER |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| SEED-1 | W is the identity, so the channels are independent scalars | live | refutation | FALSIFIER | **MATH_ERROR** — W = I is itself a usable fact: the channels are independent scalars, so anything built on cross-channel structure needs a different matrix, and SEED-5 shows one that is non-trivial while keeping proportions invariant. |
+| SEED-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| SEED-3 | the claimed fidelity is 13 orders below the seed resolution | live | refutation | FALSIFIER | **UNITS** — The resolution comparison is the reusable part: state the seed's own resolution before claiming a fidelity against it. Thirteen orders is not a tuning problem. |
+| SEED-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| SEED-5 | the fix makes W non-trivial but keeps proportions invariant | live | refutation | FALSIFIER | **SUPERSEDED** — Carried forward as the working influence matrix. This is the constructive half of the SEED audit -- non-trivial W, proportions invariant. |
 
 ## SIL
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| SIL-1 | the shipped strain invariants are blind to crystal orientation | live | refutation | NAMED_IN_TEST |
-| SIL-2 | _no recorded statement_ | unregistered | - | PROSE |
-| SIL-3 | _no recorded statement_ | unregistered | - | PROSE |
-| SIL-4 | _no recorded statement_ | unregistered | - | PROSE |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| SIL-1 | the shipped strain invariants are blind to crystal orientation | live | refutation | NAMED_IN_TEST | **CODE_ERROR** — Invariants chosen for convenience discard the thing being measured. The recovery channels in the same spec are unaffected and were kept. |
+| SIL-2 | _no recorded statement_ | unregistered | - | PROSE | |
+| SIL-3 | _no recorded statement_ | unregistered | - | PROSE | |
+| SIL-4 | _no recorded statement_ | unregistered | - | PROSE | |
 
 ## TTM
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| TTM-1 | _no recorded statement_ | unregistered | - | PROSE |
-| TTM-2 | sp3 readout is rank-deficient | live | refutation | NAMED_IN_TEST |
-| TTM-3 | the six <110> directions are a complete readout basis | live | mechanism | NAMED_IN_TEST |
-| TTM-4 | _no recorded statement_ | unregistered | - | PROSE |
-| TTM-5 | _no recorded statement_ | unregistered | - | PROSE |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| TTM-1 | _no recorded statement_ | unregistered | - | PROSE | |
+| TTM-2 | sp3 readout is rank-deficient | live | refutation | NAMED_IN_TEST | **MATH_ERROR** — Rank deficiency is checkable by construction, and TTM-3 supplies the fix: the six <110> directions are a complete basis. One audit produced both the refutation and its replacement. |
+| TTM-3 | the six <110> directions are a complete readout basis | live | mechanism | NAMED_IN_TEST | **SUPERSEDED** — The constructive replacement for TTM-2, and it fixed three separate readout failures at once. |
+| TTM-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| TTM-5 | _no recorded statement_ | unregistered | - | PROSE | |
 
 21 of 67 recorded. `python claims_index.py status` checks that nothing is marked live which nothing can falsify.

@@ -7,29 +7,29 @@
 
 ## FCL
 
-| id | statement | status | names | can fail via |
-|----|-----------|--------|-------|--------------|
-| FCL-1 | NOVEL is reachable with a stable anchor logged | live | refutation | FALSIFIER |
-| FCL-10 | claim ids come from live ids, not the log line count | live | refutation | FALSIFIER |
-| FCL-11 | the correlated series is uncensored | live | refutation | FALSIFIER |
-| FCL-12 | lag is a duration when there is a clock | live | refutation | FALSIFIER |
-| FCL-12b | and it is calibrated on an irregular clock | live | refutation | FALSIFIER |
-| FCL-12c | and no period is claimed | live | refutation | FALSIFIER |
-| FCL-13 | multiplicity correction is BH, and the gain is stated small | live | refutation | FALSIFIER |
-| FCL-13b | _no recorded statement_ | unregistered | - | PROSE |
-| FCL-14 | _no recorded statement_ | unregistered | - | PROSE |
-| FCL-1b | and it emits the experiment that route implies | live | refutation | FALSIFIER |
-| FCL-2 | anchor_dev is a deviation against an explicit tolerance | live | refutation | FALSIFIER |
-| FCL-2b | and the tolerance actually gates it | live | refutation | FALSIFIER |
-| FCL-3 | NOISE_AS_SIGNAL has a sample floor and a scaled band | live | refutation | FALSIFIER |
-| FCL-4 | a lag scan sees the rider periods a fixed lag cannot | live | refutation | FALSIFIER |
-| FCL-5 | MISSING_VARIABLE is a corrected binomial tail, not 1.5x base | live | refutation | FALSIFIER |
-| FCL-5a | _no recorded statement_ | unregistered | - | NAMED_IN_TEST |
-| FCL-5b | and it still finds a real concentration | live | refutation | FALSIFIER |
-| FCL-5e | _no recorded statement_ | unregistered | - | PROSE |
-| FCL-6 | residual membership is by index, not dict equality | live | refutation | FALSIFIER |
-| FCL-7 | deepen requires a tighter band or a named axis | live | refutation | FALSIFIER |
-| FCL-8 | self-initiated actuation is metered, capped and credited | live | refutation | FALSIFIER |
-| FCL-9 | a shape cannot be scalarized without naming the projection | live | refutation | FALSIFIER |
+| id | statement | status | names | can fail via | salvage |
+|----|-----------|--------|-------|--------------|---------|
+| FCL-1 | NOVEL is reachable with a stable anchor logged | live | refutation | FALSIFIER | **CODE_ERROR** — The general form: a route that appends a zero-weight candidate silently disables any branch guarded on the candidate list being empty. A branch contributes only with positive evidence now, and NOVEL records the negative evidence it rests on. |
+| FCL-10 | claim ids come from live ids, not the log line count | live | refutation | FALSIFIER |  |
+| FCL-11 | the correlated series is uncensored | live | refutation | FALSIFIER | **MATH_ERROR** — Censoring biases rather than blinds -- the censored series still returned STRUCTURED, at lag 4 against a true half-period of 5. A confident wrong answer is worse than silence, and that is the general shape. |
+| FCL-12 | lag is a duration when there is a clock | live | refutation | FALSIFIER |  |
+| FCL-12b | and it is calibrated on an irregular clock | live | refutation | FALSIFIER |  |
+| FCL-12c | and no period is claimed | live | refutation | FALSIFIER |  |
+| FCL-13 | multiplicity correction is BH, and the gain is stated small | live | refutation | FALSIFIER | **OUT_OF_SCOPE** — The honest negative: at k=1 Benjamini-Hochberg IS Bonferroni, so with one true effect the swap buys exactly nothing. The larger lever was found by measuring instead -- the exact binomial is discrete, so the achieved level sits near 1% against a nominal 5%. |
+| FCL-13b | _no recorded statement_ | unregistered | - | PROSE | |
+| FCL-14 | _no recorded statement_ | unregistered | - | PROSE | |
+| FCL-1b | and it emits the experiment that route implies | live | refutation | FALSIFIER |  |
+| FCL-2 | anchor_dev is a deviation against an explicit tolerance | live | refutation | FALSIFIER |  |
+| FCL-2b | and the tolerance actually gates it | live | refutation | FALSIFIER |  |
+| FCL-3 | NOISE_AS_SIGNAL has a sample floor and a scaled band | live | refutation | FALSIFIER |  |
+| FCL-4 | a lag scan sees the rider periods a fixed lag cannot | live | refutation | FALSIFIER | **MATH_ERROR** — rho(lag) = cos(2*pi*lag/T) is the whole lesson: a detector that probes a continuous space at one fixed coordinate is blind wherever the response vanishes there. Reusable for any single-point probe, not just autocorrelation. |
+| FCL-5 | MISSING_VARIABLE is a corrected binomial tail, not 1.5x base | live | refutation | FALSIFIER | **MATH_ERROR** — The measured null rates are the reusable part: 34.7%, 34.0%, 41.0%, rising with n because more bins clear the sample floor. 'Too permissive' in a comment is not a number, and the number was a third. |
+| FCL-5a | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
+| FCL-5b | and it still finds a real concentration | live | refutation | FALSIFIER |  |
+| FCL-5e | _no recorded statement_ | unregistered | - | PROSE | |
+| FCL-6 | residual membership is by index, not dict equality | live | refutation | FALSIFIER |  |
+| FCL-7 | deepen requires a tighter band or a named axis | live | refutation | FALSIFIER |  |
+| FCL-8 | self-initiated actuation is metered, capped and credited | live | refutation | FALSIFIER |  |
+| FCL-9 | a shape cannot be scalarized without naming the projection | live | refutation | FALSIFIER |  |
 
 18 of 22 recorded. `python claims_index.py status` checks that nothing is marked live which nothing can falsify.
