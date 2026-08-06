@@ -447,4 +447,76 @@ def _test_predicate(self, state: ManifoldState, context: Dict[str, float], corre
         return False  # if condition fails to evaluate, treat as failed
 
 
-        
+        add:
+from sensing.exploration.stroboscopic_scheduler import StroboscopicScheduler, SchedulerMode
+
+# Initialize scheduler with heavy frames
+heavy_set = {FrameID.DIFFUSION, FrameID.ENSEMBLE, FrameID.SEMANTIC_TUBE}
+scheduler = StroboscopicScheduler(heavy_set, interval=10)
+
+def tick_callback(primitive: Primitive):
+    context.sensor_type = primitive.sensor_type
+    binary_vec = extract_binary(primitive)  # your extraction logic
+    
+    # Advance scheduler tick
+    scheduler.tick()
+    
+    # For each frame in the router, check if it should run
+    if router.mode == "ensemble" and router.active_frame_id == FrameID.ENSEMBLE:
+        # If we're in Ensemble mode, but Ensemble is heavy, we might want to
+        # aggregate cached results from previous ensemble runs.
+        # Simpler: run the ensemble only on heavy ticks; otherwise use the cached ensemble output.
+        if scheduler.should_run(FrameID.ENSEMBLE):
+            result = router.step(context, binary_vec=binary_vec)
+            # Cache the ensemble result
+            cached_ensemble = result
+        else:
+            # Use the cached ensemble result (or fallback to a lightweight frame)
+            result = cached_ensemble if cached_ensemble else router.step(context, binary_vec=binary_vec, force_frame=FrameID.FALSIFICATIONIST)
+    else:
+        # For other frames, use the scheduler to run them conditionally
+        # We'll get the active frame and check it
+        active_id = router.active_frame_id
+        active_frame = router.get_active_frame()
+        frame_result = scheduler.run_frame(active_frame, context, binary_vec)
+        result = {
+            "active_frame": active_id.value,
+            "metrics": frame_result["metrics"],
+            "trial_results": frame_result["trial_results"],
+            "narrative": frame_result["narrative"]
+        }
+    
+    # Assign RL reward if using learned router
+    if router.use_learned_router:
+        router.assign_router_reward(context)
+    
+    print(f"[Tick {scheduler.current_tick}] Frame: {result['active_frame']}")
+    # ... rest of transmission ...
+
+    
+     {
+  "active_frame": "ensemble",
+  "switching": {
+    "mode": "learned",
+    "update_interval_ticks": 5,
+    "min_ticks_per_frame": 3
+  },
+  "scheduler": {
+    "mode": "strobe",
+    "heavy_frames": ["diffusion", "ensemble", "semantic_tube"],
+    "interval_ticks": 10
+  },
+  "frame_params": {
+    "semantic_tube": { "tube_radius": 0.2 },
+    "resonance": { "rule": 90 },
+    "bayesian": { "prior_alpha": 1.0, "prior_beta": 1.0 },
+    "diffusion": { "n_steps": 10 }
+  },
+  "safe_parser": {
+    "enabled": true,
+    "allowed_functions": ["abs", "len", "min", "max", "sum", "math"]
+  }
+}
+
+
+
