@@ -51,7 +51,7 @@
 | FAB-1 | a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID | live | refutation | NAMED_IN_TEST | **PHYSICS_BOUND** — The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority. |
 | FAB-2 | _no recorded statement_ | unregistered | - | PROSE | |
 | FAB-3 | the eight implant states are separable at >3 sigma in (R_s, carrier type, n) | open | proposal | PROSE |  |
-| FAB-4 | _no recorded statement_ | unregistered | - | PROSE | |
+| FAB-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 | FAB-5 | _no recorded statement_ | unregistered | - | PROSE | |
 | FAB-6 | _no recorded statement_ | unregistered | - | PROSE | |
 | FAB-7 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
