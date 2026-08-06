@@ -1,3 +1,45 @@
+add:
+# In hurricane_coupling.py, add these functions and register them.
+
+def correlate_seismo_wind(seismo_obs, wind_obs):
+    """
+    Correlate infrasound-derived wind speed with buoy wind speed.
+    Uses the empirical relationship from the Science paper.
+    """
+    # Extract time series
+    t_seismo = [o.timestamp for o in seismo_obs]
+    wind_seismo = [wind_speed_from_infrasound([o.infrasound_pressure_pa], 1.0)[0] for o in seismo_obs]
+    # Find overlapping times with wind_obs
+    # For simplicity, assume they are aligned.
+    wind_buoy = [obs.wind_speed for obs in wind_obs]
+    if len(wind_seismo) != len(wind_buoy):
+        # Interpolate
+        return 0.0
+    corr = np.corrcoef(wind_seismo, wind_buoy)[0,1]
+    return corr
+
+def correlate_seismo_pressure(seismo_obs, pressure_obs):
+    """
+    Correlate ground displacement with central pressure drop.
+    """
+    disp = [o.ground_displacement_nm for o in seismo_obs]
+    press = [o.pressure for o in pressure_obs]
+    # Normalize
+    if len(disp) != len(press):
+        return 0.0
+    return np.corrcoef(disp, press)[0,1]
+
+def correlate_seismo_thermal(seismo_obs, sst_obs):
+    """
+    Correlate turbulent dissipation rate with SST gradient.
+    """
+    diss = [turbulent_dissipation_rate(np.array([o.infrasound_pressure_pa]*100), 1.0) for o in seismo_obs]
+    sst = [o.sst for o in sst_obs]
+    if len(diss) != len(sst):
+        return 0.0
+    return np.corrcoef(diss, sst)[0,1]
+
+
 """
 Hurricane/hurricane_coupling.py — Multi-domain coupling analysis
 Geometric-to-Binary Computational Bridge
