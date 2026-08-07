@@ -1,3 +1,354 @@
+import json
+from typing import Dict, Any
+
+# ============================================================
+# 9. SAVE / LOAD WORLD MODEL
+# ============================================================
+
+def save_world_model(path: str, geo: Dict[str, Any], projector_bundle: Dict[str, nn.Module]):
+    """
+    Save encoder, fields, predictor, and one or more projectors.
+    - path: directory where artifacts go.
+    - geo: dict returned by train_latent_geometry().
+    - projector_bundle: dict of name -> nn.Module (e.g., {"narrative": projector}).
+    """
+    os.makedirs(path, exist_ok=True)
+    device = get_device()
+
+    # Save geometry-related modules
+    torch.save({
+        "encoder_state": geo["encoder"].state_dict(),
+        "manifold_state": geo["manifold"].state_dict(),
+        "instr_field_state": geo["instr_field"].state_dict(),
+        "cal_field_state": geo["cal_field"].state_dict(),
+        "unk_field_state": geo["unk_field"].state_dict(),
+        "attunement_field_state": geo["attunement_field"].state_dict(),
+        "predictor_state": geo["predictor"].state_dict(),
+    }, os.path.join(path, "geometry.pt"))
+
+    # Save projectors (multi-head)
+    proj_states = {name: proj.state_dict() for name, proj in projector_bundle.items()}
+    torch.save(proj_states, os.path.join(path, "projectors.pt"))
+
+    # Save basic metadata (shapes, hyperparams)
+    meta = {
+        "latent_dim": int(geo["u_final"].shape[-1]),
+        "n_states": int(geo["u_final"].shape[0]),
+        "projector_heads": list(projector_bundle.keys()),
+    }
+    with open(os.path.join(path, "meta.json"), "w") as f:
+        json.dump(meta, f, indent=2)
+
+    # Optionally save a snapshot of latent + fields for offline plotting
+    np.save(os.path.join(path, "u_final.npy"), geo["u_final"].cpu().numpy())
+    np.save(os.path.join(path, "omega_final.npy"), geo["ω_final"])
+    np.save(os.path.join(path, "unk_final.npy"), geo["unk_final"])
+
+    print(f"\nWorld model saved under: {os.path.abspath(path)}")
+
+
+def load_world_model(path: str, input_dim: int, llm_dim: int):
+    """
+    Reconstruct encoder, fields, predictor, and projectors from disk.
+    Returns a dict with modules ready to use.
+    """
+    device = get_device()
+
+    with open(os.path.join(path, "meta.json"), "r") as f:
+        meta = json.load(f)
+    latent_dim = meta["latent_dim"]
+    projector_heads = meta["projector_heads"]
+
+    # Rebuild modules with the same architecture
+    encoder = EntryEncoder(input_dim, d=latent_dim).to(device)
+    manifold = ContinuousManifold(d=latent_dim).to(device)
+    instr_field = InstrumentField(d=latent_dim).to(device)
+    cal_field = CalibrationField(d=latent_dim).to(device)
+    unk_field = UnknownField(d=latent_dim).to(device)
+    attunement_field = AttunementField(d=latent_dim).to(device)
+    predictor = Predictor(d=latent_dim).to(device)
+
+    geo_state = torch.load(os.path.join(path, "geometry.pt"), map_location=device)
+    encoder.load_state_dict(geo_state["encoder_state"])
+    manifold.load_state_dict(geo_state["manifold_state"])
+    instr_field.load_state_dict(geo_state["instr_field_state"])
+    cal_field.load_state_dict(geo_state["cal_field_state"])
+    unk_field.load_state_dict(geo_state["unk_field_state"])
+    attunement_field.load_state_dict(geo_state["attunement_field_state"])
+    predictor.load_state_dict(geo_state["predictor_state"])
+
+    # Rebuild projectors
+    proj_states = torch.load(os.path.join(path, "projectors.pt"), map_location=device)
+    projectors = {}
+    for name in projector_heads:
+        proj = Projector(d=latent_dim, out_dim=llm_dim).to(device)
+        proj.load_state_dict(proj_states[name])
+        projectors[name] = proj
+
+    # Load latent snapshot if present
+    u_final = None
+    omega_final = None
+    unk_final = None
+    u_path = os.path.join(path, "u_final.npy")
+    if os.path.exists(u_path):
+        u_final = torch.tensor(np.load(u_path), dtype=torch.float32).to(device)
+    if os.path.exists(os.path.join(path, "omega_final.npy")):
+        omega_final = np.load(os.path.join(path, "omega_final.npy"))
+    if os.path.exists(os.path.join(path, "unk_final.npy")):
+        unk_final = np.load(os.path.join(path, "unk_final.npy"))
+
+    print(f"\nWorld model loaded from: {os.path.abspath(path)}")
+
+    return {
+        "encoder": encoder,
+        "manifold": manifold,
+        "instr_field": instr_field,
+        "cal_field": cal_field,
+        "unk_field": unk_field,
+        "attunement_field": attunement_field,
+        "predictor": predictor,
+        "projectors": projectors,
+        "u_final": u_final,
+        "ω_final": omega_final,
+        "unk_final": unk_final,
+        "meta": meta,
+    }
+
+
+projector_bundle = {"narrative": projector}
+save_world_model("world_model_v1", geo, projector_bundle)
+
+
+llm, tokenizer = load_frozen_llm("distilgpt2")
+wm = load_world_model("world_model_v1", input_dim=binary_dim, llm_dim=llm.transformer.wte.weight.shape[-1])
+
+# Suppose you recompute X_new, similarity_new, re-encode, etc.
+u_final_new = wm["encoder"](X_new.to(get_device()))
+u_next_hat, text = generate_future_narrative(
+    u_final_new,
+    wm["predictor"],
+    wm["projectors"]["narrative"],
+    llm,
+    tokenizer,
+)
+
+
+class MultiHeadPredictor(nn.Module):
+    """
+    Collection of predictor heads, each with its own parameters but same latent dimension.
+    """
+    def __init__(self, d=2, hidden=12, head_names=None):
+        super().__init__()
+        if head_names is None:
+            head_names = ["default"]
+        self.heads = nn.ModuleDict({
+            name: Predictor(d=d, hidden=hidden)
+            for name in head_names
+        })
+
+    def forward(self, head_name, u_prev, u_curr):
+        return self.heads[head_name](u_prev, u_curr)
+
+
+def prediction_loss_multi(multi_predictor, u, head_name="default"):
+    if u.shape[0] < 3:
+        return torch.tensor(0.0, device=u.device)
+    u_prev = u[:-2]
+    u_curr = u[1:-1]
+    u_target = u[2:].detach()
+    u_hat = multi_predictor(head_name, u_prev, u_curr)
+    return F.mse_loss(u_hat, u_target)
+
+
+multi_predictor = MultiHeadPredictor(d=u.shape[-1], hidden=12, head_names=["physics", "narrative"]).to(device)
+# ...
+loss = loss + 0.5 * prediction_loss_multi(multi_predictor, u, head_name="physics")
+
+
+class MultiProjector(nn.Module):
+    """
+    Collection of projectors from latent space into different embedding spaces.
+    Typically all have same output dim (same LLM), but they can represent
+    different "interpretive lenses" (physics vs narrative vs social).
+    """
+    def __init__(self, d=2, out_dim=768, head_names=None):
+        super().__init__()
+        if head_names is None:
+            head_names = ["narrative"]
+        self.heads = nn.ModuleDict({
+            name: Projector(d=d, out_dim=out_dim)
+            for name in head_names
+        })
+
+    def forward(self, head_name, u):
+        return self.heads[head_name](u)
+
+
+def train_multi_projector(u_final, binary_data, llm, tokenizer, head_specs, num_epochs=1500, lr=0.01, device=None):
+    """
+    head_specs: dict name -> description_fn
+      where description_fn(binary_data) -> list of texts.
+    Example:
+      head_specs = {
+        "narrative": build_descriptions,
+        "technical": build_technical_descriptions
+      }
+    """
+    device = device or get_device()
+    llm_dim = llm.transformer.wte.weight.shape[-1]
+
+    head_names = list(head_specs.keys())
+    multi_proj = MultiProjector(d=u_final.shape[-1], out_dim=llm_dim, head_names=head_names).to(device)
+    proj_opt = torch.optim.Adam(multi_proj.parameters(), lr=lr)
+
+    u_final = u_final.to(device)
+
+    # Build target embeddings per head
+    target_embs = {}
+    with torch.no_grad():
+        for name, desc_fn in head_specs.items():
+            texts = desc_fn(binary_data)
+            embs = []
+            for txt in texts:
+                inputs = tokenizer(
+                    txt,
+                    return_tensors="pt",
+                    padding=True,
+                    truncation=True,
+                    max_length=64,
+                ).to(device)
+                emb = llm.transformer.wte(inputs["input_ids"])
+                avg_emb = emb.mean(dim=1)
+                embs.append(avg_emb)
+            target_embs[name] = torch.cat(embs, dim=0)  # [N, d_llm]
+
+    # Joint training over heads (simple sum of losses)
+    for epoch in range(num_epochs):
+        proj_opt.zero_grad()
+        total_loss = 0.0
+
+        for name in head_names:
+            projected = multi_proj(name, u_final)
+            loss_head = F.mse_loss(projected, target_embs[name])
+            total_loss = total_loss + loss_head
+
+        total_loss.backward()
+        proj_opt.step()
+
+        if epoch % 500 == 0:
+            print(f"[MultiProjector] Epoch {epoch:4d}  Loss {total_loss.item():.4f}")
+
+    return multi_proj
+
+
+def build_technical_descriptions(binary_data: np.ndarray):
+    texts = []
+    for i, bits in enumerate(binary_data):
+        p = bits.mean()
+        ones = int(bits.sum())
+        texts.append(
+            f"State {i}: binary vector of length {bits.shape[0]} "
+            f"with {ones} active bits and mean activation {p:.3f}. "
+            f"This state may encode a thermodynamic phase boundary."
+        )
+    return texts
+
+
+head_specs = {
+    "narrative": build_descriptions,
+    "technical": build_technical_descriptions,
+}
+multi_proj = train_multi_projector(u_final, binary_data, llm, tokenizer, head_specs, num_epochs=1500, lr=0.01, device=device)
+
+
+def generate_future_narrative_multi(u_final, multi_predictor, multi_proj, llm, tokenizer,
+                                    predictor_head="physics", projector_head="narrative",
+                                    prompt=None, device=None):
+    device = device or get_device()
+    u_final = u_final.to(device)
+    multi_predictor = multi_predictor.to(device)
+    multi_proj = multi_proj.to(device)
+
+    if prompt is None:
+        prompt = "The next binary state will evolve into a geometric configuration that is"
+
+    with torch.no_grad():
+        if u_final.shape[0] < 2:
+            raise ValueError("Need at least 2 latent states to predict the next one.")
+
+        u_prev = u_final[-2].unsqueeze(0)
+        u_curr = u_final[-1].unsqueeze(0)
+        u_next_hat = multi_predictor(predictor_head, u_prev, u_curr)
+        llm_embed = multi_proj(projector_head, u_next_hat)
+
+        inputs = tokenizer(prompt, return_tensors="pt", add_special_tokens=True).to(device)
+        base_embeds = llm.transformer.wte(inputs["input_ids"])
+        base_embeds[:, 0, :] = llm_embed
+
+        output = llm.generate(
+            inputs_embeds=base_embeds,
+            max_new_tokens=40,
+            temperature=0.8,
+            do_sample=True,
+            pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=tokenizer.eos_token_id,
+        )
+        text = tokenizer.decode(output[0], skip_special_tokens=True)
+        print(f"\n--- Multi-head Binary-to-Geometry Demo ---")
+        print(f"Head (predictor, projector): ({predictor_head}, {projector_head})")
+        print(f"Prompt: '{prompt}'\n")
+        print(f"LLM completes:\n{text}")
+
+        return u_next_hat.cpu(), text
+
+
+def main():
+    device = get_device()
+    print(f"Using device: {device}")
+
+    # 1. Load/construct data
+    binary_data = load_binary_data(n_samples=50, binary_dim=24)
+    X = torch.tensor(binary_data, dtype=torch.float32)
+    similarity = build_similarity_matrix(binary_data)
+
+    # 2. Train latent geometry (single-head predictor for now)
+    geo = train_latent_geometry(X, similarity, num_epochs=2000, lr=0.02, device=device)
+    u_final = geo["u_final"]
+    ω_final = geo["ω_final"]
+    unk_final = geo["unk_final"]
+    predictor = geo["predictor"]
+
+    # 3. Load LLM
+    llm, tokenizer = load_frozen_llm("distilgpt2")
+
+    # 4. Train multi-head projectors (narrative + technical)
+    head_specs = {
+        "narrative": build_descriptions,
+        "technical": build_technical_descriptions,
+    }
+    multi_proj = train_multi_projector(u_final, binary_data, llm, tokenizer, head_specs, num_epochs=1000, lr=0.01, device=device)
+
+    # 5. Save world model (geometry + projectors)
+    projector_bundle = {
+        "narrative": multi_proj.heads["narrative"],
+        "technical": multi_proj.heads["technical"],
+    }
+    save_world_model("world_model_v1", geo, projector_bundle)
+
+    # 6. Predict next latent state and generate for each head
+    for proj_head in ["narrative", "technical"]:
+        prompt = f"The next binary state will be described in a {proj_head} way as"
+        u_next_hat, _ = generate_future_narrative(
+            u_final, predictor, projector_bundle[proj_head], llm, tokenizer, prompt=prompt, device=device
+        )
+
+        # Visualize once (or per head if you want separate overlays)
+        visualize(u_final, u_next_hat, ω_final, unk_final)
+
+
+
+
+
 # In jepa_manifold.py
 def evaluate_claim(self, state: ManifoldState, claim_id: str) -> Tuple[bool, float]:
     """
