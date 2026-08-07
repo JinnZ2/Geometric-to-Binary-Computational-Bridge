@@ -22,7 +22,10 @@
         "A stated failure mode, and an argument that it is uncorrelated with the working sensor's"
       ],
       "prior_attempts": [
-        {"what": "ANCHOR_TOL = 0.0", "why_it_failed": "for a float sensor that means 'any nonzero', which is always true"}
+        {
+          "what": "ANCHOR_TOL = 0.0",
+          "why_it_failed": "for a float sensor that means 'any nonzero', which is always true"
+        }
       ],
       "leads": [
         "Allan variance (Allan 1966; IEEE Std 952) separates white / flicker / random-walk drift by log-log slope",
@@ -31,7 +34,10 @@
         "Thermodynamically-fixed anchors: ice bath, saturated salt slurries (ASTM E104: LiCl 11.3% RH, MgCl2 33%, NaCl 75%), calibration mass, shorted/open input, Spectralon reflectance target",
         "Westgard multi-rule QC has published error-detection and false-rejection rates per rule"
       ],
-      "acceptance": {"needs_null": false, "material": null}
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
     },
     {
       "id": "FCL-5e",
@@ -51,7 +57,10 @@
         "Stochastic thermodynamics: Sagawa-Ueda; Parrondo, Horowitz & Sagawa 2015. Continuous with the Landauer work already in Negentropic/",
         "Empowerment (Klyubin, Polani & Nehaniv 2005): channel capacity actuators -> sensors, in bits"
       ],
-      "acceptance": {"needs_null": false, "material": null}
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
     },
     {
       "id": "FCL-9",
@@ -65,7 +74,10 @@
         "A signed residual for it, so the correlation branch still has something to correlate",
         "A demonstration on a real multi-axis reading where the shape-level test and the scalar test disagree, and an argument for which is right"
       ],
-      "acceptance": {"needs_null": false, "material": null}
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
     },
     {
       "id": "FCL-12b",
@@ -80,14 +92,23 @@
         "Stdlib only, no numpy"
       ],
       "prior_attempts": [
-        {"what": "argmax of slotted |rho|", "why_it_failed": "median 8.8 s against a true T/2 of 3.0 s on a Poisson clock"},
-        {"what": "first local minimum of rho", "why_it_failed": "biased low, worsening with period: 7.5 s against a true 10.0 at T=20"}
+        {
+          "what": "argmax of slotted |rho|",
+          "why_it_failed": "median 8.8 s against a true T/2 of 3.0 s on a Poisson clock"
+        },
+        {
+          "what": "first local minimum of rho",
+          "why_it_failed": "biased low, worsening with period: 7.5 s against a true 10.0 at T=20"
+        }
       ],
       "leads": [
         "Lomb-Scargle (Lomb 1976; Scargle 1982); floating-mean generalisation (Zechmeister & Kuerster 2009)",
         "CLEAN deconvolution of the spectral window (Roberts, Lehar & Dreher 1987)"
       ],
-      "acceptance": {"needs_null": true, "material": null}
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "FCL-13b",
@@ -101,8 +122,15 @@
         "Measured power gain against the current gate on the same real effect",
         "No increase in false-positive rate"
       ],
-      "leads": ["mid-p correction", "randomised / fuzzy decision at the boundary", "Berger-Boos or similar"],
-      "acceptance": {"needs_null": true, "material": null}
+      "leads": [
+        "mid-p correction",
+        "randomised / fuzzy decision at the boundary",
+        "Berger-Boos or similar"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "FCL-14",
@@ -116,8 +144,14 @@
         "A worked case where the marginal and conditional verdicts differ",
         "An honest statement of what the loop can and cannot conclude from observational logging alone"
       ],
-      "leads": ["Peters, Janzing & Schoelkopf, Elements of Causal Inference (free online)", "Simpson's paradox as the concrete failure"],
-      "acceptance": {"needs_null": true, "material": null}
+      "leads": [
+        "Peters, Janzing & Schoelkopf, Elements of Causal Inference (free online)",
+        "Simpson's paradox as the concrete failure"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "NEG-8",
@@ -125,8 +159,15 @@
       "state": "OPEN",
       "kind": "CODE",
       "statement": "Negentropic/ entropy production is a housekeeping estimator with a known sign bias. NEG-8 (persistence margin Phi = -S_exchange - sigma) cannot be evaluated on simulated traces until sigma is estimated at trajectory level.",
-      "would_count": ["A MaxCal or equivalent trajectory-level estimator", "Sign-bias measured against a known-sigma simulation", "Stdlib tier"],
-      "acceptance": {"needs_null": true, "material": null}
+      "would_count": [
+        "A MaxCal or equivalent trajectory-level estimator",
+        "Sign-bias measured against a known-sigma simulation",
+        "Stdlib tier"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "NEG-2-3",
@@ -134,8 +175,13 @@
       "state": "OPEN",
       "kind": "BENCH",
       "statement": "NEG-2 (archive lifetime under an expanding maintenance schedule) and NEG-3 (finite-time Landauer erasure, tau^-1 excess scaling) have runnable falsifiers and no data.",
-      "would_count": ["A dataset, its provenance, and the falsifier's verdict on it"],
-      "acceptance": {"needs_null": false, "material": null}
+      "would_count": [
+        "A dataset, its provenance, and the falsifier's verdict on it"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
     },
     {
       "id": "AISS-1",
@@ -148,7 +194,10 @@
         "verdict_is_weight_sensitive() returning weights_carry_information = True on real patterns",
         "Or: an argument that an unweighted mean is correct, in which case rename total_score"
       ],
-      "acceptance": {"needs_null": true, "material": null}
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "AISS-2",
@@ -156,8 +205,15 @@
       "state": "OPEN",
       "kind": "CODE",
       "statement": "_check_internal_coherence carried a flat 0.4 placeholder for logical consistency. The term was removed rather than guessed at, and logical_consistency is now listed in unmeasured_components.",
-      "would_count": ["A computable check over Pattern.mathematical_structure", "Its own weight, stated", "A pair of patterns it separates that the current two components do not"],
-      "acceptance": {"needs_null": true, "material": null}
+      "would_count": [
+        "A computable check over Pattern.mathematical_structure",
+        "Its own weight, stated",
+        "A pair of patterns it separates that the current two components do not"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
     },
     {
       "id": "SI-E",
@@ -166,8 +222,15 @@
       "kind": "DERIVATION",
       "statement": "1-2 aJ is 348 kT ln2 (legal). 0.1 eV is 5.6 kT ln2 (legal). 0.01 eV is 0.56 kT ln2, below the Landauer bound at 300 K.",
       "why_open": "Pick one and propagate it through the documents that depend on it. 0.01 eV cannot be it.",
-      "would_count": ["One value, chosen with a stated basis", "Every downstream figure recomputed", "reach(E, 'landauer 300K') returning DETECTABLE"],
-      "acceptance": {"needs_null": false, "material": "silicon"}
+      "would_count": [
+        "One value, chosen with a stated basis",
+        "Every downstream figure recomputed",
+        "reach(E, 'landauer 300K') returning DETECTABLE"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": "silicon"
+      }
     },
     {
       "id": "FAB-3",
@@ -176,9 +239,16 @@
       "kind": "BENCH",
       "statement": "Eight doping states, measured as (sheet resistance, carrier type, carrier concentration). Separable at >3 sigma or not.",
       "why_open": "Cheap, decisive, unrun. Needs no magnet, no cryostat, no THz source.",
-      "would_count": ["Measured (R_s, type, n) for 8 states with error bars", "Pairwise separation in sigma", "Cost and instrument named"],
+      "would_count": [
+        "Measured (R_s, type, n) for 8 states with error bars",
+        "Pairwise separation in sigma",
+        "Cost and instrument named"
+      ],
       "cost_usd": "3000-6000",
-      "acceptance": {"needs_null": false, "material": "silicon"}
+      "acceptance": {
+        "needs_null": false,
+        "material": "silicon"
+      }
     },
     {
       "id": "BRG-6",
@@ -187,8 +257,15 @@
       "kind": "BENCH",
       "statement": "The strain channel that replaces every magnetic proposal predicts dR/R about 9% at 0.1% strain, gauge factor about 121 for pi_l along <110> paired with E<110> = 169 GPa.",
       "why_open": "A strain gauge and a four-point probe settle it. Unrun.",
-      "would_count": ["Measured dR/R vs strain", "Extracted gauge factor with the crystal direction stated", "Agreement or disagreement with 121"],
-      "acceptance": {"needs_null": false, "material": "silicon"}
+      "would_count": [
+        "Measured dR/R vs strain",
+        "Extracted gauge factor with the crystal direction stated",
+        "Agreement or disagreement with 121"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": "silicon"
+      }
     },
     {
       "id": "R2-3",
@@ -196,8 +273,15 @@
       "state": "OPEN",
       "kind": "BENCH",
       "statement": "The 60 dB common-mode suppression budget depends on a matching tolerance that was assumed, not measured.",
-      "would_count": ["Measured CMRR by magneto-optic sampling at a stated frequency", "The matching tolerance actually achieved", "Comparison against the budget in transient_suppression.py"],
-      "acceptance": {"needs_null": false, "material": "silicon"}
+      "would_count": [
+        "Measured CMRR by magneto-optic sampling at a stated frequency",
+        "The matching tolerance actually achieved",
+        "Comparison against the budget in transient_suppression.py"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": "silicon"
+      }
     },
     {
       "id": "NEG-EMIT",
@@ -205,8 +289,104 @@
       "state": "OPEN",
       "kind": "DEFINITION",
       "statement": "Negentropic/emit_ising.py does not inherit from bridges/abstract_encoder.py. The blocker is that an Ising spec has a bit width that depends on n, while every other encoder emits a fixed width.",
-      "would_count": ["A contract that admits both, or an argument that they are different kinds of thing and should not share one"],
-      "acceptance": {"needs_null": false, "material": null}
+      "would_count": [
+        "A contract that admits both, or an argument that they are different kinds of thing and should not share one"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
+    },
+    {
+      "id": "RAM-1",
+      "title": "The Raman photon budget on the actual rig",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "The proposed architecture assumes a 1024-point spectrum on every acquisition, with a scheduler budgeting model frames per acquisition, for live imaging. A shot-noise budget at 785 nm / 10 mW / NA 1.2 / 25% throughput gives 30-300 s per spectrum at SNR 10 per channel, so the acquisition is the bottleneck by one to two orders and the scheduler is optimising the wrong resource.",
+      "why_open": "The estimate uses assumed cross-sections and scatterer densities. The rig's own number settles it and nothing else does.",
+      "would_count": [
+        "Photons per channel per second measured on one unperturbed cell at the working power",
+        "The resulting seconds-per-spectrum at a stated SNR",
+        "The achievable frames per hour, which fixes n for every downstream model"
+      ],
+      "leads": [
+        "repo_guard.reach is the same comparison, already mechanised",
+        "Coherent Raman (SRS/CARS) buys 1e4-1e5 but is narrowband: sweeping 1024 points gives the time back",
+        "Broadband CARS buys ~1e2-1e3 against a worse nonresonant background"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
+    },
+    {
+      "id": "RAM-2",
+      "title": "False-alarm rate of a latent-space claim predicate",
+      "state": "OPEN",
+      "kind": "BENCH",
+      "statement": "The example claim is `u[0] > 0.5 and u[1] < -0.2` with falsification after 3 consecutive failures. Nothing states the per-observation false-alarm rate on an unperturbed cell, so the stopping rule has no calibration.",
+      "why_open": "FCL-5 is the same shape: `rate > 1.5 x base` fired on 34-41% of null sets while its own notes said only 'too permissive'.",
+      "would_count": [
+        "Technical replicates of one unperturbed cell",
+        "The predicate run against them, with the false-alarm count",
+        "A threshold set from that number rather than from inspection"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
+    },
+    {
+      "id": "RAM-3",
+      "title": "Does the manifold separate biochemistry, or batch structure?",
+      "state": "OPEN",
+      "kind": "CODE",
+      "statement": "'The manifold learns to distinguish cell states.' Untested against a null in which the biochemistry is destroyed and the acquisition structure is kept.",
+      "would_count": [
+        "The identical architecture trained on phase-randomised spectra, or on real spectra with shuffled state labels",
+        "Separation measured the same way in both",
+        "A stated margin between them"
+      ],
+      "leads": [
+        "repo_guard.null_harness",
+        "NEG-7 died exactly here"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
+    },
+    {
+      "id": "RAM-4",
+      "title": "A claim that survives retraining the encoder",
+      "state": "OPEN",
+      "kind": "DEFINITION",
+      "statement": "A hypothesis written as `u[1] > 0.3` is a claim about one fitting run: retrain the encoder and the axes rotate. The latent is also learned from the same spectra the claim is tested on.",
+      "why_open": "This is P-SELF-SUPPLIED-FALSIFIER, the largest unmechanised shape in PRINCIPLES.json.",
+      "would_count": [
+        "Claims stated in spectral terms -- a band, a ratio, a shift -- rather than latent coordinates",
+        "Or: a frozen encoder, a held-out split, and the claim written before the split is seen",
+        "A demonstration that the claim's verdict is unchanged across two independent training runs"
+      ],
+      "acceptance": {
+        "needs_null": true,
+        "material": null
+      }
+    },
+    {
+      "id": "RAM-5",
+      "title": "Full spectrum at minutes, or a few bands at video rate",
+      "state": "OPEN",
+      "kind": "DEFINITION",
+      "statement": "The design assumes both a 1024-point spectrum and real-time acquisition. Spontaneous Raman gives the first; coherent Raman gives the second for one or a few shifts. No instrument gives both.",
+      "would_count": [
+        "A stated choice, with the model redesigned for the n it implies",
+        "Or a named instrument that delivers both, with its throughput"
+      ],
+      "acceptance": {
+        "needs_null": false,
+        "material": null
+      }
     }
   ]
 }

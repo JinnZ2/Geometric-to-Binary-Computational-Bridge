@@ -338,7 +338,8 @@ functional form reproduce the reported correlation floor. See
 
 ```
 playground/                     CC0 bench for what this repo has not solved
-├── OPEN_PROBLEMS.json            15 open problems, machine-readable
+├── OPEN_PROBLEMS.json            20 open problems, machine-readable
+├── SCREENED_ramanomics_jepa.md   Incoming proposal, run through the screens
 ├── playground.py                 Harness. Docstring is the contract.
 ├── review.py                     Re-scores the archive against today's gates
 ├── PRINCIPLES.json               11 recurring failure shapes, 36 instances
@@ -349,6 +350,17 @@ playground/                     CC0 bench for what this repo has not solved
     ├── lomb_scargle_gls.py         SURVIVES — closes FCL-12b
     └── tautology_demo.py           REJECTED_UNFALSIFIABLE, on purpose
 ```
+
+`SCREENED_ramanomics_jepa.md` is the first worked use of the machinery on an
+incoming proposal rather than on this repo's own claims. The decisive finding
+came from `instrument-floor` in about ten minutes: a shot-noise budget for
+single-cell spontaneous Raman gives **30–300 s per spectrum** at SNR 10 per
+channel, so a scheduler budgeting model frames *per acquisition* is optimising
+the wrong resource by one to two orders. That reshapes the design rather than
+killing it — a time-lapse is tens to low hundreds of frames per hour, which is
+a small-*n* regime, and coherent Raman reaches video rate only by giving up the
+full spectrum. Five well-posed problems (RAM-1..5) were extracted and
+registered.
 
 Anyone may submit a candidate against a registered problem. Two gates are
 mechanical and are not ordinary code review. **`broken()`** requires a
