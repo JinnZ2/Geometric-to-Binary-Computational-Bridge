@@ -1,0 +1,6 @@
+pytest>=7.0
+
+[dev]
+pytest>=7.0
+black
+mypy

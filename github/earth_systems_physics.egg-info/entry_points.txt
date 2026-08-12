@@ -1,0 +1,2 @@
+[console_scripts]
+claim-playground = claim_playground.cli:main

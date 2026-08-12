@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "earth-systems-physics"
+version = "0.1.0"
+description = "Claim Registry & T1-T4 Reality Test Harness for earth-systems-physics"
+readme = "README.md"
+license = {text = "CC0-1.0"}
+authors = [
+    {name = "Practitioner Epistemology Collective"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "pytest>=7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "black",
+    "mypy",
+]
+
+[project.scripts]
+claim-playground = "claim_playground.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["claim_playground*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
