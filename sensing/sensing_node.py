@@ -1,3 +1,50 @@
+add:# Add to sensing_node.py (around line 20)
+from sensing.processing.jepa_manifold import JEPAManifold, ManifoldState
+
+def build_node(
+    node_id: str,
+    bounds: tuple,
+    obs_path: Path,
+    queue_path: Path,
+    mock: bool,
+) -> tuple[LocalLogger, QueueManager, JEPAManifold]:
+    # ... existing driver setup ...
+    
+    manifold = JEPAManifold()
+    return logger, queue, manifold
+
+def main(argv: list[str] | None = None) -> int:
+    # ... existing argument parsing ...
+    logger, queue, manifold = build_node(...)
+    
+    def tick_callback(primitive: Primitive):
+        # 1. Update the manifold
+        state = manifold.step(primitive)
+        
+        # 2. Attach latent state to the primitive's form
+        if state is not None:
+            form_dict = json.loads(primitive.form)
+            form_dict["jepa"] = {
+                "u": state.u.tolist(),
+                "omega": state.omega,
+                "uncertainty": state.uncertainty
+            }
+            primitive.form = json.dumps(form_dict)
+        
+        # 3. Train incrementally
+        manifold.train_on_window()
+        
+        # 4. Transmit (existing)
+        logger(primitive)  # this calls transmit_or_queue
+    
+    scheduler = Scheduler(
+        interval_seconds=args.interval_seconds,
+        tick_callback=tick_callback,
+        max_ticks=args.max_ticks,
+        no_sleep=args.no_sleep
+    )
+    scheduler.run()
+
 """
 sensing_node.py — bare-minimum field node.
 
