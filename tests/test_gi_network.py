@@ -876,5 +876,241 @@ class TestFalsifierReportRuns(unittest.TestCase):
         self.assertIn('A PASS is not "this code is correct"', flat)
 
 
+
+
+# ---------------------------------------------------------------------
+# TMP-1..5  fabrication/temperature.py
+# ---------------------------------------------------------------------
+
+class TestTemperatureCompensation(unittest.TestCase):
+
+    def setUp(self):
+        from fabrication import temperature
+        self.T = temperature
+
+    def test_tmp5_c_air_matches_exact_over_its_stated_range(self):
+        for t in range(-50, 51):
+            exact = 331.3 * math.sqrt(1.0 + t / 273.15)
+            self.assertLess(abs(self.T.c_air(t) / exact - 1.0), 0.006, msg=t)
+
+    def test_the_acoustic_shift_the_whole_thing_exists_for(self):
+        self.assertAlmostEqual(
+            self.T.acoustic_f_correct(1000.0, -40.0, 20.0) / 1000.0,
+            343.42 / 307.06, places=3)
+
+    def test_tmp1_k_correct_moves_the_wrong_way(self):
+        """Steel: alpha = 12e-6/C, dE/E ~ -2.4e-4/C. f ~ sqrt(E)."""
+        for dT in (10.0, 40.0, -55.0):
+            code = math.sqrt(self.T.k_correct(1.0, 15.0 + dT, 15.0)) - 1.0
+            physics = 0.5 * (-2.4e-4 * dT)
+            self.assertLess(code * physics, 0.0, msg=dT)
+            self.assertGreater(abs(physics / code), 10.0, msg=dT)
+
+    def test_tmp1_the_docstring_states_the_inverted_reasoning(self):
+        self.assertIn("dominant effect is length", self.T.k_correct.__doc__)
+
+    def test_tmp1_normalize_measurement_carries_it_through(self):
+        cold = self.T.normalize_measurement(200.0, "mechanical",
+                                            "resonance_freq_Hz", -40.0)
+        self.assertGreater(cold["normalized"], 200.0)   # physics says lower
+
+    def test_tmp2_two_reference_temperatures(self):
+        import inspect
+        refs = set()
+        for f in (self.T.thermal_expand, self.T.r_correct, self.T.c_correct,
+                  self.T.l_correct, self.T.k_correct,
+                  self.T.helmholtz_f_correct, self.T.acoustic_f_correct,
+                  self.T.normalize_measurement):
+            p = inspect.signature(f).parameters.get("ref_temp_c")
+            if p is not None:
+                refs.add(p.default)
+        self.assertEqual(refs, {15.0, 20.0})
+
+    def test_tmp2_the_crossing_biases_electrical_normalisation(self):
+        """A reading taken AT the TCR's own reference (20 C) should need no
+        correction. normalize_measurement defaults ref_temp_c to 15.0 and
+        passes it into r_correct, so it corrects by TCR * 5 C anyway."""
+        got = self.T.normalize_measurement(10.0, "electrical", "R_value", 20.0)
+        self.assertNotEqual(got["correction_factor"], 1.0)
+        self.assertAlmostEqual(abs(got["correction_factor"] - 1.0),
+                               0.00393 * 5.0, places=3)
+
+    def test_tmp3_two_corrections_for_one_physics(self):
+        a = self.T.acoustic_f_correct(1000.0, -40.0)
+        h = self.T.helmholtz_f_correct(1000.0, -40.0)
+        self.assertGreater(abs(a - h), 1.0)
+
+    def test_tmp3_the_docstrings_are_swapped(self):
+        self.assertIn("linear approximation",
+                      self.T.helmholtz_f_correct.__doc__)
+        self.assertNotIn("linear", self.T.acoustic_f_correct.__doc__)
+
+    def test_tmp4_mu_water_is_constant_below_zero(self):
+        self.assertEqual(self.T.mu_water(-1.0), self.T.mu_water(-40.0))
+
+    def test_tmp4_mu_water_degrades_with_temperature(self):
+        for t, true in ((0.0, 1.79e-3), (20.0, 1.002e-3), (100.0, 2.82e-4)):
+            err = abs(self.T.mu_water(t) / true - 1.0)
+            if t == 100.0:
+                self.assertGreater(err, 0.4)
+            elif t == 0.0:
+                self.assertLess(err, 0.01)
+
+    def test_rho_air_is_the_ideal_gas_law(self):
+        self.assertAlmostEqual(self.T.rho_air(15.0), 1.225, places=2)
+
+    def test_thermal_expand_inverts_the_expansion(self):
+        at_cold = 1.000 * (1.0 + 12e-6 * (-55.0))
+        self.assertAlmostEqual(
+            self.T.thermal_expand(at_cold, -40.0, 15.0, 12e-6), 1.000,
+            places=6)
+
+
+class TestTemperatureIsThreadedThrough(unittest.TestCase):
+
+    def test_pipe_modes_takes_temp_c(self):
+        from fabrication.pipe_modes import pipe_modes
+        warm = pipe_modes(0.5, "open_open", n_max=1)[0]["f"]
+        cold = pipe_modes(0.5, "open_open", n_max=1, temp_c=-40.0)[0]["f"]
+        self.assertLess(cold, warm)
+        self.assertAlmostEqual(cold / warm, 307.06 / 343.0, places=3)
+
+    def test_an_explicit_c_still_wins(self):
+        from fabrication.pipe_modes import pipe_modes
+        self.assertAlmostEqual(
+            pipe_modes(0.5, "open_open", n_max=1, c=300.0,
+                       temp_c=-40.0)[0]["f"], 300.0)
+
+    def test_the_default_is_unchanged(self):
+        from fabrication.pipe_modes import pipe_modes, C_AIR
+        self.assertAlmostEqual(pipe_modes(0.5, "open_open", n_max=1)[0]["f"],
+                               C_AIR)
+
+    def test_eigenmodes_and_the_sweep_verifier_accept_it(self):
+        import inspect
+        from fabrication.eigenmodes import predict_eigenmodes_full
+        from fabrication.verify.verifier_sweep import verify_sweep
+        for f in (predict_eigenmodes_full, verify_sweep):
+            self.assertIn("temp_c", inspect.signature(f).parameters,
+                          msg=f.__name__)
+
+    def test_the_existing_docstrings_survived(self):
+        """The bundle's versions stripped them; eigenmodes' limitations block
+        is cited by claim_back_modes.failure."""
+        with open(os.path.join(ROOT, "fabrication", "eigenmodes.py"),
+                  encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("Limitations (flagged in claim_back_modes.failure)", src)
+        with open(os.path.join(ROOT, "fabrication", "pipe_modes.py"),
+                  encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("open-closed tube   : f_n = (2n-1)", src)
+
+
+# ---------------------------------------------------------------------
+# TRD-0..7  trend detection
+# ---------------------------------------------------------------------
+
+class TestTrendDetection(unittest.TestCase):
+
+    def setUp(self):
+        from geometric_intelligence.network import trend
+        self.TR = trend
+        self.fix = os.path.join(ROOT, "tests", "fixtures",
+                                "measurements_drift_fixture.json")
+
+    def _p(self):
+        from pathlib import Path
+        return Path(self.fix)
+
+    def test_trd0_the_failing_scopes_predict_nothing(self):
+        res = self.TR.detect_all_trends(self._p())
+        failing = [r for r in res.values() if r.verdict_trend == "failed"]
+        self.assertEqual(len(failing), 2)
+        for r in failing:
+            self.assertIsNone(r.predicted_fail_days)
+
+    def test_trd0_the_stable_scope_is_the_one_with_a_prediction(self):
+        res = self.TR.detect_all_trends(self._p())
+        noisy = [r for r in res.values() if r.verdict_trend == "noisy"]
+        self.assertEqual(len(noisy), 1)
+        self.assertIsNotNone(noisy[0].predicted_fail_days)
+        self.assertLess(noisy[0].r_squared, 0.5)
+
+    def test_trd1_a_downward_drift_never_fails(self):
+        rows = [{"ts": i * 86400, "measured": 10.0 - 0.5 * i,
+                 "predicted": 10.0, "tol_frac": 0.05} for i in range(20)]
+        tr = self.TR.analyze_scope_trend("down", rows)
+        self.assertLess(tr.current_value, 10.0 * 0.9)
+        self.assertNotEqual(tr.verdict_trend, "failed")
+
+    def test_trd2_the_negative_branch_times_re_entry(self):
+        rows = [{"ts": i * 86400, "measured": 30.0 - 1.0 * i,
+                 "predicted": 10.0, "tol_frac": 0.05} for i in range(10)]
+        tr = self.TR.analyze_scope_trend("above", rows)
+        self.assertEqual(tr.verdict_trend, "failed")
+        self.assertAlmostEqual(tr.predicted_fail_days, 10.0, places=3)
+
+    def test_trd3_two_points_are_always_a_trend(self):
+        for a, b in ((10.0, 10.0001), (10.0, 9.5), (200.0, 200.5)):
+            rows = [{"ts": 0, "measured": a, "predicted": 10.0,
+                     "tol_frac": 0.05},
+                    {"ts": 86400, "measured": b, "predicted": 10.0,
+                     "tol_frac": 0.05}]
+            tr = self.TR.analyze_scope_trend("pair", rows)
+            self.assertEqual(tr.r_squared, 1.0, msg=(a, b))
+            self.assertNotEqual(tr.verdict_trend, "noisy", msg=(a, b))
+
+    def test_trd3_one_point_is_refused(self):
+        tr = self.TR.analyze_scope_trend(
+            "one", [{"ts": 0, "measured": 1.0, "predicted": 1.0}])
+        self.assertEqual(tr.verdict_trend, "insufficient_data")
+
+    def test_trd4_the_stable_gate_is_absolute(self):
+        import inspect
+        src = inspect.getsource(self.TR.analyze_scope_trend)
+        self.assertIn("abs(slope) < 1e-6", src)
+        self.assertNotIn("slope / pred", src)
+
+    def test_trd5_two_ramps_correlate_perfectly(self):
+        got = self.TR.cross_domain_correlation(self._p(), "thermal",
+                                               "mechanical")
+        self.assertEqual(len(got), 1)
+        self.assertAlmostEqual(abs(got[0]["correlation"]), 1.0, places=4)
+
+    def test_trd6_the_defaults_miss_it(self):
+        self.assertEqual(self.TR.cross_domain_correlation(self._p()), [])
+
+    def test_trd6_a_millisecond_of_jitter_removes_the_overlap(self):
+        import json as _j
+        import tempfile
+        from pathlib import Path
+        rows = _j.loads(open(self.fix, encoding="utf-8").read())
+        for m in rows:
+            if m["scope"].startswith("fab::thermal"):
+                m["ts"] += 0.001
+        p = Path(tempfile.mkdtemp()) / "j.json"
+        p.write_text(_j.dumps(rows))
+        self.assertEqual(
+            self.TR.cross_domain_correlation(p, "thermal", "mechanical"), [])
+
+    def test_trd7_the_ledger_path_is_relative(self):
+        from pathlib import Path
+        self.assertFalse(Path(self.TR.LEDGER).is_absolute())
+
+    def test_the_regression_itself_is_right(self):
+        """The part that works, and the reason the file is worth keeping."""
+        rows = [{"ts": i * 86400, "measured": 5.0 + 2.0 * i,
+                 "predicted": 5.0, "tol_frac": 0.5} for i in range(10)]
+        tr = self.TR.analyze_scope_trend("ramp", rows)
+        self.assertAlmostEqual(tr.slope_per_day, 2.0, places=9)
+        self.assertAlmostEqual(tr.r_squared, 1.0, places=9)
+
+    def test_the_fixture_is_the_one_the_findings_were_measured_on(self):
+        import json as _j
+        rows = _j.loads(open(self.fix, encoding="utf-8").read())
+        self.assertEqual(len(rows), 61)
+        self.assertEqual(len({r["scope"] for r in rows}), 4)
+
 if __name__ == "__main__":
     unittest.main()

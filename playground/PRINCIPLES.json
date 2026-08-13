@@ -84,6 +84,11 @@
      "where": "bridges/glyph_state_encoder.py",
      "what": "the demo preferred a freshly constructed empty SensorSuite over the populated mock, classified six VOIDs and printed 'operational'",
      "claim": "GLY-6"
+    },
+    {
+     "where": "geometric_intelligence/network/trend.py",
+     "what": "cross-domain correlation gates on |r| > 0.6 with no null; two monotone ramps with no physical link correlate at exactly 1.0000",
+     "claim": "TRD-5"
     }
    ],
    "cost_when_missed": "A framework's central claim can be a property of its arithmetic."
@@ -209,6 +214,11 @@
      "where": "geometric_intelligence/network/resonance.py",
      "what": "detect_injection flags 15.7% of bins on two draws of the same noise process; no null, no multiplicity correction",
      "claim": "GR-5"
+    },
+    {
+     "where": "geometric_intelligence/network/trend.py",
+     "what": "r2 > 0.5 and r2 > 0.7 with no minimum sample count: two points give R^2 = 1.0 by construction and always read as a trend",
+     "claim": "TRD-3"
     }
    ],
    "cost_when_missed": "The folder's own notes said 'too permissive'. It was 41%."
@@ -274,6 +284,16 @@
      "where": "geometric_intelligence/network/core.py",
      "what": "integrity_score multiplies a consistency fraction by an author-declared confidence, giving a number with the units of neither, and compares it to a constant two modules also use for a differently-ranged quantity",
      "claim": "GI-12"
+    },
+    {
+     "where": "fabrication/temperature.py",
+     "what": "five functions default ref_temp_c to 20 C and three to 15 C; normalize_measurement passes 15 into r_correct, whose TCR is specified at 20, biasing every electrical normalisation by 2.0%",
+     "claim": "TMP-2"
+    },
+    {
+     "where": "geometric_intelligence/network/trend.py",
+     "what": "the stable gate abs(slope) < 1e-6 compares per-day changes in ohms, hertz and kelvin against one absolute constant",
+     "claim": "TRD-4"
     }
    ],
    "cost_when_missed": "A threshold that cannot be met or missed."
@@ -284,7 +304,7 @@
    "status": "ESTABLISHED",
    "statement": "A test, falsifier or branch that no longer executes -- moved import, missing bootstrap, unreachable guard -- while the surrounding report still looks healthy.",
    "detector": "Count what ran, not what passed. An import error inside setUp is reported as a test ERROR, not a collection failure.",
-   "mechanised_by": "the full-sweep command with a per-file failure echo; nothing automatic",
+   "mechanised_by": "tests/test_repo_guard.py TestEveryDefinedTestActuallyRuns; plus the full-sweep command",
    "instances": [
     {
      "where": "tests/test_silicon_modules.py",
@@ -328,6 +348,10 @@
      "where": "geometric_intelligence/network/resonance.py",
      "what": "band edges overshoot f_max then append it, leaving a reversed final interval no frequency can enter",
      "claim": "GR-1"
+    },
+    {
+     "where": "tests/test_repo_guard.py",
+     "what": "mechanised: every suite's declared `def test_` count is compared against what unittest loads, so a class appended after the __main__ guard is caught automatically"
     }
    ],
    "cost_when_missed": "A suite 79% dead that still looks like it ran."

@@ -1,0 +1,490 @@
+[
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.0,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1783991790.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.009414709848079,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784121390.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.011092974268257,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784250990.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.004411200080598,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784380590.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 9.99643197504692,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784510190.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 9.995410757253369,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784639790.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.00320584501801,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784769390.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.013569865987188,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1784898990.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.017893582466233,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785028590.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.013121184852418,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785158190.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.004559788891106,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785287790.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.001000097934492,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785417390.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.006634270819996,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785546990.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.017201670368266,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785676590.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.023906073556947,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785806190.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.021502878401572,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1785935790.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.01312096683335,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1786065390.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.007386025081203,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1786194990.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.010490127532284,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1786324590.8560934
+  },
+  {
+    "scope": "fab::electrical::test::R0",
+    "measured": 10.02049877209663,
+    "predicted": 10.0,
+    "tol_frac": 0.05,
+    "verdict": "pass",
+    "ts": 1786454190.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 50.0,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1783991790.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 50.8,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784121390.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 51.6,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784250990.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 52.4,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784380590.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 53.2,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784510190.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 54.0,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784639790.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 54.8,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784769390.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 55.6,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1784898990.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 56.4,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785028590.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 57.2,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785158190.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 58.0,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785287790.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 58.8,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785417390.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 59.6,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785546990.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 60.4,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785676590.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 61.2,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "pass",
+    "ts": 1785806190.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 62.0,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "drift",
+    "ts": 1785935790.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 62.8,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "drift",
+    "ts": 1786065390.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 63.6,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "drift",
+    "ts": 1786194990.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 64.4,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "drift",
+    "ts": 1786324590.8560934
+  },
+  {
+    "scope": "fab::thermal::test::delta_T",
+    "measured": 65.2,
+    "predicted": 50.0,
+    "tol_frac": 0.1,
+    "verdict": "drift",
+    "ts": 1786454190.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 200.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1783991790.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 202.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784121390.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 205.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784250990.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 207.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784380590.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 210.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784510190.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 212.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784639790.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 215.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784769390.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 217.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1784898990.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 220.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1785028590.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 222.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1785158190.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 225.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1785287790.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 227.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1785417390.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 230.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1785546990.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 232.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1785676590.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 235.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1785806190.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 237.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1785935790.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 240.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1786065390.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 242.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1786194990.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 245.0,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1786324590.8560934
+  },
+  {
+    "scope": "fab::mechanical::test::resonance",
+    "measured": 247.5,
+    "predicted": 200.0,
+    "tol_frac": 0.08,
+    "verdict": "fail",
+    "ts": 1786454190.8560934
+  },
+  {
+    "scope": "fab::acoustic::test::mode0",
+    "measured": 800.0,
+    "predicted": 800.0,
+    "tol_frac": 0.08,
+    "verdict": "pass",
+    "ts": 1786583790.8564456
+  }
+]

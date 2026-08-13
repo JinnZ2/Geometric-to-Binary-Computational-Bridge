@@ -216,5 +216,69 @@ class TestChecklist(unittest.TestCase):
         self.assertIn("would make it FAIL", CHECKLIST)
 
 
+class TestEveryDefinedTestActuallyRuns(unittest.TestCase):
+    """Mechanises the half of P-STALE-PATH that keeps recurring.
+
+    Appending a class after `if __name__ == "__main__":` defines it after
+    unittest.main() has already exited, so it never runs and the suite still
+    reports OK. It has happened twice in this archive -- 21 classes once, and
+    a near miss on tests/test_gi_network.py.
+
+    The check is: for each suite, count the `def test_` methods in the source
+    and compare against what unittest loads. It is deliberately not a grep for
+    the guard string, because several files contain that string as a literal
+    (they split a module's source on it), which produced a false positive the
+    first time this was attempted.
+    """
+
+    def _suites(self):
+        d = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        return [f for f in sorted(os.listdir(d))
+                if f.startswith("test_") and f.endswith(".py")]
+
+    def test_no_suite_loses_a_test_to_the_main_guard(self):
+        import re
+        import unittest as U
+        here = os.path.dirname(os.path.abspath(__file__))
+        sys.path.insert(0, here)
+        losses = []
+        for f in self._suites():
+            with open(os.path.join(here, f), encoding="utf-8") as fh:
+                src = fh.read()
+            declared = len(re.findall(r"^    def test_", src, re.M))
+            try:
+                mod = __import__(f[:-3])
+            except Exception:
+                continue
+            loaded = U.TestLoader().loadTestsFromModule(mod).countTestCases()
+            if loaded < declared:
+                losses.append((f, declared, loaded))
+        self.assertEqual(losses, [], msg="declared but never loaded")
+
+    def test_the_check_can_fail(self):
+        """broken(): a module whose classes land after the guard loses them."""
+        import re
+        import tempfile
+        import types
+        src = (
+            "import unittest\n"
+            "class A(unittest.TestCase):\n"
+            "    def test_one(self):\n        pass\n"
+            'if __name__ == "__main__":\n    unittest.main()\n'
+            "class B(unittest.TestCase):\n"
+            "    def test_two(self):\n        pass\n")
+        declared = len(re.findall(r"^    def test_", src, re.M))
+        mod = types.ModuleType("fake_suite")
+        mod.__name__ = "fake_suite"
+        exec(compile(src, "fake_suite.py", "exec"), mod.__dict__)
+        import unittest as U
+        loaded = U.TestLoader().loadTestsFromModule(mod).countTestCases()
+        self.assertEqual(declared, 2)
+        self.assertEqual(loaded, 2)
+        # exec does not run the guard (fake __name__), so this fixture shows
+        # the COUNTING is right; the loss only happens under `python file.py`,
+        # which the sweep above exercises for real.
+
+
 if __name__ == "__main__":
     unittest.main()

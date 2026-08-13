@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-falsifiers_gi_network.py -- runnable report for GI-1..16, GR-1..6 and GB-1..5.
+falsifiers_gi_network.py -- runnable report for GI-1..16, GR-1..6, GB-1..5, TMP-1..5, TRD-0..7, TMP-1..5, TRD-0..7.
 
     python geometric_intelligence/falsifiers_gi_network.py
 
@@ -425,9 +425,162 @@ def bridge_findings():
           "0.32%% of exact at -40 C" % (c_lin(20), c_lin(-40), ratio))
 
 
+def temperature_findings():
+    print()
+    print("TEMPERATURE COMPENSATION  (fabrication/temperature.py)")
+    from fabrication import temperature as T
+    import inspect
+
+    # TMP-5 (the positive one) -----------------------------------------------
+    worst = max(abs(T.c_air(t) / (331.3 * math.sqrt(1 + t / 273.15)) - 1)
+                for t in range(-50, 51))
+    check("TMP-5", "c_air is within 0.6 pct of exact over its range",
+          worst < 0.006,
+          "max error %.2f%% over -50..+50 C against 331.3*sqrt(1+T/273.15); "
+          "the claim of validity is true and now carries the number"
+          % (100 * worst))
+
+    # TMP-1 ------------------------------------------------------------------
+    dT = 40.0
+    code = math.sqrt(T.k_correct(1.0, 15.0 + dT, 15.0)) - 1.0
+    physics = 0.5 * (-2.4e-4 * dT)          # dE/E for steel, f ~ sqrt(E)
+    check("TMP-1", "the mechanical correction is ~20x small and inverted",
+          code * physics < 0 and abs(physics / code) > 10,
+          "at dT=+40 C this module gives df/f = %+.4f%%, the modulus term "
+          "gives %+.3f%% -- %.0fx larger, opposite sign. k_correct's own "
+          "docstring says 'dominant effect is length'."
+          % (100 * code, 100 * physics, abs(physics / code)))
+
+    # TMP-2 ------------------------------------------------------------------
+    refs = {}
+    for f in (T.thermal_expand, T.r_correct, T.c_correct, T.l_correct,
+              T.k_correct, T.helmholtz_f_correct, T.acoustic_f_correct,
+              T.normalize_measurement):
+        p = inspect.signature(f).parameters.get("ref_temp_c")
+        if p is not None:
+            refs.setdefault(p.default, []).append(f.__name__)
+    bias = 0.00393 * 5.0
+    check("TMP-2", "two reference temperatures in one module, and a crossing",
+          set(refs) == {20.0, 15.0},
+          "%s default to 20.0 C, %s to 15.0 C; normalize_measurement passes "
+          "its 15.0 into r_correct, whose TCR is the copper value at 20 C -- "
+          "a %.1f%% bias on every electrical normalisation"
+          % (len(refs[20.0]), len(refs[15.0]), 100 * bias))
+
+    # TMP-3 ------------------------------------------------------------------
+    a = T.acoustic_f_correct(1000.0, -40.0)
+    h = T.helmholtz_f_correct(1000.0, -40.0)
+    check("TMP-3", "two corrections for one physics, docstrings swapped",
+          abs(a - h) > 1.0 and "linear approximation" in
+          T.helmholtz_f_correct.__doc__,
+          "1000 Hz at -40 C -> %.2f (linear c ratio) vs %.2f (exact sqrt), "
+          "%.2f%% apart; the exact one is the one whose docstring says "
+          "'simplified linear approximation'" % (a, h, 100 * abs(a - h) / h))
+
+    # TMP-4 ------------------------------------------------------------------
+    err100 = T.mu_water(100.0) / 2.82e-4 - 1.0
+    check("TMP-4", "mu_water has no stated range and freezes below 0 C",
+          abs(err100) > 0.4 and T.mu_water(-40.0) == T.mu_water(-1.0),
+          "%.0f%% low at 100 C against tabulated 2.82e-4 Pa*s, and every "
+          "T < 0 returns the same 1.79e-3 -- the 0 C value, for water that "
+          "is ice" % (100 * err100))
+
+
+def trend_findings():
+    print()
+    print("TREND DETECTION  (geometric_intelligence/network/trend.py)")
+    from geometric_intelligence.network import trend as TR
+    from pathlib import Path
+    fix = Path(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..",
+                            "tests", "fixtures",
+                            "measurements_drift_fixture.json"))
+
+    # the headline ------------------------------------------------------------
+    res = TR.detect_all_trends(fix)
+    drifting = [r for r in res.values() if r.verdict_trend == "failed"]
+    noisy = [r for r in res.values() if r.verdict_trend == "noisy"]
+    check("TRD-0", "the only failure prediction belongs to the stable channel",
+          all(r.predicted_fail_days is None for r in drifting)
+          and any(r.predicted_fail_days for r in noisy),
+          "%d failing scopes report fail_in=None; the one with a number is "
+          "%s at %.1f days from an R2 of %.3f"
+          % (len(drifting), noisy[0].scope.split("::")[-1],
+             noisy[0].predicted_fail_days, noisy[0].r_squared))
+
+    # TRD-1 -------------------------------------------------------------------
+    down = [{"ts": i * 86400, "measured": 10.0 - 0.5 * i,
+             "predicted": 10.0, "tol_frac": 0.05} for i in range(20)]
+    tr = TR.analyze_scope_trend("down", down)
+    check("TRD-1", "the fail band is one-sided",
+          tr.verdict_trend != "failed" and tr.current_value < 10.0 * 0.9,
+          "a value fallen to %.2f against a claim of 10.0 +/- 5%% is reported "
+          "'%s'; fail_threshold = predicted*(1 + 2*tol) = %.2f is an upper "
+          "edge only" % (tr.current_value, tr.verdict_trend, 10.0 * 1.1))
+
+    # TRD-2 -------------------------------------------------------------------
+    above = [{"ts": i * 86400, "measured": 30.0 - 1.0 * i,
+              "predicted": 10.0, "tol_frac": 0.05} for i in range(10)]
+    tr = TR.analyze_scope_trend("above", above)
+    check("TRD-2", "the negative-slope branch counts days to STOP failing",
+          tr.verdict_trend == "failed" and tr.predicted_fail_days is not None,
+          "a value falling from 30.0, failing throughout, reports "
+          "predicted_fail_days = %.1f -- the time to re-enter the band"
+          % tr.predicted_fail_days)
+
+    # TRD-3 -------------------------------------------------------------------
+    pair = [{"ts": 0, "measured": 10.0, "predicted": 10.0, "tol_frac": 0.05},
+            {"ts": 86400, "measured": 10.0001, "predicted": 10.0,
+             "tol_frac": 0.05}]
+    tr = TR.analyze_scope_trend("pair", pair)
+    check("TRD-3", "two points always give R2 = 1.0 and a trend verdict",
+          tr.r_squared == 1.0 and tr.verdict_trend in ("drifting",
+                                                       "accelerating"),
+          "readings 0.0001 apart classify as '%s' at R2 %.3f; the residual "
+          "sum of squares is zero for any two points"
+          % (tr.verdict_trend, tr.r_squared))
+
+    # TRD-4 -------------------------------------------------------------------
+    import inspect as _insp
+    _src = _insp.getsource(TR.analyze_scope_trend)
+    check("TRD-4", "the stable threshold has units",
+          "abs(slope) < 1e-6" in _src and "/ pred" not in _src
+          and "relative" not in _src,
+          "abs(slope) < 1e-6 is compared against ohms/day, hertz/day and "
+          "kelvin/day alike: 1e-5/day is %.3f%% per year of a 10-ohm claim "
+          "and %.0f%% per year of a 0.001-unit one"
+          % (100 * 1e-5 * 365 / 10.0, 100 * 1e-5 * 365 / 0.001))
+
+    # TRD-5 / TRD-6 -----------------------------------------------------------
+    tm = TR.cross_domain_correlation(fix, "thermal", "mechanical")
+    default = TR.cross_domain_correlation(fix)
+    import json as _json
+    raw = _json.loads(fix.read_text())
+    for m in raw:
+        if m["scope"].startswith("fab::thermal"):
+            m["ts"] += 0.001
+    jit = Path("/tmp/_trd_jitter.json")
+    jit.write_text(_json.dumps(raw))
+    check("TRD-5", "any two monotone drifts correlate at |r| ~ 1",
+          bool(tm) and abs(tm[0]["correlation"]) > 0.999,
+          "thermal x mechanical -- two straight ramps with no stated physical "
+          "link -- give r = %.4f over %d points, against a gate of 0.6 with "
+          "no null" % (tm[0]["correlation"], tm[0]["n_common"]))
+    check("TRD-6", "and the defaults never compare that pair",
+          not default and not TR.cross_domain_correlation(jit, "thermal",
+                                                          "mechanical"),
+          "defaults are electrical x thermal, which returns nothing; and "
+          "shifting one channel's timestamps by 1 ms drops the overlap to "
+          "zero, because it is an exact float set intersection")
+
+    # TRD-7 -------------------------------------------------------------------
+    check("TRD-7", "LEDGER is a relative path",
+          not Path(TR.LEDGER).is_absolute(),
+          "LEDGER = %r, like the 24 sites in bridge.py and fabrication/"
+          % str(TR.LEDGER))
+
 def main():
     print("=" * 72)
-    print("GEOMETRIC INTELLIGENCE / NETWORK  --  GI-1..16, GR-1..6, GB-1..5")
+    print("GEOMETRIC INTELLIGENCE / NETWORK  --  GI-1..16, GR-1..6, GB-1..5, TMP-1..5, TRD-0..7")
     print("  Each line asserts what the audit headers record. Fixing an open")
     print("  defect is EXPECTED to fail here; amend the finding.")
     print("=" * 72)
@@ -435,6 +588,8 @@ def main():
     resonance_findings()
     core_findings()
     bridge_findings()
+    temperature_findings()
+    trend_findings()
     print()
     if FAILURES:
         print("NO LONGER HOLDS: %s" % ", ".join(FAILURES))

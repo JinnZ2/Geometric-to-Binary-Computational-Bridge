@@ -640,6 +640,135 @@
     "needs_null": false,
     "material": null
    }
+  },
+  {
+   "id": "TMP-1a",
+   "title": "A stiffness-temperature correction with the right term",
+   "state": "OPEN",
+   "kind": "DERIVATION",
+   "statement": "fabrication/temperature.py's k_correct builds a stiffness correction from thermal expansion alone, on the stated reasoning that 'E changes slightly with temperature; dominant effect is length'. For steel the two coefficients are alpha = 12e-6/C and dE/E ~ -2.4e-4/C, so the reasoning is inverted and the correction is ~20x too small with the wrong sign.",
+   "why_open": "Writing dE/E in is a line of code. What is missing is the coefficient per material, and a statement of what mode the resonance IS -- a cantilever, a plate and a Helmholtz cavity scale differently with E and with dimension, and normalize_measurement currently applies one formula to 'mechanical / resonance_freq_Hz' whatever the geometry.",
+   "would_count": [
+    "A dE/dT table alongside the existing ALPHA table, with sources",
+    "A mode factor, or a refusal to correct when the mode is unstated",
+    "A bench check that can see it: 0.024% is invisible against +/-8%, so the test has to be a coefficient comparison, not a measurement"
+   ],
+   "prior_attempts": [
+    {
+     "what": "k_correct = k*(1 + alpha*dT)",
+     "why_it_failed": "the modulus term is 20x larger and opposite in sign; the correction is invisible in any test narrow enough to run"
+    }
+   ],
+   "leads": [
+    "Steel E drops ~2-3e-4 per C over -50..+200 C; aluminium ~5e-4",
+    "f ~ sqrt(E) for most flexural modes, so df/f = 0.5 dE/E"
+   ],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TMP-2a",
+   "title": "One reference temperature",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "fabrication/temperature.py has five functions defaulting ref_temp_c to 20 C and three to 15 C, and normalize_measurement passes its 15 C into r_correct, whose TCR is the copper value specified at 20 C -- a 2.0% bias on every electrical normalisation at the default.",
+   "why_open": "Picking one is a two-line change; picking WHICH is not. 15 C is the acoustic convention baked into C_AIR = 343.0 and every existing acoustic claim in the ledger; 20 C is the convention every component tempco is specified at. Moving either re-bases claims already recorded.",
+   "would_count": [
+    "A single module-level REF_TEMP_C with a stated reason",
+    "A pass over existing ledger claims saying which were made at which reference, or a statement that none were",
+    "Each tempco carrying the temperature it is specified at, so a mismatch is detectable rather than silent"
+   ],
+   "prior_attempts": [
+    {
+     "what": "per-function defaults of 15 and 20",
+     "why_it_failed": "they cross inside normalize_measurement and nothing reports the crossing"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-1a",
+   "title": "A two-sided drift detector",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "trend.py computes fail_threshold as predicted*(1 + 2*tol_frac) -- an upper edge only. A value drifting DOWN out of its band is never classified failed, and when a value is already above the threshold and falling, predicted_fail_days reports the time to come back inside.",
+   "why_open": "The repair is one band and one sign convention, and it is held only by needing to decide what 'time to failure' means for a value already outside: time to the far edge, or nothing at all. Both are defensible and they read very differently in a report.",
+   "would_count": [
+    "Both edges, with the crossing timed against whichever the slope approaches",
+    "A stated answer for an already-failed value",
+    "The measured cases passing: a 10.0-ohm claim fallen to 0.5 reports failed, and a value falling from 30.0 toward a 10.0 claim does not report a fail date"
+   ],
+   "prior_attempts": [
+    {
+     "what": "predicted*(1 + 2*tol) with a slope-sign branch",
+     "why_it_failed": "one edge; and the negative branch answers a different question in a field named for this one"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-3a",
+   "title": "Calibrating the trend verdicts",
+   "state": "OPEN",
+   "kind": "BENCH",
+   "statement": "trend.py classifies on r2 > 0.5 and r2 > 0.7 with no minimum sample count, so two points give R^2 = 1.0 by construction and always read as a trend; and the stable gate abs(slope) < 1e-6 is an absolute number compared against ohms, hertz and kelvin per day alike.",
+   "why_open": "Both thresholds need what FCL-5/6 needed: a null. Feed the detector sequences with no drift and count how often each verdict fires, at each sample count. Nobody has run that, and until it is run the verdicts are labels rather than rates.",
+   "would_count": [
+    "A false-alarm rate per verdict against a no-drift null, as a function of n",
+    "A minimum sample count derived from it, rather than chosen",
+    "A relative slope gate, so the stable verdict compares across domains",
+    "Power: the drift the detector reliably catches at n = 10, 20, 50"
+   ],
+   "prior_attempts": [
+    {
+     "what": "r2 > 0.5 / 0.7 and abs(slope) < 1e-6",
+     "why_it_failed": "neither has been run against data where the answer is known to be no"
+    }
+   ],
+   "leads": [
+    "The exact binomial tail and BH correction from field/field_claim_loop.py apply directly once the pairs are counted",
+    "R^2 has a known null distribution for a line through n iid points"
+   ],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-5a",
+   "title": "Cross-domain correlation that is not a statement about time",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "cross_domain_correlation gates on |r| > 0.6 with no null. Two monotone drifts correlate at ~1 whatever their cause -- measured at exactly 1.0000 between the fixture's thermal and mechanical ramps. Separately the overlap is an exact float-timestamp intersection, so a millisecond of jitter drops it to zero, and the defaults compare electrical against thermal, which is the one pair in the fixture that does not correlate.",
+   "why_open": "Detrending is the standard first move and it changes what the function answers -- from 'do these move together' to 'do their residuals move together', which is the interesting question and a different one. Timestamp binning needs a tolerance nobody has stated.",
+   "would_count": [
+    "Residual correlation after removing each series' own trend",
+    "A permutation null, and a correction over the pairs tested",
+    "Timestamp binning at a stated tolerance",
+    "All domain pairs iterated, not a default pair",
+    "The thermal x mechanical pair in the fixture reporting NO residual correlation, since both are noiseless ramps"
+   ],
+   "prior_attempts": [
+    {
+     "what": "Pearson r on raw series, |r| > 0.6, exact timestamp match",
+     "why_it_failed": "r = 1.0000 on two unrelated ramps; and returns nothing at all on any real log"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
   }
  ]
 }
