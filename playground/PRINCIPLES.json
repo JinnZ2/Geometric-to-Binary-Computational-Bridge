@@ -43,6 +43,11 @@
      "where": "bridges/glyph_state_encoder.py",
      "what": "sub_glyphs is decided by _glyph_related(primary, glyph) and never reads the measurement, so 'secondary states' is a constant lookup",
      "claim": "GLY-3"
+    },
+    {
+     "where": "geometric_intelligence/network/integrity.py",
+     "what": "predict_from seeds from net.nodes[source].value, so no measurement changes any prediction -- a brace measured 400 mm against a 600 mm design still predicts its neighbour at 970.820 mm",
+     "claim": "GI-1"
     }
    ],
    "cost_when_missed": "A suite can be 79% dead and still look green. tests/test_silicon_modules.py was."
@@ -106,6 +111,16 @@
     {
      "where": "playground/candidates/lomb_scargle_gls.py",
      "what": "TOL_FRAC = 0.01 is not derived -- it is what the estimator happened to achieve, so the tolerance check is partly circular. Recorded in that candidate's own archive entry."
+    },
+    {
+     "where": "geometric_intelligence/network/integrity.py",
+     "what": "check() keeps the minimum-error prediction over all sources, so a design contradiction is resolved in the measurement's favour and reported trusted at residual 0.000%",
+     "claim": "GI-3"
+    },
+    {
+     "where": "geometric_intelligence/network/resonance.py",
+     "what": "the power-law baseline is fitted over every populated band including the peaks it is then used to judge",
+     "claim": "GR-3"
     }
    ],
    "cost_when_missed": "A test that cannot fail, wearing the shape of one that can."
@@ -179,6 +194,11 @@
     {
      "where": "Silicon/silicon_check.py",
      "what": "a thermal noise floor quoted without the bandwidth it was integrated over"
+    },
+    {
+     "where": "geometric_intelligence/network/resonance.py",
+     "what": "detect_injection flags 15.7% of bins on two draws of the same noise process; no null, no multiplicity correction",
+     "claim": "GR-5"
     }
    ],
    "cost_when_missed": "The folder's own notes said 'too permissive'. It was 41%."
@@ -234,6 +254,11 @@
      "where": "field/field_claim_loop.py",
      "what": "the conservation ledger's reservoir, still unstated -- which is why it was not guessed",
      "claim": "FCL-5e"
+    },
+    {
+     "where": "geometric_intelligence/network/FIELD_GUIDE.md",
+     "what": "the contraction table gave percentages with no reference temperature; back-solving five rows found three different ones",
+     "claim": "GI-7"
     }
    ],
    "cost_when_missed": "A threshold that cannot be met or missed."
@@ -278,6 +303,16 @@
      "where": "bridges/non_local_sensor.py",
      "what": "the spec path resolved into an unmounted sibling repo, so the class could not be constructed anywhere in this tree",
      "claim": "NLS-1"
+    },
+    {
+     "where": "geometric_intelligence/network/integrity.py",
+     "what": "the INTEGRITY_THRESHOLD clause in `passes` tests a quantity bounded by 1.0 against 1.809; the branch cannot be entered",
+     "claim": "GI-2"
+    },
+    {
+     "where": "geometric_intelligence/network/resonance.py",
+     "what": "band edges overshoot f_max then append it, leaving a reversed final interval no frequency can enter",
+     "claim": "GR-1"
     }
    ],
    "cost_when_missed": "A suite 79% dead that still looks like it ran."

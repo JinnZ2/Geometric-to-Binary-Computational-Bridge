@@ -363,6 +363,114 @@
    "source": "derived:field/falsifiers_field_loop.py"
   },
   {
+   "id": "GI-1",
+   "family": "GI",
+   "statement": "IntegrityMonitor predictions are seeded from the design value, not the measurement, so a measured error propagates nowhere",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The module answers 'is this part where the drawing says', which is a real question and the one it can be trusted for. What it does NOT answer, and reads as if it does, is 'given this part came out wrong, is the next one still compatible'. Naming which of the two a tool answers is most of the value of auditing it, and full_report now carries predictions_use_measurements so a caller cannot assume the second.",
+    "killed": "the field guide's stated purpose of catching a mis-cut part before the next one is committed",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GI-2",
+   "family": "GI",
+   "statement": "the INTEGRITY_THRESHOLD clause in full_report is unsatisfiable: integrity is a product of two fractions so is at most 1.0, and the clause tests it against 1.809",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "phi^2 + 1 = 3.618 is a correct constant that does no work anywhere in the module, so removing it costs nothing and keeping it costs a reader's trust. The general form: a threshold and the quantity it gates must be shown to share a range before the comparison means anything -- one line, and it is the same check that killed BLOCKAGE in bridges/.",
+    "killed": "phi^2 + 1 as a coherence bound on anything this module computes",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GI-3",
+   "family": "GI",
+   "statement": "check() keeps the minimum-error prediction over all sources, so a design with two routes of different product is resolved in the measurement's favour and reported trusted",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The redundancy is free evidence and is being spent to hide a contradiction rather than to find one: two routes disagreeing IS the finding, and reporting the spread instead of the minimum turns the same computation into a design audit. On a path-consistent design the O(N^2) walk returns one value from every source, so nothing is lost by changing it.",
+    "killed": "a trusted verdict as evidence the design is self-consistent",
+    "screen": {
+     "name": "report-the-spread-not-the-best-fit",
+     "rule": "When a check has several independent routes to the same quantity, report their spread. Keeping the closest one to the measurement converts disagreement into agreement and destroys the evidence.",
+     "mechanised_by": null,
+     "applies_when": "any verification with more than one path from premises to a predicted value"
+    }
+   }
+  },
+  {
+   "id": "GI-4",
+   "family": "GI",
+   "statement": "reconstruct() implements neither the averaging nor the path weighting its docstring promises; the first edge to reach a node wins, so insertion order decides",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The docstring is a usable specification of what the function should do -- confidence-weighted average over trusted paths -- and it is worth keeping as the target rather than deleting to match the code. The measurable form of the defect is cheap: build the same graph twice with the edges added in each order and compare, which is a general test for any first-writer-wins propagation.",
+    "killed": "a reconstructed value as better than a single-path estimate"
+   }
+  },
+  {
+   "id": "GI-5",
+   "family": "GI",
+   "statement": "IntegrityReport.reconstructed is declared on the dataclass and never assigned, so it is None on every report the module produces",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A declared-and-never-written field is found by one loop over the constructor's outputs, and it is worth looking for because it usually means a second code path was planned and the first one shipped. Here full_report fills the same value from a separate dict, so the two are one field apart from being a duplicate authority."
+   }
+  },
+  {
+   "id": "GI-6",
+   "family": "GI",
+   "statement": "reconstruct() returns {} from a single measurement, and a forward-only chain reports its first node untrusted on perfect measurements",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The rule is simple and belongs in the field guide rather than the code: a node nothing points at cannot be predicted, so build every network with edges in both directions, and reconstruction needs two surviving measurements that agree, not one. The drop's own timber-frame example had forward edges only and flagged a correctly cut brace; the README's nautilus example added both directions and did not.",
+    "killed": "the documented one-measurement emergency reconstruction"
+   }
+  },
+  {
+   "id": "GI-7",
+   "family": "GI",
+   "statement": "the field guide's speed-of-sound correction was 6%; the true shift from +20 C to -40 C is 10.6%",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:tests/test_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "c(T) = 331.3 + 0.606*T is within 0.32% of the exact sqrt(1+T/273.15) form at -40 C and 0.52% at -50 C, so the linear approximation is fine over the stated range and only the arithmetic downstream of it was wrong. 343.0 m/s hardcoded across fabrication/ is the +15 C value. pipe_modes, box_modes, cylinder_modes and ka_check already accept c=, so this is a threading job from a recorded temperature, not a physics change.",
+    "killed": "the 6% figure a reader would have compensated by"
+   }
+  },
+  {
    "id": "GIES-1",
    "family": "GIES",
    "statement": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant",
@@ -551,6 +659,87 @@
      "mechanised_by": null,
      "applies_when": "a module with a __main__ demo and no test that imports it"
     }
+   }
+  },
+  {
+   "id": "GR-1",
+   "family": "GR",
+   "statement": "the phi band edges are not monotonic: the loop overshoots f_max and then appends it, so the last interval is reversed and empty",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Two defects for the price of one inspection: a band that no input can enter, and a band above it running past the f_max the caller asked for, so components between f_max and the overshoot are counted and everything above the overshoot is dropped silently. Any geometric-progression edge builder has this shape -- the exit test fires after the step, not before.",
+    "killed": "f_max as the stated upper limit of the analysis",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GR-2",
+   "family": "GR",
+   "statement": "bands_per_octave is stored and never read; every value gives byte-identical band edges",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "An argument that looks like the resolution control and is not. Found by the cheapest possible test -- construct with two extreme values and compare the derived state -- which is worth running against every constructor parameter that is supposed to change something.",
+    "killed": "bands_per_octave as a tuning knob",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GR-3",
+   "family": "GR",
+   "statement": "the power-law fit is built from every populated band including the peaks it is then used to judge, contradicting its own comment",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The bias has a direction worth stating: including anomalies in the baseline raises it, so the method misses anomalies, and it misses more of them the more of the spectrum is anomalous -- weakest exactly when there is most to find. A robust fit or a leave-one-out baseline fixes it; the shape is P-SELF-SUPPLIED-FALSIFIER in a spectral estimator."
+   }
+  },
+  {
+   "id": "GR-5",
+   "family": "GR",
+   "statement": "detect_injection flags 15.7% of bins when both series are independent draws of the same noise process",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "For iid exponential numerator and denominator the analytic false-alarm rate is 1/(1+t), which at t = 2.3156 is 30.2% -- so the measured 15.7% on Rayleigh amplitudes is the expected order and the gate is behaving exactly as its arithmetic says. The fix is the FCL-5/6 pair the field loop already needed: a permutation null and a correction over the number of bins tested. injection_score cannot be read as a rate until both exist.",
+    "killed": "injection_score as a rate of anything",
+    "screen": {
+     "name": "measure-the-null",
+     "rule": "Run the gate on data where the answer is known to be no, and count. A threshold with no measured false-alarm rate is not calibrated in either direction.",
+     "mechanised_by": null,
+     "applies_when": "any detector emitting a pass/fail or a score read as a rate"
+    }
+   }
+  },
+  {
+   "id": "GR-6",
+   "family": "GR",
+   "statement": "detect_injection returns a dict with no injections key when called without a baseline, so the documented fallback raises KeyError in the caller",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The fallback itself is intended and documented; only the silent shape change is not. It fails for exactly the callers who captured no baseline -- the cold-workshop case the field guide is written for -- which is the general lesson: a fallback path is used by the least-equipped caller, so it needs the tightest contract, not the loosest."
    }
   },
   {
