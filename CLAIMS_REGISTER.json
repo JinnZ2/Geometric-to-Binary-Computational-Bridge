@@ -363,6 +363,77 @@
    "source": "derived:field/falsifiers_field_loop.py"
   },
   {
+   "id": "GB-1",
+   "family": "GB",
+   "statement": "verify_edge_measurement computes delta_pct = 100*(measured/pred - 1) and raises ZeroDivisionError whenever the claim's predicted value is zero",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Zero is reachable two ways that both occur in the shipped demo's own domain: a rotate edge declares an angle and 0 is legal, and an acyclic network's integrity claim is exactly 0.0. A relative error is undefined at zero for every claim type, not just this one -- the ledger's other domains compare against nonzero physical rates, which is why the pattern survived there.",
+    "killed": "verify_edge_measurement on rotate edges and on integrity claims"
+   }
+  },
+  {
+   "id": "GB-2",
+   "family": "GB",
+   "statement": "an acyclic design records an integrity claim of value 0.0, so a correct chain scores worst and writes the value GB-1 crashes on",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Not a bug in audit(): a network with no cycles genuinely has nothing to be consistent about, and 0.0 is the honest answer to a question that should not have been asked. The bridge should decline to write an integrity claim for an acyclic network rather than write a zero, because the ledger cannot tell 'no evidence' from 'failed'. The demo's own DEMO 5 does exactly this.",
+    "killed": "the integrity claim as meaningful for a network without cycles",
+    "screen": {
+     "name": "distinguish-no-evidence-from-failure",
+     "rule": "A score of zero for 'nothing to measure' and zero for 'measured and failed' are the same number in a ledger. Emit no record, or a distinct state.",
+     "mechanised_by": null,
+     "applies_when": "any scoring function whose domain includes inputs it cannot score"
+    }
+   }
+  },
+  {
+   "id": "GB-3",
+   "family": "GB",
+   "statement": "the integrity claim's failure text describes a threshold test while the record encodes a two-sided band around the value",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A claim record carries both what a verifier will compute and what a human will read, and here they are different tests. The text also cites 3.618, which GI-12 shows that score cannot reach. Cheap general check: read the failure string against the tol_frac in the same record.",
+    "killed": "the failure text as a description of the encoded test"
+   }
+  },
+  {
+   "id": "GB-4",
+   "family": "GB",
+   "statement": "three unsourced tolerances (0.05 edge, phi^-9 cycle, 0.10 integrity) and a drift band of (1+t)^2 rather than a doubled tolerance",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "UNITS",
+    "keep": "The drift band is a real design choice and a defensible one -- it is multiplicative, which suits a ratio claim -- but it reads as 2x tolerance and diverges from it as t grows: at t = 0.5 it is [0.25, 2.25] rather than [0, 2]. Naming it in the docstring costs one line. The three tolerances need sources rather than defaults before any verdict from them means anything.",
+    "killed": "the three defaults as calibrated tolerances"
+   }
+  },
+  {
+   "id": "GB-5",
+   "family": "GB",
+   "statement": "LEDGER is a relative path and append_geo_claims does an unlocked read-modify-write, matching the 23 sites in fabrication/",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The relative path is the sharper half and it is not in the original analysis of fabrication/: the ledger written depends on the working directory, so running from the repo root and from fabrication/ produces two ledgers that do not know about each other. Fixing it in one of 24 places makes the split worse, so it stays until all 24 move together. Open problem GI-10.",
+    "killed": "the ledger as a single authority regardless of where a tool is run"
+   }
+  },
+  {
    "id": "GI-1",
    "family": "GI",
    "statement": "IntegrityMonitor predictions are seeded from the design value, not the measurement, so a measured error propagates nowhere",
@@ -378,6 +449,108 @@
      "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
      "mechanised_by": null,
      "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GI-11",
+   "family": "GI",
+   "statement": "cycle closure is evaluated at the single point x = 1, so any affine cycle map with a + b = 1 is reported consistent without being the identity",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The general rule is one line and it transfers: an affine map is two numbers, so testing it at one point cannot determine it. Either evaluate at two points or compare (a, b) to (1, 0) directly -- the code already computes both in _compose_transforms and then throws b away into a single scalar. Pure-scale cycles have b = 0 and are unaffected, which is exactly why every demo and every shipped test misses it: they build only scale edges, and `compose` is the kind that breaks it.",
+    "killed": "closure error as evidence that a cycle composes to the identity",
+    "screen": {
+     "name": "probe-at-two-points",
+     "rule": "A test that evaluates a transform at one input cannot tell it from any other transform with the same fixed point. Evaluate at two, or compare the transform's parameters to identity directly.",
+     "mechanised_by": null,
+     "applies_when": "any check that validates a map by running it on a single test value"
+    }
+   }
+  },
+  {
+   "id": "GI-12",
+   "family": "GI",
+   "statement": "integrity_score = base_score * (1 + mean_edge_weight), where weight is author-declared and only ever adds: zero confidence still scores the full consistency fraction",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "UNITS",
+    "keep": "Two quantities are being multiplied that answer different questions -- how much of the network closes, and how sure the author was -- and the product has the units of neither. Measured: weights alone move the score across 1.2298-1.7248 with the geometry untouched, and declaring weight 0.0 costs nothing because the term is (1 + w) rather than w. Reporting the two separately costs nothing and makes both readable. The same arithmetic explains why INTEGRITY_THRESHOLD is unreachable: the ceiling at w <= 1 is 2.0.",
+    "killed": "integrity_score as a single comparable number",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GI-13",
+   "family": "GI",
+   "statement": "correct() reaches cycle consistency by splitting the error across the cycle rather than restoring the wrong edge",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The distinction worth keeping: making a model self-consistent and making it correct are different operations, and only the first is decidable from the model alone. Measured on the drop's own injected defect -- an edge 23.6% high converges to +11.9% with its inverse partner at -9.5%, and audit() then reports 5/5 consistent. Any correction that only sees the residual has this property; restoring the right value needs an external reference, which is what the measurements are for.",
+    "killed": "a post-correct() audit as evidence the design is right",
+    "screen": {
+     "name": "consistency-is-not-correctness",
+     "rule": "A procedure that minimises internal disagreement can always reach zero by moving everything. Check what it moved, not just that it converged.",
+     "mechanised_by": null,
+     "applies_when": "any iterative correction driven by a self-consistency residual"
+    }
+   }
+  },
+  {
+   "id": "GI-14",
+   "family": "GI",
+   "statement": "_inverse_apply returns float('inf') on a zero factor while its only caller guards with except (ZeroDivisionError, OverflowError)",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A sentinel return and an exception guard written by two authors for the same failure, neither aware of the other, so the guard never fires and inf enters a reconstruction as a value. Found for free by the interim core.py reconstruction, which RAISED here -- guessing the safer behaviour is how you miss a bug, and that is the reusable lesson about reconstructing a missing module.",
+    "killed": "the except clause in reconstruct() as protection"
+   }
+  },
+  {
+   "id": "GI-15",
+   "family": "GI",
+   "statement": "hash() is documented as a hash of network topology and relations and is also a hash of insertion order",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "to_dict() lists nodes and edges in insertion order, so the same network built two ways hashes differently -- which matters because the hash is what a ledger entry would use to say 'this is the artifact I predicted'. Sorting by node id in to_dict() fixes it. The shipped test hashes one object twice, so it asserts the property that cannot fail and not the one that is false.",
+    "killed": "hash() as an identity for a network across two constructions"
+   }
+  },
+  {
+   "id": "GI-16",
+   "family": "GI",
+   "statement": "three of the drop's 20 tests cannot fail: the audit bounds hold by construction, the hash test reuses one object, and the correct() fixture is already consistent",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:tests/test_gi_network.py",
+   "salvage": {
+    "cause": "UNFALSIFIABLE",
+    "keep": "The fixture is the sharp one: 2.5 x 0.4 = 1.0 exactly, so a pair commented 'slightly wrong' is exactly right, and correct() -- the function with two of this folder's findings in it -- is never run on an inconsistent network by anything in the suite. Checking a fixture's arithmetic before trusting what a test covers is two lines and it is where the coverage actually went. The suite is kept and vendored as evidence rather than deleted.",
+    "killed": "the 20-test suite as validation of audit(), hash() or correct()",
+    "screen": {
+     "name": "check-the-fixture-arithmetic",
+     "rule": "Before believing a test covers a case, evaluate its fixture. A fixture meant to be wrong and accidentally right silently removes the test.",
+     "mechanised_by": null,
+     "applies_when": "any test whose fixture is a hand-written constant meant to violate a condition"
     }
    }
   },
@@ -468,6 +641,18 @@
     "cause": "MATH_ERROR",
     "keep": "c(T) = 331.3 + 0.606*T is within 0.32% of the exact sqrt(1+T/273.15) form at -40 C and 0.52% at -50 C, so the linear approximation is fine over the stated range and only the arithmetic downstream of it was wrong. 343.0 m/s hardcoded across fabrication/ is the +15 C value. pipe_modes, box_modes, cylinder_modes and ka_check already accept c=, so this is a threading job from a recorded temperature, not a physics change.",
     "killed": "the 6% figure a reader would have compensated by"
+   }
+  },
+  {
+   "id": "GI-8",
+   "family": "GI",
+   "statement": "core.audit()'s integrity_score responds to the geometry: randomising every edge factor drops it from 2.000 to a mean of 0.014 over 200 draws",
+   "status": "live",
+   "names": "mechanism",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The one positive result in this folder, and worth recording as one. The null harness is cheap here because a geometric network has an obvious structure-destroying perturbation -- randomise the edge factors, keep the graph and the weights. Running it first also bounds what the other findings can mean: audit() is measuring something real and measuring it wrongly, which is a different repair from measuring nothing."
    }
   },
   {

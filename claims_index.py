@@ -282,6 +282,7 @@ FAMILY_HOME = {
     "GIES": "GEIS", "FCL": "field",
     "GLY": "bridges", "NLS": "bridges",
     "GI": "geometric_intelligence", "GR": "geometric_intelligence",
+    "GB": "geometric_intelligence",
     "VAC": "experiments/silicon_speculative",
     "ATT": "experiments/silicon_speculative",
     "TOP": "experiments/silicon_speculative",

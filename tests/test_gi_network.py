@@ -1,4 +1,4 @@
-"""GI-1..6, GR-1..6: geometric_intelligence/network.
+"""GI-1..16, GR-1..6, GB-1..5: geometric_intelligence/network.
 
 Stdlib only. Most assertions here pin a DEFECT in place. If someone fixes one,
 the test fails, and the fix is to amend the audit header in the module so it
@@ -9,10 +9,12 @@ Two things this file also guards that are not findings:
   * The subpackage must stay a subpackage. `geometric_intelligence/__init__.py`
     is empty on purpose and four other suites depend on that; the drop assumed
     it could put `from .core import ...` there.
-  * `core.py` was reconstructed, not supplied. Its two underdetermined methods
-    must keep refusing rather than acquiring a plausible implementation.
+  * The drop's own 20-test suite is vendored under network/tests/ and is run
+    from here. It is evidence, not coverage: three of its tests cannot fail,
+    and TestGi16TheDropsOwnTests asserts exactly that.
 """
 
+import json
 import math
 import os
 import sys
@@ -76,49 +78,386 @@ class TestSubpackageBoundary(unittest.TestCase):
                              txt, msg=doc)
 
 
-class TestCoreIsReconstructed(unittest.TestCase):
+def nautilus(weight=1.0, n_ch=6):
+    net = GeometricNetwork()
+    for i in range(n_ch):
+        net.add_node("c%d" % i, PHI ** i)
+    for i in range(n_ch - 1):
+        net.add_edge("c%d" % i, "c%d" % (i + 1), "scale", PHI, weight=weight)
+        net.add_edge("c%d" % (i + 1), "c%d" % i, "scale", PHI_INV,
+                     weight=weight)
+    return net
 
-    def test_audit_refuses_and_names_the_open_problem(self):
-        with self.assertRaises(NotImplementedError) as ctx:
-            GeometricNetwork().audit()
-        self.assertIn("GI-8", str(ctx.exception))
 
-    def test_correct_refuses(self):
-        with self.assertRaises(NotImplementedError):
-            GeometricNetwork().correct()
+def corrupted():
+    net = nautilus()
+    for e in net.edges:
+        if e.source == "c2" and e.target == "c3":
+            e.factor = 2.0
+    return net
 
-    def test_the_provenance_note_says_it_was_not_supplied(self):
+
+class TestCoreEdgeSemantics(unittest.TestCase):
+
+    def test_the_three_relation_types(self):
+        net = GeometricNetwork()
+        for rel, factor, offset, expect in (("scale", 2.0, 0.0, 10.0),
+                                            ("rotate", 3.0, 0.0, 8.0),
+                                            ("compose", 2.0, 3.0, 13.0)):
+            e = GeoEdge("A", "B", rel, factor, offset)
+            self.assertAlmostEqual(net._apply(e, 5.0), expect, msg=rel)
+
+    def test_each_relation_inverts(self):
+        net = GeometricNetwork()
+        for rel, factor, offset in (("scale", 2.0, 0.0), ("rotate", 3.0, 0.0),
+                                    ("compose", 2.0, 3.0)):
+            e = GeoEdge("A", "B", rel, factor, offset)
+            self.assertAlmostEqual(net._inverse_apply(e, net._apply(e, 5.0)),
+                                   5.0, msg=rel)
+
+    def test_add_edge_creates_missing_nodes(self):
+        net = GeometricNetwork()
+        net.add_edge("a", "b", "scale", 2.0)
+        self.assertEqual(sorted(net.nodes), ["a", "b"])
+
+    def test_compose_transforms_chains_affine_maps(self):
+        net = GeometricNetwork()
+        a, b = net._compose_transforms([GeoEdge("A", "B", "scale", 2.0),
+                                        GeoEdge("B", "C", "scale", 3.0)])
+        self.assertEqual((a, b), (6.0, 0.0))
+        a, b = net._compose_transforms([GeoEdge("A", "B", "compose", 2.0, 1.0),
+                                        GeoEdge("B", "C", "compose", 3.0, 1.0)])
+        self.assertEqual((a, b), (6.0, 4.0))
+
+
+class TestGi8NullHarness(unittest.TestCase):
+    """The one positive result in the core audit."""
+
+    def test_the_score_collapses_when_the_geometry_is_destroyed(self):
+        import random
+        rng = random.Random(0)
+        real = nautilus().audit()["integrity_score"]
+        vals = []
+        for _ in range(120):
+            net = nautilus()
+            for e in net.edges:
+                e.factor = rng.uniform(0.2, 5.0)
+            vals.append(net.audit()["integrity_score"])
+        self.assertGreater(real, 1.9)
+        self.assertLess(sum(vals) / len(vals), 0.1)
+
+    def test_the_audit_header_reports_it_before_the_negatives(self):
         flat = " ".join(C.__doc__.split())
-        self.assertIn("was NOT in the drop", flat)
-        self.assertIn("bridge.py", flat)
+        self.assertIn("PASSES the null harness", flat)
 
-    def test_scale_and_offset_round_trip(self):
+
+class TestGi11FixedProbe(unittest.TestCase):
+
+    def _affine_cycle(self, factor, offset):
         net = GeometricNetwork()
         net.add_node("a", 1.0)
         net.add_node("b", 1.0)
-        for kind, factor, expect in (("scale", PHI, PHI),
-                                     ("offset", 0.25, 1.25)):
-            e = net.add_edge("a", "b", kind, factor)
-            self.assertAlmostEqual(net._apply(e, 1.0), expect)
-            self.assertAlmostEqual(net._inverse_apply(e, expect), 1.0)
+        net.add_edge("a", "b", "compose", factor=factor, offset=offset)
+        net.add_edge("b", "a", "scale", factor=1.0)
+        return net
 
-    def test_compose_is_declared_non_invertible(self):
+    def test_a_non_identity_map_that_fixes_one_is_called_consistent(self):
+        net = self._affine_cycle(2.0, -1.0)
+        au = net.audit()
+        self.assertEqual(au["consistent_cycles"], 1)
+        self.assertEqual(au["inconsistent_cycles"], 0)
+
+    def test_the_same_cycle_is_wrong_everywhere_else(self):
+        net = self._affine_cycle(2.0, -1.0)
+        a, b = net._compose_transforms(net.find_cycles()[0][0])
+        for x in (0.0, 2.0, 10.0):
+            self.assertGreater(abs(a * x + b - x), 0.9, msg=x)
+
+    def test_every_a_plus_b_equals_one_map_passes(self):
+        for factor in (0.5, 2.0, 5.0, -3.0):
+            net = self._affine_cycle(factor, 1.0 - factor)
+            self.assertEqual(net.audit()["inconsistent_cycles"], 0,
+                             msg=factor)
+
+    def test_pure_scale_cycles_are_unaffected(self):
+        """Which is why nothing in the drop's demos or tests sees it."""
+        net = self._affine_cycle(2.0, 0.0)
+        self.assertEqual(net.audit()["inconsistent_cycles"], 1)
+
+    def test_two_probe_points_would_catch_it(self):
+        net = self._affine_cycle(2.0, -1.0)
+        a, b = net._compose_transforms(net.find_cycles()[0][0])
+        self.assertLess(abs(a * 1.0 + b - 1.0), 1e-12)
+        self.assertGreater(abs(a - 1.0) + abs(b), 1.0)
+
+
+class TestGi12IntegrityScore(unittest.TestCase):
+
+    def test_zero_confidence_costs_nothing(self):
+        self.assertEqual(nautilus(weight=0.0).audit()["integrity_score"], 1.0)
+
+    def test_full_confidence_doubles_it(self):
+        self.assertEqual(nautilus(weight=1.0).audit()["integrity_score"], 2.0)
+
+    def test_weights_alone_move_the_score(self):
+        import random
+        rng = random.Random(1)
+        vals = []
+        for _ in range(120):
+            net = nautilus()
+            for e in net.edges:
+                e.weight = rng.uniform(0.0, 1.0)
+            vals.append(net.audit()["integrity_score"])
+        self.assertGreater(max(vals) - min(vals), 0.4)
+
+    def test_the_threshold_is_out_of_range_for_a_confidence_in_zero_one(self):
+        self.assertLess(nautilus(weight=1.0).audit()["integrity_score"],
+                        INTEGRITY_THRESHOLD)
+        self.assertAlmostEqual(nautilus(weight=1e9).audit()["integrity_score"],
+                               INTEGRITY_THRESHOLD, places=5)
+
+    def test_two_modules_emit_one_name_with_two_ranges(self):
+        net = nautilus()
+        m = IntegrityMonitor(net)
+        for i in range(6):
+            m.add_measurement("c%d" % i, PHI ** i)
+        self.assertEqual(net.audit()["integrity_score"], 2.0)
+        self.assertLessEqual(m.full_report()["integrity_score"], 1.0)
+
+
+class TestGi13Correct(unittest.TestCase):
+
+    def test_five_iterations_move_nothing_measurable(self):
+        net = corrupted()
+        before = net.audit()["integrity_score"]
+        net.correct(max_iter=5)
+        self.assertEqual(before, net.audit()["integrity_score"])
+
+    def test_convergence_reaches_consistency(self):
+        net = corrupted()
+        net.correct(max_iter=500)
+        au = net.audit()
+        self.assertEqual(au["inconsistent_cycles"], 0)
+
+    def test_but_not_by_restoring_the_wrong_edge(self):
+        net = corrupted()
+        net.correct(max_iter=500)
+        fwd = [e for e in net.edges
+               if e.source == "c2" and e.target == "c3"][0]
+        self.assertGreater(abs(fwd.factor - PHI) / PHI, 0.10)
+
+    def test_the_error_is_split_with_the_inverse_partner(self):
+        net = corrupted()
+        net.correct(max_iter=500)
+        fwd = [e for e in net.edges
+               if e.source == "c2" and e.target == "c3"][0]
+        rev = [e for e in net.edges
+               if e.source == "c3" and e.target == "c2"][0]
+        self.assertGreater(fwd.factor, PHI)
+        self.assertLess(rev.factor, PHI_INV)
+        self.assertLess(abs(fwd.factor * rev.factor - 1.0), 0.02)
+
+    def test_only_the_edges_of_the_bad_cycle_move(self):
+        net = corrupted()
+        net.correct(max_iter=500)
+        moved = [e for e in net.edges
+                 if abs(e.factor - (PHI if int(e.target[1:]) >
+                                    int(e.source[1:]) else PHI_INV)) > 1e-9]
+        self.assertEqual(sorted((e.source, e.target) for e in moved),
+                         [("c2", "c3"), ("c3", "c2")])
+
+    def test_modified_counts_adjustments_not_edges(self):
+        net = corrupted()
+        self.assertGreaterEqual(net.correct(max_iter=5), len(net.edges))
+
+
+class TestGi14InfiniteReconstruction(unittest.TestCase):
+
+    def test_a_zero_factor_edge_yields_inf_not_an_exception(self):
         net = GeometricNetwork()
-        net.add_node("a", 1.0)
-        net.add_node("b", 1.0)
-        e = net.add_edge("a", "b", "compose", 2.0)
-        with self.assertRaises(ValueError):
-            net._inverse_apply(e, 2.0)
+        for x in ("a", "b", "c"):
+            net.add_node(x, 1.0)
+        net.add_edge("a", "b", "scale", PHI)
+        net.add_edge("b", "a", "scale", PHI_INV)
+        net.add_edge("c", "b", "scale", 0.0)
+        m = IntegrityMonitor(net)
+        m.add_measurement("a", 1.0)
+        m.add_measurement("b", PHI)
+        self.assertEqual(m.reconstruct().get("c"), float("inf"))
 
-    def test_an_unknown_edge_kind_is_refused_at_construction(self):
-        with self.assertRaises(ValueError):
-            GeoEdge("a", "b", "rotate", 1.0)
-
-    def test_an_edge_to_a_missing_node_is_refused(self):
+    def test_core_returns_inf_rather_than_raising(self):
         net = GeometricNetwork()
-        net.add_node("a", 1.0)
-        with self.assertRaises(KeyError):
-            net.add_edge("a", "nope", "scale", 1.0)
+        e = GeoEdge("a", "b", "scale", 0.0)
+        self.assertEqual(net._inverse_apply(e, 1.0), float("inf"))
+
+    def test_the_caller_guards_on_the_exception_that_never_comes(self):
+        import inspect
+        src = inspect.getsource(IntegrityMonitor.reconstruct)
+        self.assertIn("ZeroDivisionError", src)
+
+
+class TestGi15Hash(unittest.TestCase):
+
+    def test_it_is_stable_for_one_object(self):
+        net = GeometricNetwork()
+        net.add_node("A", 1.0)
+        self.assertEqual(net.hash(), net.hash())
+
+    def test_it_is_stable_across_identical_builds(self):
+        a, b = GeometricNetwork(), GeometricNetwork()
+        for net in (a, b):
+            net.add_node("A", 1.0)
+            net.add_node("B", 2.0)
+        self.assertEqual(a.hash(), b.hash())
+
+    def test_it_changes_with_insertion_order(self):
+        a, b = GeometricNetwork(), GeometricNetwork()
+        a.add_node("A", 1.0)
+        a.add_node("B", 2.0)
+        b.add_node("B", 2.0)
+        b.add_node("A", 1.0)
+        self.assertNotEqual(a.hash(), b.hash())
+
+    def test_the_docstring_claims_topology_and_relations(self):
+        self.assertIn("topology and relations",
+                      GeometricNetwork.hash.__doc__)
+
+
+class TestGi16TheDropsOwnTests(unittest.TestCase):
+    """The suite the package README cites as its validation. All 20 pass."""
+
+    def test_the_suite_still_passes(self):
+        import unittest as U
+        loader = U.TestLoader()
+        suite = loader.loadTestsFromName(
+            "geometric_intelligence.network.tests.test_geometric_intelligence")
+        with open(os.devnull, "w") as sink:
+            result = U.TextTestRunner(verbosity=0, stream=sink).run(suite)
+        self.assertTrue(result.wasSuccessful())
+        self.assertEqual(result.testsRun, 20)
+
+    def test_audit_passes_bounds_hold_by_construction(self):
+        broke = GeometricNetwork()
+        broke.add_node("a", 1.0)
+        broke.add_node("b", 1.0)
+        broke.add_edge("a", "b", "scale", 99.0)
+        broke.add_edge("b", "a", "scale", 99.0)
+        self.assertEqual(broke.audit()["integrity_score"], 0.0)
+        self.assertAlmostEqual(nautilus(weight=1e9).audit()["integrity_score"],
+                               INTEGRITY_THRESHOLD, places=5)
+
+    def test_the_correct_fixture_is_already_consistent(self):
+        net = GeometricNetwork()
+        net.add_node("A", 1.0)
+        net.add_node("B", 2.0)
+        net.add_edge("A", "B", "scale", 2.5)
+        net.add_edge("B", "A", "scale", 0.4)
+        self.assertEqual(net.audit()["inconsistent_cycles"], 0)
+        self.assertAlmostEqual(2.5 * 0.4, 1.0, places=12)
+
+    def test_the_guarded_cycle_assertion_does_run(self):
+        """Checked rather than assumed: a guarded assertion that never runs
+        is the same defect as one that cannot fail."""
+        net = GeometricNetwork()
+        net.add_node("A", 1.0)
+        net.add_node("B", PHI)
+        net.add_node("C", PHI ** 2)
+        net.add_edge("A", "B", "scale", PHI)
+        net.add_edge("B", "C", "scale", PHI)
+        net.add_edge("C", "A", "scale", PHI_INV ** 2)
+        self.assertTrue(any(len(c) == 3
+                            for c, _ in net.find_cycles(max_depth=5)))
+
+
+class TestBridgeClaims(unittest.TestCase):
+
+    def setUp(self):
+        import tempfile
+        from geometric_intelligence.network import bridge
+        self.B = bridge
+        self.led = os.path.join(tempfile.mkdtemp(), "led.json")
+
+    def _chain(self):
+        net = GeometricNetwork()
+        for x, v in (("L1", 0.100), ("L2", 0.162), ("L3", 0.262)):
+            net.add_node(x, v)
+        net.add_edge("L1", "L2", "scale", PHI)
+        net.add_edge("L2", "L3", "scale", PHI)
+        return net
+
+    def test_gb2_an_acyclic_design_scores_zero(self):
+        claims = self.B.network_to_claims(self._chain(), scope_prefix="a")
+        ic = [c for c in claims if "integrity" in c["scope"]][0]
+        self.assertEqual(ic["value"], 0.0)
+        self.assertEqual(self._chain().audit()["n_cycles"], 0)
+
+    def test_gb2_reverse_edges_fix_it(self):
+        net = self._chain()
+        net.add_edge("L2", "L1", "scale", PHI_INV)
+        net.add_edge("L3", "L2", "scale", PHI_INV)
+        claims = self.B.network_to_claims(net, scope_prefix="b")
+        ic = [c for c in claims if "integrity" in c["scope"]][0]
+        self.assertGreater(ic["value"], 1.0)
+
+    def test_gb1_verify_divides_by_the_prediction(self):
+        from pathlib import Path
+        net = GeometricNetwork()
+        net.add_node("a", 0.0)
+        net.add_node("b", 0.0)
+        net.add_edge("a", "b", "rotate", factor=0.0)
+        self.B.append_geo_claims(
+            self.B.network_to_claims(net, scope_prefix="rot"),
+            Path(self.led))
+        with self.assertRaises(ZeroDivisionError):
+            self.B.verify_edge_measurement("rot", 0, 0.1, Path(self.led))
+
+    def test_gb1_the_acyclic_integrity_claim_is_the_same_zero(self):
+        from pathlib import Path
+        self.B.append_geo_claims(
+            self.B.network_to_claims(self._chain(), scope_prefix="c"),
+            Path(self.led))
+        with open(self.led, encoding="utf-8") as fh:
+            claims = json.load(fh)
+        ic = [c for c in claims if c["scope"].endswith("::integrity")][0]
+        self.assertEqual(ic["value"], 0.0)
+
+    def test_gb3_the_failure_text_describes_a_threshold_not_a_band(self):
+        claims = self.B.network_to_claims(self._chain(), scope_prefix="d")
+        ic = [c for c in claims if "integrity" in c["scope"]][0]
+        self.assertEqual(ic["tol_frac"], 0.10)
+        self.assertIn("below", ic["failure"])
+        self.assertIn("threshold", ic["failure"])
+
+    def test_gb4_three_unsourced_tolerances(self):
+        net = self._chain()
+        net.add_edge("L2", "L1", "scale", PHI_INV)
+        claims = self.B.network_to_claims(net, scope_prefix="e")
+        tols = {c["tol_frac"] for c in claims}
+        self.assertEqual(tols, {0.05, PHI_INV_9, 0.10})
+
+    def test_gb4_the_drift_band_is_the_square_not_the_double(self):
+        from pathlib import Path
+        self.B.append_geo_claims(
+            self.B.network_to_claims(self._chain(), scope_prefix="f"),
+            Path(self.led))
+        p = Path(self.led)
+        # (1+t)^2 = 1.1025; 1+2t = 1.10. A ratio between them is drift under
+        # the square band and would be fail under a doubled one.
+        r = self.B.verify_edge_measurement("f", 0, PHI * 1.101, p)
+        self.assertEqual(r["verdict"], "drift")
+        r = self.B.verify_edge_measurement("f", 0, PHI * 1.11, p)
+        self.assertEqual(r["verdict"], "fail")
+
+    def test_gb5_the_ledger_path_is_relative(self):
+        from pathlib import Path
+        self.assertFalse(Path(self.B.LEDGER).is_absolute())
+
+    def test_the_edge_claims_carry_a_failure_mode(self):
+        claims = self.B.network_to_claims(self._chain(), scope_prefix="g")
+        for c in claims:
+            self.assertTrue(c["failure"])
+            self.assertTrue(c["measurement"])
+            self.assertEqual(len(c["id"]), 16)
 
 
 class TestGi1MeasurementsDoNotPropagate(unittest.TestCase):

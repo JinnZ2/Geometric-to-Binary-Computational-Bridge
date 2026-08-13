@@ -48,6 +48,11 @@
      "where": "geometric_intelligence/network/integrity.py",
      "what": "predict_from seeds from net.nodes[source].value, so no measurement changes any prediction -- a brace measured 400 mm against a 600 mm design still predicts its neighbour at 970.820 mm",
      "claim": "GI-1"
+    },
+    {
+     "where": "geometric_intelligence/network/tests/test_geometric_intelligence.py",
+     "what": "test_audit_passes' bounds hold by construction, test_hash_stable hashes one object twice, and test_correct's fixture is 2.5 x 0.4 = 1.0 exactly so correct() is never run on an inconsistent network",
+     "claim": "GI-16"
     }
    ],
    "cost_when_missed": "A suite can be 79% dead and still look green. tests/test_silicon_modules.py was."
@@ -169,6 +174,11 @@
      "where": "Silicon/propulsion_bounds.py",
      "what": "traveling-wave phase aliasing at delta-phi = 2*pi*m/N -- the same blindness in the drive rather than the detector",
      "claim": "FP-2"
+    },
+    {
+     "where": "geometric_intelligence/network/core.py",
+     "what": "cycle closure is scored as abs(a*1 + b - 1), so every affine map with a + b = 1 passes without being the identity; compose(2,-1) reports closure error 0.000000",
+     "claim": "GI-11"
     }
    ],
    "cost_when_missed": "A detector with a 22% false-alarm rate and 0% power in the same configuration."
@@ -259,6 +269,11 @@
      "where": "geometric_intelligence/network/FIELD_GUIDE.md",
      "what": "the contraction table gave percentages with no reference temperature; back-solving five rows found three different ones",
      "claim": "GI-7"
+    },
+    {
+     "where": "geometric_intelligence/network/core.py",
+     "what": "integrity_score multiplies a consistency fraction by an author-declared confidence, giving a number with the units of neither, and compares it to a constant two modules also use for a differently-ranged quantity",
+     "claim": "GI-12"
     }
    ],
    "cost_when_missed": "A threshold that cannot be met or missed."
@@ -341,6 +356,11 @@
      "where": "bridges/glyph_state_encoder.py",
      "what": "two complete encoders pasted end to end in one file, sharing only the twelve glyph names; the concatenation did not compile",
      "claim": "GLY-0"
+    },
+    {
+     "where": "geometric_intelligence/network/bridge.py",
+     "what": "the integrity claim's failure text describes a threshold test while the record encodes a two-sided band; a verifier and a reader get different tests from one record",
+     "claim": "GB-3"
     }
    ],
    "cost_when_missed": "The implementation quietly wins over the specification, and the specification is what gets read."
