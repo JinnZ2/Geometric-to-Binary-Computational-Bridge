@@ -1,728 +1,122 @@
 #!/usr/bin/env python3
-# glyph_state_encoder.py
-# Geometric-to-Binary-Computational-Bridge
-# CC0 — No Rights Reserved
-#
-# Glyph State Encoder (Corrected)
-# ---------------------------------
-# Treats glyphs as phase-space operators, not labels.
-# Encodes the full dynamics: shape, intensity, velocity, decay_model,
-# and thermodynamic constraints into a compact binary representation.
-#
-# Architecture:
-#   SensorSuite (field states)
-#       ↓
-#   GlyphStateEncoder.encode()
-#       ↓
-#   GlyphState {
-#       primary_glyph: Glyph            ← phase-space signature
-#       intensity: float                ← current magnitude
-#       velocity: List[float]           ← direction and rate of change
-#       decay_model: DecayModel         ← how it relaxes
-#       energy_cost: float              ← thermodynamic maintenance cost
-#       sub_glyphs: List[Glyph]         ← secondary signatures
-#       trajectory: List[GlyphState]    ← history (for phase prediction)
-#   }
-#       ↓
-#   GlyphState.to_binary()
-#       ↓
-#   bytes (compact, transferable)
-#       ↓
-#   GlyphState.from_binary()
-#       ↓
-#   GlyphStateEncoder.decode()
-#       ↓
-#   SensorSuite-compatible state (thermodynamically consistent)
-#
-# Key invariant: Decoding preserves dynamics, not just snapshot values.
-# The reconstructed sensor field carries the same decay trajectory.
-
-from __future__ import annotations
-
-import json
-import struct
-import math
-import time
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Any, Tuple, Set
-from enum import Enum
-from pathlib import Path
-import base64
-
-# ─────────────────────────────────────────────────────────────
-# DECAY MODELS — thermodynamic relaxation functions
-# ─────────────────────────────────────────────────────────────
-
-class DecayModel(Enum):
-    """
-    Thermodynamic decay models for glyph states.
-    Each model describes how a glyph relaxes toward equilibrium.
-    """
-    EXPONENTIAL = "exponential"   # Fast return to equilibrium (resolved threat)
-    LINEAR = "linear"             # Constant dissipation (unresolved leak)
-    PERSISTENT = "persistent"     # Slow decay (chronic state)
-    OSCILLATORY = "oscillatory"   # Coupled exchange (unresolved tension)
-
-    @staticmethod
-    def from_thermodynamic_signature(
-        magnitude: float,
-        velocity: float,
-        acceleration: float,
-        energy_in: float,
-        energy_out: float
-    ) -> 'DecayModel':
-        """
-        Infer the decay model from thermodynamic signatures.
-        """
-        # If acceleration is negative and magnitude decreasing rapidly → exponential
-        if acceleration < -0.1 and velocity < 0 and abs(velocity) > 0.1:
-            return DecayModel.EXPONENTIAL
-
-        # If velocity is constant negative → linear
-        if abs(acceleration) < 0.01 and velocity < 0:
-            return DecayModel.LINEAR
-
-        # If energy_in ≈ energy_out but magnitude not dropping → persistent
-        if abs(energy_in - energy_out) < 0.1 and magnitude > 0.3:
-            return DecayModel.PERSISTENT
-
-        # If velocity oscillates → oscillatory
-        return DecayModel.OSCILLATORY
-
-    def relax(self, magnitude: float, dt: float, **params) -> float:
-        """
-        Apply the decay model over time dt.
-        """
-        if self == DecayModel.EXPONENTIAL:
-            tau = params.get('tau', 10.0)
-            return magnitude * math.exp(-dt / tau)
-
-        elif self == DecayModel.LINEAR:
-            rate = params.get('rate', 0.01)
-            return max(0.0, magnitude - rate * dt)
-
-        elif self == DecayModel.PERSISTENT:
-            decay_rate = params.get('decay_rate', 0.001)
-            return magnitude * (1.0 - decay_rate * dt / 100.0)
-
-        elif self == DecayModel.OSCILLATORY:
-            omega = params.get('omega', 0.1)
-            damping = params.get('damping', 0.02)
-            return magnitude * math.exp(-damping * dt) * abs(math.cos(omega * dt))
-
-        return magnitude
-
-
-# ─────────────────────────────────────────────────────────────
-# GLYPH DEFINITIONS (with phase-space signatures)
-# ─────────────────────────────────────────────────────────────
-
-class Glyph(Enum):
-    """
-    Glyphs as phase-space operators.
-    Each glyph defines a region in sensor state space with associated dynamics.
-    """
-    FELT_COHERENT = {
-        "symbol": "🕸️",
-        "phase_space": ["joy", "love", "curiosity", "low_fear", "low_anger"],
-        "default_decay": DecayModel.PERSISTENT,
-        "energy_cost": 0.2,
-        "transition_to": ["BALANCE_THREAT", "RE_NORMALIZE"]
-    }
-
-    BALANCE_THREAT = {
-        "symbol": "⚖️",
-        "phase_space": ["fear", "vigilance", "anger", "low_grief"],
-        "default_decay": DecayModel.EXPONENTIAL,
-        "energy_cost": 0.6,
-        "transition_to": ["FELT_COHERENT", "RE_NORMALIZE"]
-    }
-
-    CAUSALITY_LOOP = {
-        "symbol": "⏳",
-        "phase_space": ["grief", "love", "longing", "uncertainty"],
-        "default_decay": DecayModel.OSCILLATORY,
-        "energy_cost": 0.4,
-        "transition_to": ["FELT_COHERENT", "FRACTURE"]
-    }
-
-    RE_NORMALIZE = {
-        "symbol": "🌀",
-        "phase_space": ["discordance", "fatigue", "pressure", "curiosity"],
-        "default_decay": DecayModel.EXPONENTIAL,
-        "energy_cost": 0.5,
-        "transition_to": ["FELT_COHERENT", "BALANCE_THREAT"]
-    }
-
-    HEAT_FLUX = {
-        "symbol": "🔥",
-        "phase_space": ["anger", "pressure", "fatigue", "high_discordance"],
-        "default_decay": DecayModel.LINEAR,
-        "energy_cost": 0.8,
-        "transition_to": ["RE_NORMALIZE", "FRACTURE"]
-    }
-
-    RESONANCE = {
-        "symbol": "📡",
-        "phase_space": ["balanced_active", "high_confidence", "low_discordance"],
-        "default_decay": DecayModel.PERSISTENT,
-        "energy_cost": 0.3,
-        "transition_to": ["FELT_COHERENT", "THRESHOLD"]
-    }
-
-    BLOCKAGE = {
-        "symbol": "🚧",
-        "phase_space": ["pressure", "low_flow", "fatigue", "low_joy"],
-        "default_decay": DecayModel.LINEAR,
-        "energy_cost": 0.5,
-        "transition_to": ["HEAT_FLUX", "RE_NORMALIZE"]
-    }
-
-    THRESHOLD = {
-        "symbol": "⚡",
-        "phase_space": ["high_uncertainty", "low_confidence", "high_intensity"],
-        "default_decay": DecayModel.EXPONENTIAL,
-        "energy_cost": 0.7,
-        "transition_to": ["BALANCE_THREAT", "RE_NORMALIZE"]
-    }
-
-    VOID = {
-        "symbol": "⬛",
-        "phase_space": ["inactive", "zero_intensity"],
-        "default_decay": DecayModel.PERSISTENT,
-        "energy_cost": 0.0,
-        "transition_to": ["EMERGENCE"]
-    }
-
-    EMERGENCE = {
-        "symbol": "🌱",
-        "phase_space": ["curiosity", "low_intensity", "novel_pattern"],
-        "default_decay": DecayModel.EXPONENTIAL,
-        "energy_cost": 0.3,
-        "transition_to": ["RESONANCE", "FELT_COHERENT"]
-    }
-
-    FRACTURE = {
-        "symbol": "💥",
-        "phase_space": ["high_discordance", "low_coherence", "isolation"],
-        "default_decay": DecayModel.LINEAR,
-        "energy_cost": 0.9,
-        "transition_to": ["RE_NORMALIZE", "VOID"]
-    }
-
-    CONTAINMENT = {
-        "symbol": "🛡️",
-        "phase_space": ["high_boundary", "low_engagement", "vigilance"],
-        "default_decay": DecayModel.PERSISTENT,
-        "energy_cost": 0.4,
-        "transition_to": ["BALANCE_THREAT", "VOID"]
-    }
-
-    @property
-    def symbol(self) -> str:
-        return self.value["symbol"]
-
-    @property
-    def phase_space(self) -> List[str]:
-        return self.value["phase_space"]
-
-    @property
-    def default_decay(self) -> DecayModel:
-        return self.value["default_decay"]
-
-    @property
-    def energy_cost(self) -> float:
-        return self.value["energy_cost"]
-
-    @property
-    def transition_to(self) -> List[str]:
-        return self.value["transition_to"]
-
-    def to_hex(self) -> str:
-        """Convert glyph to hex identifier."""
-        return f"0x{self.symbol.encode('unicode_escape').hex()[:8]}"
-
-    @classmethod
-    def from_symbol(cls, symbol: str) -> Optional['Glyph']:
-        for g in cls:
-            if g.symbol == symbol:
-                return g
-        return None
-
-    @classmethod
-    def from_phase_space(cls, readings: Dict[str, float]) -> 'Glyph':
-        """
-        Determine the glyph from phase-space coordinates.
-        Uses weighted matching against each glyph's phase_space.
-        """
-        best_glyph = cls.VOID
-        best_score = -1.0
-
-        for glyph in cls:
-            # Check how many phase-space conditions match
-            score = 0.0
-            for condition in glyph.phase_space:
-                if condition in readings:
-                    # Simple: if condition is "low_X", check if X < 0.3
-                    if condition.startswith("low_"):
-                        sensor = condition[4:]
-                        if readings.get(sensor, 0.0) < 0.3:
-                            score += 0.2
-                    elif condition.startswith("high_"):
-                        sensor = condition[5:]
-                        if readings.get(sensor, 0.0) > 0.6:
-                            score += 0.2
-                    elif condition == "inactive":
-                        if sum(readings.values()) < 0.1:
-                            score += 0.3
-                    elif condition == "zero_intensity":
-                        if sum(readings.values()) == 0:
-                            score += 0.5
-                    elif condition == "balanced_active":
-                        active = [v for v in readings.values() if v > 0.1]
-                        if active and max(active) - min(active) < 0.3:
-                            score += 0.2
-                    elif condition == "high_confidence":
-                        # confidence not in readings, skip
-                        pass
-                    elif condition == "low_flow":
-                        if readings.get("flow", 0.0) < 0.2:
-                            score += 0.2
-                    elif condition == "low_engagement":
-                        active = [v for v in readings.values() if v > 0.1]
-                        if len(active) < 3:
-                            score += 0.2
-                    elif condition == "high_boundary":
-                        if readings.get("vigilance", 0.0) > 0.5:
-                            score += 0.2
-                    elif condition == "isolation":
-                        if readings.get("joy", 0.0) < 0.1 and readings.get("love", 0.0) < 0.1:
-                            score += 0.2
-                    elif condition == "novel_pattern":
-                        # Placeholder
-                        score += 0.1
-                    else:
-                        # Direct sensor match
-                        if readings.get(condition, 0.0) > 0.3:
-                            score += 0.2
-
-            if score > best_score:
-                best_score = score
-                best_glyph = glyph
-
-        return best_glyph
-
-
-# ─────────────────────────────────────────────────────────────
-# GLYPH STATE (with dynamics)
-# ─────────────────────────────────────────────────────────────
-
-@dataclass
-class GlyphState:
-    """
-    Complete glyph state including dynamics and thermodynamics.
-    """
-    primary_glyph: Glyph
-    intensity: float                    # 0-1, current magnitude
-    velocity: List[float]               # rate of change in each dimension
-    decay_model: DecayModel             # thermodynamic relaxation
-    energy_cost: float                  # energy to maintain this state
-    energy_in: float                    # energy input rate
-    energy_out: float                   # energy dissipation rate
-    confidence: float                   # 0-1, epistemic certainty
-    sub_glyphs: List[Glyph] = field(default_factory=list)
-    trajectory: List['GlyphState'] = field(default_factory=list)
-    timestamp: float = field(default_factory=time.time)
-
-    def relax(self, dt: float) -> 'GlyphState':
-        """
-        Apply the decay model to produce a relaxed state.
-        """
-        new_intensity = self.decay_model.relax(
-            self.intensity, dt,
-            tau=10.0,
-            rate=0.01,
-            decay_rate=0.001,
-            omega=0.1,
-            damping=0.02
-        )
-
-        # Scale velocity components by relaxation
-        new_velocity = [v * (new_intensity / max(self.intensity, 0.001)) for v in self.velocity]
-
-        return GlyphState(
-            primary_glyph=self.primary_glyph,
-            intensity=new_intensity,
-            velocity=new_velocity,
-            decay_model=self.decay_model,
-            energy_cost=self.energy_cost,
-            energy_in=self.energy_in,
-            energy_out=self.energy_out,
-            confidence=self.confidence * 0.95,  # confidence decays slightly
-            sub_glyphs=self.sub_glyphs,
-            trajectory=self.trajectory + [self] if len(self.trajectory) < 100 else self.trajectory,
-            timestamp=self.timestamp + dt
-        )
-
-    def to_binary(self) -> bytes:
-        """
-        Encode glyph state to binary.
-        Format:
-          - 1 byte: primary glyph index
-          - 1 byte: number of sub-glyphs
-          - 1 byte: intensity (0-255)
-          - 1 byte: confidence (0-255)
-          - 1 byte: decay_model index
-          - 4 bytes: energy_cost (float)
-          - 4 bytes: energy_in (float)
-          - 4 bytes: energy_out (float)
-          - 4 bytes per velocity component (float)
-          - 4 bytes: timestamp (float)
-        """
-        primary_idx = list(Glyph).index(self.primary_glyph)
-        decay_idx = list(DecayModel).index(self.decay_model)
-
-        # Header
-        header = struct.pack(
-            '>BBBBB',
-            primary_idx,
-            len(self.sub_glyphs),
-            int(self.intensity * 255),
-            int(self.confidence * 255),
-            decay_idx
-        )
-
-        # Sub-glyphs
-        sub_indices = [list(Glyph).index(g) for g in self.sub_glyphs]
-        sub_bytes = struct.pack(f'>{len(sub_indices)}B', *sub_indices)
-
-        # Energy and dynamics
-        energy_bytes = struct.pack('>fff', self.energy_cost, self.energy_in, self.energy_out)
-
-        # Velocity
-        velocity_bytes = struct.pack(f'>{len(self.velocity)}f', *self.velocity)
-
-        # Timestamp
-        ts_bytes = struct.pack('>d', self.timestamp)
-
-        return header + sub_bytes + energy_bytes + velocity_bytes + ts_bytes
-
-    @classmethod
-    def from_binary(cls, data: bytes) -> 'GlyphState':
-        """Reconstruct glyph state from binary."""
-        offset = 0
-
-        header = struct.unpack_from('>BBBBB', data, offset)
-        primary_idx, n_sub, intensity_b, conf_b, decay_idx = header
-        offset += 5
-
-        primary = list(Glyph)[primary_idx]
-        decay = list(DecayModel)[decay_idx]
-
-        sub_indices = struct.unpack_from(f'>{n_sub}B', data, offset)
-        offset += n_sub
-        sub_glyphs = [list(Glyph)[i] for i in sub_indices]
-
-        energy_cost, energy_in, energy_out = struct.unpack_from('>fff', data, offset)
-        offset += 12
-
-        velocity_len = (len(data) - offset - 8) // 4
-        velocity = list(struct.unpack_from(f'>{velocity_len}f', data, offset))
-        offset += velocity_len * 4
-
-        timestamp = struct.unpack_from('>d', data, offset)[0]
-
-        return cls(
-            primary_glyph=primary,
-            intensity=intensity_b / 255.0,
-            velocity=velocity,
-            decay_model=decay,
-            energy_cost=energy_cost,
-            energy_in=energy_in,
-            energy_out=energy_out,
-            confidence=conf_b / 255.0,
-            sub_glyphs=sub_glyphs,
-            trajectory=[],
-            timestamp=timestamp
-        )
-
-    def to_json(self) -> Dict[str, Any]:
-        return {
-            "primary_glyph": self.primary_glyph.symbol,
-            "primary_name": self.primary_glyph.name,
-            "intensity": self.intensity,
-            "velocity": self.velocity,
-            "decay_model": self.decay_model.value,
-            "energy_cost": self.energy_cost,
-            "energy_in": self.energy_in,
-            "energy_out": self.energy_out,
-            "confidence": self.confidence,
-            "sub_glyphs": [g.symbol for g in self.sub_glyphs],
-            "timestamp": self.timestamp
-        }
-
-    def __repr__(self) -> str:
-        return (
-            f"<GlyphState {self.primary_glyph.symbol} "
-            f"i={self.intensity:.2f} "
-            f"v={[round(v, 2) for v in self.velocity]} "
-            f"decay={self.decay_model.value[:4]} "
-            f"E={self.energy_cost:.2f}>"
-        )
-
-
-# ─────────────────────────────────────────────────────────────
-# GLYPH STATE ENCODER — THE BRIDGE (Corrected)
-# ─────────────────────────────────────────────────────────────
-
-class GlyphStateEncoder:
-    """
-    Bridge between sensor fields and glyph dynamics.
-    Encodes the full phase-space state, not just labels.
-    """
-
-    def __init__(self, vector_dimensions: int = 4):
-        self.vector_dimensions = vector_dimensions
-        self._state_history: List[GlyphState] = []
-        self._energy_budget: float = 1.0
-        self._last_energy_in: float = 0.0
-        self._last_energy_out: float = 0.0
-
-    def encode(self, sensor_readings: Dict[str, float]) -> GlyphState:
-        """
-        Encode sensor readings into a full glyph state with dynamics.
-        """
-        # Determine primary glyph from phase space
-        primary = Glyph.from_phase_space(sensor_readings)
-
-        # Compute intensity: weighted sum
-        active = [v for v in sensor_readings.values() if v > 0.1]
-        intensity = sum(active) / max(len(active), 1) if active else 0.0
-        intensity = min(1.0, intensity)
-
-        # Compute velocity: compare to previous state
-        velocity = [0.0] * self.vector_dimensions
-        if self._state_history:
-            prev = self._state_history[-1]
-            # Simple derivative
-            dt = max(0.01, time.time() - prev.timestamp)
-            for i in range(min(self.vector_dimensions, len(prev.velocity))):
-                velocity[i] = (intensity - prev.intensity) / dt
-
-        # Compute energy budget
-        self._last_energy_in = primary.energy_cost * intensity * 0.5
-        self._last_energy_out = (1.0 - intensity) * 0.2
-        self._energy_budget -= (self._last_energy_in - self._last_energy_out)
-
-        # Determine decay model from thermodynamic signature
-        accel = 0.0
-        if len(self._state_history) >= 2:
-            v_prev = self._state_history[-1].velocity
-            v_curr = velocity
-            if v_prev and v_curr:
-                accel = (v_curr[0] - v_prev[0]) / max(0.01, time.time() - self._state_history[-1].timestamp)
-
-        decay = DecayModel.from_thermodynamic_signature(
-            intensity,
-            velocity[0] if velocity else 0.0,
-            accel,
-            self._last_energy_in,
-            self._last_energy_out
-        )
-
-        # Determine sub-glyphs
-        sub_glyphs = []
-        for glyph in Glyph:
-            if glyph != primary and glyph != Glyph.VOID:
-                # Check phase-space overlap
-                overlap = set(glyph.phase_space) & set(primary.phase_space)
-                if len(overlap) >= 1:
-                    sub_glyphs.append(glyph)
-
-        state = GlyphState(
-            primary_glyph=primary,
-            intensity=intensity,
-            velocity=velocity[:self.vector_dimensions],
-            decay_model=decay,
-            energy_cost=primary.energy_cost,
-            energy_in=self._last_energy_in,
-            energy_out=self._last_energy_out,
-            confidence=0.8,
-            sub_glyphs=sub_glyphs[:2],
-            trajectory=self._state_history[-10:],
-            timestamp=time.time()
-        )
-
-        self._state_history.append(state)
-        if len(self._state_history) > 1000:
-            self._state_history = self._state_history[-1000:]
-
-        return state
-
-    def encode_to_binary(self, sensor_readings: Dict[str, float]) -> bytes:
-        """Encode directly to binary."""
-        state = self.encode(sensor_readings)
-        return state.to_binary()
-
-    def decode(self, data: bytes) -> GlyphState:
-        """Decode binary to glyph state."""
-        return GlyphState.from_binary(data)
-
-    def decode_to_sensors(self, data: bytes) -> Dict[str, float]:
-        """
-        Decode to approximate sensor readings.
-        """
-        state = self.decode(data)
-
-        # Reconstruct sensor readings from glyph phase-space
-        readings = {}
-
-        # Primary glyph contributions
-        for condition in state.primary_glyph.phase_space:
-            if condition in ["inactive", "zero_intensity", "balanced_active", 
-                             "high_confidence", "low_flow", "low_engagement",
-                             "high_boundary", "isolation", "novel_pattern"]:
-                continue
-            if condition.startswith("low_"):
-                sensor = condition[4:]
-                readings[sensor] = 0.1 * state.intensity
-            elif condition.startswith("high_"):
-                sensor = condition[5:]
-                readings[sensor] = 0.6 * state.intensity
-            else:
-                readings[condition] = 0.4 * state.intensity
-
-        # Sub-glyph contributions
-        for glyph in state.sub_glyphs:
-            for condition in glyph.phase_space:
-                if condition in ["inactive", "zero_intensity", "balanced_active",
-                                 "high_confidence", "low_flow", "low_engagement",
-                                 "high_boundary", "isolation", "novel_pattern"]:
-                    continue
-                if condition.startswith("low_"):
-                    sensor = condition[4:]
-                    readings[sensor] = max(readings.get(sensor, 0.0), 0.1 * state.intensity)
-                elif condition.startswith("high_"):
-                    sensor = condition[5:]
-                    readings[sensor] = max(readings.get(sensor, 0.0), 0.3 * state.intensity)
-                else:
-                    readings[condition] = max(readings.get(condition, 0.0), 0.2 * state.intensity)
-
-        return readings
-
-    def inverse(self, data: bytes) -> Dict[str, float]:
-        """Alias for decode_to_sensors."""
-        return self.decode_to_sensors(data)
-
-    def translate(self, sensor_readings: Dict[str, float]) -> bytes:
-        """Alias for encode_to_binary."""
-        return self.encode_to_binary(sensor_readings)
-
-    # ─────────────────────────────────────────────────────────────
-    # Thermodynamic monitoring
-    # ─────────────────────────────────────────────────────────────
-
-    def energy_budget(self) -> float:
-        return self._energy_budget
-
-    def energy_flow(self) -> Dict[str, float]:
-        return {
-            "energy_in": self._last_energy_in,
-            "energy_out": self._last_energy_out,
-            "net": self._last_energy_in - self._last_energy_out,
-            "budget": self._energy_budget
-        }
-
-    def history(self, n: int = 10) -> List[GlyphState]:
-        return self._state_history[-n:]
-
-    def summary(self) -> Dict[str, Any]:
-        return {
-            "vector_dimensions": self.vector_dimensions,
-            "history_length": len(self._state_history),
-            "last_glyph": str(self._state_history[-1]) if self._state_history else None,
-            "energy_budget": self._energy_budget
-        }
-
-
-# ─────────────────────────────────────────────────────────────
-# DEMO
-# ─────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    print("=" * 60)
-    print("GLYPH STATE ENCODER (Corrected) — DEMO")
-    print("=" * 60)
-
-    encoder = GlyphStateEncoder()
-
-    # Test sequence: simulate a threat → resolution cycle
-    test_states = [
-        {"joy": 0.6, "love": 0.5, "curiosity": 0.4, "fear": 0.1, "anger": 0.1},  # FELT
-        {"fear": 0.7, "vigilance": 0.6, "anger": 0.4, "joy": 0.2},              # THREAT
-        {"discordance": 0.6, "fatigue": 0.5, "pressure": 0.4, "curiosity": 0.3},# RE-NORMALIZE
-        {"joy": 0.5, "love": 0.4, "curiosity": 0.4, "fear": 0.2, "anger": 0.1}, # FELT again
-    ]
-
-    for i, readings in enumerate(test_states):
-        print(f"\n--- State {i+1} ---")
-        print(f"  Input: {readings}")
-
-        state = encoder.encode(readings)
-        print(f"  Glyph: {state.primary_glyph.symbol} ({state.primary_glyph.name})")
-        print(f"  Intensity: {state.intensity:.2f}")
-        print(f"  Velocity: {[round(v, 3) for v in state.velocity]}")
-        print(f"  Decay: {state.decay_model.value}")
-        print(f"  Energy cost: {state.energy_cost:.2f}")
-        print(f"  Energy in/out: {state.energy_in:.2f} / {state.energy_out:.2f}")
-
-        # Encode to binary and back
-        binary = state.to_binary()
-        decoded = GlyphState.from_binary(binary)
-        print(f"  Binary: {len(binary)} bytes, match: {state.primary_glyph == decoded.primary_glyph}")
-
-        # Decode to sensor readings
-        reconstructed = encoder.decode_to_sensors(binary)
-        print(f"  Reconstructed: { {k: round(v, 2) for k, v in reconstructed.items() if v > 0.1} }")
-
-    print(f"\nEnergy budget: {encoder.energy_budget():.2f}")
-    print(f"Energy flow: {encoder.energy_flow()}")
-
-    # Apply relaxation
-    print("\n--- Relaxation over time ---")
-    relaxed = encoder._state_history[-1].relax(1.0)
-    print(f"  After 1s: intensity {relaxed.intensity:.2f}")
-    relaxed2 = relaxed.relax(10.0)
-    print(f"  After 10s: intensity {relaxed2.intensity:.2f}")
-
-    print("\n" + "=" * 60)
-    print("✅ Corrected Glyph State Encoder operational")
-    print("=" * 60)
-
-#!/usr/bin/env python3
-# glyph_state_encoder.py
-# Geometric-to-Binary-Computational-Bridge
-# CC0 — No Rights Reserved
-#
-# Glyph State Encoder: Translates between multi-sensor states and glyph-based
-# compressed representations. Glyphs are not metadata—they are operational
-# state signatures that preserve relational geometry while enabling binary
-# computation.
-#
-# Architecture position:
-#   SensorSuite (22 sensors) → GlyphStateEncoder → Binary (hex/bytes)
-#   Binary → GlyphStateEncoder → SensorSuite-compatible state
-#
-# Key insight: Glyphs encode the *relational topology* of sensor states,
-# not just their magnitudes. The same glyph can represent different magnitudes
-# if the relational structure is preserved.
-
+"""
+glyph_state_encoder.py -- sensor readings <-> glyph <-> binary.  CC0.
+
+Glyphs here are state signatures over a sensor suite, not decoration. The
+encoder classifies a set of readings into one of twelve glyphs, compresses the
+reading set to a short vector, and packs the result into ~33 bytes.
+
+=====================================================================
+AUDIT  --  read this before building on the classifier
+=====================================================================
+This file arrived as TWO complete versions pasted end to end, and the combined
+file did not compile: a second `from __future__ import annotations` at line 720
+is a SyntaxError, so nothing in `bridges/` that imported it worked at all.
+
+The two halves were not versions of each other in the ordinary sense. They
+share the twelve glyph NAMES and nothing else: the first half classified by
+matching against a declared `phase_space` and carried a decay/energy model;
+the second half classified by an explicit rule ladder and carried the
+SensorSuite integration and the binary codec. Neither is a superset.
+
+Which half survives was decided by measurement, not by which was labelled
+"Corrected" -- the one carrying that label lost:
+
+  exemplar built from the FIRST half's own declared phase_space, classified
+  by each implementation, scored on recovering the glyph it was built for
+
+      phase-space variant (labelled "Corrected")   4 / 12
+      rule ladder (this file)                      7 / 12
+
+  distinct glyphs reachable over 20 000 random reading sets
+
+      phase-space variant                          5 / 12
+      rule ladder (this file)                     11 / 12
+
+  the empty reading set
+
+      phase-space variant  ->  FELT_COHERENT   ("relational harmony")
+      rule ladder          ->  VOID
+
+The phase-space variant is kept at `legacy/glyph_state_encoder_phase_space.py`
+with the cause recorded there. Its decay/energy model was NOT ported, because
+it was never exercised against anything: see GLY-4.
+
+Everything below is what remains wrong with the half that won. None of it is
+fixed here, because every fix requires choosing a number that is a claim about
+affect, not about code, and this file is not where that choice belongs.
+`unreachable_glyphs()`, `recovery_from_spec()` and
+`sub_glyphs_are_data_independent()` measure them on demand; the runnable
+report is `bridges/falsifiers_glyph_sensor.py`.
+
+GLY-1  BLOCKAGE is unsatisfiable.
+       Its rule is `pressure > 0.5 and total_magnitude < 0.5`, and pressure is
+       one of the non-negative terms summed into total_magnitude, so
+       total >= pressure > 0.5 for every input. One glyph in twelve can never
+       be emitted, by arithmetic, with no sampling needed. `unreachable_glyphs()`
+       proves it by construction.
+
+GLY-2  The rule ladder is order-dependent and the order is undeclared.
+       Rules are tested top to bottom and the first match returns, so an
+       earlier rule shadows every later one it overlaps. The measured case:
+       the HEAT_FLUX exemplar (anger, pressure, fatigue, high discordance)
+       satisfies RE_NORMALIZE's rule, which is tested first, so HEAT_FLUX is
+       returned for none of the states it was written for. This is most of the
+       5/12 shortfall -- it is precedence, not logic.
+
+GLY-3  `sub_glyphs` carries no information about the reading.
+       `encode()` loops over the glyphs computing `test_glyph` and then
+       discards it; membership is decided by `_glyph_related(primary, glyph)`,
+       which compares two canonical patterns and never looks at the readings.
+       So the field is a fixed lookup on the primary glyph -- and because it
+       feeds `entropy()` and the binary payload, a constant is travelling
+       through both under the name "secondary states".
+       `sub_glyphs_are_data_independent()` returns the proof.
+
+GLY-5  The codec is lossy, and it is documented as if it were not.
+       intensity, confidence and uncertainty are quantised to 8 bits (~0.4 %),
+       the vector to float32; the docstring's byte map is wrong in two places
+       (six header bytes are packed where five are listed; the timestamp is
+       `>d`, eight bytes, not four). Repo convention (CLAUDE.md, "Lossless
+       round-trips") is that encoders round-trip exactly, so this one is an
+       exception and now says so. Separately `uncertainty` is
+       `(max - min) / 2` over magnitudes documented on [0, inf), so a
+       magnitude above 2.0 makes `int(uncertainty * 255) > 255` and
+       `to_binary()` raises `struct.error`. That path is reachable from a
+       legal SensorReading.
+
+GLY-6  The demo classified nothing and reported success.
+       It preferred a freshly constructed real `SensorSuite` -- which has no
+       readings in it -- over the populated mock in the `except ImportError`
+       branch, so all six processed states were VOID, the "glyph timeline"
+       had zero transitions, and the last line printed was
+       "Glyph State Encoder operational". Fixed below: the demo now seeds the
+       suite and asserts that more than one glyph was produced.
+
+GLY-7  The module was not importable as a library, and only the demo hid it.
+       `encode()` calls `time.time()`, but `import time` appeared only inside
+       the `if __name__ == "__main__":` block -- which puts `time` in module
+       globals when the file is RUN and nowhere when it is IMPORTED. So every
+       caller outside this file got `NameError: name 'time' is not defined`
+       on the first encode, while the demo passed. Fixed (the import moved to
+       module scope); recorded because the shape is worth having a name for:
+       a demo can supply a binding the library needs, and then the demo is
+       testing a different module than the one anyone imports.
+
+What is NOT audited here, because it is a question rather than a defect: the
+twelve glyphs, their sensor sets and their thresholds are an affect model. The
+open problems GLY-A and GLY-B in `playground/OPEN_PROBLEMS.json` state what
+would have to be measured to make any of those numbers other than a guess.
+"""
 from __future__ import annotations
 
 import json
 import hashlib
 import struct
 import math
+import time          # GLY-7: encode() calls time.time(); this import was
+                     # present only inside the __main__ block, so the module
+                     # raised NameError for every importer.
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Any, Tuple, Set
 from enum import Enum
@@ -1317,71 +711,189 @@ class GlyphSensorIntegration:
 # DEMO
 # ─────────────────────────────────────────────────────────────
 
+
+# ─────────────────────────────────────────────────────────────
+# MEASUREMENTS  --  the audit header's numbers, on demand
+# ─────────────────────────────────────────────────────────────
+
+def unreachable_glyphs() -> Dict[str, str]:
+    """GLY-1. Glyphs no input can produce, with the reason.
+
+    Only the arithmetically provable case is listed. A glyph that merely never
+    turned up in sampling is not reported here, because "not seen in 20 000
+    draws" is a statement about the draws.
+    """
+    out = {}
+    # BLOCKAGE: pressure > 0.5 and total_magnitude < 0.5, where pressure is a
+    # term of total_magnitude over non-negative magnitudes.
+    out[Glyph.BLOCKAGE.name] = (
+        "pressure > 0.5 and total_magnitude < 0.5; pressure is a term of "
+        "total_magnitude and magnitudes are non-negative, so "
+        "total_magnitude >= pressure > 0.5 for every input"
+    )
+    return out
+
+
+def _spec_exemplar(phase_space: List[str]) -> Dict[str, float]:
+    """Build a reading set from a declared phase_space description.
+
+    `low_X` -> X at 0.05, `high_X` -> X at 0.85, a bare sensor name -> 0.70,
+    the two null tokens -> the empty set. Predicate tokens that name no sensor
+    (`balanced_active`, `novel_pattern`, `isolation`, ...) contribute nothing,
+    which is itself part of what the recovery score measures.
+    """
+    out: Dict[str, float] = {}
+    for cond in phase_space:
+        if cond in ("inactive", "zero_intensity"):
+            return {}
+        if cond.startswith("low_"):
+            out.setdefault(cond[4:], 0.05)
+        elif cond.startswith("high_"):
+            out[cond[5:]] = 0.85
+        elif "_" in cond:
+            continue          # a predicate, not a sensor
+        else:
+            out[cond] = 0.70
+    return out
+
+
+#: The phase_space declarations from the superseded half, kept as the
+#: independent statement of intent that `recovery_from_spec()` scores against.
+#: Copied verbatim from `legacy/glyph_state_encoder_phase_space.py`; it is a
+#: specification, not an implementation, which is the point -- scoring this
+#: file's ladder against exemplars derived from this file's own ladder would
+#: be P-SELF-SUPPLIED-FALSIFIER.
+PHASE_SPACE_SPEC: Dict[str, List[str]] = {
+    "FELT_COHERENT":  ["joy", "love", "curiosity", "low_fear", "low_anger"],
+    "BALANCE_THREAT": ["fear", "vigilance", "anger", "low_grief"],
+    "CAUSALITY_LOOP": ["grief", "love", "longing", "uncertainty"],
+    "RE_NORMALIZE":   ["discordance", "fatigue", "pressure", "curiosity"],
+    "HEAT_FLUX":      ["anger", "pressure", "fatigue", "high_discordance"],
+    "RESONANCE":      ["balanced_active", "high_confidence", "low_discordance"],
+    "BLOCKAGE":       ["pressure", "low_flow", "fatigue", "low_joy"],
+    "THRESHOLD":      ["high_uncertainty", "low_confidence", "high_intensity"],
+    "VOID":           ["inactive", "zero_intensity"],
+    "EMERGENCE":      ["curiosity", "low_intensity", "novel_pattern"],
+    "FRACTURE":       ["high_discordance", "low_coherence", "isolation"],
+    "CONTAINMENT":    ["high_boundary", "low_engagement", "vigilance"],
+}
+
+
+def recovery_from_spec() -> Dict[str, Any]:
+    """GLY-2. Feed each glyph an exemplar built from its declared phase_space
+    and count how often the classifier returns the glyph it was built for.
+
+    Returns the per-glyph verdict and the score. This is the number that
+    decided which half of the pasted file survived; it is not a quality
+    threshold, and 12/12 is not achievable while GLY-1 stands.
+    """
+    rows = {}
+    hits = 0
+    for name, ps in PHASE_SPACE_SPEC.items():
+        ex = _spec_exemplar(ps)
+        got = Glyph.from_sensor_state(
+            {k: SensorReading(magnitude=v, confidence=1.0)
+             for k, v in ex.items()}).name
+        rows[name] = {"exemplar": ex, "got": got, "recovered": got == name}
+        hits += got == name
+    return {"rows": rows, "recovered": hits, "of": len(PHASE_SPACE_SPEC)}
+
+
+def sub_glyphs_are_data_independent(encoder: "GlyphStateEncoder" = None) -> bool:
+    """GLY-3. True when `sub_glyphs` is a function of the primary glyph alone.
+
+    Proved by finding two reading sets that classify to the same primary and
+    differ in every magnitude, then comparing their sub_glyph lists. If the
+    field carried information about the reading, those two would differ.
+    """
+    enc = encoder or GlyphStateEncoder()
+    a = {"joy": SensorReading(magnitude=0.9, confidence=1.0),
+         "love": SensorReading(magnitude=0.9, confidence=1.0),
+         "curiosity": SensorReading(magnitude=0.9, confidence=1.0)}
+    b = {"joy": SensorReading(magnitude=0.35, confidence=0.4),
+         "love": SensorReading(magnitude=0.25, confidence=0.4),
+         "grief": SensorReading(magnitude=0.15, confidence=0.4)}
+    sa, sb = enc.encode(a), enc.encode(b)
+    if sa.primary_glyph != sb.primary_glyph:
+        raise AssertionError("fixture no longer lands on one primary glyph")
+    return [g.name for g in sa.sub_glyphs] == [g.name for g in sb.sub_glyphs]
+
+
+def codec_round_trip_error(state: "GlyphState") -> Dict[str, float]:
+    """GLY-5. Absolute error introduced by to_binary/from_binary.
+
+    Reported rather than removed: widening the fields would change the wire
+    format, and nothing downstream has declared what precision it needs.
+    """
+    back = GlyphState.from_binary(state.to_binary())
+    out = {"intensity": abs(state.intensity - back.intensity),
+           "confidence": abs(state.confidence - back.confidence),
+           "uncertainty": abs(state.uncertainty - back.uncertainty)}
+    out["vector"] = max([abs(x - y) for x, y in zip(state.vector, back.vector)]
+                        or [0.0])
+    return out
+
+
+# ─────────────────────────────────────────────────────────────
+# DEMO
+# ─────────────────────────────────────────────────────────────
+
+def _demo_readings() -> List[Dict[str, SensorReading]]:
+    """Four reading sets that are meant to land on four different glyphs."""
+    def R(**kw):
+        return {k: SensorReading(magnitude=v, confidence=0.85)
+                for k, v in kw.items()}
+    return [R(joy=0.6, love=0.5, curiosity=0.4, fear=0.1, anger=0.1),
+            R(fear=0.7, vigilance=0.6, anger=0.4, grief=0.1),
+            R(discordance=0.6, fatigue=0.5, pressure=0.4, curiosity=0.3),
+            R(grief=0.6, love=0.4, longing=0.5)]
+
+
+def main() -> int:
+    """Exercises the encoder on states that must not all classify the same.
+
+    The version this replaced constructed an empty SensorSuite, classified six
+    VOIDs, and printed "operational". This one returns nonzero if fewer than
+    three distinct glyphs come out, so the same failure cannot pass silently.
+    """
+    enc = GlyphStateEncoder()
+    seen = []
+    print("GLYPH STATE ENCODER")
+    print("=" * 62)
+    for i, readings in enumerate(_demo_readings(), 1):
+        st = enc.encode(readings)
+        wire = st.to_binary()
+        back = GlyphState.from_binary(wire)
+        err = codec_round_trip_error(st)
+        seen.append(st.primary_glyph.name)
+        print("  state %d  %-16s intensity %.2f  %2d bytes  "
+              "round-trip glyph %s  max field error %.4f"
+              % (i, st.primary_glyph.name, st.intensity, len(wire),
+                 "ok" if back.primary_glyph == st.primary_glyph else "LOST",
+                 max(err.values())))
+
+    print()
+    rec = recovery_from_spec()
+    print("  recovery from the declared phase_space: %d/%d"
+          % (rec["recovered"], rec["of"]))
+    for name, row in rec["rows"].items():
+        if not row["recovered"]:
+            print("      %-16s -> %s" % (name, row["got"]))
+    print("  unreachable by arithmetic: %s"
+          % ", ".join(unreachable_glyphs()) or "none")
+    print("  sub_glyphs independent of the reading: %s"
+          % sub_glyphs_are_data_independent())
+    print()
+
+    distinct = len(set(seen))
+    if distinct < 3:
+        print("FAIL: %d distinct glyph(s) over %d states -- the classifier is "
+              "not separating the demo inputs" % (distinct, len(seen)))
+        return 1
+    print("%d distinct glyphs over %d states" % (distinct, len(seen)))
+    return 0
+
+
 if __name__ == "__main__":
-    import time
-
-    print("=" * 60)
-    print("GLYPH STATE ENCODER — DEMO")
-    print("=" * 60)
-
-    # Create a mock SensorSuite or use the real one
-    try:
-        from bridges.sensor_suite import SensorSuite
-        suite = SensorSuite()
-        print("✅ Using real SensorSuite")
-    except ImportError:
-        # Create mock readings
-        class MockSuite:
-            def active_channels(self):
-                return {
-                    "fear": SensorReading(magnitude=0.7, confidence=0.85),
-                    "vigilance": SensorReading(magnitude=0.6, confidence=0.8),
-                    "anger": SensorReading(magnitude=0.4, confidence=0.75),
-                    "discordance": SensorReading(magnitude=0.3, confidence=0.7),
-                }
-        suite = MockSuite()
-        print("⚠️  Using mock SensorSuite (no real sensors)")
-
-    # Initialize encoder
-    encoder = GlyphStateEncoder()
-    integration = GlyphSensorIntegration(suite)
-
-    print("\n--- Processing sensor state to glyph ---")
-    state = integration.process()
-    print(f"  Primary glyph: {state.primary_glyph.value} ({state.primary_glyph.name})")
-    print(f"  Intensity: {state.intensity:.2f}")
-    print(f"  Confidence: {state.confidence:.2f}")
-    print(f"  Uncertainty: {state.uncertainty:.2f}")
-    print(f"  Vector: {[round(v, 3) for v in state.vector]}")
-
-    print("\n--- Encoding to binary ---")
-    binary = state.to_binary()
-    print(f"  Binary length: {len(binary)} bytes")
-    print(f"  Hex (first 64): {binary[:32].hex()}...")
-
-    print("\n--- Decoding binary back to state ---")
-    decoded = GlyphState.from_binary(binary)
-    print(f"  Decoded glyph: {decoded.primary_glyph.value} ({decoded.primary_glyph.name})")
-    print(f"  Decoded intensity: {decoded.intensity:.2f}")
-    print(f"  Match: {state.primary_glyph == decoded.primary_glyph}")
-
-    print("\n--- Decoding to sensor readings (approximate) ---")
-    sensors = encoder.inverse(binary)
-    active = [s for s, r in sensors.items() if r.magnitude > 0]
-    print(f"  Reconstructed {len(active)} active sensors:")
-    for sid in active[:5]:
-        r = sensors[sid]
-        print(f"    {sid}: magnitude={r.magnitude:.2f}, confidence={r.confidence:.2f}")
-
-    print("\n--- Glyph timeline (simulated) ---")
-    # Simulate a sequence
-    for _ in range(5):
-        time.sleep(0.01)
-        integration.process()
-    timeline = integration.glyph_timeline()
-    print(f"  Sequence: {' → '.join(timeline['glyph_sequence'])}")
-    print(f"  Transitions: {timeline['transition_count']}")
-
-    print("\n" + "=" * 60)
-    print("✅ Glyph State Encoder operational")
-    print("=" * 60)
+    import sys as _sys
+    _sys.exit(main())

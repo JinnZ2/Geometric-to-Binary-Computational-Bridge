@@ -280,6 +280,8 @@ FAMILY_HOME = {
     "FAB": "Silicon", "BRG": "Silicon", "EPG": "Silicon", "SIL": "Silicon",
     "TTM": "Silicon", "FP": "Silicon",
     "GIES": "GEIS", "FCL": "field",
+    "GLY": "bridges", "NLS": "bridges",
+    "GI": "geometric_intelligence", "GR": "geometric_intelligence",
     "VAC": "experiments/silicon_speculative",
     "ATT": "experiments/silicon_speculative",
     "TOP": "experiments/silicon_speculative",

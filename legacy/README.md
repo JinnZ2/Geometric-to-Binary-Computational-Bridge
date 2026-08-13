@@ -29,6 +29,7 @@ fix it.
 |---|---|---|
 | `Negentropic-05-implementation.md` | `Negentropic/core.py`, `negentropic_engine.py`, and the rest of the module tier | Original code listings carrying the inverted Kuramoto sign, the constant-D Fokker-Planck form, `A = avg_R_e`, compounding curiosity, and the raised cosine applied to Euclidean distances. All five are in `Negentropic/corrections.md` |
 | `Silicon-3D_LIGHT_ENHANCED_OCTAHEDRAL_PROCESSING.md` | `Silicon/optical_interface.md` | Three FATAL defects: magneto-optic control of a diamagnetic material, photon-driven site-level state switching against a ~1e8-site mode-size mismatch, and indirect-gap optical addressing. Audited in the replacement's `audit_v1` section |
+| `glyph_state_encoder_phase_space.py` | `bridges/glyph_state_encoder.py` | GLY-4. `from_phase_space` guards every scoring branch on `if condition in readings`, where the conditions are tokens like `low_fear` and `balanced_active` that are never sensor keys — so all of them are unreachable. 5 of 12 glyphs can be emitted, VOID is not one of them, and an empty reading set returns FELT_COHERENT. Its `phase_space` declarations survive as `PHASE_SPACE_SPEC` in the replacement; its dynamics layer was deliberately not ported |
 
 ## Deliberately NOT moved
 

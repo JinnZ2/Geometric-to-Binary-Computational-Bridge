@@ -11,112 +11,57 @@
  },
  "claims": [
   {
-   "id": "NEG-10",
-   "family": "NEG",
-   "statement": "Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology",
+   "id": "ATT-1",
+   "family": "ATT",
+   "statement": "a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode",
    "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-11",
-   "family": "NEG",
-   "statement": "The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-2",
-   "family": "NEG",
-   "statement": "An archive is a dissipative structure. Lifetime is set by `sigma - W_care/T`, not by the medium.",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-3",
-   "family": "NEG",
-   "statement": "Finite-time erasure costs `kT ln2 + C/tau`; resurfacing of an overwritten trace scales as `tau^-1`",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-4",
-   "family": "NEG",
-   "statement": "Dependency re-rooting is the correct update operation; radiate and recenter are the only two evidence moves",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-7",
-   "family": "NEG",
-   "statement": "Seventeen cultural and scientific lenses are surface renderings of one deep grammar",
-   "status": "dead",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md",
-   "because": "randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor; see Negentropic/lens_collapse_test.py",
+   "names": "refutation",
+   "source": "recorded",
    "salvage": {
-    "cause": "NULL_ARTIFACT",
-    "keep": "The seventeen lenses remain a usable phrasebook between vocabularies -- what died is the claim that they are ONE grammar, not that translating between them helps. And the harness that killed it generalised: repo_guard.null_harness now runs the same test on anything.",
-    "principle": "P-NULL-ARTIFACT",
-    "screen": {
-     "name": "null-harness",
-     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
-     "mechanised_by": "repo_guard.null_harness",
-     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
-    }
+    "cause": "CODE_ERROR",
+    "keep": "The correct half is load-bearing and was kept: topological charge is invariant while core POSITION is a zero mode. The remedy was wrong, not the finding. A pin coupling to something non-topological removes the zero mode -- measured, 100% hop at k_p = 0 and 0% at k_p >= 0.01, charge conserved throughout.",
+    "killed": "a registry as a vortex pin -- bookkeeping costs nothing to violate",
+    "principle": "P-UNFALSIFIABLE"
    }
   },
   {
-   "id": "NEG-8",
-   "family": "NEG",
-   "statement": "A structure persists iff it exports entropy at least as fast as it produces it: `Phi = -S_exchange_dot - sigma >= 0`",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "NEG-9",
-   "family": "NEG",
-   "statement": "A cycle after inversion is a contradiction detector: two claims cannot both be foundational to each other, so one is wrong",
-   "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "TRI-1",
-   "family": "TRI",
-   "statement": "Equilateral minimises worst-case strength of figure, at exactly 1.0",
+   "id": "BRG-6",
+   "family": "BRG",
+   "statement": "piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110>",
    "status": "open",
    "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
+   "source": "recorded"
   },
   {
-   "id": "TRI-2",
-   "family": "TRI",
-   "statement": "Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design",
+   "id": "EPG-6",
+   "family": "EPG",
+   "statement": "109.47 degrees is the tetrahedral maximin bound, from |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0",
    "status": "live",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
+   "names": "mechanism",
+   "source": "recorded",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The two-line identity |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0 proves the 109.47 degree maximin bound outright. It replaced a numerical search that stalled half a degree short -- worth remembering when an optimiser is standing in for an identity."
+   }
   },
   {
-   "id": "TRI-3",
-   "family": "TRI",
-   "statement": "Closure failure and record drift are separable: closure tests the observation, drift tests the figure",
-   "status": "open",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
-  },
-  {
-   "id": "TRI-4",
-   "family": "TRI",
-   "statement": "Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum",
-   "status": "open",
-   "names": "proposal",
-   "source": "derived:Negentropic/NEG_CLAIMS.md"
+   "id": "EPG-7",
+   "family": "EPG",
+   "statement": "cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic",
+   "status": "live",
+   "names": "mechanism",
+   "source": "recorded",
+   "salvage": {
+    "cause": "SYMMETRY_FORBIDDEN",
+    "keep": "Neumann's principle on a cubic crystal forces any rank-2 transport tensor to lambda*I. Free to check, kills every 'preferred direction in cubic Si' claim at once, and generalises to every material in that point group.",
+    "killed": "directional thermal or electrical transport anisotropy in cubic silicon",
+    "screen": {
+     "name": "neumann-cubic",
+     "rule": "Neumann's principle: a rank-2 tensor invariant under a cubic group is lambda*I. Any 'preferred direction in a cubic crystal' claim dies by inspection.",
+     "mechanised_by": "repo_guard.veto",
+     "applies_when": "a claim of directional anisotropy in a material whose point group forbids it"
+    }
+   }
   },
   {
    "id": "ER-1",
@@ -193,6 +138,41 @@
      "applies_when": "two quantities quoted together as a consistent pair"
     }
    }
+  },
+  {
+   "id": "ER-7",
+   "family": "ER",
+   "statement": "the stated implant dose is achievable",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "FAB-1",
+   "family": "FAB",
+   "statement": "a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority.",
+    "killed": "a magnetic state channel in silicon, 11 orders below a Hall sensor",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach",
+     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
+    }
+   }
+  },
+  {
+   "id": "FAB-3",
+   "family": "FAB",
+   "statement": "the eight implant states are separable at >3 sigma in (R_s, carrier type, n)",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
   },
   {
    "id": "FCL-1",
@@ -383,6 +363,122 @@
    "source": "derived:field/falsifiers_field_loop.py"
   },
   {
+   "id": "GI-1",
+   "family": "GI",
+   "statement": "IntegrityMonitor predictions are seeded from the design value, not the measurement, so a measured error propagates nowhere",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The module answers 'is this part where the drawing says', which is a real question and the one it can be trusted for. What it does NOT answer, and reads as if it does, is 'given this part came out wrong, is the next one still compatible'. Naming which of the two a tool answers is most of the value of auditing it, and full_report now carries predictions_use_measurements so a caller cannot assume the second.",
+    "killed": "the field guide's stated purpose of catching a mis-cut part before the next one is committed",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GI-2",
+   "family": "GI",
+   "statement": "the INTEGRITY_THRESHOLD clause in full_report is unsatisfiable: integrity is a product of two fractions so is at most 1.0, and the clause tests it against 1.809",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "phi^2 + 1 = 3.618 is a correct constant that does no work anywhere in the module, so removing it costs nothing and keeping it costs a reader's trust. The general form: a threshold and the quantity it gates must be shown to share a range before the comparison means anything -- one line, and it is the same check that killed BLOCKAGE in bridges/.",
+    "killed": "phi^2 + 1 as a coherence bound on anything this module computes",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GI-3",
+   "family": "GI",
+   "statement": "check() keeps the minimum-error prediction over all sources, so a design with two routes of different product is resolved in the measurement's favour and reported trusted",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The redundancy is free evidence and is being spent to hide a contradiction rather than to find one: two routes disagreeing IS the finding, and reporting the spread instead of the minimum turns the same computation into a design audit. On a path-consistent design the O(N^2) walk returns one value from every source, so nothing is lost by changing it.",
+    "killed": "a trusted verdict as evidence the design is self-consistent",
+    "screen": {
+     "name": "report-the-spread-not-the-best-fit",
+     "rule": "When a check has several independent routes to the same quantity, report their spread. Keeping the closest one to the measurement converts disagreement into agreement and destroys the evidence.",
+     "mechanised_by": null,
+     "applies_when": "any verification with more than one path from premises to a predicted value"
+    }
+   }
+  },
+  {
+   "id": "GI-4",
+   "family": "GI",
+   "statement": "reconstruct() implements neither the averaging nor the path weighting its docstring promises; the first edge to reach a node wins, so insertion order decides",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The docstring is a usable specification of what the function should do -- confidence-weighted average over trusted paths -- and it is worth keeping as the target rather than deleting to match the code. The measurable form of the defect is cheap: build the same graph twice with the edges added in each order and compare, which is a general test for any first-writer-wins propagation.",
+    "killed": "a reconstructed value as better than a single-path estimate"
+   }
+  },
+  {
+   "id": "GI-5",
+   "family": "GI",
+   "statement": "IntegrityReport.reconstructed is declared on the dataclass and never assigned, so it is None on every report the module produces",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A declared-and-never-written field is found by one loop over the constructor's outputs, and it is worth looking for because it usually means a second code path was planned and the first one shipped. Here full_report fills the same value from a separate dict, so the two are one field apart from being a duplicate authority."
+   }
+  },
+  {
+   "id": "GI-6",
+   "family": "GI",
+   "statement": "reconstruct() returns {} from a single measurement, and a forward-only chain reports its first node untrusted on perfect measurements",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The rule is simple and belongs in the field guide rather than the code: a node nothing points at cannot be predicted, so build every network with edges in both directions, and reconstruction needs two surviving measurements that agree, not one. The drop's own timber-frame example had forward edges only and flagged a correctly cut brace; the README's nautilus example added both directions and did not.",
+    "killed": "the documented one-measurement emergency reconstruction"
+   }
+  },
+  {
+   "id": "GI-7",
+   "family": "GI",
+   "statement": "the field guide's speed-of-sound correction was 6%; the true shift from +20 C to -40 C is 10.6%",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:tests/test_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "c(T) = 331.3 + 0.606*T is within 0.32% of the exact sqrt(1+T/273.15) form at -40 C and 0.52% at -50 C, so the linear approximation is fine over the stated range and only the arithmetic downstream of it was wrong. 343.0 m/s hardcoded across fabrication/ is the +15 C value. pipe_modes, box_modes, cylinder_modes and ka_check already accept c=, so this is a threading job from a recorded temperature, not a physics change.",
+    "killed": "the 6% figure a reader would have compensated by"
+   }
+  },
+  {
+   "id": "GIES-1",
+   "family": "GIES",
+   "statement": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded"
+  },
+  {
    "id": "GIES-2",
    "family": "GIES",
    "statement": "index parity equals site type, 8/8",
@@ -418,6 +514,232 @@
      "mechanised_by": null,
      "applies_when": "a claimed operation that moves an atom between sublattices or sites"
     }
+   }
+  },
+  {
+   "id": "GLY-0",
+   "family": "GLY",
+   "statement": "bridges/glyph_state_encoder.py did not compile: two complete encoders pasted end to end, a second `from __future__` at line 720",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:tests/test_glyph_encoder.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The two halves are the only two independent statements in the repository of what the twelve glyphs mean. The superseded half's phase_space declarations survive as PHASE_SPACE_SPEC in the replacement, which is what lets the surviving classifier be scored against a specification it did not author instead of against its own thresholds.",
+    "killed": "every import of bridges.glyph_state_encoder, and with it any use of the glyph layer at all",
+    "screen": {
+     "name": "compile-every-file",
+     "rule": "A merge or paste that concatenates rather than resolves leaves a file that reads correctly in fragments and compiles in none. Compile every .py in the folder before trusting any result from it -- ast.parse is not enough, since a misplaced future import parses and does not compile.",
+     "mechanised_by": null,
+     "applies_when": "a folder whose files arrived by paste or merge rather than by incremental edit"
+    }
+   }
+  },
+  {
+   "id": "GLY-1",
+   "family": "GLY",
+   "statement": "BLOCKAGE is unsatisfiable: its rule needs pressure > 0.5 and total_magnitude < 0.5, and pressure is a non-negative term of that total",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Reachability of a classifier's outputs is decidable by inspection whenever a rule constrains both a term and the sum it belongs to. One glyph in twelve was dead and no sampling was needed to show it -- 20 000 random draws only confirmed what two lines of arithmetic already gave.",
+    "killed": "the BLOCKAGE state",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GLY-2",
+   "family": "GLY",
+   "statement": "the rule ladder is order-dependent with the order undeclared; recovery of the intended glyph from its own specification is 7 of 12",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Scoring a classifier against exemplars built from a SEPARATE statement of intent tells a precedence bug from a logic bug. The HEAT_FLUX exemplar satisfies RE_NORMALIZE's own rule, so no rule here is wrong -- the order in which they are tried is what decides, and it is written nowhere.",
+    "killed": "the reading of 7/12 as a logic error",
+    "screen": {
+     "name": "score-against-a-spec-you-did-not-write",
+     "rule": "Build the test inputs from a statement of intent written apart from the implementation under test. Exemplars derived from the implementation's own thresholds measure nothing.",
+     "mechanised_by": null,
+     "applies_when": "a classifier whose thresholds and whose test inputs would otherwise share an author"
+    }
+   }
+  },
+  {
+   "id": "GLY-3",
+   "family": "GLY",
+   "statement": "sub_glyphs is a function of the primary glyph alone and carries no information about the reading",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The screen that found it is the GIES-2 / KEA-7 one carried into a third formalism: vary the thing the field is supposed to track and check the field moves. Two reading sets differing in every magnitude produce byte-identical sub_glyphs, and the constant travels into both entropy() and the wire format under the name 'secondary states'.",
+    "killed": "sub_glyphs as evidence of anything about the measurement",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GLY-4",
+   "family": "GLY",
+   "statement": "the phase-space classifier reaches 5 of 12 glyphs and returns FELT_COHERENT for an empty reading set",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Its phase_space declarations are the only description of what each glyph MEANS written apart from a classifier, and they became PHASE_SPACE_SPEC. The cause generalises: every scoring branch sat behind `if condition in readings` where the conditions are tokens like low_fear that are never reading keys, so the guard silently deleted the ladder beneath it. A dead channel then read as the healthy state.",
+    "killed": "the phase-space glyph encoder, now legacy/glyph_state_encoder_phase_space.py, and its untested decay/energy layer with it",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GLY-5",
+   "family": "GLY",
+   "statement": "the codec is lossy and documented as if it were not, and an uncertainty above 1.0 is reachable from a legal reading and raises struct.error",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Two separate things worth keeping: the repo's lossless-round-trip convention needs an explicit exception rather than a silent one, and a field packed into one byte needs its domain checked against the domain of what feeds it. uncertainty is (max-min)/2 over magnitudes documented on [0, inf), so the byte overflows at a magnitude spread above 2."
+   }
+  },
+  {
+   "id": "GLY-6",
+   "family": "GLY",
+   "statement": "the demo constructed an empty SensorSuite, classified six VOIDs, and printed 'operational'",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "A demo that cannot fail is not evidence the module works. The fix costs one assertion -- count distinct outputs over the demo's own inputs and exit nonzero below a floor -- and it converts the demo from a advertisement into a test. The try/except that preferred the real empty suite over the populated mock is the general trap: the fallback had the data and the preferred path had none.",
+    "killed": "the 'operational' banner as evidence",
+    "screen": {
+     "name": "demo-must-be-able-to-fail",
+     "rule": "A __main__ block that prints success unconditionally is an advertisement. Give it one assertion about its own output and a nonzero exit.",
+     "mechanised_by": null,
+     "applies_when": "a module whose only exercise is a __main__ demo"
+    }
+   }
+  },
+  {
+   "id": "GLY-7",
+   "family": "GLY",
+   "statement": "encode() needed `time`, imported only inside __main__, so the module raised NameError for every importer while the demo passed",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The __main__ block is a scope boundary in one direction only: names bound there become module globals when the file is RUN and do not exist when it is IMPORTED. So a demo can supply a binding the library needs, and then the demo is exercising a different module than the one anyone imports. Import the module in a test rather than running it.",
+    "killed": "the demo's pass as evidence the library worked",
+    "screen": {
+     "name": "import-it-do-not-run-it",
+     "rule": "Exercise a module through an import in a test, not through its __main__ block. Running the file can bind names that importing it does not.",
+     "mechanised_by": null,
+     "applies_when": "a module with a __main__ demo and no test that imports it"
+    }
+   }
+  },
+  {
+   "id": "GR-1",
+   "family": "GR",
+   "statement": "the phi band edges are not monotonic: the loop overshoots f_max and then appends it, so the last interval is reversed and empty",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Two defects for the price of one inspection: a band that no input can enter, and a band above it running past the f_max the caller asked for, so components between f_max and the overshoot are counted and everything above the overshoot is dropped silently. Any geometric-progression edge builder has this shape -- the exit test fires after the step, not before.",
+    "killed": "f_max as the stated upper limit of the analysis",
+    "screen": {
+     "name": "enumerate-reachable-outputs",
+     "rule": "For a classifier with a fixed output set, list the outputs no input can produce before trusting the label set. A rule constraining both a term and the sum that term belongs to is the common case, and it is decidable by inspection.",
+     "mechanised_by": null,
+     "applies_when": "a classifier or encoder whose outputs are a fixed enumerable set"
+    }
+   }
+  },
+  {
+   "id": "GR-2",
+   "family": "GR",
+   "statement": "bands_per_octave is stored and never read; every value gives byte-identical band edges",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "An argument that looks like the resolution control and is not. Found by the cheapest possible test -- construct with two extreme values and compare the derived state -- which is worth running against every constructor parameter that is supposed to change something.",
+    "killed": "bands_per_octave as a tuning knob",
+    "screen": {
+     "name": "test-the-distinguishing-operation",
+     "rule": "Apply the operation that is supposed to separate the states and check every invariant the representation exposes. If none move, the representation is blind to it.",
+     "mechanised_by": null,
+     "applies_when": "any encoding claiming N distinct states, where some operation is supposed to separate them"
+    }
+   }
+  },
+  {
+   "id": "GR-3",
+   "family": "GR",
+   "statement": "the power-law fit is built from every populated band including the peaks it is then used to judge, contradicting its own comment",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "MATH_ERROR",
+    "keep": "The bias has a direction worth stating: including anomalies in the baseline raises it, so the method misses anomalies, and it misses more of them the more of the spectrum is anomalous -- weakest exactly when there is most to find. A robust fit or a leave-one-out baseline fixes it; the shape is P-SELF-SUPPLIED-FALSIFIER in a spectral estimator."
+   }
+  },
+  {
+   "id": "GR-5",
+   "family": "GR",
+   "statement": "detect_injection flags 15.7% of bins when both series are independent draws of the same noise process",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "For iid exponential numerator and denominator the analytic false-alarm rate is 1/(1+t), which at t = 2.3156 is 30.2% -- so the measured 15.7% on Rayleigh amplitudes is the expected order and the gate is behaving exactly as its arithmetic says. The fix is the FCL-5/6 pair the field loop already needed: a permutation null and a correction over the number of bins tested. injection_score cannot be read as a rate until both exist.",
+    "killed": "injection_score as a rate of anything",
+    "screen": {
+     "name": "measure-the-null",
+     "rule": "Run the gate on data where the answer is known to be no, and count. A threshold with no measured false-alarm rate is not calibrated in either direction.",
+     "mechanised_by": null,
+     "applies_when": "any detector emitting a pass/fail or a score read as a rate"
+    }
+   }
+  },
+  {
+   "id": "GR-6",
+   "family": "GR",
+   "statement": "detect_injection returns a dict with no injections key when called without a baseline, so the documented fallback raises KeyError in the caller",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:geometric_intelligence/falsifiers_gi_network.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The fallback itself is intended and documented; only the silent shape change is not. It fails for exactly the callers who captured no baseline -- the cold-workshop case the field guide is written for -- which is the general lesson: a fallback path is used by the least-equipped caller, so it needs the tightest contract, not the loosest."
    }
   },
   {
@@ -473,6 +795,178 @@
    }
   },
   {
+   "id": "NEG-10",
+   "family": "NEG",
+   "statement": "Recenter cost = edges reversed ∝ path length, so archives that recenter often evolve toward shallow, wide topology",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-11",
+   "family": "NEG",
+   "statement": "The validation gate is load-bearing: an archive rooted on an unvalidated node degrades faster than one rooted on a confirmed one",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-2",
+   "family": "NEG",
+   "statement": "An archive is a dissipative structure. Lifetime is set by `sigma - W_care/T`, not by the medium.",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-3",
+   "family": "NEG",
+   "statement": "Finite-time erasure costs `kT ln2 + C/tau`; resurfacing of an overwritten trace scales as `tau^-1`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-4",
+   "family": "NEG",
+   "statement": "Dependency re-rooting is the correct update operation; radiate and recenter are the only two evidence moves",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-7",
+   "family": "NEG",
+   "statement": "Seventeen cultural and scientific lenses are surface renderings of one deep grammar",
+   "status": "dead",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md",
+   "because": "randomly-coefficiented lenses of the same functional form reproduce the reported correlation floor; see Negentropic/lens_collapse_test.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "The seventeen lenses remain a usable phrasebook between vocabularies -- what died is the claim that they are ONE grammar, not that translating between them helps. And the harness that killed it generalised: repo_guard.null_harness now runs the same test on anything.",
+    "principle": "P-NULL-ARTIFACT",
+    "screen": {
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness",
+     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
+    }
+   }
+  },
+  {
+   "id": "NEG-8",
+   "family": "NEG",
+   "statement": "A structure persists iff it exports entropy at least as fast as it produces it: `Phi = -S_exchange_dot - sigma >= 0`",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NEG-9",
+   "family": "NEG",
+   "statement": "A cycle after inversion is a contradiction detector: two claims cannot both be foundational to each other, so one is wrong",
+   "status": "live",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "NLS-1",
+   "family": "NLS",
+   "statement": "the sensor spec path resolves into an unmounted sibling repo, so NonLocalCorrelationSensor could not be constructed anywhere in this tree",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A cross-repo path should fail naming the MOUNT, not the path: ./fieldlink-sync.sh is the recovery and the FileNotFoundError never said so. Accepting an explicit spec= makes the class testable without the sibling repo, which is what let the other three findings be measured at all. The spec itself is deliberately not reproduced -- guessing its contents would put a fabricated standard where the real one goes.",
+    "killed": "every use of the non-local sensor in this repository",
+    "screen": {
+     "name": "resolve-cross-repo-paths",
+     "rule": "A path into a fieldlink-mounted sibling repo is absent in a bare checkout. Fail naming the sync command, and take the data by argument so the module is testable unmounted.",
+     "mechanised_by": null,
+     "applies_when": "a module reading a file from a sibling repository mount"
+    }
+   }
+  },
+  {
+   "id": "NLS-2",
+   "family": "NLS",
+   "statement": "scale is inferred from correlation_strength and technique is then selected from scale, so scale/technique agreement is 1.0 by construction: 0 mismatches over 21 strengths spanning [0,1]",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "UNFALSIFIABLE",
+    "keep": "The remedy that worked for AISS's flat merit weights works here and did not require inventing a disagreement: report the degeneracy beside the answer, so a caller cannot read a tautology as a confirmation. Every metadata dict now carries scale_is_inferred. The general check is cheaper than the null: trace both sides of an agreement test to their inputs.",
+    "killed": "scale/technique agreement as evidence of anything",
+    "screen": {
+     "name": "both-sides-from-one-source",
+     "rule": "When a check compares two quantities, trace both back to their inputs. If they descend from the same number the check cannot fail, and no amount of data will make it informative.",
+     "mechanised_by": null,
+     "applies_when": "any agreement or consistency check between two derived quantities"
+    }
+   }
+  },
+  {
+   "id": "NLS-3",
+   "family": "NLS",
+   "statement": "the strength-to-scale map records a strong cross-system correlation as 'cellular', so the observation the sensor exists to catch cannot be recorded at all",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "OUT_OF_SCOPE",
+    "keep": "Scale is a property of the EXPERIMENT -- what was sampled, over what extent, across what interval -- and is knowable before the correlation is computed. Correlation strength is a property of the result. Deriving one from the other conflates two quantities with no stated mechanism between them. Passing scale explicitly was already supported and nothing called it that way, so the fix is a caller change, not a model change.",
+    "killed": "the inferred scale as a description of extent",
+    "screen": {
+     "name": "can-the-target-observation-be-recorded",
+     "rule": "Construct the observation the instrument exists to detect and check the data model can hold it. An instrument whose encoding excludes its own target is not insensitive, it is blind.",
+     "mechanised_by": null,
+     "applies_when": "an instrument with a fixed enumerated output vocabulary and a named target phenomenon"
+    }
+   }
+  },
+  {
+   "id": "NLS-4",
+   "family": "NLS",
+   "statement": "an inferred scale absent from the spec's scale_to_technique selected no technique and reported nothing",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:bridges/falsifiers_glyph_sensor.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "dict.get(key, []) turns a vocabulary mismatch between two files into a silent empty result. Checking the four names _infer_scale can emit against the loaded spec at construction converts a silent miss into a refusal that names both sides."
+   }
+  },
+  {
+   "id": "R2-3",
+   "family": "R2",
+   "statement": "the bifilar CMRR budget holds at an achievable matching tolerance",
+   "status": "open",
+   "names": "proposal",
+   "source": "recorded"
+  },
+  {
+   "id": "R2-8",
+   "family": "R2",
+   "statement": "the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse",
+   "status": "live",
+   "names": "refutation",
+   "source": "recorded",
+   "salvage": {
+    "cause": "PHYSICS_BOUND",
+    "keep": "The bifilar geometry and the common-mode budget are sound engineering and stand. What died is the direction of the worry: at 4.42 mrad the risk is not that the write destroys coherence, it is that the write does not happen.",
+    "killed": "the concern that the 5 ps write pulse collapses spin coherence",
+    "screen": {
+     "name": "instrument-floor",
+     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
+     "mechanised_by": "repo_guard.reach",
+     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
+    }
+   }
+  },
+  {
    "id": "SEED-1",
    "family": "SEED",
    "statement": "W is the identity, so the channels are independent scalars",
@@ -517,84 +1011,49 @@
    }
   },
   {
-   "id": "GIES-1",
-   "family": "GIES",
-   "statement": "T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant",
-   "status": "live",
-   "names": "refutation",
-   "source": "recorded"
-  },
-  {
-   "id": "VAC-1",
-   "family": "VAC",
-   "statement": "the vacuum criterion 'at least one mode survives' is true by construction",
-   "status": "live",
-   "names": "refutation",
-   "source": "recorded",
-   "salvage": {
-    "cause": "UNFALSIFIABLE",
-    "keep": "VAC-2's mode-count floor is real and survives. What died is the criterion, not the folder: restating 'at least one mode survives' as a count with a floor makes it able to fail.",
-    "killed": "'at least one mode survives' as a vacuum criterion",
-    "principle": "P-UNFALSIFIABLE",
-    "screen": {
-     "name": "null-harness",
-     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
-     "mechanised_by": "repo_guard.null_harness",
-     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
-    }
-   }
-  },
-  {
-   "id": "ATT-1",
-   "family": "ATT",
-   "statement": "a registry is bookkeeping, not a pin; a template pin coupling to something non-topological removes the core zero mode",
+   "id": "SIL-1",
+   "family": "SIL",
+   "statement": "the shipped strain invariants are blind to crystal orientation",
    "status": "live",
    "names": "refutation",
    "source": "recorded",
    "salvage": {
     "cause": "CODE_ERROR",
-    "keep": "The correct half is load-bearing and was kept: topological charge is invariant while core POSITION is a zero mode. The remedy was wrong, not the finding. A pin coupling to something non-topological removes the zero mode -- measured, 100% hop at k_p = 0 and 0% at k_p >= 0.01, charge conserved throughout.",
-    "killed": "a registry as a vortex pin -- bookkeeping costs nothing to violate",
-    "principle": "P-UNFALSIFIABLE"
+    "keep": "Invariants chosen for convenience discard the thing being measured. The recovery channels in the same spec are unaffected and were kept.",
+    "killed": "the shipped strain invariants as an orientation-sensitive fault signal"
    }
   },
   {
-   "id": "FAB-1",
-   "family": "FAB",
-   "statement": "a 5 um Si cell carries 4e-19 A m2, eleven orders below a Hall sensor and seven below a SQUID",
-   "status": "live",
-   "names": "refutation",
-   "source": "recorded",
-   "salvage": {
-    "cause": "PHYSICS_BOUND",
-    "keep": "The instrument-floor comparison is now repo_guard.reach and it is free to run. Everything above the physics layer in Magnetic-bridge.md -- the FSM, the protocol structure, the hardware list -- was sound and was kept; only the transduction was replaced, by strain at 40x the authority.",
-    "killed": "a magnetic state channel in silicon, 11 orders below a Hall sensor",
-    "screen": {
-     "name": "instrument-floor",
-     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
-     "mechanised_by": "repo_guard.reach",
-     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
-    }
-   }
+   "id": "TRI-1",
+   "family": "TRI",
+   "statement": "Equilateral minimises worst-case strength of figure, at exactly 1.0",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
   },
   {
-   "id": "R2-8",
-   "family": "R2",
-   "statement": "the 5 ps write pulse delivers 4.42 mrad at the legal on-chip coil field, 0.14% of a pi pulse",
+   "id": "TRI-2",
+   "family": "TRI",
+   "statement": "Surviving long-lived stone/timber nets skew near-equilateral by selection, not necessarily design",
    "status": "live",
-   "names": "refutation",
-   "source": "recorded",
-   "salvage": {
-    "cause": "PHYSICS_BOUND",
-    "keep": "The bifilar geometry and the common-mode budget are sound engineering and stand. What died is the direction of the worry: at 4.42 mrad the risk is not that the write destroys coherence, it is that the write does not happen.",
-    "killed": "the concern that the 5 ps write pulse collapses spin coherence",
-    "screen": {
-     "name": "instrument-floor",
-     "rule": "Compute the signal in the instrument's own units and divide by its noise floor before designing anything around reading it.",
-     "mechanised_by": "repo_guard.reach",
-     "applies_when": "any claim that a stated physical quantity will be READ by a named instrument"
-    }
-   }
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-3",
+   "family": "TRI",
+   "statement": "Closure failure and record drift are separable: closure tests the observation, drift tests the figure",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
+  },
+  {
+   "id": "TRI-4",
+   "family": "TRI",
+   "statement": "Angle-only storage removes all metrological dependency; only SIZE needs a preserved datum",
+   "status": "open",
+   "names": "proposal",
+   "source": "derived:Negentropic/NEG_CLAIMS.md"
   },
   {
    "id": "TTM-2",
@@ -622,80 +1081,24 @@
    }
   },
   {
-   "id": "SIL-1",
-   "family": "SIL",
-   "statement": "the shipped strain invariants are blind to crystal orientation",
+   "id": "VAC-1",
+   "family": "VAC",
+   "statement": "the vacuum criterion 'at least one mode survives' is true by construction",
    "status": "live",
    "names": "refutation",
    "source": "recorded",
    "salvage": {
-    "cause": "CODE_ERROR",
-    "keep": "Invariants chosen for convenience discard the thing being measured. The recovery channels in the same spec are unaffected and were kept.",
-    "killed": "the shipped strain invariants as an orientation-sensitive fault signal"
-   }
-  },
-  {
-   "id": "EPG-6",
-   "family": "EPG",
-   "statement": "109.47 degrees is the tetrahedral maximin bound, from |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0",
-   "status": "live",
-   "names": "mechanism",
-   "source": "recorded",
-   "salvage": {
-    "cause": "MATH_ERROR",
-    "keep": "The two-line identity |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0 proves the 109.47 degree maximin bound outright. It replaced a numerical search that stalled half a degree short -- worth remembering when an optimiser is standing in for an identity."
-   }
-  },
-  {
-   "id": "EPG-7",
-   "family": "EPG",
-   "statement": "cubic symmetry forces a rank-2 transport tensor to lambda*I, so conductivity is isotropic",
-   "status": "live",
-   "names": "mechanism",
-   "source": "recorded",
-   "salvage": {
-    "cause": "SYMMETRY_FORBIDDEN",
-    "keep": "Neumann's principle on a cubic crystal forces any rank-2 transport tensor to lambda*I. Free to check, kills every 'preferred direction in cubic Si' claim at once, and generalises to every material in that point group.",
-    "killed": "directional thermal or electrical transport anisotropy in cubic silicon",
+    "cause": "UNFALSIFIABLE",
+    "keep": "VAC-2's mode-count floor is real and survives. What died is the criterion, not the folder: restating 'at least one mode survives' as a count with a floor makes it able to fail.",
+    "killed": "'at least one mode survives' as a vacuum criterion",
+    "principle": "P-UNFALSIFIABLE",
     "screen": {
-     "name": "neumann-cubic",
-     "rule": "Neumann's principle: a rank-2 tensor invariant under a cubic group is lambda*I. Any 'preferred direction in a cubic crystal' claim dies by inspection.",
-     "mechanised_by": "repo_guard.veto",
-     "applies_when": "a claim of directional anisotropy in a material whose point group forbids it"
+     "name": "null-harness",
+     "rule": "Replace the structure you claim is doing the work with noise of the same shape. If the result survives, it was the shape.",
+     "mechanised_by": "repo_guard.null_harness",
+     "applies_when": "any claim whose evidence is statistical, or whose structure could be replaced by noise of the same shape"
     }
    }
-  },
-  {
-   "id": "BRG-6",
-   "family": "BRG",
-   "statement": "piezoresistive readout gives dR/R about 9% at 0.1% strain, gauge factor about 121 along <110>",
-   "status": "open",
-   "names": "proposal",
-   "source": "recorded"
-  },
-  {
-   "id": "FAB-3",
-   "family": "FAB",
-   "statement": "the eight implant states are separable at >3 sigma in (R_s, carrier type, n)",
-   "status": "open",
-   "names": "proposal",
-   "source": "recorded"
-  },
-  {
-   "id": "R2-3",
-   "family": "R2",
-   "statement": "the bifilar CMRR budget holds at an achievable matching tolerance",
-   "status": "open",
-   "names": "proposal",
-   "source": "recorded"
-  },
-  {
-   "id": "ER-7",
-   "family": "ER",
-   "statement": "the stated implant dose is achievable",
-   "status": "open",
-   "names": "proposal",
-   "source": "recorded"
   }
  ],
  "causes": {
