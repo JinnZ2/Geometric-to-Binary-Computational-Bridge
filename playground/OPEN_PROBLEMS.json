@@ -491,15 +491,12 @@
   {
    "id": "GI-8",
    "title": "What audit() computes",
-   "state": "OPEN",
+   "state": "CLOSED",
    "kind": "DEFINITION",
-   "statement": "geometric_intelligence.network.core.audit() was named by the drop's README and __init__ and never supplied. Its output `integrity_score` is the headline number: 'if integrity_score is low, your design has an internal contradiction. Fix the design before cutting wood.' correct() is in the same position, described only as 'iterative error correction'.",
-   "why_open": "Three things are unstated and none is recoverable from the modules that call it: which cycles are enumerated in a directed multigraph, how a cycle's product is compared to identity when edge kinds mix scale and offset, and how per-cycle deviations combine into one number. A plausible formula invented here would be a quantity a person cuts timber against.",
+   "statement": "What audit() and correct() compute. ANSWERED by a second drop containing core.py; both are implemented.",
+   "why_open": "Closed. The answers were: audit() enumerates simple cycles by DFS, composes each into an affine map, and scores it as the deviation from identity AT x = 1; correct() nudges every edge in every inconsistent cycle by a phi^-9-scaled step. Both turned out to carry defects a reconstruction would not have reproduced -- GI-11 and GI-13 -- which is why refusing to guess was the right call. The two questions that remain are GI-11a and GI-13a.",
    "would_count": [
-    "A definition of cycle product for each edge kind, including mixed cycles",
-    "A stated combination rule with an argument for it -- worst case, RMS, and energy-weighted mean give different answers on the same graph",
-    "A network whose score is KNOWN to be low, so the function can fail",
-    "For correct(): what it minimises, what it may move, what it converges to"
+    "Closed by arrival of the file, not by argument."
    ],
    "prior_attempts": [
     {
@@ -519,18 +516,27 @@
   },
   {
    "id": "GI-10",
-   "title": "A bridge from a geometric network to the fabrication ledger",
+   "title": "One ledger, and a claim that can decline to be written",
    "state": "OPEN",
    "kind": "CODE",
-   "statement": "The drop's README shows network_to_claims(net, scope_prefix=...) and append_geo_claims(claims) writing into CLAIM_TABLE.fab.json alongside the acoustic and electrical claims. bridge.py was not supplied.",
-   "why_open": "Two things have to be decided first, and neither is a coding question. What a geometric claim ASSERTS -- a node value, an edge ratio, or a cycle product -- decides what a verdict means, and only the ratio survives a uniform scale change like thermal contraction or timber moisture. And the ledger it would write to is unresolved: 23 sites in fabrication/ open Path('CLAIM_TABLE.fab.json') relative to the working directory, with no locking around the read-modify-write.",
+   "statement": "bridge.py arrived and works. What is unresolved is the ledger it writes to and what it does when it has nothing to say: LEDGER is a relative path at 24 sites across bridge.py and fabrication/, with no locking, and an acyclic network writes an integrity claim of 0.0 that verify_edge_measurement then divides by.",
+   "why_open": "Three decisions, none of them coding questions. Where the ledger lives (an absolute path anchored to the repo root, or JSONL so concurrent appends are safe). What a claim record does when the quantity is undefined -- decline to write, or carry an explicit no-evidence state, because a 0.0 in a ledger cannot be told from a failure. And whether a relative error is the right verdict for every claim type, since it is undefined at zero for all of them.",
    "would_count": [
-    "A statement of what a geo claim asserts, with the reason ratio-vs-value was decided the way it was",
-    "A tolerance with a source -- PHI_INV_9 = 1.3 % is currently a default, not a measurement",
-    "An absolute ledger path, or a decision to migrate to JSONL",
-    "Concurrent-write behaviour stated, since a monitor and a manual verification pass can run at once"
+    "All 24 LEDGER sites moved together, or a stated reason to keep them split",
+    "A no-evidence state in the record, distinct from a zero value",
+    "A verdict rule for claims whose predicted value is legitimately zero -- a rotate edge at angle 0 is the worked case",
+    "Concurrent-append behaviour stated and tested"
    ],
-   "prior_attempts": [],
+   "prior_attempts": [
+    {
+     "what": "Path(\"CLAIM_TABLE.fab.json\") at 24 sites",
+     "why_it_failed": "relative to the working directory, so the ledger written depends on where the tool was run"
+    },
+    {
+     "what": "integrity_score = 0.0 for an acyclic network",
+     "why_it_failed": "honest as an answer, unreadable as a record -- and it is the value GB-1 divides by"
+    }
+   ],
    "leads": [
     "fabrication/emit/_common.py shows the payload shape and the dedupe-by-scope pattern",
     "GI-1 means a claim about a node value would be checked against a prediction that ignores measurements"
@@ -556,6 +562,206 @@
     {
      "what": "phi^-9 as the residual tolerance in integrity.py",
      "why_it_failed": "not failed -- there it is used directly at 1.3 % with no multiplier, which is the consistent case"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
+  },
+  {
+   "id": "GI-11a",
+   "title": "A closure test that is not a single probe",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "find_cycles composes each cycle into an affine map x -> a*x + b and scores it as abs(a*1 + b - 1), so every map with a + b = 1 passes. The two numbers that determine the map are already computed and one of them is discarded.",
+   "why_open": "The replacement is nearly free -- compare (a, b) to (1, 0) -- but it changes what closure_error MEANS, and closure_error is written into ledger claims with tol_frac = phi^-9. A two-component residual needs a combination rule, and picking one silently rescales every existing cycle claim.",
+   "would_count": [
+    "A residual over both components with a stated combination rule",
+    "A demonstration that pure-scale cycles keep their current values, so existing ledger entries do not all move",
+    "The compose(2, -1) cycle failing, and a genuine identity cycle passing"
+   ],
+   "prior_attempts": [],
+   "leads": [
+    "abs(a-1) + abs(b) and hypot(a-1, b) differ only in the mixed case; the first is scale-free in b, the second is not",
+    "Evaluating at two points is equivalent and needs no rule, but the choice of points is then the free parameter"
+   ],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "GI-13a",
+   "title": "What correct() is allowed to move",
+   "state": "OPEN",
+   "kind": "DEFINITION",
+   "statement": "correct() distributes a cycle's closure error across every edge in the cycle. Measured on the drop's own defect: an edge 23.6% high converges to +11.9% with its inverse partner at -9.5%, and audit() then reports every cycle consistent.",
+   "why_open": "Reaching self-consistency by moving everything is always possible and tells you nothing. Restoring the RIGHT value needs a reference the network does not contain. So the question is which edges are held fixed -- and that is a statement about what is known, not about the algorithm.",
+   "would_count": [
+    "A way to mark an edge as trusted, so correction cannot move it",
+    "A report of WHAT was moved and by how much, not just a count of adjustments",
+    "A stated stopping rule; the current step is phi^-9 * residual / len(cycle), which at max_iter=5 moves nothing measurable and at 500 converges to a wrong value"
+   ],
+   "prior_attempts": [
+    {
+     "what": "uniform phi^-9-scaled nudges across every edge of every bad cycle",
+     "why_it_failed": "the error is split between the wrong edge and its inverse partner until the product closes; the defect is hidden, not removed"
+    }
+   ],
+   "leads": [
+    "Least squares on log factors with a fixed subset is the standard form for pure-scale networks, and has a unique solution",
+    "GI-1 is the other half: the measurements are the external reference, and nothing currently feeds them into correction"
+   ],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "GI-12a",
+   "title": "What integrity_score is a score of",
+   "state": "OPEN",
+   "kind": "DEFINITION",
+   "statement": "core.audit() returns base_score * (1 + mean_edge_weight); integrity.full_report() returns coverage * (trusted/measured). Both are called integrity_score, both are compared to INTEGRITY_THRESHOLD = 3.618, their ranges are [0, 2] and [0, 1], and neither reaches it.",
+   "why_open": "Multiplying a consistency fraction by an author-declared confidence gives a number with the units of neither, and the (1 + w) form means declaring no confidence costs nothing. Separating them is easy; deciding what a caller should gate on is not, and that decision is what the threshold was standing in for.",
+   "would_count": [
+    "The two factors reported separately, with the threshold attached to whichever one it is about",
+    "A name for each of the two quantities that does not collide",
+    "A stated range for `weight`, since the score's ceiling depends on it"
+   ],
+   "prior_attempts": [],
+   "leads": [
+    "GI-2 and GI-12 are the same constant seen from two modules",
+    "AISS's flat merit weights are the nearest prior: an unweighted mean wearing a weighting"
+   ],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TMP-1a",
+   "title": "A stiffness-temperature correction with the right term",
+   "state": "OPEN",
+   "kind": "DERIVATION",
+   "statement": "fabrication/temperature.py's k_correct builds a stiffness correction from thermal expansion alone, on the stated reasoning that 'E changes slightly with temperature; dominant effect is length'. For steel the two coefficients are alpha = 12e-6/C and dE/E ~ -2.4e-4/C, so the reasoning is inverted and the correction is ~20x too small with the wrong sign.",
+   "why_open": "Writing dE/E in is a line of code. What is missing is the coefficient per material, and a statement of what mode the resonance IS -- a cantilever, a plate and a Helmholtz cavity scale differently with E and with dimension, and normalize_measurement currently applies one formula to 'mechanical / resonance_freq_Hz' whatever the geometry.",
+   "would_count": [
+    "A dE/dT table alongside the existing ALPHA table, with sources",
+    "A mode factor, or a refusal to correct when the mode is unstated",
+    "A bench check that can see it: 0.024% is invisible against +/-8%, so the test has to be a coefficient comparison, not a measurement"
+   ],
+   "prior_attempts": [
+    {
+     "what": "k_correct = k*(1 + alpha*dT)",
+     "why_it_failed": "the modulus term is 20x larger and opposite in sign; the correction is invisible in any test narrow enough to run"
+    }
+   ],
+   "leads": [
+    "Steel E drops ~2-3e-4 per C over -50..+200 C; aluminium ~5e-4",
+    "f ~ sqrt(E) for most flexural modes, so df/f = 0.5 dE/E"
+   ],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TMP-2a",
+   "title": "One reference temperature",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "fabrication/temperature.py has five functions defaulting ref_temp_c to 20 C and three to 15 C, and normalize_measurement passes its 15 C into r_correct, whose TCR is the copper value specified at 20 C -- a 2.0% bias on every electrical normalisation at the default.",
+   "why_open": "Picking one is a two-line change; picking WHICH is not. 15 C is the acoustic convention baked into C_AIR = 343.0 and every existing acoustic claim in the ledger; 20 C is the convention every component tempco is specified at. Moving either re-bases claims already recorded.",
+   "would_count": [
+    "A single module-level REF_TEMP_C with a stated reason",
+    "A pass over existing ledger claims saying which were made at which reference, or a statement that none were",
+    "Each tempco carrying the temperature it is specified at, so a mismatch is detectable rather than silent"
+   ],
+   "prior_attempts": [
+    {
+     "what": "per-function defaults of 15 and 20",
+     "why_it_failed": "they cross inside normalize_measurement and nothing reports the crossing"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-1a",
+   "title": "A two-sided drift detector",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "trend.py computes fail_threshold as predicted*(1 + 2*tol_frac) -- an upper edge only. A value drifting DOWN out of its band is never classified failed, and when a value is already above the threshold and falling, predicted_fail_days reports the time to come back inside.",
+   "why_open": "The repair is one band and one sign convention, and it is held only by needing to decide what 'time to failure' means for a value already outside: time to the far edge, or nothing at all. Both are defensible and they read very differently in a report.",
+   "would_count": [
+    "Both edges, with the crossing timed against whichever the slope approaches",
+    "A stated answer for an already-failed value",
+    "The measured cases passing: a 10.0-ohm claim fallen to 0.5 reports failed, and a value falling from 30.0 toward a 10.0 claim does not report a fail date"
+   ],
+   "prior_attempts": [
+    {
+     "what": "predicted*(1 + 2*tol) with a slope-sign branch",
+     "why_it_failed": "one edge; and the negative branch answers a different question in a field named for this one"
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-3a",
+   "title": "Calibrating the trend verdicts",
+   "state": "OPEN",
+   "kind": "BENCH",
+   "statement": "trend.py classifies on r2 > 0.5 and r2 > 0.7 with no minimum sample count, so two points give R^2 = 1.0 by construction and always read as a trend; and the stable gate abs(slope) < 1e-6 is an absolute number compared against ohms, hertz and kelvin per day alike.",
+   "why_open": "Both thresholds need what FCL-5/6 needed: a null. Feed the detector sequences with no drift and count how often each verdict fires, at each sample count. Nobody has run that, and until it is run the verdicts are labels rather than rates.",
+   "would_count": [
+    "A false-alarm rate per verdict against a no-drift null, as a function of n",
+    "A minimum sample count derived from it, rather than chosen",
+    "A relative slope gate, so the stable verdict compares across domains",
+    "Power: the drift the detector reliably catches at n = 10, 20, 50"
+   ],
+   "prior_attempts": [
+    {
+     "what": "r2 > 0.5 / 0.7 and abs(slope) < 1e-6",
+     "why_it_failed": "neither has been run against data where the answer is known to be no"
+    }
+   ],
+   "leads": [
+    "The exact binomial tail and BH correction from field/field_claim_loop.py apply directly once the pairs are counted",
+    "R^2 has a known null distribution for a line through n iid points"
+   ],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
+  },
+  {
+   "id": "TRD-5a",
+   "title": "Cross-domain correlation that is not a statement about time",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "cross_domain_correlation gates on |r| > 0.6 with no null. Two monotone drifts correlate at ~1 whatever their cause -- measured at exactly 1.0000 between the fixture's thermal and mechanical ramps. Separately the overlap is an exact float-timestamp intersection, so a millisecond of jitter drops it to zero, and the defaults compare electrical against thermal, which is the one pair in the fixture that does not correlate.",
+   "why_open": "Detrending is the standard first move and it changes what the function answers -- from 'do these move together' to 'do their residuals move together', which is the interesting question and a different one. Timestamp binning needs a tolerance nobody has stated.",
+   "would_count": [
+    "Residual correlation after removing each series' own trend",
+    "A permutation null, and a correction over the pairs tested",
+    "Timestamp binning at a stated tolerance",
+    "All domain pairs iterated, not a default pair",
+    "The thermal x mechanical pair in the fixture reporting NO residual correlation, since both are noiseless ramps"
+   ],
+   "prior_attempts": [
+    {
+     "what": "Pearson r on raw series, |r| > 0.6, exact timestamp match",
+     "why_it_failed": "r = 1.0000 on two unrelated ramps; and returns nothing at all on any real log"
     }
    ],
    "leads": [],

@@ -32,15 +32,23 @@ GI-1   Measurements do not propagate. This is the load-bearing one.
        is not made here because it re-decides every verdict the ledger already
        holds. `full_report()` reports `predictions_use_measurements: False`.
 
-GI-2   `passes` has a clause no input can satisfy.
+GI-2   `passes` has a clause no input can satisfy, and the constant it
+       tests against belongs to a different quantity of the same name.
        `integrity = coverage * (trusted_count / total_measured)` is a product
        of two quantities each in [0, 1], so integrity <= 1.0 always. The
        clause tests `integrity >= INTEGRITY_THRESHOLD * 0.5`, which is
        1.809017. `passes` is therefore decided entirely by its first clause,
        `trusted_count == total_measured and coverage >= 0.5`, and phi^2 + 1
-       does no work anywhere in the module. Same shape as `GLY-1`, found by
+       does no work anywhere in this module. Same shape as `GLY-1`, found by
        the same screen: enumerate what the outputs can be before trusting the
        label. `full_report()` reports `threshold_clause_reachable: False`.
+
+       `core.audit()` returns its OWN `integrity_score`, computed as
+       `base_score * (1 + mean_edge_weight)`, which reaches 2.0 at the default
+       weight and is compared against the same constant. So two modules emit a
+       number under one name, with ranges [0, 1] and [0, 2], and gate it on
+       one threshold that neither reaches. A caller reading `integrity_score`
+       out of a report cannot tell which it has. See GI-12.
 
 GI-3   The search over sources searches nothing, until the design is wrong.
        `check()` runs a BFS from every other measured node and keeps the

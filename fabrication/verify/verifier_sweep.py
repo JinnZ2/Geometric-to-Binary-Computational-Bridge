@@ -26,13 +26,19 @@ from .verifier import (
 
 def verify_sweep(sweep_wav, response_wav, scope,
                  search_band=(50, 2000), coh_min=0.7,
-                 baseline_id=None):
+                 baseline_id=None, temp_c=None, ref_temp_c=15.0):
     """
     sweep_wav    : the exponential sweep you generated and played
     response_wav : phone-mic recording captured at the same time
     scope        : matches CLAIM_TABLE.fab.json composite claim scope
     baseline_id  : optional id from CLAIM_TABLE.fab.baselines.json
                    -- when provided, divide out the phone's response
+    temp_c       : ambient temperature during the measurement (°C). When
+                   given, the picked frequency is normalised to ref_temp_c
+                   before the verdict, because f scales with c and c(T) moves
+                   10.6 % between +20 °C and -40 °C -- more than the ±8 %
+                   band. The raw pick travels in the record as measured_raw.
+    ref_temp_c   : the temperature the claim's prediction was made at
     """
     freqs, mag, phase, coh = transfer_function(sweep_wav, response_wav)
 
@@ -52,6 +58,12 @@ def verify_sweep(sweep_wav, response_wav, scope,
     f0_meas, _ = peak
     q_meas     = q_factor(freqs, mag, f0_meas)
 
+    # --- temperature normalisation ------------------------------------
+    f0_meas_raw = f0_meas
+    if temp_c is not None:
+        from fabrication.temperature import acoustic_f_correct
+        f0_meas = acoustic_f_correct(f0_meas, temp_c, ref_temp_c)
+
     claims = _load_claims()
     claim  = _find_composite_freq_claim(claims, scope)
     if claim is None:
@@ -61,6 +73,9 @@ def verify_sweep(sweep_wav, response_wav, scope,
     tol     = claim.get("tol_frac", 0.08)
     verdict = _verdict(f0_meas, f0_pred, tol)
     notes   = _diagnostic(claim, f0_meas, q_meas)
+    if temp_c is not None:
+        notes.append("temperature: %.1f Hz @ %.1f °C -> %.1f Hz @ %.1f °C ref"
+                     % (f0_meas_raw, temp_c, f0_meas, ref_temp_c))
 
     if used_baseline is None:
         notes.append("no baseline correction -- phone speaker/mic peaks may "
@@ -80,6 +95,9 @@ def verify_sweep(sweep_wav, response_wav, scope,
         "baseline_id":  used_baseline,
         "predicted":    f0_pred,
         "measured":     f0_meas,
+        "measured_raw": f0_meas_raw,
+        "temp_c":       temp_c,
+        "ref_temp_c":   ref_temp_c,
         "q_factor":     q_meas,
         "tol_frac":     tol,
         "verdict":      verdict,

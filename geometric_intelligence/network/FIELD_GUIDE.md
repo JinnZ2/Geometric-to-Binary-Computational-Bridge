@@ -112,9 +112,27 @@ Do **not** also add a direct `brace_short → brace_long` edge at `PHI**2`
 `check()` keeps whichever route agrees best with the measurement (GI-3), and
 it will report a contradiction as `trusted`.
 
-`net.audit()` raises `NotImplementedError` — it was named in the drop's README
-and never supplied. Until it exists there is no integrity score for a design,
-only for measurements against one.
+`net.audit()` now works — `core.py` arrived in a second drop. It returns an
+`integrity_score` for the *design*, separately from the one
+`IntegrityMonitor.full_report()` returns for the *measurements*. They are
+different quantities with the same name and different ranges (GI-2, GI-12), so
+say which one you mean when you write a number down.
+
+Two things to know before you act on a design audit:
+
+- **A cycle is checked at one value only.** Closure error is computed by
+  running the cycle on the number 1. For pure `scale` edges that is fine. If
+  you use a `compose` edge — a scale *and* an offset, e.g. a length plus a
+  fixed allowance — a cycle can be reported CONSISTENT while being wrong
+  everywhere except at 1 (GI-11). In a shop that means: **use `scale` edges
+  for ratio checks and keep offsets out of cycles.**
+- **`correct()` edits the drawing, not the part.** Given an edge that is
+  23.6 % wrong it does not restore the right factor; it splits the error
+  across that edge and its inverse partner until the cycle closes, then
+  `audit()` reports everything consistent (GI-13). Run it to see whether a
+  design *can* be made consistent. Do not run it on a network whose edges
+  encode measured reality — it will erase the discrepancy you built the
+  network to find.
 
 ### Example: verifying cut parts
 
@@ -247,7 +265,9 @@ reconstructed value as better than a single-path guess.
 | One node always untrusted | No edge points at it | Add the reverse edge — see the timber example |
 | `reconstruct()` returns `{}` | Only one measurement | Needs two that agree |
 | Two ledgers with different contents | Relative `CLAIM_TABLE.fab.json` | Always run from the repo root |
-| `audit()` raises NotImplementedError | It was never supplied | Open problem GI-8 |
+| Integrity claim in the ledger is 0.0 | The network has no cycles | Add reverse edges; a chain has nothing to close (GB-2) |
+| `verify_edge_measurement` crashes | The claim's predicted value is 0 | A rotate edge at angle 0, or the zero above (GB-1) |
+| `correct()` "fixed" it and the part is still wrong | It balances error across the cycle | Read GI-13; re-measure the part, do not trust the corrected model |
 | FFT takes minutes | Pure-Python radix-2 on a long file | Shorten the sample, or install numpy |
 
 ---

@@ -120,11 +120,17 @@ def predict_eigenmodes(ir):
 # Auto-decide via ka_check; user can force via geometry_hints.
 # -------------------------------------------------------------
 
-def predict_eigenmodes_full(ir, geometry_hints=None, c=None):
+def predict_eigenmodes_full(ir, geometry_hints=None, c=None,
+                            temp_c=None):
     """
     Lumped-chain prediction (predict_eigenmodes) plus, if
     geometry_hints["distributed"] is set AND ka > 0.3, the
     distributed-element modes from pipe_modes.
+
+    c / temp_c: speed of sound. `c` wins if given; otherwise `temp_c` is
+    passed down to pipe_modes, which resolves it through
+    fabrication.temperature.c_air. Both None keeps the 343 m/s default,
+    which is the +15 °C value.
 
     geometry_hints (optional dict), e.g.:
       {"distributed": "cylinder",
@@ -149,7 +155,7 @@ def predict_eigenmodes_full(ir, geometry_hints=None, c=None):
     # auto-decide whether distributed prediction is warranted
     if ("lumped_f_lowest_Hz" in geometry_hints
             and "characteristic_dim_m" in geometry_hints):
-        ka = ka_check(geometry_hints, c=c)
+        ka = ka_check(geometry_hints, c=c, temp_c=temp_c)
         if ka < 0.3:
             return modes      # safely lumped; nothing to add
 
@@ -159,19 +165,19 @@ def predict_eigenmodes_full(ir, geometry_hints=None, c=None):
         extra = pipe_modes(geometry_hints["length"],
                            geometry_hints["end_condition"],
                            n_max=geometry_hints.get("n_max", 4),
-                           c=c)
+                           c=c, temp_c=temp_c)
     elif kind == "box":
         extra = box_modes(geometry_hints["Lx"],
                           geometry_hints["Ly"],
                           geometry_hints["Lz"],
                           n_max=geometry_hints.get("n_max", 2),
-                          c=c)
+                          c=c, temp_c=temp_c)
     elif kind == "cylinder":
         extra = cylinder_modes(geometry_hints["radius"],
                                geometry_hints["length"],
                                n_axial=geometry_hints.get("n_axial", 3),
                                m_radial=geometry_hints.get("m_radial", 2),
-                               c=c)
+                               c=c, temp_c=temp_c)
 
     # merge: re-index, dedupe within 1% (distributed annotation wins)
     combined = modes + extra

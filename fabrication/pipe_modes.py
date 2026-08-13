@@ -25,6 +25,22 @@ import math
 C_AIR = 343.0    # default speed of sound (m/s) at 15 °C
 
 
+def _c(c, temp_c):
+    """Resolve the speed of sound: explicit c wins, else c_air(temp_c).
+
+    Threading temperature through is the whole point -- a prediction made at
+    +20 °C and measured at -40 °C is 10.6 % off in frequency, which swamps the
+    ±8 % acoustic verdict band. `fabrication.temperature.c_air` is the linear
+    331.3 + 0.606·T form, within 0.32 % of exact at -40 °C.
+    """
+    if c is not None:
+        return c
+    if temp_c is None:
+        return C_AIR
+    from fabrication.temperature import c_air
+    return c_air(temp_c)
+
+
 # Bessel function J'_m first zeros (m=0..3, n=1..3).
 # Standard mathematical-table values. These give transverse modes
 # of a rigid-wall cylinder.
@@ -36,11 +52,12 @@ J_PRIME_ZEROS = {
 }
 
 
-def pipe_modes(length_m, end_condition, n_max=4, c=C_AIR):
+def pipe_modes(length_m, end_condition, n_max=4, c=None, temp_c=None):
     """
     1-D pipe with two end conditions.
       end_condition ∈ {"open_open", "closed_closed", "open_closed"}
     """
+    c = _c(c, temp_c)
     f = []
     for n in range(1, n_max+1):
         if end_condition in ("open_open", "closed_closed"):
@@ -54,11 +71,12 @@ def pipe_modes(length_m, end_condition, n_max=4, c=C_AIR):
             for i, v in enumerate(f)]
 
 
-def box_modes(Lx, Ly, Lz, n_max=2, c=C_AIR):
+def box_modes(Lx, Ly, Lz, n_max=2, c=None, temp_c=None):
     """
     Rigid-wall rectangular box. Returns all unique (l,m,n) with at
     least one index > 0 and each index ≤ n_max, sorted by f.
     """
+    c = _c(c, temp_c)
     modes = []
     for l in range(n_max+1):
         for m in range(n_max+1):
@@ -73,13 +91,14 @@ def box_modes(Lx, Ly, Lz, n_max=2, c=C_AIR):
     return modes
 
 
-def cylinder_modes(radius_m, length_m, n_axial=3, m_radial=2, c=C_AIR):
+def cylinder_modes(radius_m, length_m, n_axial=3, m_radial=2, c=None, temp_c=None):
     """
     Combined axial + transverse modes of a rigid-wall cylinder.
       axial      : f_n = n·c/(2L)
       transverse : f_{m,k} = (c / (2π)) · (α_{m,k} / a)   α from J'_m
       combined (separable):  f² = f_axial² + f_transverse²
     """
+    c = _c(c, temp_c)
     modes = []
     # axial-only modes (transverse index 0,0 -- uniform pressure)
     for n in range(1, n_axial+1):
@@ -110,7 +129,7 @@ def cylinder_modes(radius_m, length_m, n_axial=3, m_radial=2, c=C_AIR):
     return modes
 
 
-def ka_check(geometry, c=C_AIR):
+def ka_check(geometry, c=None, temp_c=None):
     """
     Returns ka_max for the lowest predicted lumped mode.
     Caller can decide: if ka > 0.3 -> distributed prediction needed.
@@ -118,6 +137,7 @@ def ka_check(geometry, c=C_AIR):
     geometry: dict with at least 'characteristic_dim_m' and
               'lumped_f_lowest_Hz'.
     """
+    c = _c(c, temp_c)
     a = geometry["characteristic_dim_m"]
     f = geometry["lumped_f_lowest_Hz"]
     k = 2 * math.pi * f / c
