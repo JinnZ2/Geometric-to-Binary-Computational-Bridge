@@ -156,9 +156,9 @@
     "killed": "R2 > 0.6 as evidence of a power law",
     "screen": {
      "name": "measure-the-null",
-     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number.",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number, and a threshold with no measured false-alarm rate is not calibrated in either direction.",
      "mechanised_by": null,
-     "applies_when": "any threshold or gate whose false-positive rate has not been counted on data where the answer is known to be no"
+     "applies_when": "any threshold, gate or detector emitting a pass/fail or a score read as a rate, whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },
@@ -556,9 +556,9 @@
     "killed": "rate > 1.5x base as a covariate concentration test",
     "screen": {
      "name": "measure-the-null",
-     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number.",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number, and a threshold with no measured false-alarm rate is not calibrated in either direction.",
      "mechanised_by": null,
-     "applies_when": "any threshold or gate whose false-positive rate has not been counted on data where the answer is known to be no"
+     "applies_when": "any threshold, gate or detector emitting a pass/fail or a score read as a rate, whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },
@@ -1213,9 +1213,9 @@
     "killed": "injection_score as a rate of anything",
     "screen": {
      "name": "measure-the-null",
-     "rule": "Run the gate on data where the answer is known to be no, and count. A threshold with no measured false-alarm rate is not calibrated in either direction.",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number, and a threshold with no measured false-alarm rate is not calibrated in either direction.",
      "mechanised_by": null,
-     "applies_when": "any detector emitting a pass/fail or a score read as a rate"
+     "applies_when": "any threshold, gate or detector emitting a pass/fail or a score read as a rate, whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },
@@ -1638,9 +1638,9 @@
     "killed": "the drifting and accelerating verdicts below ~5 points",
     "screen": {
      "name": "measure-the-null",
-     "rule": "Run the gate on data where the answer is known to be no, and count. A threshold with no measured false-alarm rate is not calibrated in either direction.",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number, and a threshold with no measured false-alarm rate is not calibrated in either direction.",
      "mechanised_by": null,
-     "applies_when": "any detector emitting a pass/fail or a score read as a rate"
+     "applies_when": "any threshold, gate or detector emitting a pass/fail or a score read as a rate, whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },
@@ -1670,9 +1670,9 @@
     "killed": "the correlation gate as evidence of a cross-domain mechanism",
     "screen": {
      "name": "measure-the-null",
-     "rule": "Run the gate on data where the answer is known to be no, and count. A threshold with no measured false-alarm rate is not calibrated in either direction.",
+     "rule": "Run the gate on data where the answer is known to be no, and count. 'Too permissive' in a comment is not a number, and a threshold with no measured false-alarm rate is not calibrated in either direction.",
      "mechanised_by": null,
-     "applies_when": "any detector emitting a pass/fail or a score read as a rate"
+     "applies_when": "any threshold, gate or detector emitting a pass/fail or a score read as a rate, whose false-positive rate has not been counted on data where the answer is known to be no"
     }
    }
   },

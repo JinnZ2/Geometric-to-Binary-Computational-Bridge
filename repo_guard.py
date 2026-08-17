@@ -15,6 +15,12 @@ Three are mechanically checkable BEFORE a file enters the repo:
   3. REACH CHECK    is the claimed signal above the instrument floor?
                     (would have caught the 11-order Hall gap, the 500x
                      Er/diamagnetism swamp, the RBS 20-200x shortfall)
+  4. COLLISIONS     do two artifacts carry the same content, or one name two
+                    definitions? (P-DUPLICATE-AUTHORITY's own detector is
+                    "hash the bodies", and it was mechanised by nothing until
+                    a scan found two byte-identical document pairs nobody had
+                    recorded: PROJECTS.md/PROJECTS2.md and Silicon/GIES.md /
+                    GEIS/GEIS_organization.md)
 
 The other two -- circular targets and unit errors -- need a human. Checklist
 for those at the bottom, and ``human_checklist()`` prints it.
@@ -46,8 +52,12 @@ import random
 __all__ = [
     "null_harness", "report", "VETO", "veto", "veto_report",
     "FLOOR", "reach", "reach_report", "CHECKLIST", "human_checklist",
+    "duplicate_bodies", "screen_collisions", "collision_report",
     "demo", "main",
 ]
+
+SKIP_DIRS = {".git", "__pycache__", "node_modules", ".pytest_cache",
+             "scratchpad", "legacy", "evidence"}
 
 # =====================================================================
 # 1. NULL HARNESS
@@ -217,6 +227,98 @@ def reach_report(signal, instrument, label=""):
     return d
 
 
+
+# =====================================================================
+# 4. COLLISIONS
+# =====================================================================
+#
+# Two artifacts carrying the same content, or one name carrying two
+# definitions. Neither is a physics error and both are cheap to detect, which
+# is why they survive: nothing was looking. P-DUPLICATE-AUTHORITY has been
+# ESTABLISHED since it was written with `mechanised_by: None` and a detector
+# that reads, in full, "Hash the bodies. Then ask which one the code imports."
+#
+# `legacy/` and `evidence/` are skipped on purpose. A file kept for provenance
+# is SUPPOSED to duplicate the thing that replaced it -- that is what it is
+# for -- so flagging it would train a reader to ignore this stage.
+
+
+def duplicate_bodies(root=".", exts=(".md", ".py", ".json", ".txt"),
+                     max_bytes=3_000_000):
+    """Files with byte-identical content. Returns [[path, path, ...], ...].
+
+    Identity, not similarity: two files that merely say the same thing are an
+    editorial question, and this stage only reports what is decidable.
+    """
+    import hashlib
+    import os
+    seen = {}
+    for base, dirs, names in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        for n in names:
+            if not n.endswith(exts):
+                continue
+            path = os.path.join(base, n)
+            try:
+                if not 0 < os.path.getsize(path) <= max_bytes:
+                    continue
+                with open(path, "rb") as fh:
+                    digest = hashlib.md5(fh.read()).hexdigest()
+            except OSError:
+                continue
+            seen.setdefault(digest, []).append(os.path.relpath(path, root))
+    return sorted((sorted(v) for v in seen.values() if len(v) > 1))
+
+
+def screen_collisions(register=None):
+    """Screen names carrying more than one definition in the claim register.
+
+    A screen is meant to be one reusable check. Two definitions under one name
+    means the reach count -- how many independent claims it has already killed,
+    which is the whole basis for ranking them -- is summing two different
+    things. `measure-the-null` carried two rule texts and two applies_when
+    clauses across five claims before this was written.
+
+    Returns [(name, [ (rule, applies_when, mechanised_by), ... ]), ...].
+    """
+    import json
+    import os
+    path = register or os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                    "CLAIMS_REGISTER.json")
+    try:
+        with open(path, encoding="utf-8") as fh:
+            claims = json.load(fh).get("claims", [])
+    except (OSError, ValueError):
+        return []
+    variants = {}
+    for c in claims:
+        s = (c.get("salvage") or {}).get("screen")
+        if not s:
+            continue
+        variants.setdefault(s["name"], set()).add(
+            (s["rule"], s.get("applies_when"), s.get("mechanised_by")))
+    return sorted((n, sorted(v)) for n, v in variants.items() if len(v) > 1)
+
+
+def collision_report(root=".", register=None):
+    """Print stage 4 and return the number of collisions found."""
+    dups = duplicate_bodies(root)
+    screens = screen_collisions(register)
+    print("  byte-identical file bodies        %d" % len(dups))
+    for group in dups:
+        print("      %s" % "  ==  ".join(group))
+    print("  screen names with two definitions %d" % len(screens))
+    for name, vs in screens:
+        print("      %s  (%d definitions)" % (name, len(vs)))
+        for rule, _aw, _m in vs:
+            print("          %s" % rule[:66])
+    n = len(dups) + len(screens)
+    print("  %s" % ("no collisions" if not n else
+                    "%d collision group(s) -- name a canonical one or merge "
+                    "the definitions" % n))
+    return n
+
+
 # =====================================================================
 # HUMAN CHECKLIST -- the two classes no code catches
 # =====================================================================
@@ -309,7 +411,13 @@ def demo(seed=0):
     reach_report(0.121, "piezoresistive", "dR/R at 0.1% strain, GF=121")
 
     print("=" * 70)
-    print("4. HUMAN CHECKLIST -- the two classes no code catches")
+    print("4. COLLISIONS -- one content in two files, or one name in two")
+    print("=" * 70)
+    import os
+    collision_report(os.path.dirname(os.path.abspath(__file__)))
+
+    print("=" * 70)
+    print("5. HUMAN CHECKLIST -- the two classes no code catches")
     print("=" * 70)
     human_checklist()
 

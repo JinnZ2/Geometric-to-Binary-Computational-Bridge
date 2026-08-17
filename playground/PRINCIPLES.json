@@ -410,6 +410,14 @@
      "where": "geometric_intelligence/network/bridge.py",
      "what": "the integrity claim's failure text describes a threshold test while the record encodes a two-sided band; a verifier and a reader get different tests from one record",
      "claim": "GB-3"
+    },
+    {
+     "where": "PROJECTS2.md",
+     "what": "byte-identical to PROJECTS.md, 45 lines. Navigation.md describes both as 'Example applications' and neither is one -- they are a connected-repository list, so the index is wrong about a file it names twice"
+    },
+    {
+     "where": "GEIS/GEIS_organization.md",
+     "what": "byte-identical to Silicon/GIES.md, 937 lines, the same document in two folders with nothing stating which is canonical -- and GEIS/GIES_AUDIT.md cites 'GIES.md' by name, which resolves to neither path unambiguously"
     }
    ],
    "cost_when_missed": "The implementation quietly wins over the specification, and the specification is what gets read."
