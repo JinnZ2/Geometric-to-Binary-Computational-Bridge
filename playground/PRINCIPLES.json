@@ -53,6 +53,16 @@
      "where": "geometric_intelligence/network/tests/test_geometric_intelligence.py",
      "what": "test_audit_passes' bounds hold by construction, test_hash_stable hashes one object twice, and test_correct's fixture is 2.5 x 0.4 = 1.0 exactly so correct() is never run on an inconsistent network",
      "claim": "GI-16"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "exploration_rate stored and never read; 0.0 and 1.0 produce identical behaviour",
+     "claim": "ASF-13"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "forest_species_coexistence fails only when the grid is empty; richness is 3,3,3,3,3 at every setting the agent can reach",
+     "claim": "ASF-14"
     }
    ],
    "cost_when_missed": "A suite can be 79% dead and still look green. tests/test_silicon_modules.py was."
@@ -219,6 +229,11 @@
      "where": "geometric_intelligence/network/trend.py",
      "what": "r2 > 0.5 and r2 > 0.7 with no minimum sample count: two points give R^2 = 1.0 by construction and always read as a trend",
      "claim": "TRD-3"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "R^2 > 0.6 on a log-binned fit, never run against a non-power-law: uniform[1,1000] passes 100% of draws at slope +0.919",
+     "claim": "ASF-8"
     }
    ],
    "cost_when_missed": "The folder's own notes said 'too permissive'. It was 41%."
@@ -294,6 +309,16 @@
      "where": "geometric_intelligence/network/trend.py",
      "what": "the stable gate abs(slope) < 1e-6 compares per-day changes in ohms, hertz and kelvin against one absolute constant",
      "claim": "TRD-4"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "switching_rate is a continuous-time generator rate used as a per-step Bernoulli probability; 2.0, 5.0 and 50.0 give byte-identical outcomes",
+     "claim": "ASF-11"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "the log-binned fit reports a slope with no convention: it estimates 1-alpha, and the generated claim's -1.5 threshold is written in the other frame",
+     "claim": "ASF-9"
     }
    ],
    "cost_when_missed": "A threshold that cannot be met or missed."
@@ -392,8 +417,7 @@
   {
    "id": "P-CENSORED-INPUT",
    "name": "Filtering before analysis biases rather than blinds",
-   "status": "PROVISIONAL",
-   "provisional_because": "one strong instance. It needs a second, independent one before it earns ESTABLISHED. Kept because the instance was decisive and the shape is general.",
+   "status": "ESTABLISHED",
    "statement": "Discarding the samples that did not trigger, then analysing what remains. The intuition is that you lose sensitivity; what actually happens is that you keep it and shift the answer, which is worse because the result still looks confident.",
    "detector": "Run the analysis on the full record and on the filtered one. Compare the answers, not just the detection rates.",
    "mechanised_by": null,
@@ -402,9 +426,14 @@
      "where": "field/field_claim_loop.py",
      "what": "the correlation branch was fed only band-breaking readings: 120 became 87, and it still came back STRUCTURED -- at lag 4 against a true half-period of 5, |rho| 0.79 versus 0.95 uncensored",
      "claim": "FCL-11"
+    },
+    {
+     "where": "adaptive_sim/adaptive_sim_framework.py",
+     "what": "mean_fixation_time averages only the replicates that fixed, discarding exactly the slowest: 366.4 at budget 500 against a true 1072.4, rising with the budget and looking converged at every stop",
+     "claim": "ASF-10"
     }
    ],
-   "cost_when_missed": "A wrong answer delivered confidently, which is worse than silence."
+   "cost_when_missed": "A wrong answer delivered confidently, which is worse than silence. Measured twice now: |rho| 0.79 against a true 0.95, and a mean low by 2.9x."
   }
  ],
  "instance_fields": {

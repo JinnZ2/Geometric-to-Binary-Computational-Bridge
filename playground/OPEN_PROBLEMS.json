@@ -769,6 +769,79 @@
     "needs_null": true,
     "material": null
    }
+  },
+  {
+   "id": "ASF-A",
+   "title": "A claim about a response, not a threshold at one point",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "Every claim in adaptive_sim is a threshold on a single run. The framework generates claims of the form 'X is correlated with parameter P' -- one shipped, describing a correlation between power-law slope and seed injection rate -- and then tests them by comparing X to a constant on one run in which P was never varied. So the stated content and the executed test are different claims.",
+   "why_open": "It needs a second loop shape. The existing loop varies parameters to CHASE a threshold, adapting until a claim passes; a response claim needs a sweep with the claim held fixed, and fitting across runs afterwards. Merging the two naively gives a loop that adapts its way to whatever correlation it was looking for, which is the shape that manufactures a fit rather than measuring one.",
+   "would_count": [
+    "A sweep runner that holds every claim fixed while varying one parameter over a stated grid",
+    "The fit reported with a null: shuffle the parameter against the outcomes and report where the observed slope sits",
+    "A refusal to emit a response claim from fewer than a stated number of distinct parameter values",
+    "The adaptive loop and the sweep kept separable, so a sweep cannot be run on parameters the agent has been steering"
+   ],
+   "prior_attempts": [
+    {
+     "what": "Emitting the claim from a single run with a threshold on the outcome",
+     "why_it_failed": "ASF-15. The description asserts a correlation, the test is `slope < -1.5` at one point, and seed_rate is never varied. It also fails on arrival, being written in the density-exponent convention while the tested quantity is a binned-count slope (ASF-9)."
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
+  },
+  {
+   "id": "ASF-B",
+   "title": "A precondition for testing a distributional claim at all",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "mortality_base 0.2 empties the forest grid, and the only symptom is claims returning inconclusive one at a time. A run with no trees, or with too few for a 30-bin histogram, is a failed experiment rather than a source of weak evidence, and nothing marks it as one.",
+   "why_open": "The floor is a number and the number is a claim. `len(sizes) > 100` is already in the fitting code as an unexplained constant, and the right value depends on the bin count and on what the fit is for -- the literature's answer for power-law fitting is not a count threshold at all.",
+   "would_count": [
+    "A stated precondition on the run, evaluated before any distributional claim is tested",
+    "The threshold derived from the bin count and occupancy rather than asserted",
+    "A degenerate run reported as degenerate once, not as N separate inconclusive claims"
+   ],
+   "prior_attempts": [
+    {
+     "what": "`if len(sizes) > 100` inside the fitting function, and `np.sum(mask) > 5` on occupied bins",
+     "why_it_failed": "Both are unexplained constants that silently return None, so the caller sees a missing key rather than a stated precondition. Six occupied bins is enough for R2 > 0.6 on almost anything."
+    }
+   ],
+   "leads": [],
+   "acceptance": {
+    "needs_null": false,
+    "material": null
+   }
+  },
+  {
+   "id": "ASF-C",
+   "title": "Null-harness the forest model, not only its fitting code",
+   "state": "OPEN",
+   "kind": "CODE",
+   "statement": "ASF-8 nulls the FITTING code against distributions with known answers, which is what made the R2 gate's blindness visible. It does not null the MODEL. What size distribution does this grid produce when metabolic scaling is replaced by a constant growth rate, or when competition is switched off entirely (which ASF-12 shows is one parameter value away)? If R2 > 0.6 survives those substitutions, the claim is measuring the binning and the grid geometry rather than the biology.",
+   "why_open": "Not run. It is repo_guard's null-harness stage applied to a model rather than to a statistic, and the substitution has to preserve the thing that is not under test -- same grid, same mortality, same seed rain -- which takes a stated null model rather than a switch.",
+   "would_count": [
+    "A constant-growth null with everything else held fixed, and the R2 distribution under it",
+    "A no-competition null (competition_radius 0, which ASF-12 makes reachable and explicit)",
+    "The observed R2 reported as a position in the null distribution rather than against 0.6",
+    "A statement of which substitution the claim is supposed to survive, written before the numbers"
+   ],
+   "prior_attempts": [],
+   "leads": [
+    {
+     "what": "ASF-12 already exposes competition_radius, so the no-competition null needs no new code path"
+    }
+   ],
+   "acceptance": {
+    "needs_null": true,
+    "material": null
+   }
   }
  ]
 }
