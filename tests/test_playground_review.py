@@ -410,5 +410,52 @@ class TestSourceRecovery(unittest.TestCase):
         R.report(R.review(path), out=buf)
         self.assertIn("they do not restore the module", buf.getvalue())
 
+class TestCrossFiledInstances(unittest.TestCase):
+    """An instance filed under two principles is legitimate; a principle with
+    no evidence of its own is not."""
+
+    def setUp(self):
+        from playground import principles as PR
+        self.PR = PR
+
+    def test_no_principle_is_contained_in_another(self):
+        _shared, contained = self.PR.crossfiled()
+        self.assertEqual(contained, [], msg="a principle whose instances are "
+                         "a subset of another's is two names for one shape")
+
+    def test_containment_is_detected_when_it_happens(self):
+        import json
+        import os
+        import tempfile
+        lib = {"principles": [
+            {"id": "P-WIDE", "name": "w", "status": "ESTABLISHED",
+             "statement": "s", "detector": "d", "mechanised_by": None,
+             "instances": [{"where": "a.py", "what": "x" * 30, "claim": "A-1"},
+                           {"where": "b.py", "what": "y" * 30, "claim": "B-1"}]},
+            {"id": "P-NARROW", "name": "n", "status": "ESTABLISHED",
+             "statement": "s", "detector": "d", "mechanised_by": None,
+             "instances": [{"where": "a.py", "what": "x" * 30, "claim": "A-1"}]},
+        ]}
+        path = os.path.join(tempfile.mkdtemp(), "P.json")
+        with open(path, "w") as fh:
+            json.dump(lib, fh)
+        _shared, contained = self.PR.crossfiled(path)
+        self.assertIn("P-NARROW", [a for a, _b, _c, _d in contained])
+
+    def test_a_shared_instance_is_not_subtracted_from_either_principle(self):
+        """GIES-1 is filed under symmetry-collapse AND premature-scalarization
+        and remains a full instance of both. The first version of this check
+        stripped shared instances before counting and reported
+        P-SYMMETRY-COLLAPSE as unsupported -- which would make a cross-folder
+        finding a liability rather than this archive's best asset."""
+        shared, _contained = self.PR.crossfiled()
+        self.assertIn(("GEIS/gies_core.py", "GIES-1"), shared)
+        sym = self.PR.principle("P-SYMMETRY-COLLAPSE")
+        self.assertEqual(self.PR.status_of(sym), "ESTABLISHED")
+        self.assertEqual(sorted(i.get("claim") for i in sym["instances"]),
+                         ["GIES-1", "KEA-7"])
+
+
+
 if __name__ == "__main__":
     unittest.main()

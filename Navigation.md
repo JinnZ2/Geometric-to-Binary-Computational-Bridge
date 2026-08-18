@@ -347,7 +347,10 @@ Each bridge specializes in translating geometric patterns for specific physical 
 **Integration Guides:**
 
 - `TRANSLATION_GUIDE.md` - How to specify geometric inputs
-- `PROJECTS.md` & `PROJECTS2.md` - Example applications
+- `PROJECTS.md` - Connected repositories across the ecosystem. NOT example
+  applications, which is what this line said until the bodies were hashed.
+  `PROJECTS2.md` is byte-identical to it and neither is marked canonical
+  (P-DUPLICATE-AUTHORITY); nothing links to `PROJECTS2.md` but this line
 - `CO_CREATION.md` - AI collaboration framework
 
 **Philosophical Context:**

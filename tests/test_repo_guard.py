@@ -17,8 +17,10 @@ from repo_guard import (  # noqa: E402
     CHECKLIST,
     FLOOR,
     VETO,
+    duplicate_bodies,
     null_harness,
     reach,
+    screen_collisions,
     veto,
 )
 
@@ -278,6 +280,98 @@ class TestEveryDefinedTestActuallyRuns(unittest.TestCase):
         # exec does not run the guard (fake __name__), so this fixture shows
         # the COUNTING is right; the loss only happens under `python file.py`,
         # which the sweep above exercises for real.
+
+
+class TestCollisionStage(unittest.TestCase):
+    """Stage 4. Both directions, because a detector that finds nothing on a
+    clean tree is indistinguishable from one that finds nothing ever."""
+
+    def _tree(self, files):
+        import tempfile
+        d = tempfile.mkdtemp()
+        for rel, body in files.items():
+            path = os.path.join(d, rel)
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as fh:
+                fh.write(body)
+        return d
+
+    def test_it_finds_identical_bodies(self):
+        d = self._tree({"a.md": "same\n", "sub/b.md": "same\n",
+                        "c.md": "different\n"})
+        self.assertEqual(duplicate_bodies(d), [["a.md", os.path.join("sub", "b.md")]])
+
+    def test_it_is_silent_when_every_body_differs(self):
+        d = self._tree({"a.md": "one\n", "b.md": "two\n", "c.py": "three\n"})
+        self.assertEqual(duplicate_bodies(d), [])
+
+    def test_identity_not_similarity(self):
+        """Two files saying the same thing differently are an editorial
+        question, and this stage only reports what is decidable."""
+        d = self._tree({"a.md": "the same claim\n",
+                        "b.md": "the same claim.\n"})
+        self.assertEqual(duplicate_bodies(d), [])
+
+    def test_provenance_copies_are_skipped(self):
+        """legacy/ and evidence/ are SUPPOSED to duplicate what replaced
+        them; flagging them would train a reader to ignore this stage."""
+        d = self._tree({"live.py": "x = 1\n",
+                        "legacy/old.py": "x = 1\n",
+                        "adaptive_sim/evidence/asreceived.py": "x = 1\n"})
+        self.assertEqual(duplicate_bodies(d), [])
+
+    def test_the_live_tree_state_is_what_the_register_records(self):
+        """Two pairs, both recorded as P-DUPLICATE-AUTHORITY instances and
+        deliberately not deleted -- which copy is canonical is an editorial
+        call. This pins the count so a THIRD one cannot appear unnoticed."""
+        root = os.path.join(os.path.dirname(__file__), "..")
+        found = {tuple(g) for g in duplicate_bodies(root)}
+        self.assertEqual(found, {
+            ("GEIS/GEIS_organization.md", "Silicon/GIES.md"),
+            ("PROJECTS.md", "PROJECTS2.md")})
+
+    def test_a_screen_name_with_two_definitions_is_caught(self):
+        import json
+        import tempfile
+        reg = {"claims": [
+            {"id": "X-1", "salvage": {"screen": {
+                "name": "dup", "rule": "one", "applies_when": "a",
+                "mechanised_by": None}}},
+            {"id": "X-2", "salvage": {"screen": {
+                "name": "dup", "rule": "two", "applies_when": "a",
+                "mechanised_by": None}}},
+            {"id": "X-3", "salvage": {"screen": {
+                "name": "fine", "rule": "one", "applies_when": "a",
+                "mechanised_by": None}}}]}
+        path = os.path.join(tempfile.mkdtemp(), "r.json")
+        with open(path, "w") as fh:
+            json.dump(reg, fh)
+        got = screen_collisions(path)
+        self.assertEqual([n for n, _ in got], ["dup"])
+        self.assertEqual(len(got[0][1]), 2)
+
+    def test_applies_when_alone_is_enough_to_collide(self):
+        """The same rule under two scopes is still two screens sharing a
+        reach count, which is what the ranking is built on."""
+        import json
+        import tempfile
+        reg = {"claims": [
+            {"id": "X-1", "salvage": {"screen": {
+                "name": "dup", "rule": "same", "applies_when": "narrow",
+                "mechanised_by": None}}},
+            {"id": "X-2", "salvage": {"screen": {
+                "name": "dup", "rule": "same", "applies_when": "wide",
+                "mechanised_by": None}}}]}
+        path = os.path.join(tempfile.mkdtemp(), "r.json")
+        with open(path, "w") as fh:
+            json.dump(reg, fh)
+        self.assertEqual([n for n, _ in screen_collisions(path)], ["dup"])
+
+    def test_the_live_register_has_no_screen_collision(self):
+        """measure-the-null carried two rule texts and two applies_when
+        clauses across five claims; merged to one definition."""
+        self.assertEqual(screen_collisions(), [])
+
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ principles.py  --  the failure shapes, compressed, and what still catches none.
     python playground/principles.py show P-FIXED-PROBE
     python playground/principles.py coverage      # which are mechanised
     python playground/principles.py gaps          # only the ones that are not
+    python playground/principles.py crossfiled    # instances filed under two
 
 =====================================================================
 WHAT COMPRESSION BUYS, AND WHAT IT DOES NOT
@@ -132,6 +133,46 @@ def unresolved(path=LIBRARY, root=ROOT):
     return bad
 
 
+def crossfiled(path=LIBRARY):
+    """Instances filed under more than one principle, and whether it matters.
+
+    A defect can genuinely exhibit two shapes -- GIES-1 is both a
+    representation blind to the sign (P-SYMMETRY-COLLAPSE) and a rank-1
+    projection that discarded it (P-PREMATURE-SCALARIZATION) -- so a shared
+    instance is not an error and is not evidence subtracted from either
+    principle. The first version of this function treated it as one: it
+    stripped every shared instance before counting and duly reported
+    P-SYMMETRY-COLLAPSE as load-bearing, which would make a cross-cutting
+    finding a liability rather than this archive's best asset. GIES-1 and
+    KEA-7 are two independent claims in two formalisms that never met; that
+    is what the principle rests on and it is intact.
+
+    What WOULD be a collision is one principle whose instances are a SUBSET
+    of another's -- two names for one shape, where the narrower has no
+    evidence the wider does not already have. That is what this returns.
+
+    Returns (shared, contained). `shared` is informational. `contained` lists
+    (narrow, wide) pairs and is the failure condition; the test asserts it
+    stays empty.
+    """
+    def key(i):
+        return (i["where"], i.get("claim") or "")
+
+    owners = {}
+    for p in principles(path):
+        for i in p["instances"]:
+            owners.setdefault(key(i), []).append(p["id"])
+    shared = {k: v for k, v in owners.items() if len(v) > 1}
+
+    sets = {p["id"]: {key(i) for i in p["instances"]} for p in principles(path)}
+    contained = []
+    for a, sa in sorted(sets.items()):
+        for b, sb in sorted(sets.items()):
+            if a != b and sa and sa <= sb:
+                contained.append((a, b, len(sa), len(sb)))
+    return shared, contained
+
+
 def match(record, path=LIBRARY):
     """Which principles an archive record cites. Cheap, and deliberately so.
 
@@ -213,6 +254,27 @@ def main(argv):
             if p.get("gap_note"):
                 print("      %s" % p["gap_note"])
             print()
+    elif cmd == "crossfiled":
+        shared, contained = crossfiled()
+        print("Instances filed under more than one principle: %d"
+              % len(shared))
+        print("  A defect can exhibit two shapes, and a shared instance is")
+        print("  not evidence subtracted from either principle. What would")
+        print("  be a collision is one principle's instances being a SUBSET")
+        print("  of another's -- two names for one shape.")
+        print()
+        for (where, claim), pids in sorted(shared.items()):
+            print("  %-12s %s" % (claim or "-", where))
+            print("               %s" % " + ".join(sorted(pids)))
+        print()
+        if contained:
+            print("CONTAINED (%d): a principle with no evidence of its own"
+                  % len(contained))
+            for a, b, na, nb in contained:
+                print("  %-26s (%d) subset of %-26s (%d)" % (a, na, b, nb))
+            return 1
+        print("no principle's instances are a subset of another's: each of "
+              "the %d carries evidence no other one has." % len(principles()))
     elif cmd == "tags":
         for tag, pids in sorted(tags().items()):
             print("  %-14s %s" % (tag, ", ".join(pids)))
@@ -232,7 +294,7 @@ def main(argv):
         print("every instance points at something that exists.")
     else:
         print("usage: principles.py [list | show ID | coverage | gaps | "
-              "tags | resolve]")
+              "tags | resolve | crossfiled]")
         return 2
     return 0
 
