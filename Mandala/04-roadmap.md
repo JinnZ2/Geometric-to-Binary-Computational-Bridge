@@ -2,6 +2,12 @@
 
 > **Status: Aspirational.** Phases are ordered by dependency.
 > Phase 0 is already done. Phases 1–3 are future work.
+>
+> **Corrected 2026-08.** Two entries below rested on claims this archive has
+> since refuted, marked `[corrected]` in place rather than deleted. The
+> repository-wide roadmap is
+> [`../docs/Implementation_Roadmap.md`](../docs/Implementation_Roadmap.md);
+> this file is the Mandala-Computing slice of it.
 
 ---
 
@@ -26,10 +32,27 @@ Engine/
 └── spatial_grid.py            Adaptive octree (~2000 pts vs 32 000 uniform)
 
 Silicon/
-├── octahedral_sim.py          Decoherence physics (T₂ = 166ms @ optimal params)
+├── octahedral_sim.py          Decoherence physics [corrected] — the T₂ = 166 ms @ 300 K
+│                              figure is DEAD (ER-1). Er³⁺ is a Kramers ion, which protects
+│                              against static splitting but not Orbach relaxation through the
+│                              crystal field: the CF gap is 40–60 cm⁻¹ against kT = 208.5 cm⁻¹,
+│                              so the rate goes linear in T. Measured Er T₁ is ~µs at 10 K and
+│                              undetectable above ~30 K; T₂ ≤ 2T₁ caps it 8 orders below the
+│                              claim, and 110× above the NV-in-diamond room-temperature record.
+│                              See Silicon/er_bounds.py
 ├── topological_memory.py      VortexMemory — 8-bit topological storage, 500-step stable
 ├── vortex_phase_learning.py   KT physics from gradient descent, winding field tools
-└── vortex_attention_heads.py  Registry-locked Gaussian attention; charge/position audit
+└── vortex_attention_heads.py  [corrected] — the charge/position audit is the archive's best
+                               negative result and stands: topological charge is invariant
+                               while core POSITION is a zero mode. The REMEDY does not — a
+                               registry is bookkeeping, not a pin, and costs nothing to
+                               violate. Coupling to the winding density fails for a deeper
+                               reason: d(plaquette circulation)/d(phi) = 0 identically, so a
+                               charge-based pin is gradient-free. A pin must couple to
+                               something non-topological (ATT-1);
+                               experiments/silicon_speculative/topological_pin.py measures a
+                               template pin: core hops in 100% of seeds at k_p = 0, 0% at
+                               k_p >= 0.01, charge conserved throughout
 ```
 
 ---
@@ -111,7 +134,7 @@ path = engine.navigate(structure, start="F", target="acceleration")
 | Bloom expansion | Symbol → nested rings rendered in Three.js | Structure depth |
 | Simple factorisation | Factor 10–20 bit numbers via energy landscape | Accuracy vs brute force |
 | Fibonacci resonance | Eigenvalue ratio distributions for stable states | Deviation from φ |
-| T₂ measurement | Coherence time on real octahedral cells | Match `octahedral_sim.py` prediction |
+| T₂ measurement | Coherence time on real octahedral cells | ~~Match `octahedral_sim.py` prediction~~ **[corrected]** — that prediction is dead (ER-1). The measurement is still worth making; what it cannot do is confirm 166 ms at 300 K. The three cheap decisive experiments are FAB-3, BRG-6 and R2-3 — see `../docs/Implementation_Roadmap.md` §3.2 |
 
 **Φ measurement** (consciousness): use proper MIP approximation, not the simplified proxy.
 Add `pyiit` to `requirements.txt` only when the approximation is actually computed.

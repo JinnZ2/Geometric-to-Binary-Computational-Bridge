@@ -280,6 +280,7 @@ FAMILY_HOME = {
     "FAB": "Silicon", "BRG": "Silicon", "EPG": "Silicon", "SIL": "Silicon",
     "TTM": "Silicon", "FP": "Silicon",
     "GIES": "GEIS", "FCL": "field", "ASF": "adaptive_sim",
+    "ENG": "Engine",
     "GLY": "bridges", "NLS": "bridges",
     "GI": "geometric_intelligence", "GR": "geometric_intelligence",
     "GB": "geometric_intelligence", "TRD": "geometric_intelligence",

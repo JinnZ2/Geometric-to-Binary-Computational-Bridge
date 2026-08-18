@@ -656,7 +656,9 @@ Typical accuracy: Within 0.1% of analytical solutions where they exist.
 - Quantum geometric patterns → qubit configurations
 - Wave function visualization
 - Entanglement as geometric correlation
-- See `/quantum-bridge/` (if exists) or PROJECTS.md for roadmap
+- See [`docs/Implementation_Roadmap.md`](docs/Implementation_Roadmap.md) for the
+  roadmap. This line pointed at PROJECTS.md, which is a connected-repository
+  list and never contained a roadmap
 
 -----
 
@@ -776,11 +778,26 @@ performance_report(optimized)
 
 ### Future Development Roadmap
 
+> **Superseded 2026-08.** The authoritative roadmap is
+> [`docs/Implementation_Roadmap.md`](docs/Implementation_Roadmap.md), which is
+> dated and states what would settle each item. This section is kept only so
+> that the correction is visible rather than silent.
+>
+> Two things in the list below did not survive being measured. **"GPU
+> acceleration (10-100x additional speedup)"** was written on top of a reported
+> speedup that no clock had ever been on: timed against a uniform baseline the
+> adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is
+> per-point call overhead and Python-side decomposition, neither of which a GPU
+> removes (ENG-1, ENG-5). And **"hardware that natively understands geometry"**
+> still stands as intent, but its transduction layer changed completely: there
+> is no magnetic state channel in silicon, and strain replaces it throughout
+> (FAB-1, BRG-1, ER-1).
+
 **Near-term (months):**
 
 - More physics bridges (chemistry, biology)
 - Improved quantum system support
-- GPU acceleration (10-100x additional speedup)
+- ~~GPU acceleration (10-100x additional speedup)~~ — see the note above
 - Better mesh preprocessing
 
 **Mid-term (1-2 years):**
