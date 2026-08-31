@@ -1,385 +1,641 @@
 # META-PROTOCOL.md
 
-**The operating manual for the pattern used across this repository and its
-siblings (`Simulators`, `curly-octo-happiness`).** It states what happens when a folder is dropped in, the five steps
-that turn it into three documents, the templates those documents use, and the
-principles the work is committed to.
+**A way of finding out things, written as a map instead of a test.**
 
-It is written so that the pattern can be run **without the model that
-established it** — by a collaborator, by a student, by a different AI, or by
-the author in a later session. If you are picking this up cold, Part 4 is the
-entry point and Part 5 is the exit test.
+CC0. Copy it, change it, argue with it, put your own terrain in it.
 
 ---
 
-## PART 0 — WHERE THIS SITS
+## 0. WHAT THIS IS
 
-This repository already carries most of the machinery this protocol describes,
-in executable form. The protocol is the **human-side procedure**; those tools
-are the parts of it that got mechanised.
+You have something in front of you — a field, a machine, a dataset,
+a claim somebody made online that sits wrong with you and you can't
+say why.
 
-| protocol step | mechanised as |
-|---|---|
-| step 1, system boundary | `claims_index.py` — classifies every claim id by what can make it FAIL |
-| step 2, load-bearing anchor | nothing; this is the read that stays a read |
-| step 3, epistemic states | `CLAIMS_REGISTER.json` — statement, whether it holds, why not, cause of death, salvage |
-| step 4, falsifiers | `playground/playground.py` — `broken()` and `null()` are the two gates |
-| step 5, scope boundary | `repo_guard.py` — null harness, symmetry veto, instrument reach, collisions |
-| recurring shapes | `PRINCIPLES.json` — 11 failure shapes, promoted only at two independent instances |
-| what the killing bought | `graveyard.py` — screens ranked by reach |
-| the archive as one space | `explore.py` — screens × families, and the empty cells |
+This document is a set of moves for working on that thing.
 
-Read `playground/README.md` for the two gates, and `AI_INDEX.json` first if
-you are a model. Where this file and a running check disagree, **the check
-wins** and this file is the thing that gets corrected — that is principle 4
-applied to the protocol itself.
+It is not a method that produces right answers. It is a method that
+produces **positions** — places you are standing, with known edges
+leading out of them. You move, you take a reading, the reading tells
+you which way to go next. Then you are somewhere else.
+
+**There is no failing move in here.** A result that doesn't match your
+prediction is not a wrong answer. It is the highest-information reading
+you can get, because it tells you an edge you assumed was there isn't,
+and the direction of the miss tells you which edge is.
+
+Most of what gets taught as "the scientific method" is written as a
+pass/fail gate: hypothesis, test, confirmed or rejected. That framing
+closes down thinking, because it makes most of what actually happens
+during real work look like failure. It isn't failure. It's traversal.
+
+If you have ever sensed that the right-way/wrong-way framing was
+missing something — that sense is a valid reading. This is the map
+version.
 
 ---
 
+## 1. THE MAP
 
-## PART 1 — CLASSIFICATION: WHAT HAPPENS WHEN A FOLDER IS DROPPED
+```
+POSITION  ── what is in front of you, plus what you currently know
+              about it. Always nameable. You are always somewhere.
 
-Five steps, in order. Each produces a specific artifact. Recognise them when
-they happen; run them yourself when nobody is here to.
+MOVE      ── something you do that produces a reading.
+              measure, build, dismantle, ask, compare, run it twice.
 
-### Step 1 — The system boundary audit
+READING   ── what came back.
+              EVERY reading has an outgoing edge. See §5.
 
-**Do:** read the folder and ask *what does this claim to be about, and what
-does it actually contain?* Separate:
+GAP       ── a node you have not reached, with edges pointing at it.
+              A gap is a destination, not a hole.
 
-- **executable code** — runs, produces output
-- **build specifications** — need an external engine or dataset not present
-- **scaffolds** — structure with no data in it
-- **audits** — tools that inspect something else
-- **markers** — a named mechanism with nothing quantified
+BEARING   ── the direction the next move lies in.
+              Comes from the reading, not from a rulebook.
+```
 
-**Produce:** the opening statement of `CLAIM_TABLE.md`, saying what the folder
-*is*, not what it claims to be. The form is *"This is an X, not a Y."*
+The whole thing runs on one idea:
 
-**Yourself:** list every file. For each, ask — does it run, does it produce
-output, does it need something that is not here? State the result. No
-judgement, only classification.
+> **The direction a result misses by is the compass.**
 
-### Step 2 — The load-bearing, data-independent anchor
+Not whether it missed. Which way it missed, and by how much.
+The direction names the missing edge. The size sizes the missing term.
 
-**Do:** find the one structural conclusion that holds even if every number is
-missing. In `Silicon/keating_cluster.py` it was that Keating is a sum of
-squares, so it has one minimum and not eight — true before any optimiser runs.
-In `GEIS/gies_core.py` it was that `outer(v, v)` cannot see the sign of `v`,
-so an antipodal state table collapses. In `Silicon/er_bounds.py` it was the
-Orbach screen: compare the crystal-field gap to `kT` and the coherence claim
-is settled in two lines with no apparatus.
+---
 
-**Produce:** a `CLAIMS_REGISTER.json` entry naming the anchor and why it holds.
+## 2. ENTRY POINTS
 
-**Yourself:** state the core claim. Ask whether it follows from structure or
-from data. If from structure, name it — those are the claims that transfer to
-other domains, and they are what `graveyard.py screens` ranks by reach. If from
-data, mark it `UNMEASURED` and do not soften that.
+Three doors. Take whichever one matches what you actually have.
 
-### Step 3 — The epistemic state inventory
+```
+DOOR A — YOU HAVE A THING
+  a field, a hive, a motor, a robot kit, a well, a stretch of road
+  you have a question about it
+  → start at §3, MOVE 1
 
-**Do:** read every parameter, assumption and variable. For each ask — is it
-quantified, is it measurable, is it measured? Classify:
+DOOR B — YOU HAVE A DOCUMENT
+  a folder, a repo, a paper, a report, a spec
+  → start at §8, PATH B (the folder audit)
+
+DOOR C — YOU HAVE A CLAIM THAT SITS WRONG
+  something asserted, and your sense says something is missing
+  → write the claim down in one sentence
+  → ask: what would have to be true for this to hold?
+  → each of those is a node. Check the cheapest one first.
+  → then you are at DOOR A or DOOR B
+```
+
+Door A is the primary door. Most existing method-writing assumes
+Door B — that you start with literature. You don't have to. Starting
+with the physical thing is not the amateur version.
+
+---
+
+## 3. THE FIVE MOVES
+
+### MOVE 1 — Ask the thing before you ask the record
+
+```
+default:  search the literature → form expectation → look at the thing
+here:     query the physical state → THEN search the record
+```
+
+Take a reading off the object first. Temperature, count, weight, sound,
+what it does when you load it, what it did last year.
+
+Reason: the record has a shape, and if you load that shape first, you
+will see the object through it. Reading the object first gives you an
+independent measurement to compare the record against — which means
+you can now audit the record instead of only absorbing it.
+
+You do not need equipment to do this. Counting, timing, weighing,
+marking, and comparing two matched groups are all instruments.
+
+### MOVE 2 — Weigh by persistence, not by volume
+
+```
+signal strength ≠ how many times it is repeated
+signal strength ≈ how long it has held under load
+```
+
+A practice that has worked for four hundred years under real cost has
+survived more tests than a claim repeated five thousand times in one
+year. Repetition count measures circulation. Persistence measures
+survival.
+
+Apply this to your own results too: something you have seen hold across
+three seasons is stronger than something you saw ten times in one week.
+
+### MOVE 3 — Keep *observed* and *validated* in separate columns
+
+```
+OBSERVED   you saw it
+VALIDATED  it has been measured under controlled conditions
+```
+
+These never merge on their own. An observed-but-unvalidated thing does
+not get promoted to validated because it's been sitting around, and it
+does not get deleted because it hasn't been validated yet.
+
+Keep a third column: **unquantified but load-bearing**. Things you know
+are affecting the outcome and cannot yet put a number on. Write them
+down explicitly. An unnumbered term left out of the write-up is a term
+you have silently set to zero.
+
+### MOVE 4 — Non-written evidence is a medium, not a lower tier
+
+```
+written paper      medium
+oral transmission  medium
+carved / built     medium
+chain of custody   medium
+your own hands     medium
+```
+
+A medium is how something is carried, not how true it is. Evidence
+carried orally across generations, or built into a working structure,
+or held in someone's hands as a practice, is primary data. It is
+weighted by MOVE 2 like everything else.
+
+This does not mean everything is equal. It means the sorting question
+is "how has it been tested?" and not "was it printed?"
+
+### MOVE 5 — Reduce to something conserved
+
+```
+before a claim counts, run it down to a quantity that has to balance
+  energy      mass       water       time       money
+  count       area       load        heat
+```
+
+Then check closure: **do the inputs and outputs actually add up?**
+
+If a proposed explanation requires more water than falls, more hours
+than the day has, more load than the material carries, or more people
+than were there, the explanation has a missing term — and the size of
+the shortfall tells you how big that term is.
+
+**This is where the compass comes from.** The residual — what's left
+over when you balance the books — has a direction and a size. That
+residual is your bearing to the next node.
+
+---
+
+## 4. STATE VOCABULARY
+
+Two sets. The first describes **the record's** condition. The second
+describes **your own readings**. Most method-writing has only the first,
+which is why there is usually nowhere to file your own mismatch.
+
+### 4A — States of the record
 
 | state | meaning |
 |---|---|
-| `MEASURED` | a value exists and is in the folder |
-| `UNKNOWN_ATM` | the mechanism is known to exist; no current value is available |
-| `UNDER_STUDY` | data collection is in progress |
-| `NOT_STUDIED` | the mechanism is recognised; no measurement has been attempted |
-| `UNDEFINED` | the variable has no agreed definition or measurement protocol |
+| `MEASURED` | a value exists and you have it |
+| `UNKNOWN_ATM` | the mechanism is known; no current value available |
+| `UNDER_STUDY` | someone is collecting it now; value provisional |
+| `NOT_STUDIED` | mechanism recognised, no measurement ever attempted |
+| `UNDEFINED` | no agreed definition or measurement protocol exists |
 | `UNMEASURED` | no value available; the cell is a gap |
 
-**Produce:** one research gap per unquantified variable, in
-`UNDERGRADUATE_RESEARCH_GAPS.md`.
+### 4B — States of your own readings
 
-**Yourself:** for each item, ask — is there a value here? in the literature?
-is it even defined? An absent value and a value known to be zero are different
-states and must never share a cell.
+| state | meaning |
+|---|---|
+| `HELD` | you predicted, you measured, it matched |
+| `OFF` | you measured; the result differs from the prediction |
+| `SILENT` | the instrument returned nothing usable |
+| `MIXED` | the reading fits two incompatible explanations equally |
+| `UNREPEATED` | one run only — not yet a reading |
+| `BLOCKED` | you could not run it: access, cost, permission, gate |
 
-### Step 4 — The falsifier-locked research prompts
+Note what is **not** in either list: there is no `FAILED`, no `WRONG`,
+no `REJECTED`. Those aren't states of the world. They're verdicts,
+and a verdict has no outgoing edge.
 
-**Do:** every gap gets a defeater — the condition that settles it. Each gap
-carries a knowledge state, a research question, a **falsifier**, a data source,
-a method, and an expected deliverable.
-
-**Produce:** a complete `UNDERGRADUATE_RESEARCH_GAPS.md`, typically 10–20 gaps.
-
-**Yourself:** name the data source explicitly (*USGS gage records*, *NBI
-inventory*), the method explicitly (*extract impervious surface area from
-NLCD*), and the deliverable explicitly (*a calibrated urban increment
-fraction*). A falsifier that cannot be checked is not a falsifier.
-
-### Step 5 — The scope boundary document
-
-**Do:** read the folder for assumptions that are **institutional rather than
-physical**. Ask: what was treated as out of scope that the physics cares about?
-Six fallacy shapes recur:
-
-| # | shape | domain examples |
-|---|---|---|
-| 1 | *X as default* | additive, selection, channel, improvement |
-| 2 | *Y as detail* | version, schedule, bounding box, call window |
-| 3 | *Z as independent* | procedure gap, held constants, false alarm |
-| 4 | *W as complete* | cognitive load, static model, desk-worker |
-| 5 | *V as neutral* | medium, reading, estimator, org chart |
-| 6 | *U as optional* | anchor, bridge, rejections, hard constraints |
-
-**Produce:** `SCOPE_BOUNDARY.md` naming the six in this folder's domain and
-saying why the framework refuses each.
-
-**Yourself:** for each excluded thing ask whether the physics cares. If it
-does, name the fallacy and include the mechanism.
+`BLOCKED` is the important one people leave out. It records a fact
+about the **route**, not about the terrain. The node is still there.
 
 ---
 
-## PART 2 — THE OUTPUT TEMPLATES
+## 5. READINGS AND BEARINGS
 
-Copy these. They are also what a second AI should be handed.
+This is the engine. Every reading exits somewhere.
 
-### `CLAIM_TABLE.md`
-
-```markdown
-## CLAIM_TABLE.md
-
-Claims about the delivered `<folder>/` folder, about what a <environment> can
-establish concerning it, and about the <protocol> it inherits.
-
-This is a <classification>, not a <opposite>. <one sentence on what it is>
-
----
-
-## REFUTATION_PROTOCOL
-
-Every claim names what would refute it. A failed check updates the claim,
-never the delivered design.
-
-| id | claim | status |
-|---|---|---|
-| `XXX_001` | <first claim> | SUPPORTED / UNVERIFIED / REPAIRED / REFUTED |
-| `XXX_002` | <second claim> | ... |
 ```
+HELD
+  meaning   the edge you assumed is there
+  bearing   walk it. Your new position is the node it leads to.
+  caution   HELD on already-mapped ground teaches you little.
+            HELD where you expected OFF is worth more.
 
-`id` rules: the prefix must be **unused anywhere else in the repository**, and
-the number must mean the same claim in every file that cites it. Two folders
-sharing a prefix makes both uncitable.
+OFF
+  meaning   that edge is not where you thought
+  bearing   turn toward the residual.
+            WHICH WAY it missed names the missing edge.
+            HOW FAR it missed sizes the missing term.
+  note      this is the highest-information reading available.
+            If you are getting OFF a lot, you are in new terrain.
 
-### `UNDERGRADUATE_RESEARCH_GAPS.md`
+SILENT
+  meaning   wrong instrument, or wrong scale, or no baseline
+  bearing   change the instrument, or change the scale, or go get
+            a baseline. The terrain is unchanged; your reach isn't
+            long enough yet.
+  note      SILENT is not evidence of absence. It is absence of
+            evidence, which is a statement about your instrument.
 
-```markdown
-## UNDERGRADUATE_RESEARCH_GAPS.md
+MIXED
+  meaning   two explanations both fit this reading
+  bearing   design the one move that separates them.
+            Ask: what would differ between the two?
+            Go measure THAT.
+  note      this is where most real progress happens.
 
-Open questions in the <folder> framework, organized by discipline.
+UNREPEATED
+  meaning   n = 1
+  bearing   run it again, changing exactly one thing.
+            Two runs that agree is a reading.
+            Two runs that disagree is a better one.
 
-Every gap here is a research question with a knowledge state, a falsifier, a
-data source, a method, and an expected deliverable.
-
----
-
-### 1. <GAP TITLE> — <brief description>
-
-**Gap:** <what is unknown>
-
-**Knowledge state:** `NOT_STUDIED`
-
-**Research question:** <the question>
-
-**Disciplines:** <list>
-
-**Data sources:** <list>
-
-**Method:** <steps>
-
-**Expected deliverable:** <what is produced>
-
-**Falsifier:** <the condition that closes the gap>
-```
-
-### `SCOPE_BOUNDARY.md`
-
-```markdown
-## SCOPE_BOUNDARY.md
-
-Why this framework is broader than standard <domain> practice.
-
----
-
-### The Problem
-
-<one paragraph: the institutional boundary the physics does not respect>
-
----
-
-### Six Ways the Connection Gets Lost
-
-#### 1. The "<NAME>" Fallacy
-
-<what the fallacy is>  <why it is one>  <what the framework does instead>
-
-#### 2. ... (through 6)
-
----
-
-### What This Framework Does Differently
-
-<mechanisms the framework keeps that standard practice drops>
-
----
-
-### The Knowledge-State Vocabulary
-
-<the Step 3 table>
-
----
-
-### What Is NOT a Valid Epistemic State
-
-`<INSTITUTIONAL_CATEGORY>` is not a knowledge state. If a mechanism physically
-influences the system, excluding it because <reason> is a scope error, not an
-epistemic one.
-
----
-
-### The Standard
-
-The question should not be:
-
-> "<institutional question>"
-
-But rather:
-
-> "<physical question>"
-
-If the answer is yes, it belongs in the model.
+BLOCKED
+  meaning   the route is closed, not the question
+  bearing   find another route to the same node.
+            Cheaper instrument, proxy measurement, someone who
+            already has the data, a different permission path,
+            or a measurement that makes the blocked one unnecessary.
+  note      write down WHAT blocked it. The pattern of blocks is
+            itself data about the system you are working in.
 ```
 
 ---
 
-## PART 3 — THE DEEP PRINCIPLES
+## 6. WHAT A NORMAL TRAVERSE LOOKS LIKE
 
-Commitments, not methods.
+Set your expectations from the terrain, not from a textbook.
 
-**1. The physics does not care about our boundaries.** The first question is
-always whether the mechanism physically influences the system. Institutional
-boundaries are administrative facts about who pays, not about what acts.
+```
+on well-mapped ground     mostly HELD
+                          (you are confirming, not exploring)
 
-**2. Gaps are the map.** A map is not finished when every cell is filled. It is
-finished when every gap is marked with what would move it. The unmeasured cell
-is the information.
+on new ground             mostly SILENT and OFF
+                          HELD is rare and often means you asked
+                          a question that was already answered
+```
 
-**3. Every claim names its falsifier.** A claim with no falsifier is not a
-claim. The falsifier is the boundary of the claim, and a claim that survives
-one is stronger than a claim nobody tested.
+If you are exploring and most of your moves come back SILENT or OFF,
+**you are doing it correctly.** That is the base rate of unmapped
+terrain. It is not a statement about your competence.
 
-**4. The instrument audits itself.** The later instrument turns on the earlier
-one. Ship the check with the scaffold. A scorer that cannot fail is not a
-scorer — see `null-harness/`.
+The people who quit here mostly quit because they were told to expect
+confirmation, got mismatch instead, and read the mismatch as a verdict
+on themselves rather than as a bearing.
 
-**5. Absent is not zero.** *No value*, *checked and found absent*, and *not
-searched* are three states. Collapsing any two of them is the single most
-frequent defect in this repository, and it has been found and repaired more
-than a dozen times at different sites.
+Two practical consequences:
 
-**6. The field is one system.** Temperature, wind, water, terrain, season,
-animal behaviour, human signals — read as one field, not as a sequence of
-narratives. The repository is the field map.
+```
+1  budget for it
+   plan on several moves per node, not one
+   a plan that only works if the first test confirms is a fragile plan
 
----
-
-## PART 4 — HOW TO RUN THIS
-
-**With a model in session.** Point it at the folder, say *follow
-META-PROTOCOL.md*, review the three documents, correct, iterate, next folder.
-
-**With another AI.** Paste this file in. Same instruction. It needs nothing
-else — that is the file's design requirement.
-
-**Yourself.** Work Part 1 step by step, filling the Part 2 templates, and use
-Part 5 as the exit test.
+2  log the OFFs
+   a notebook of mismatches with their directions IS the map
+   it is more valuable than a notebook of confirmations
+```
 
 ---
 
-## PART 5 — THE CHECKLIST
+## 7. COMMON WRONG TURNS
 
-A folder is **not processed** until every line passes.
+Six shapes that recur across every domain. They are not mistakes of
+carelessness — they are structural, and they happen to careful people.
 
-**Documents**
+Name them when you find them. **Six is a ceiling, not a quota** — if
+your fifth or sixth slot has nothing real in it, leave it empty. An
+empty slot is honest; a filled one with nothing measured in it is noise.
 
-- [ ] `CLAIM_TABLE.md` exists; every claim is `SUPPORTED`, `UNVERIFIED`,
-      `REPAIRED` or `REFUTED`, and **no claim row has an empty status cell**
-- [ ] every `SUPPORTED` claim names a falsifier
-- [ ] `UNDERGRADUATE_RESEARCH_GAPS.md` exists with 10–20 gaps
-- [ ] every gap carries a falsifier, data source, method and deliverable
-- [ ] `SCOPE_BOUNDARY.md` exists and names six fallacies
+```
+1  X AS DEFAULT
+   one option is treated as the baseline that everything else is
+   measured as a deviation from
+   ask: who set the baseline, and what would a different one show?
 
-**Identifiers**
+2  Y AS DETAIL
+   something that changes the answer is filed as a footnote
+   ask: if I varied this, would the conclusion move? if yes, it is
+        not a detail
 
-- [ ] the claim-id prefix is unused by any other folder in the repository
-- [ ] each id means the same claim in the folder's canonical table and in
-      every document that restates it — a restatement that renumbers makes
-      every cross-reference ambiguous
-- [ ] cross-referenced folders and claim ids **resolve**; a named-but-absent
-      artifact is recorded as absent rather than assumed to exist
+3  Z AS INDEPENDENT
+   two things treated as separate that actually move together
+   ask: were these ever measured at the same time on the same system?
 
-**Markup**
+4  W AS COMPLETE
+   a list treated as covering the whole space
+   ask: what would a thing look like that fits none of these
+        categories? could I detect it if it existed?
 
-- [ ] headings are `#`/`##`/`###`, not plain lines
-- [ ] tables are pipe tables, not space-separated columns
-- [ ] lists use `-`, not `·`
-- [ ] no truncated lines, no unterminated code spans, no retrieval-tool
-      artifacts (`【…】`, `[N†L…]`)
+5  V AS NEUTRAL
+   the instrument, medium, or reading treated as adding nothing
+   ask: what does this instrument make easy to see, and what does
+        it make impossible to see?
 
-**Code**
+6  U AS OPTIONAL
+   a load-bearing part treated as nice-to-have
+   ask: what happens if I remove it? if the structure fails, it was
+        never optional
+```
 
-- [ ] `python repo_guard.py` passes — null harness, symmetry veto, instrument
-      reach, and the collision stage
-- [ ] `python claims_index.py status` shows nothing recorded `live` that
-      nothing in the tree can falsify
-- [ ] `python claims_index.py salvage` — every `dead` claim records what
-      survives it; a death with no salvage is a deletion, not a lesson
-- [ ] `python playground/review.py` exits zero — the archive still describes
-      reality, and no candidate survives by having loosened its own tolerance
-- [ ] `python playground/principles.py resolve` exits zero — every principle
-      instance points at a path that exists
-- [ ] a statistical claim ships a `null()`; a claim of any kind ships a
-      `broken()` its own checks reject
-- [ ] stdlib-only, or the dependency is declared (`requirements.txt`;
-      `numpy`/`scipy` tiers are stated per module)
-- [ ] the suite actually runs — a test class defined after
-      `unittest.main()` never executes and the suite still reports OK
-
-**Discipline**
-
-- [ ] no real-world value supplied from memory — a figure is either fetched,
-      cited, or `UNMEASURED`
-- [ ] delivered files are landed verbatim; corrections live in the audit
-- [ ] absent, zero, and not-searched are three distinguishable states
+For each one you find, write down: **the physical mechanism it drops,
+and whether that mechanism actually influences the system.** If it does,
+it belongs in the model regardless of whose scope it falls outside of.
 
 ---
 
-## PART 6 — WHERE TO PUT THIS
+## 8. TWO PATHS
 
-Post it at the root of each repository, or once centrally with each repository
-linking to it. Hand it to collaborators so they know the pattern, to students
-so they know what they are building, and to a future model so the work
-continues without the session that started it.
+### PATH A — You have a thing (physical entry)
+
+```
+1  state the position
+   what is in front of you, what you already know, what you noticed
+
+2  take a reading off the object    (MOVE 1)
+   before any searching
+
+3  reduce to something conserved     (MOVE 5)
+   what has to balance here?
+
+4  predict, then move
+   say out loud what you expect BEFORE you measure
+   an unstated prediction cannot come back OFF, so it teaches nothing
+
+5  classify the reading              (§4B)
+   HELD / OFF / SILENT / MIXED / UNREPEATED / BLOCKED
+
+6  take the bearing                  (§5)
+   the reading tells you the next move
+
+7  when a node stays unreached: write it as a gap  (§9)
+
+8  repeat from 1 at the new position
+```
+
+### PATH B — You have a document (folder audit)
+
+Five steps. This works on a repo, a paper, a report, a spec.
+
+```
+1  SYSTEM BOUNDARY AUDIT
+   what does it claim to be, and what does it actually contain?
+   sort every file:
+     executable        runs, produces output
+     build spec        needs an engine or data not present
+     scaffold          structure, no data
+     audit             a tool that inspects other things
+     marker            a named mechanism with no numbers on it
+   → produces CLAIM_TABLE entries
+
+2  FIND THE LOAD-BEARING, DATA-INDEPENDENT ANCHOR
+   which conclusion holds even if every number is missing?
+   if it follows from structure alone, name it
+   if it needs data, mark it UNMEASURED
+   → produces a CLAIM_TABLE entry
+
+3  EPISTEMIC STATE INVENTORY
+   every parameter, assumption, variable
+   classify with §4A
+   → produces one gap per unquantified variable
+
+4  ATTACH A FALSIFIER TO EACH GAP
+   what specific result would settle this?
+   name the data source, the method, the deliverable
+   → produces RESEARCH_GAPS
+
+5  SCOPE BOUNDARY
+   what did it treat as out of scope that the physics cares about?
+   run §7 against it
+   → produces SCOPE_BOUNDARY
+```
+
+Both paths converge on the same three documents. Path A fills them
+from your own measurements; Path B fills them from someone else's.
 
 ---
 
-## APPENDIX — THE SIX FALLACIES, QUICK REFERENCE
+## 9. TEMPLATES
 
-| # | fallacy | reads as | actually is |
+### CLAIM_TABLE.md
+
+```markdown
+# CLAIM_TABLE.md
+
+What this actually is: [one sentence — the honest classification]
+
+Every claim names what would change it.
+A check that comes back OFF updates the claim, not the design.
+
+| id | claim | state | what would change it |
 |---|---|---|---|
-| 1 | X as default | the ordinary case | one option among several, chosen and unmarked |
-| 2 | Y as detail | an implementation matter | the variable the result turns on |
-| 3 | Z as independent | a competing explanation | a downstream readout of the same cause |
-| 4 | W as complete | the whole picture | the part the instrument reaches |
-| 5 | V as neutral | a transparent medium | an instrument with its own response |
-| 6 | U as optional | a nice-to-have | the precondition the rest rests on |
+| 001 | | SUPPORTED / UNVERIFIED / REPAIRED | |
+| 002 | | | |
+```
+
+### RESEARCH_GAPS.md
+
+```markdown
+# RESEARCH_GAPS.md
+
+### N. [GAP TITLE]
+
+Gap:                what is unknown
+Knowledge state:    [§4A state]
+Question:           the question, stated so it can be answered
+Where to look:      pick at least one —
+                      EXISTING RECORD: [database, archive, agency]
+                      YOUR OWN DATA:   [what you would measure,
+                                        with what, over what period]
+                      SOMEONE'S HANDS: [who already does this and
+                                        could be asked]
+Method:             the steps, specific enough to hand to someone else
+Deliverable:        what exists at the end that didn't before
+What settles it:    the specific result that closes this node
+What it opens:      if it closes, which node are you standing at next
+```
+
+That last line is not decoration. A gap that closes and points nowhere
+is a dead end you built yourself.
+
+**You are allowed to be the data source.** Most gap templates assume
+a corpus. Your own field, your own machine, your own season of records
+is a data source. It is often the only one that exists for your terrain.
+
+### SCOPE_BOUNDARY.md
+
+```markdown
+# SCOPE_BOUNDARY.md
+
+## The problem
+[the boundary that was drawn, and why the physics doesn't respect it]
+
+## Wrong turns found here
+[up to six, from §7 — leave slots empty rather than filling them]
+
+For each:
+  the shape
+  the mechanism it drops
+  whether that mechanism influences the system  (yes/no/unknown)
+  what this framework does instead
+
+## What is not a valid state
+[the institutional category that got recorded as if it were knowledge]
+
+## The standard
+The question is not: [the administrative question]
+It is:               [the physical question]
+```
 
 ---
 
-CC-BY-4.0, matching the repository. No claim in this file is a claim about the world; it is a claim about how
-to write claims about the world, and it is refuted by a folder processed
-correctly against it that still misleads a reader.
+## 10. A WORKED TRAVERSAL
+
+Not a finished result — the walk, including the moves that came back
+SILENT and OFF, because those are the ones that did the work.
+
+**Position 0.** Squash is setting less fruit this year than last.
+That's the thing and the question.
+
+```
+MOVE A    count bees in the patch
+READING   SILENT
+WHY       no count from last year. Nothing to compare against.
+          The instrument can't answer a change question without
+          a baseline.
+BEARING   change the instrument. Ask something that doesn't need
+          last year's number.
+```
+
+```
+MOVE B    count flower VISITS instead of insects.
+          Ten minutes, three times a day, marked flowers.
+READING   visits high before 9am, near zero after 10am
+STATE     HELD — but it opened a node that wasn't on the map:
+          the flowers themselves
+BEARING   go look at the flowers
+```
+
+```
+MOVE C    when do squash flowers open and close?
+READING   open early, closed by mid-morning
+STATE     MIXED
+WHY       two explanations fit equally:
+            (a) not enough visitors in the window
+            (b) the window itself is short or shifted
+BEARING   design the move that separates them
+```
+
+```
+MOVE D    hand-pollinate 20 marked flowers early.
+          Leave 20 marked, untouched, as comparison.
+READING   hand-pollinated set fruit at much higher rate
+STATE     OFF — against "there is enough pollen delivery"
+DIRECTION the miss is on the DELIVERY side, not the plant side
+          → not soil, not water, not plant health
+          → pollen delivery is the limiting term
+BEARING   the node is now: what is reducing delivery in that window?
+```
+
+```
+MOVE E    identify which insects are doing the visiting
+READING   BLOCKED — no species-level ID available
+BEARING   route around, don't stop:
+            photograph and post for ID
+            OR classify by size and behaviour class instead of
+               species (large-bodied buzzing / small / hovering)
+            → a behaviour-class count answers the delivery question
+              without needing species names
+```
+
+**Position now:** delivery is limiting; window is early morning;
+candidate edges into the unreached node are fewer visitors, a shorter
+flower window, and wet or cold mornings shifting insect activity.
+
+That is a research gap, and it is now specific enough to write into
+the template — with your own patch as the data source.
+
+Notice the shape of the walk: one SILENT, one MIXED, one OFF, one
+BLOCKED, and exactly one clean HELD that mostly served to open a new
+node. That ratio is normal. Nothing in that sequence was a failure.
+
+---
+
+## 11. PRINCIPLES
+
+```
+1  The physics does not care about our boundaries.
+   If a mechanism influences the system, it belongs in the model,
+   whoever's jurisdiction it falls outside of.
+
+2  Gaps are the map.
+   A map is not finished when every cell is full. It is finished when
+   every gap is marked with the move that would reach it.
+
+3  Every claim names what would change it.
+   A claim with nothing that could change it is not a claim about
+   the world.
+
+4  The instrument audits itself.
+   Whatever you use to check things, check it too. The later
+   instrument turns on the earlier one.
+
+5  The field is one system.
+   Temperature, wind, water, terrain, season, animal behaviour,
+   what people do — one field, read whole. Not a sequence of
+   separate stories.
+```
+
+---
+
+## 12. CHECKLIST
+
+Before calling a position "worked":
+
+```
+□ the position is written down — where you are, what you know
+□ every prediction was stated BEFORE the measurement
+□ every reading is classified with §4B
+□ every reading has a bearing written next to it
+□ the OFFs are logged with their direction, not just their fact
+□ every gap names what would close it AND what it opens
+□ the BLOCKEDs are logged with what blocked them
+□ nothing is marked failed, rejected, or wrong
+□ up to six wrong turns named — empty slots left empty
+□ where a number is missing, it is written as missing, not as zero
+```
+
+---
+
+## 13. RUNNING THIS
+
+```
+ALONE
+  use the templates, work the moves, keep the notebook
+  the notebook of OFFs is the product
+
+WITH ANOTHER PERSON
+  they take readings you can't reach and you take readings they can't
+  compare bearings before comparing conclusions
+  two people agreeing on the conclusion for different reasons is not
+  agreement — it's two separate readings that happen to look alike
+
+WITH AN AI
+  hand it this document and the thing you are working on
+  useful moves for it: classify states, find the conserved quantity,
+  spot which of the six shapes is running, draft the gap template
+  moves to keep yourself: which reading is real, what the object
+  actually did, whether the bearing makes sense on your ground
+  it does not have hands. You do.
+```
+
+The point of the whole thing is not to arrive somewhere and stop.
+It is that after enough traversal you find you already knew more of
+this terrain than you were told you did.

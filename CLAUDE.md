@@ -64,7 +64,7 @@ python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (4
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
 
-# The procedure those guards mechanise, and its exit checklist
+# The map the guards are one implementation of
 cat META-PROTOCOL.md
 
 # Collisions: one content in two files, one screen name with two definitions
@@ -810,17 +810,23 @@ The `Engine/` module provides real electromagnetic field computation:
 
 7. **Multi-functional design** — Every structure should serve multiple purposes where possible. Avoid single-use abstractions.
 
-8. **`META-PROTOCOL.md` is the procedure the guards mechanise** — the five-step
-   deconstruction a folder goes through (system-boundary audit, load-bearing
-   data-independent anchor, epistemic-state inventory, falsifier-locked
-   research prompts, scope boundary), the three output templates, the six
-   recurring fallacy shapes, and an exit checklist whose Code section is
-   `repo_guard.py`, `claims_index.py status`, `playground/review.py` and
-   `playground/principles.py resolve`, all four verified to exit zero here. It
-   is written so the pattern runs without the session that established it:
-   hand it to a collaborator, a student, or a different model and nothing else
-   is needed. Where it and a running check disagree, **the check wins** and the
-   file is what gets corrected.
+8. **`META-PROTOCOL.md` is a map, not a test** — a way of finding out things
+   written for people rather than for a model. Positions, moves, readings,
+   bearings: you are always somewhere, every reading has an outgoing edge, and
+   the direction a result misses by is the compass. It has no `FAILED` and no
+   `REJECTED`, because those are verdicts and a verdict has no outgoing edge.
+   Several of this repo's guards are one implementation of moves in it, and
+   the correspondence is worth knowing: `playground`'s `null()` gate is a
+   `SILENT` reading made mandatory — structure replaced by noise, and if the
+   checks still pass the instrument was never reading the structure;
+   `broken()` is principle 3, a claim must name something that would change
+   it, asked of the submitter rather than a reviewer; `repo_guard.py`'s reach
+   check is the `SILENT` bearing, *your instrument's reach is not long enough
+   yet*, separated from a statement about the terrain; `graveyard.py`'s
+   requirement that a dead claim record what survives it is §5's rule that
+   every reading exits somewhere. Where a guard and the map disagree, the
+   guard is a measurement and the map is a description of how to take one —
+   fix whichever one is wrong, and say which. Delivered verbatim, CC0.
 
 ---
 
