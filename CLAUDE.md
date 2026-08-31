@@ -67,6 +67,9 @@ python repo_guard.py
 # The map the guards are one implementation of
 cat META-PROTOCOL.md
 
+# The render schema: how a found gap is handed off
+cat RESEARCH_RENDER.md
+
 # Collisions: one content in two files, one screen name with two definitions
 python repo_guard.py                         # stage 4 reports both
 python playground/principles.py crossfiled   # instances filed under two principles
@@ -827,6 +830,22 @@ The `Engine/` module provides real electromagnetic field computation:
    every reading exits somewhere. Where a guard and the map disagree, the
    guard is a measurement and the map is a description of how to take one —
    fix whichever one is wrong, and say which. Delivered verbatim, CC0.
+
+9. **`RESEARCH_RENDER.md` is the render schema** — `META-PROTOCOL.md` is how
+   you find and traverse a gap, this is how you render a found one so a
+   stranger with a lab and a semester can start. It fixes the three documents,
+   the id scheme (*three-letter folder prefix + sequence; ids are permanent,
+   never renumber*), the three-value claim status set, and the per-gap fields
+   including **`What it opens`**. Two of its rules are this repo's own results
+   arrived at from the writing side rather than the checking side. §5 keeps
+   claim status, knowledge state and reading state apart, which is
+   `CLAIMS_REGISTER.json`'s split between `live`/`dead` and cause-of-death
+   made general. §6 — *the six-shape section will fill itself if you let it;
+   six is a ceiling, not a quota* — is the `null()` gate pointed at prose:
+   a section that fills itself regardless of input is a section noise also
+   produces, and `PRINCIPLES.json` already refuses to promote a principle
+   below two independent instances for exactly that reason. §8 writes the
+   claim table **last**. Delivered verbatim, CC0.
 
 ---
 
