@@ -64,6 +64,9 @@ python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (4
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
 
+# The procedure those guards mechanise, and its exit checklist
+cat META-PROTOCOL.md
+
 # Collisions: one content in two files, one screen name with two definitions
 python repo_guard.py                         # stage 4 reports both
 python playground/principles.py crossfiled   # instances filed under two principles
@@ -806,6 +809,18 @@ The `Engine/` module provides real electromagnetic field computation:
 6. **Theory and code stay in sync** — This project bridges physics theory and implementation. When updating code, update corresponding documentation in `docs/`, `Silicon/`, or root markdown files.
 
 7. **Multi-functional design** — Every structure should serve multiple purposes where possible. Avoid single-use abstractions.
+
+8. **`META-PROTOCOL.md` is the procedure the guards mechanise** — the five-step
+   deconstruction a folder goes through (system-boundary audit, load-bearing
+   data-independent anchor, epistemic-state inventory, falsifier-locked
+   research prompts, scope boundary), the three output templates, the six
+   recurring fallacy shapes, and an exit checklist whose Code section is
+   `repo_guard.py`, `claims_index.py status`, `playground/review.py` and
+   `playground/principles.py resolve`, all four verified to exit zero here. It
+   is written so the pattern runs without the session that established it:
+   hand it to a collaborator, a student, or a different model and nothing else
+   is needed. Where it and a running check disagree, **the check wins** and the
+   file is what gets corrected.
 
 ---
 
