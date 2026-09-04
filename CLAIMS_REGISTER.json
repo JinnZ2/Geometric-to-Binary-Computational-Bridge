@@ -337,6 +337,120 @@
    "source": "recorded"
   },
   {
+   "id": "ENG-1",
+   "family": "ENG",
+   "statement": "the reported geometric_speedup was a point-count ratio times a symmetry factor, with no clock in it; timed, the adaptive path is 2x-50x slower than the uniform baseline",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "NULL_ARTIFACT",
+    "keep": "The measurement is the reusable part and it took one afternoon: uniform grid vs adaptive octree, same sources, same optimizer, best-of-N wall clock. `generateUniformGrid` already existed and had never been called by the solver, so the baseline was there all along. What survives the correction is the geometry: at resolution 32 the octree evaluates 15x fewer points and the field evaluation over those points really is ~26x faster (ENG-5). The claim that was wrong is that this had been measured.",
+    "killed": "the 15x-33x speedup figure, and every roadmap phase target written as a multiple of it",
+    "screen": {
+     "name": "time-it-against-a-baseline",
+     "rule": "A number called a speedup must come from two clocks on two runs of the same problem. A ratio of counts, of points or of operations, is a ratio of counts; report it under that name.",
+     "mechanised_by": "Engine.engine_benchmark.benchmark",
+     "applies_when": "any performance claim quoted as a multiplier"
+    }
+   }
+  },
+  {
+   "id": "ENG-2",
+   "family": "ENG",
+   "statement": "naive_points was hardcoded to 32**3 while resolution was a documented parameter that reached nothing",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Fourth instance of the unread-parameter shape after GR-2's bands_per_octave, GLY-3's sub_glyphs and ASF-13's exploration_rate, and the detector is the same two-line sweep: run at both extremes and diff. The docstring named a 'uniform fallback' path that does not exist in the module, which is the tell -- a parameter documented for a code path nobody wrote.",
+    "killed": "resolution as a parameter that affected anything",
+    "screen": {
+     "name": "set-it-to-both-extremes",
+     "rule": "Run the code at a parameter's extreme values and diff the output. Identical output means the parameter is not read.",
+     "mechanised_by": null,
+     "applies_when": "any declared parameter, option or weight whose effect on the output has not been demonstrated"
+    }
+   }
+  },
+  {
+   "id": "ENG-3",
+   "family": "ENG",
+   "statement": "the reported figure multiplied in a symmetry reduction the solver explicitly does not take",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "The call site's own comment says it: 'we compute all but report the potential reduction'. Measured, a symmetric configuration reports 1.50x more speedup while taking 1.89x more wall clock, so the metric moves opposite to the truth exactly where the geometry is best. The general form is worth keeping: a saving may enter an efficiency figure only if the code took it.",
+    "killed": "the symmetry factor as a contribution to measured performance",
+    "screen": {
+     "name": "credit-only-work-actually-skipped",
+     "rule": "A saving may enter a performance figure only if the code took it. If a comment says the saving is available but not exploited, the figure is counting work that was done.",
+     "mechanised_by": null,
+     "applies_when": "any efficiency figure built from a reduction factor rather than from elapsed time"
+    }
+   }
+  },
+  {
+   "id": "ENG-4",
+   "family": "ENG",
+   "statement": "averageSpeedup reported the last run while history accumulated every run and was read by nothing",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "Small, measured rather than argued: two runs at 15.24 and 22.88 reported 22.9 against a true mean of 19.06. Kept because the name is the whole defect -- a field called an average that is not one is read as one, and the data to compute it properly was already being stored.",
+    "killed": "averageSpeedup as an average",
+    "screen": {
+     "name": "does-the-test-test-the-description",
+     "rule": "Read the claim's stated content and its assertion side by side. A claim about a relationship cannot be tested at one point, and a threshold inherits the units of whatever produced the number.",
+     "mechanised_by": null,
+     "applies_when": "any claim carrying both a prose description and an executable test"
+    }
+   }
+  },
+  {
+   "id": "ENG-5",
+   "family": "ENG",
+   "statement": "SpatialGrid.createRegion emits one sample point per leaf region, so the solver makes one numpy call per point and defeats its own vectorisation",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "This is the actionable half of ENG-1 and the reason the roadmap's near-term item is a measurement rather than a multiplier. Batching the same points into one call: 0.0023 s against 0.0597 s, a 26x overhead removed and a 27x gain on the field evaluation. But the octree decomposition costs 0.0645 s against the uniform path's 0.0713 s total, so batching alone lands at 1.07x end to end -- both halves have to come down, and knowing that before starting is worth more than the 26x. Left in place deliberately; the fix changes solver output ordering and the per-region efficiency averaging.",
+    "killed": "the adaptive decomposition as delivering a speedup in its current form",
+    "screen": {
+     "name": "time-it-against-a-baseline",
+     "rule": "A number called a speedup must come from two clocks on two runs of the same problem. A ratio of counts, of points or of operations, is a ratio of counts; report it under that name.",
+     "mechanised_by": "Engine.engine_benchmark.benchmark",
+     "applies_when": "any performance claim quoted as a multiplier"
+    }
+   }
+  },
+  {
+   "id": "ENG-6",
+   "family": "ENG",
+   "statement": "simdEfficiency is a function of chunk length alone and reports 12.5% for every configuration ever run",
+   "status": "live",
+   "names": "refutation",
+   "source": "derived:Engine/falsifiers_engine.py",
+   "salvage": {
+    "cause": "CODE_ERROR",
+    "keep": "A metric that returns the same number for one charge and for four is a constant wearing the name of a measurement, and the cause is ENG-5: one point per region means one lane of eight, always. It becomes informative for free once ENG-5 is addressed, which is why it is reported with the constancy stated rather than removed.",
+    "killed": "simdEfficiency as evidence of vectorisation quality",
+    "screen": {
+     "name": "vary-the-input-and-watch-the-metric",
+     "rule": "Feed the metric two configurations that should score differently. A value that does not move is a constant wearing the name of a measurement.",
+     "mechanised_by": null,
+     "applies_when": "any reported efficiency, score or quality number whose response to its input has not been shown"
+    }
+   }
+  },
+  {
    "id": "EPG-6",
    "family": "EPG",
    "statement": "109.47 degrees is the tetrahedral maximin bound, from |sum v_i|^2 = 4 + 2 sum v_i.v_j >= 0",
