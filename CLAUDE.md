@@ -64,6 +64,12 @@ python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (4
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
 
+# The map the guards are one implementation of
+cat META-PROTOCOL.md
+
+# The render schema: how a found gap is handed off
+cat RESEARCH_RENDER.md
+
 # Collisions: one content in two files, one screen name with two definitions
 python repo_guard.py                         # stage 4 reports both
 python playground/principles.py crossfiled   # instances filed under two principles
@@ -806,6 +812,40 @@ The `Engine/` module provides real electromagnetic field computation:
 6. **Theory and code stay in sync** — This project bridges physics theory and implementation. When updating code, update corresponding documentation in `docs/`, `Silicon/`, or root markdown files.
 
 7. **Multi-functional design** — Every structure should serve multiple purposes where possible. Avoid single-use abstractions.
+
+8. **`META-PROTOCOL.md` is a map, not a test** — a way of finding out things
+   written for people rather than for a model. Positions, moves, readings,
+   bearings: you are always somewhere, every reading has an outgoing edge, and
+   the direction a result misses by is the compass. It has no `FAILED` and no
+   `REJECTED`, because those are verdicts and a verdict has no outgoing edge.
+   Several of this repo's guards are one implementation of moves in it, and
+   the correspondence is worth knowing: `playground`'s `null()` gate is a
+   `SILENT` reading made mandatory — structure replaced by noise, and if the
+   checks still pass the instrument was never reading the structure;
+   `broken()` is principle 3, a claim must name something that would change
+   it, asked of the submitter rather than a reviewer; `repo_guard.py`'s reach
+   check is the `SILENT` bearing, *your instrument's reach is not long enough
+   yet*, separated from a statement about the terrain; `graveyard.py`'s
+   requirement that a dead claim record what survives it is §5's rule that
+   every reading exits somewhere. Where a guard and the map disagree, the
+   guard is a measurement and the map is a description of how to take one —
+   fix whichever one is wrong, and say which. Delivered verbatim, CC0.
+
+9. **`RESEARCH_RENDER.md` is the render schema** — `META-PROTOCOL.md` is how
+   you find and traverse a gap, this is how you render a found one so a
+   stranger with a lab and a semester can start. It fixes the three documents,
+   the id scheme (*three-letter folder prefix + sequence; ids are permanent,
+   never renumber*), the three-value claim status set, and the per-gap fields
+   including **`What it opens`**. Two of its rules are this repo's own results
+   arrived at from the writing side rather than the checking side. §5 keeps
+   claim status, knowledge state and reading state apart, which is
+   `CLAIMS_REGISTER.json`'s split between `live`/`dead` and cause-of-death
+   made general. §6 — *the six-shape section will fill itself if you let it;
+   six is a ceiling, not a quota* — is the `null()` gate pointed at prose:
+   a section that fills itself regardless of input is a section noise also
+   produces, and `PRINCIPLES.json` already refuses to promote a principle
+   below two independent instances for exactly that reason. §8 writes the
+   claim table **last**. Delivered verbatim, CC0.
 
 ---
 
