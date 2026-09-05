@@ -681,6 +681,7 @@ docs/                           Architecture docs, roadmaps, field notes
 examples/                       Sample .gshape and .json files
 scripts/                        Utility scripts (bridge_convert.py)
 tests/                          Bridge and Engine test suites
+falsifier-survey/               Delivered Run 2 falsifier survey, this repo's share; filed, instructions pending
 ```
 
 ---
