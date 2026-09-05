@@ -1,0 +1,290 @@
+[
+ {
+  "folder": "ASIS",
+  "claim_id": "F2",
+  "source_file": "ASIS/ASCF.md",
+  "falsifier_text": "A uniform `U(O)` treats every observable as equally likely, which makes trivial claims look highly falsifiable in structured domains. Prefer an adaptive baseline: the marginal distribution of a generic pretrained model over the same space.",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "Φ(C) scored against a uniform baseline U(O) over observables",
+   "maps_to": "Φ(C) against an adaptive baseline: marginal distribution of a generic pretrained model over the same space",
+   "breaks_at": "structured domains, where the uniform baseline makes trivial claims look highly falsifiable"
+  },
+  "downgrade_reason": null,
+  "notes": "baseline caveat to the Φ gate",
+  "repo": "g2b"
+ },
+ {
+  "folder": "ASIS",
+  "claim_id": "F6",
+  "source_file": "ASIS/audit.md",
+  "falsifier_text": "Any surprise count from the Co-Cradle loop must be compared against this baseline before it is called a detection; a rate in the same range is the threshold reporting itself, not novelty in the world.",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "raw flag rate of the mean+2σ rolling surprise threshold on the observed stream",
+   "maps_to": "flag rate relative to the null-stream baseline (white noise 2.16%, decaying loss 1.70%, Cauchy² 3.12%)",
+   "breaks_at": "any rate in the 2–3% range is the threshold reporting itself; comparing without the null baseline misreads the threshold as novelty"
+  },
+  "downgrade_reason": null,
+  "notes": "baseline-comparison rule for the surprise detector",
+  "repo": "g2b"
+ },
+ {
+  "folder": "Silicon",
+  "claim_id": "F7",
+  "source_file": "Silicon/SYSTEM_ENERGY_DYNAMICS.md",
+  "falsifier_text": "| E_bit = C·V² | STATE THE CONVENTION | CV² per full charge-discharge cycle; ½CV² dissipated per transition. At 1 fF and 0.8 V that is 640 aJ vs 320 aJ — a factor 2 that matters when comparing against a 1-2 aJ target.",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "E_bit = C·V² counted per full charge-discharge cycle",
+   "maps_to": "½C·V² dissipated per transition (640 aJ vs 320 aJ at 1 fF, 0.8 V)",
+   "breaks_at": "comparison against a 1-2 aJ target, where the factor 2 between conventions flips the verdict"
+  },
+  "downgrade_reason": null,
+  "notes": "accounting-convention note in audit table",
+  "repo": "g2b"
+ },
+ {
+  "folder": "Silicon",
+  "claim_id": "F9",
+  "source_file": "Silicon/SYSTEM_ENERGY_DYNAMICS.md",
+  "falsifier_text": "\"Cold-climate populations maintain higher BMR\" does not survive adjustment. BMR scales with fat-free mass; once lean mass, body size, diet composition and activity are controlled, the climate effect largely disappears in meta-analysis.",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "raw BMR compared across climate groups (unadjusted group means)",
+   "maps_to": "BMR adjusted for fat-free mass, body size, diet composition and activity",
+   "breaks_at": "meta-analysis with covariates controlled: the climate effect largely disappears; residual adaptation is locus-level, not a scalar multiplier on BMR"
+  },
+  "downgrade_reason": null,
+  "notes": "§4.1 measurement objection",
+  "repo": "g2b"
+ },
+ {
+  "folder": "docs",
+  "claim_id": "F1",
+  "source_file": "docs/Implementation_Roadmap.md",
+  "falsifier_text": "PerformanceTracker reported (32³ / n_points) × symmetry_reduction as averageSpeedup... No clock entered it. Timed against a uniform grid: measured 0.48×, 0.26×, 0.31×.",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "claimed averageSpeedup = (32³/n_points) × symmetry_reduction — a point-count ratio with no clock",
+   "maps_to": "measured wall-clock speedup vs a uniform grid on the same sources through the same optimizer (Engine/engine_benchmark.py): 0.48×/0.26×/0.31×",
+   "breaks_at": "direct comparison: the proxy quoted 11.4–16.2× while the clock measured 0.26–0.48× (slower than uniform)"
+  },
+  "downgrade_reason": null,
+  "notes": "§1 'What the performance claim actually was'; refuted the roadmap's 10×-1000× multipliers",
+  "repo": "g2b"
+ },
+ {
+  "folder": "GI",
+  "claim_id": "F2",
+  "source_file": "GI/hurricane_validator.py",
+  "falsifier_text": "\"600k_mwh_claim\": Wind alone: ~103k MWh (claim 6x too high); Salt gradient: ~814k MWh (claim in ballpark); Waves: ~2.2M MWh (3.6x too low); Thermal: ~42M MWh (70x too low). Most likely: original tracked salt gradient sub-region",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "claim 'Single Category 5 hurricane ≈ 600,000 MWh equivalent' read as a whole-storm figure",
+   "maps_to": "component-wise budget from hurricane_validator EnergyEstimate: wind 103,330 MWh harvestable; salt gradient ~814k; waves ~2.2M; thermal ~42M",
+   "breaks_at": "the claim matches only the salt-gradient sub-region; against wind it is 6x high and against waves/thermal 3.6-70x low, so a whole-storm comparison misreads it"
+  },
+  "downgrade_reason": null,
+  "notes": "VALIDATION_REQUIREMENTS in hurricane_validator.py",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "ASF-11",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "switching_rate is a continuous-time generator rate consumed as a per-step Bernoulli probability, so it saturates at 1.0",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "switching_rate consumed as a per-step Bernoulli probability",
+   "maps_to": "continuous-time generator rate: per-step p = 1-exp(-rate*dt)",
+   "breaks_at": "rate >= ~2 per step: p saturates at 1.0; rates 2.0/5.0/50.0 give byte-identical outcomes"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation. salvage UNITS",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "ENG-1",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "the reported geometric_speedup was a point-count ratio times a symmetry factor, with no clock in it; timed, the adaptive path is 2x-50x slower than the uniform baseline",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "geometric_speedup reported as point-count ratio times a symmetry factor, with no clock in it",
+   "maps_to": "best-of-N wall-clock ratio, adaptive octree vs generateUniformGrid uniform baseline, same sources and optimizer",
+   "breaks_at": "any timed run: the adaptive path is 2x-50x slower while the metric reports a speedup"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation. salvage NULL_ARTIFACT",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "ENG-3",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "the reported figure multiplied in a symmetry reduction the solver explicitly does not take",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "reported figure multiplies in a symmetry reduction the solver explicitly does not take ('we compute all but report the potential reduction')",
+   "maps_to": "speedup of the code path actually executed, measured in wall clock",
+   "breaks_at": "symmetric configurations: reports 1.50x more speedup while taking 1.89x more wall clock -- metric moves opposite to the truth"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation.",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "NLS-3",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "the strength-to-scale map records a strong cross-system correlation as 'cellular', so the observation the sensor exists to catch cannot be recorded at all",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "scale inferred from correlation_strength, a property of the result",
+   "maps_to": "scale as a property of the EXPERIMENT -- what was sampled, over what extent, across what interval -- passed explicitly",
+   "breaks_at": "a strong cross-system correlation is recorded as 'cellular': the observation the sensor exists to catch cannot be recorded at all"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation. salvage OUT_OF_SCOPE",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "TMP-2",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "two reference temperatures inside one module -- 20 C for the material and component corrections, 15 C for the acoustic ones -- and normalize_measurement crosses them",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "two reference temperatures in one module (20 C material/component, 15 C acoustic); normalize_measurement passes 15 C into r_correct whose TCR is the copper value at 20 C",
+   "maps_to": "a single module-level REF_TEMP_C, each tempco carrying the temperature it is specified at",
+   "breaks_at": "every electrical normalisation: biased by TCR*5 C = 2.0%"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation. salvage UNITS",
+  "repo": "g2b"
+ },
+ {
+  "folder": "(repo root)",
+  "claim_id": "TRD-4",
+  "source_file": "CLAIMS_REGISTER.json",
+  "falsifier_text": "the stable gate abs(slope) < 1e-6 compares per-day changes in ohms, hertz and kelvin against one absolute constant",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "absolute per-day slope compared against one constant 1e-6 across ohms, hertz and kelvin",
+   "maps_to": "relative slope = slope / the claim's predicted value (dimensionless, comparable across domains)",
+   "breaks_at": "small-valued claims: 1e-5/day is 0.036%/yr of a 10-ohm claim but 365%/yr of a 0.001-unit one, which the gate calls stable"
+  },
+  "downgrade_reason": null,
+  "notes": "register status=live names=refutation. salvage UNITS",
+  "repo": "g2b"
+ },
+ {
+  "folder": "geometric_intelligence",
+  "claim_id": "TRD-4",
+  "source_file": "geometric_intelligence/CLAIMS.md",
+  "falsifier_text": "the stable gate abs(slope) < 1e-6 compares per-day changes in ohms, hertz and kelvin against one absolute constant",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "absolute per-day slope compared against one constant 1e-6 across ohms, hertz and kelvin",
+   "maps_to": "relative slope = slope / the claim's predicted value (dimensionless, comparable across domains)",
+   "breaks_at": "small-valued claims: 1e-5/day is 0.036%/yr of a 10-ohm claim but 365%/yr of a 0.001-unit one, which the gate calls stable"
+  },
+  "downgrade_reason": null,
+  "notes": "salvage UNITS",
+  "repo": "g2b"
+ },
+ {
+  "folder": "adaptive_sim",
+  "claim_id": "ASF-11",
+  "source_file": "adaptive_sim/CLAIMS.md",
+  "falsifier_text": "switching_rate is a continuous-time generator rate consumed as a per-step Bernoulli probability, so it saturates at 1.0",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "switching_rate consumed as a per-step Bernoulli probability",
+   "maps_to": "continuous-time generator rate: per-step p = 1-exp(-rate*dt)",
+   "breaks_at": "rate >= ~2 per step: p saturates at 1.0; rates 2.0/5.0/50.0 give byte-identical outcomes"
+  },
+  "downgrade_reason": null,
+  "notes": "salvage UNITS",
+  "repo": "g2b"
+ },
+ {
+  "folder": "Engine",
+  "claim_id": "ENG-1",
+  "source_file": "Engine/CLAIMS.md",
+  "falsifier_text": "the reported geometric_speedup was a point-count ratio times a symmetry factor, with no clock in it; timed, the adaptive path is 2x-50x slower than the uniform baseline",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "geometric_speedup reported as point-count ratio times a symmetry factor, with no clock in it",
+   "maps_to": "best-of-N wall-clock ratio, adaptive octree vs generateUniformGrid uniform baseline, same sources and optimizer",
+   "breaks_at": "any timed run: the adaptive path is 2x-50x slower while the metric reports a speedup"
+  },
+  "downgrade_reason": null,
+  "notes": "salvage NULL_ARTIFACT",
+  "repo": "g2b"
+ },
+ {
+  "folder": "Engine",
+  "claim_id": "ENG-3",
+  "source_file": "Engine/CLAIMS.md",
+  "falsifier_text": "the reported figure multiplied in a symmetry reduction the solver explicitly does not take",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "reported figure multiplies in a symmetry reduction the solver explicitly does not take ('we compute all but report the potential reduction')",
+   "maps_to": "speedup of the code path actually executed, measured in wall clock",
+   "breaks_at": "symmetric configurations: reports 1.50x more speedup while taking 1.89x more wall clock -- metric moves opposite to the truth"
+  },
+  "downgrade_reason": null,
+  "notes": "",
+  "repo": "g2b"
+ },
+ {
+  "folder": "bridges",
+  "claim_id": "NLS-3",
+  "source_file": "bridges/CLAIMS.md",
+  "falsifier_text": "the strength-to-scale map records a strong cross-system correlation as 'cellular', so the observation the sensor exists to catch cannot be recorded at all",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "scale inferred from correlation_strength, a property of the result",
+   "maps_to": "scale as a property of the EXPERIMENT -- what was sampled, over what extent, across what interval -- passed explicitly",
+   "breaks_at": "a strong cross-system correlation is recorded as 'cellular': the observation the sensor exists to catch cannot be recorded at all"
+  },
+  "downgrade_reason": null,
+  "notes": "salvage OUT_OF_SCOPE",
+  "repo": "g2b"
+ },
+ {
+  "folder": "fabrication",
+  "claim_id": "TMP-2",
+  "source_file": "fabrication/CLAIMS.md",
+  "falsifier_text": "two reference temperatures inside one module -- 20 C for the material and component corrections, 15 C for the acoustic ones -- and normalize_measurement crosses them",
+  "status": "SCOPE-DIFFERENT",
+  "measured_as": null,
+  "scope_transform": {
+   "reference": "two reference temperatures in one module (20 C material/component, 15 C acoustic); normalize_measurement passes 15 C into r_correct whose TCR is the copper value at 20 C",
+   "maps_to": "a single module-level REF_TEMP_C, each tempco carrying the temperature it is specified at",
+   "breaks_at": "every electrical normalisation: biased by TCR*5 C = 2.0%"
+  },
+  "downgrade_reason": null,
+  "notes": "salvage UNITS",
+  "repo": "g2b"
+ }
+]
