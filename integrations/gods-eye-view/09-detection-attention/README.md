@@ -39,6 +39,7 @@ GEV (https://github.com/JinnZ2/gods-eye-view-fork)
 | `src/renderGovernor.js` | identity-keyed holds; continuous while any hold, idle otherwise; O(1) passive |
 | `src/overlays/worldOverlayAllocation.worker.mjs` | allocation off the main thread |
 | `scripts/track-regression.mjs` | the tracked entity survived four regressions because the harness couples to per-frame position |
+| `src/data/labelArbiterNull.test.mjs` | av-det-1: the null harness, measured numbers in the header, both halves pinned |
 
 Bridge (this repo)
 
@@ -60,6 +61,7 @@ Each one names what would make it FAIL. An avenue that cannot fail is not listed
 - direction `bridge->gev` · cost `trivial`
 - **moves:** pure function, node-testable: random reweightings vs the shipped weights over recorded demand vectors; fraction of draws with the same allocation
 - **fails if:** the fraction is near 1 (weights carry no information at the shipped capacity, the AISS shape) or near 0 (weights are load-bearing and a doc should say what they encode). Either answer is a finding; only 'untested' is not
+- **status:** MEASURED 2026-09-16, src/data/labelArbiterNull.test.mjs in the fork: random weights in [0.5, 2] reproduce the shipped allocation 18-31% of the time at capacities 16-128 (not the 77% AISS shape), and the shipped weights move ~3% of labels against flat weights (0.45 of 16, 1.84 of 64). Reading: load-bearing and small, a tiebreak on top of sqrt(count). Both halves pinned.
 
 ### `av-det-2` Render governor holds replace the strobe modulo
 

@@ -10,6 +10,11 @@ to notice -- the playground `broken()` gate applied to the guard itself.
 IX-6 is the join: the feed-state port must reproduce every case GEV ships
 in src/data/manager.test.mjs, so the epistemology table cannot drift from
 the precedence it claims to mirror.
+
+IX-7 is the coast harness (av-mob-1): the ports of arcOffsetEnu,
+estimateTurnRateDps and staleCoastLimitSeconds, and the mechanics of the
+divergence measurement on synthetic tracks whose generator is not the coast
+model. It is NOT the measurement, which needs real fixes and is unrun.
 """
 
 import importlib.util
@@ -36,6 +41,7 @@ def _load(name, path):
 
 CL = _load("gev_crosslinks", os.path.join(MAP, "crosslinks.py"))
 FE = _load("gev_feed_state", os.path.join(MAP, "06-feed-integrity", "feed_state_epistemology.py"))
+CD = _load("gev_coast", os.path.join(MAP, "04-mobility-transport", "coast_divergence.py"))
 import claims_index as CI  # noqa: E402
 
 
@@ -280,6 +286,77 @@ class TestIX6FeedStatePort(unittest.TestCase):
         self.assertIn("stale_is_placeholder", FE.as_json())
         with open(FE.__file__, encoding="utf-8") as fh:
             self.assertIn("PLACEHOLDER", fh.read())
+
+
+class TestIX7CoastHarness(unittest.TestCase):
+    """IX-7: the coast ports and the harness mechanics. Not the measurement."""
+
+    def test_straight_offset_matches_trigonometry(self):
+        e, n, c = CD.arc_offset_enu(100.0, 90.0, 0.0, 10.0)
+        self.assertAlmostEqual(e, 1000.0, places=6)
+        self.assertAlmostEqual(n, 0.0, places=6)
+        self.assertEqual(c, 90.0)
+        e, n, _ = CD.arc_offset_enu(100.0, 0.0, 0.0, 10.0)
+        self.assertAlmostEqual(n, 1000.0, places=6)
+
+    def test_turn_offset_closes_a_circle(self):
+        # 1 deg/s for 360 s at any speed returns to the start; end course wraps to the start course
+        e, n, c = CD.arc_offset_enu(50.0, 30.0, 1.0, 360.0)
+        self.assertAlmostEqual(e, 0.0, places=6)
+        self.assertAlmostEqual(n, 0.0, places=6)
+        self.assertAlmostEqual(c, 30.0, places=9)
+
+    def test_turn_rate_port_gates_like_the_original(self):
+        s = [{"t_s": 0, "track_deg": 10, "speed_mps": 100}, {"t_s": 10, "track_deg": 20, "speed_mps": 100}]
+        self.assertAlmostEqual(CD.estimate_turn_rate_dps(s), 1.0)
+        # below the noise floor reads as straight
+        s2 = [{"t_s": 0, "track_deg": 10, "speed_mps": 100}, {"t_s": 10, "track_deg": 12, "speed_mps": 100}]
+        self.assertEqual(CD.estimate_turn_rate_dps(s2), 0.0)
+        # clamped at +-4 deg/s
+        s3 = [{"t_s": 0, "track_deg": 0, "speed_mps": 100}, {"t_s": 10, "track_deg": 170, "speed_mps": 100}]
+        self.assertEqual(CD.estimate_turn_rate_dps(s3), 4.0)
+        # dt outside 2..120 s is skipped; hover speed is skipped
+        s4 = [{"t_s": 0, "track_deg": 0, "speed_mps": 100}, {"t_s": 1, "track_deg": 90, "speed_mps": 100}]
+        self.assertEqual(CD.estimate_turn_rate_dps(s4), 0.0)
+        s5 = [{"t_s": 0, "track_deg": 0, "speed_mps": 2}, {"t_s": 10, "track_deg": 90, "speed_mps": 2}]
+        self.assertEqual(CD.estimate_turn_rate_dps(s5), 0.0)
+        # angle unwrapping across north
+        s6 = [{"t_s": 0, "track_deg": 355, "speed_mps": 100}, {"t_s": 10, "track_deg": 5, "speed_mps": 100}]
+        self.assertAlmostEqual(CD.estimate_turn_rate_dps(s6), 1.0)
+
+    def test_stale_coast_limit_port(self):
+        self.assertEqual(CD.stale_coast_limit_s(1000, 1030), 90)
+        self.assertEqual(CD.stale_coast_limit_s(1000, 1000), 60)
+        self.assertEqual(CD.stale_coast_limit_s(1000, 1500), 300)
+
+    def test_straight_track_sits_on_the_harness_floor(self):
+        fixes = CD._great_circle_track(47.0, 8.0, 84.0, 230.0, 0.0, 21, 15)
+        r = CD.measure(fixes, max_dt_s=300, bin_s=60)
+        worst = max(x["arc_p90_m"] for x in r["rows"])
+        self.assertLess(worst, 200.0)
+        self.assertGreater(worst, 20.0)   # the floor is real and stated, not zero
+
+    def test_unseen_turn_diverges_with_horizon(self):
+        fixes = CD._great_circle_track(47.0, 8.0, 84.0, 230.0, 0.0, 21, 15, turn_dps=2.0, turn_after_s=150)
+        r = CD.measure(fixes, max_dt_s=300, bin_s=60)
+        p90 = [x["arc_p90_m"] for x in r["rows"]]
+        self.assertTrue(all(b > a for a, b in zip(p90[:3], p90[1:4])), p90)
+        self.assertGreater(p90[3], 1000.0)
+        self.assertIsNotNone(r["p90_widening_mps"])
+        self.assertGreater(r["p90_widening_mps"], 0.0)
+
+    def test_measure_skips_ground_and_reports_no_rows_on_empty(self):
+        self.assertEqual(CD.measure([])["rows"], [])
+        fixes = CD._great_circle_track(47.0, 8.0, 84.0, 230.0, 0.0, 5, 15)
+        for f in fixes:
+            f["on_ground"] = True
+        self.assertEqual(CD.measure(fixes)["n_pairs"], 0)
+
+    def test_harness_says_it_is_not_the_measurement(self):
+        self.assertIsNone(CD.measure([])["measured_on_real_fixes"])
+        with open(CD.__file__, encoding="utf-8") as fh:
+            body = fh.read()
+        self.assertIn("NOT been run", body)
 
 
 if __name__ == "__main__":

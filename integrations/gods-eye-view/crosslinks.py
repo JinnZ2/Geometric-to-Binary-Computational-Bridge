@@ -282,6 +282,8 @@ def render_readme(d: dict, doms_by_id: dict | None = None) -> str:
         L.append(f"- direction `{a['direction']}` · cost `{a['cost']}`")
         L.append(f"- **moves:** {a['moves']}")
         L.append(f"- **fails if:** {a['fails_if']}")
+        if a.get("status"):
+            L.append(f"- **status:** {a['status']}")
         L.append("")
     L.append("## Interference")
     L.append("")
@@ -316,7 +318,8 @@ def render_index(doms: list[dict]) -> str:
             "mounts": [e["mount"] for e in d["ecosystem"]],
             "siblings": list(d["siblings"]),
             "avenues": [{"id": a["id"], "title": a["title"], "direction": a["direction"],
-                         "cost": a["cost"]} for a in d["avenues"]],
+                         "cost": a["cost"], **({"status": a["status"]} if a.get("status") else {})}
+                        for a in d["avenues"]],
         })
     return json.dumps(out, indent=1, ensure_ascii=False) + "\n"
 
@@ -347,8 +350,9 @@ def render_gev_view(doms: list[dict]) -> str:
         L.append("")
         L.append("Avenues")
         L.append("")
-        L.append(_table([[f"`{a['id']}`", a["title"], a["direction"], a["cost"]]
-                         for a in d["avenues"]], ["id", "title", "direction", "cost"]))
+        L.append(_table([[f"`{a['id']}`", a["title"], a["direction"], a["cost"],
+                          a.get("status", "")] for a in d["avenues"]],
+                        ["id", "title", "direction", "cost", "status"]))
         L.append("")
         L.append("Ecosystem: " + ", ".join(f"`{e['mount']}`" for e in d["ecosystem"]))
         L.append("")

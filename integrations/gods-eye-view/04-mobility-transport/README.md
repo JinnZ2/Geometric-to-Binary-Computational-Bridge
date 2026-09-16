@@ -48,6 +48,7 @@ Bridge (this repo)
 | `Kimchi/horizon_sweep.py` | divergence vs horizon: false confidence compounds with prediction distance |
 | `field/field_claim_loop.py` | route(): INSTRUMENT / NOISE_AS_SIGNAL / NOVEL / MISSING_VARIABLE on a residual series |
 | `sensing/processing/anomaly_detector.py` | RollingBaseline for a per-track speed or turn-rate channel |
+| `integrations/gods-eye-view/04-mobility-transport/coast_divergence.py` | av-mob-1 harness: coast error vs coast time; p90 widening rate in m/s |
 
 ## Avenues
 
@@ -58,6 +59,7 @@ Each one names what would make it FAIL. An avenue that cannot fail is not listed
 - direction `gev->bridge` · cost `low`
 - **moves:** for each aircraft: coasted position at t+dt vs the real fix that arrived at t+dt, over dt in 1..staleCoastLimitSeconds; horizon_sweep.ascii_plot of the divergence curve
 - **fails if:** divergence does not grow with dt (then the coast is better than a widening interval and Kimchi's premise fails here), or grows faster than the interval widens at the shipped noise (then staleCoastLimitSeconds is too long)
+- **status:** harness shipped (coast_divergence.py: ports of arcOffsetEnu, estimateTurnRateDps, staleCoastLimitSeconds; fetch/measure/selftest), self-tested on great-circle synthetics with a ~120 m tangent-plane floor at 69 km. UNMEASURED on real fixes: OpenSky and adsb.lol were unreachable from the session. Run `fetch` where they are, then `measure`.
 
 ### `av-mob-2` Cross-track distance as a band claim
 

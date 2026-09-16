@@ -195,7 +195,8 @@
     "Kimchi/forward_predict.py",
     "Kimchi/horizon_sweep.py",
     "field/field_claim_loop.py",
-    "sensing/processing/anomaly_detector.py"
+    "sensing/processing/anomaly_detector.py",
+    "integrations/gods-eye-view/04-mobility-transport/coast_divergence.py"
    ],
    "mounts": [
     "trdap",
@@ -214,7 +215,8 @@
      "id": "av-mob-1",
      "title": "Coast error vs coast time, measured from GEV's own fix history",
      "direction": "gev->bridge",
-     "cost": "low"
+     "cost": "low",
+     "status": "harness shipped (coast_divergence.py: ports of arcOffsetEnu, estimateTurnRateDps, staleCoastLimitSeconds; fetch/measure/selftest), self-tested on great-circle synthetics with a ~120 m tangent-plane floor at 69 km. UNMEASURED on real fixes: OpenSky and adsb.lol were unreachable from the session. Run `fetch` where they are, then `measure`."
     },
     {
      "id": "av-mob-2",
@@ -480,7 +482,8 @@
     "src/data/focusDeemphasis.js",
     "src/renderGovernor.js",
     "src/overlays/worldOverlayAllocation.worker.mjs",
-    "scripts/track-regression.mjs"
+    "scripts/track-regression.mjs",
+    "src/data/labelArbiterNull.test.mjs"
    ],
    "bridge_paths": [
     "experiments/silicon_speculative/topological_pin.py",
@@ -506,7 +509,8 @@
      "id": "av-det-1",
      "title": "Null harness on allocateLayerQuotas layerWeights",
      "direction": "bridge->gev",
-     "cost": "trivial"
+     "cost": "trivial",
+     "status": "MEASURED 2026-09-16, src/data/labelArbiterNull.test.mjs in the fork: random weights in [0.5, 2] reproduce the shipped allocation 18-31% of the time at capacities 16-128 (not the 77% AISS shape), and the shipped weights move ~3% of labels against flat weights (0.45 of 16, 1.84 of 64). Reading: load-bearing and small, a tiebreak on top of sqrt(count). Both halves pinned."
     },
     {
      "id": "av-det-2",
