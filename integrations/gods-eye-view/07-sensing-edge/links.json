@@ -1,0 +1,132 @@
+{
+ "id": "sensing-edge",
+ "folder": "07-sensing-edge",
+ "title": "Sensing edge: public cameras and radio on the globe; Pi Zero field nodes, LoRa, HAM and CB relay in the bridge",
+ "shape": "GEV consumes other people's sensors over HTTP. The bridge builds its own and moves their readings over radio. The seam is the .obs line.",
+ "flow": [
+  "  city camera packs ──registered URLs only──▶ /api/cctv ──▶ cctv.js (pose, viewshed)   (GEV)",
+  "  Radio Browser ──▶ radio.js ──▶ browser audio element → broadcaster              (GEV, not RF)",
+  "",
+  "  DS18B20 / soil / IR / PIR+mic ──drivers──▶ Primitive ──▶ .obs line   (bridge, Pi Zero)",
+  "        │                                        ├─ LoRa packet",
+  "        │                                        ├─ KISS frame (HAM TNC)",
+  "        │                                        └─ CB voice script (≤50 words, NATO digits)",
+  "        └─ claim_match.verify_obs_file ──▶ .claims catalogue",
+  "",
+  "  av-sen-1: .obs ──/api/obs (registered path)──▶ field-nodes LAYER   needs {concept_id → lat, lon}",
+  "  av-sen-2: cctv_sources.*.json IS that registry shape (pose, range, mount height, license)"
+ ],
+ "notes": {
+  "bottleneck": "A Primitive carries a named spatial bound, not a coordinate. Without a node registry the field-nodes layer has nothing to place.",
+  "leverage": "The camera pack schema is already that registry: pose, range, mount height, licence per instrument. Reuse it with sensor_id in place of url.",
+  "harmonics": "The CB relay script and the realtime voice agent are the same channel from two ends; a parser closes a voice-only path from a shop to the globe.",
+  "tertiary": "A field-nodes proxy must inherit the registered-URL rule or it reopens the SSRF hole SECURITY.md closed."
+ },
+ "gev": [
+  {
+   "path": "src/data/cctv.js",
+   "role": "server-registered camera URLs only; v2 calibration with provenance; viewshed; city packs"
+  },
+  {
+   "path": "src/data/radio.js",
+   "role": "Radio Browser directory: internet streams played directly by the browser; station tags, not RF"
+  },
+  {
+   "path": "config/cctv_sources.shinjuku.json",
+   "role": "the camera pack schema: lat, lon, headingDeg, pitchDeg, fovDeg, rangeM, mountHeightM, license"
+  },
+  {
+   "path": "SECURITY.md",
+   "role": "the proxy fetches registered URLs only, never client-supplied ones"
+  }
+ ],
+ "bridge": [
+  {
+   "path": "sensing/sensing_node.py",
+   "role": "the runnable node: drivers + recipe + transport, mocks cleanly"
+  },
+  {
+   "path": "sensing/processing/primitives_encoder.py",
+   "role": "Primitive: concept_id, domain, form, role, couplings, bounds(spatial,temporal,scale), epi, confidence, timestamp, claim_ref; .obs line codec"
+  },
+  {
+   "path": "sensing/transmission/cb_relay_format.py",
+   "role": "a Primitive as a <=50-word NATO-phonetic voice script"
+  },
+  {
+   "path": "sensing/transmission/ham_kiss_wrapper.py",
+   "role": "KISS framing for TNC packet radio"
+  },
+  {
+   "path": "sensing/transmission/lora_transmit.py",
+   "role": "LoRa packets, chunked above MTU"
+  },
+  {
+   "path": "sensing/hardware/tier3_rf_sensing.md",
+   "role": "planned RTL-SDR tier: the only RF sensing in either repo, and it is a plan"
+  },
+  {
+   "path": "sensing/processing/claim_match.py",
+   "role": "verify_obs_file(): an .obs file against the repo's .claims catalogue"
+  }
+ ],
+ "ecosystem": [
+  {
+   "mount": "be2-communication",
+   "why": "opportunistic agent communication over transports/; LoRa, KISS and CB are its transports"
+  },
+  {
+   "mount": "symbolic-sensors",
+   "why": "sensor framework the sensing/ drivers and the camera packs both instantiate"
+  },
+  {
+   "mount": "noise-sensor",
+   "why": "a PIR + mic node is a noise-as-information instrument"
+  },
+  {
+   "mount": "biogrid",
+   "why": "glyph registry for biological grid sensing; soil and phenophase .obs examples are its inputs"
+  },
+  {
+   "mount": "living-intelligence",
+   "why": "multi-kingdom ontology the bear_activity and phenophase examples file under"
+  }
+ ],
+ "siblings": [
+  "atmosphere-storm",
+  "feed-integrity",
+  "encoding-wire",
+  "analyst-agent"
+ ],
+ "avenues": [
+  {
+   "id": "av-sen-1",
+   "title": "A field-nodes layer: .obs lines on the globe",
+   "direction": "bridge->gev",
+   "cost": "medium",
+   "moves": "a /api/obs proxy that reads a local .obs file (registered path only, same rule as cameras) -> a layer with one entity per node; epi and confidence drive the marker; claim_ref drives the card",
+   "fails_if": "a Primitive's spatial bound is a name ('plot_KV'), not a coordinate; the .obs line carries no lat/lon field. A node registry {concept_id -> lat, lon} must exist on the GEV side first, like the camera pack, or the layer has nothing to place"
+  },
+  {
+   "id": "av-sen-2",
+   "title": "Camera pack schema as a sensor-pack schema",
+   "direction": "gev->bridge",
+   "cost": "low",
+   "moves": "cctv_sources.*.json already has pose, range, mount height and licence per instrument; the same record with sensor_id instead of feed url is the node registry av-sen-1 needs",
+   "fails_if": "a node is mobile (a collar, a drifter); the pack schema has no motion model and the record would lie by omission"
+  },
+  {
+   "id": "av-sen-3",
+   "title": "A spoken relay through the voice agent",
+   "direction": "both",
+   "cost": "high",
+   "moves": "cb_relay_format renders a Primitive as speech; GEV's realtime agent hears speech. A tool that parses the CB script back into a Primitive closes a voice-only path from a shop to the globe",
+   "fails_if": "the realtime model paraphrases digits; the script's whole point is that a tired operator does not guess decimals, and a model that does is worse than the operator"
+  }
+ ],
+ "interference": [
+  "GEV 'radio' is internet streaming, not RF. The bridge's tier3 RF sensing is a plan. Neither repo has an RTL-SDR path today; the word is shared, the mechanism is not",
+  "GEV 'detection' draws screen-space boxes around records it already holds. It is not computer vision and CCTV frames are not analysed. Nothing in either repo detects anything in an image",
+  "Every camera URL is server-registered; a field-nodes proxy inherits that rule or it opens the SSRF hole SECURITY.md closes"
+ ]
+}

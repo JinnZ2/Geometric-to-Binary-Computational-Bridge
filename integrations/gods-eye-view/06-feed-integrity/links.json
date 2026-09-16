@@ -1,0 +1,145 @@
+{
+ "id": "feed-integrity",
+ "folder": "06-feed-integrity",
+ "title": "Feed integrity: GEV's six feed states and serve-stale caches; the bridge's epistemology grades, drift detector and instrument route",
+ "shape": "Both repos already refuse to render a dead channel as healthy. They do it in two vocabularies. One table joins them.",
+ "flow": [
+  "  layer.getStats() ──▶ layerFeedState() ──▶ nominal | loading | degraded | stale | fallback | unavailable  (GEV)",
+  "  proxy caches ──serve-stale──▶ stale (never nominal)",
+  "  Overpass 406 ──cached as data for a month──▶ FIXED: rotate mirrors, never cache a refusal",
+  "",
+  "  driver.confidence_grade ──epi_classifier──▶ measured | inferred | derived | asserted  (bridge)",
+  "        mock −0.40   saturation −0.20   uncalibrated −0.10   no baseline −0.05",
+  "",
+  "  av-fdi-1: one table   feed state ──▶ epistemology × confidence   (data, both sides read it)",
+  "  av-fdi-4: stale:bool ──▶ trend.py 'walking toward the edge at N/day'  (gate TRD-3 first)",
+  "  av-fdi-3: track-regression + random-walk feed = null() on a QA harness"
+ ],
+ "notes": {
+  "bottleneck": "Two vocabularies for one question. The table (av-fdi-1) is the whole cost.",
+  "leverage": "Both sides already refuse to read a dead channel as healthy; the join makes that refusal survive a hand-off between them.",
+  "harmonics": "trend.py's TRD-3 and the loop's FCL-3 are the same shape (no minimum-sample gate). Fix once, cite twice.",
+  "tertiary": "An adapter that drops the stale flag turns a measured value into an asserted one silently. That is the failure this folder exists to prevent."
+ },
+ "gev": [
+  {
+   "path": "src/data/manager.js",
+   "role": "layerFeedState(): nominal | loading | degraded | stale | fallback | unavailable; guidance states never read DEGRADED"
+  },
+  {
+   "path": "src/data/retryableLoad.js",
+   "role": "createRetryableLoader(): memoize success, rate-limit failure, 5 s doubling to 300 s"
+  },
+  {
+   "path": "src/data/adsbLolFallback.js",
+   "role": "regional fallback with provenance surfaced in stats"
+  },
+  {
+   "path": "CHANGELOG.md",
+   "role": "Overpass: a 406 refusal was cached to memory and disk and served as data for a month; fixed by rotating mirrors and never caching a refusal"
+  },
+  {
+   "path": "scripts/track-regression.mjs",
+   "role": "deterministic harness: synthetic feeds, invariants that must hold"
+  },
+  {
+   "path": "src/data/aisWatchdog.js",
+   "role": "liveness of a websocket stream"
+  }
+ ],
+ "bridge": [
+  {
+   "path": "sensing/processing/epi_classifier.py",
+   "role": "measured | inferred | derived | asserted; mock_penalty 0.40, saturation 0.20, uncalibrated 0.10"
+  },
+  {
+   "path": "geometric_intelligence/network/trend.py",
+   "role": "is this parameter walking toward its band edge (TRD-1..7 recorded, not all fixed)"
+  },
+  {
+   "path": "field/field_claim_loop.py",
+   "role": "INSTRUMENT route needs anchor_dev against ANCHOR_TOL; open problem 5a: what the physical standard is"
+  },
+  {
+   "path": "repo_guard.py",
+   "role": "reach(): is the signal above the instrument floor; null_harness(): does the result survive noise"
+  },
+  {
+   "path": "adaptive_sim/adaptive_sim_framework.py",
+   "role": "--verify: a record must reproduce under the code shipped beside it (ASF-1)"
+  },
+  {
+   "path": "playground/PRINCIPLES.json",
+   "role": "P-UNFALSIFIABLE and the 'dead channel reads as healthy' shape (GLY-1 empty reading -> FELT_COHERENT)"
+  }
+ ],
+ "ecosystem": [
+  {
+   "mount": "noise-sensor",
+   "why": "noise as information: a feed's failure pattern is a signal about the feed"
+  },
+  {
+   "mount": "physics-guard",
+   "why": "premise verification before a feed value is believed"
+  },
+  {
+   "mount": "logic-ferret",
+   "why": "truth_integrity_score: the same question asked of an argument"
+  },
+  {
+   "mount": "component-failure",
+   "why": "a feed outage is a component failure with a repurposing path (fallback source)"
+  },
+  {
+   "mount": "symbolic-sensors",
+   "why": "self-assessment sensors: the app assessing its own feeds"
+  }
+ ],
+ "siblings": [
+  "geo-seismic",
+  "atmosphere-storm",
+  "orbital",
+  "mobility-transport",
+  "infrastructure",
+  "sensing-edge",
+  "analyst-agent"
+ ],
+ "avenues": [
+  {
+   "id": "av-fdi-1",
+   "title": "One feed-state to epistemology table",
+   "direction": "both",
+   "cost": "trivial",
+   "moves": "nominal->measured(1.0), stale->measured(age-penalised), fallback->inferred, mode:'sim'->asserted(<=0.5), degraded->measured(0.5), unavailable->no reading. Shipped as data in this folder, consumed by either side",
+   "fails_if": "a GEV stat set maps to two rows; layerFeedState() is a total function with a fixed precedence, so the table must reproduce that precedence and a test checks it against the shipped cases"
+  },
+  {
+   "id": "av-fdi-2",
+   "title": "Refusal-cached-as-data as a registered principle instance",
+   "direction": "gev->bridge",
+   "cost": "trivial",
+   "moves": "the Overpass bug is a second independent instance of 'a dead channel reads as the healthy state' (first: GLY-1). Two instances is what PRINCIPLES.json needs to move an entry from PROVISIONAL to ESTABLISHED",
+   "fails_if": "the register requires a `where` path inside this repo (it does, CI-3); a cross-repo instance needs a path convention the register does not have yet. Recorded here as a candidate, not added"
+  },
+  {
+   "id": "av-fdi-3",
+   "title": "A null run for the tracking harness",
+   "direction": "bridge->gev",
+   "cost": "low",
+   "moves": "track-regression's synthetic feed replaced by random-walk positions; the invariants that still pass were never reading the geometry (playground null() gate, applied to a QA harness)",
+   "fails_if": "all four invariants still pass on noise; then the harness locks the render path, not the tracking, and that is worth knowing before the next regression"
+  },
+  {
+   "id": "av-fdi-4",
+   "title": "Age distributions instead of a stale boolean",
+   "direction": "bridge->gev",
+   "cost": "low",
+   "moves": "per-layer last-fix age, TLE epoch age, cache age as trend.py scopes; 'stale' becomes 'walking toward the edge at N/day'",
+   "fails_if": "trend.py's TRD-3 (two points give R^2 = 1.0) is still open when this is wired; wire the minimum-sample gate first or the report will predict a failure from two polls"
+  }
+ ],
+ "interference": [
+  "GEV feed state is per layer; bridge epistemology is per reading. The join key is (layer, poll) and a reading inherits the layer's state at poll time, not at render time",
+  "Serve-stale is correct behaviour and reads as 'stale', never as 'nominal'. Any adapter that drops the stale flag converts a measured value into an asserted one silently"
+ ]
+}
