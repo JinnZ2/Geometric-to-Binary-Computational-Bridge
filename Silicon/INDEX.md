@@ -339,7 +339,7 @@ Your architecture is **validated** if:
 ✓ k_well > 4 eV/Å² (precision achievable)  
 ✓ T₂ > 100 ms @ 300 K (room-temp operation)
 
-**Impact**: 10× better than state-of-the-art room-temp quantum memory
+**Impact**: 10× better than state-of-the-art room-temp quantum memory [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 
 -----
 

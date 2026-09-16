@@ -9,9 +9,9 @@ emergence of post-binary systems.
 3. MATH -> OPTIMIZED BINARY (SIMD, Symmetry, Cache)
 4. BINARY -> HARDWARE EXECUTION (CPU/GPU)
 === OPTIMIZATIONS ===
-- SIMD Parallelism (8x practical speedup)
+- SIMD Parallelism (8x practical speedup) [unmeasured: never timed against a scalar path; the Engine reports SIMD efficiency as a constant 12.5% — ENG-6, Engine/geometric_solver.py]
 - Spatial Decomposition (O(n log n))
-- Symmetry Exploitation (2x-8x reduction)
+- Symmetry Exploitation (2x-8x reduction) [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
 - Geometric Memory Layout (cache-coherent fields)
 === SYMBOLIC TRANSLATION ===
 CORE -> field_centering

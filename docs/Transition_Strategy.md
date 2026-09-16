@@ -9,7 +9,7 @@ This guide describes the 4-phase transition plan to move from traditional binary
 - Description: Use geometric insights to improve traditional binary code
 - Techniques:
   - SIMD, spatial decomposition, symmetry reduction
-- Gains: 10x–100x performance on real problems
+- Gains: 10x–100x performance on real problems [unmeasured: no benchmark or device in the tree produced this figure]
 - Compatibility: 100%
 - Risk: Low
 
@@ -21,7 +21,7 @@ This guide describes the 4-phase transition plan to move from traditional binary
 - Techniques:
   - Symbolic-to-geometric plugins
   - Hybrid compilers
-- Gains: 100x–1000x
+- Gains: 100x–1000x [unmeasured: no benchmark or device in the tree produced this figure]
 - Compatibility: 90–95%
 - Risk: Moderate
 
@@ -33,7 +33,7 @@ This guide describes the 4-phase transition plan to move from traditional binary
 - Techniques:
   - Geometric processors or FPGAs
   - Hardware memory mapped to space
-- Gains: 1000x+ efficiency and emergent behavior
+- Gains: 1000x+ efficiency and emergent behavior [unmeasured: no benchmark or device in the tree produced this figure]
 - Compatibility: 80–90% (via binary emulation layer)
 - Risk: High
 

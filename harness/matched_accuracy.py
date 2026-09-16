@@ -66,12 +66,25 @@ def _loglog(x0, y0, x1, y1, y):
 
 
 def sweep_curve(latest, impl, workload, comp):
-    """[(resolution, error, wall)] for the OK records of impl on workload, by resolution."""
+    """[(resolution, error, wall)] for the OK resolution-swept records of impl on workload."""
     pts = []
     for (i, w, r), rec in latest.items():
         if i == impl and w == workload and _ok(rec) and _err(rec, comp) is not None:
             pts.append((r, _err(rec, comp), rec["wall_time"]))
     return sorted(pts)
+
+
+def target_points(latest, latest_tol, impl, workload, comp):
+    """[(knob_value, error, wall, points, knob_kind)] for impl on workload: tolerance-swept
+    records when it has them, else its resolution records."""
+    pts = [(t, _err(rec, comp), rec["wall_time"], rec.get("points"), "tolerance")
+           for (i, w, t), rec in latest_tol.items()
+           if i == impl and w == workload and _ok(rec) and _err(rec, comp) is not None]
+    if pts:
+        return sorted(pts, reverse=True)
+    return sorted((r, _err(rec, comp), rec["wall_time"], rec.get("points"), "resolution")
+                  for (i, w, r), rec in latest.items()
+                  if i == impl and w == workload and _ok(rec) and _err(rec, comp) is not None)
 
 
 def match_one(target_err, curve):
@@ -105,8 +118,9 @@ def _wall_at(r0, w0, r1, w1, r):
 def matched_rows(records, target=None, sweep=None):
     """One dict per (target impl, sweep impl, workload, component[, resolution])."""
     latest = _run.latest_per_cell(records)
-    impls = sorted({k[0] for k in latest})
-    workloads = sorted({k[1] for k in latest})
+    latest_tol = _run.latest_per_tol_cell(records)
+    impls = sorted({k[0] for k in latest} | {k[0] for k in latest_tol})
+    workloads = sorted({k[1] for k in latest} | {k[1] for k in latest_tol})
     rows = []
     for T in impls:
         if target and T != target:
@@ -116,24 +130,27 @@ def matched_rows(records, target=None, sweep=None):
                 continue
             for w in workloads:
                 for c in COMPONENTS:
-                    t_pts = sweep_curve(latest, T, w, c)
+                    t_pts = target_points(latest, latest_tol, T, w, c)
                     if not t_pts:
                         continue
                     curve = sweep_curve(latest, S, w, c)
-                    t_errs = [e for _, e, _ in t_pts]
+                    if not curve:
+                        continue                                 # S has no resolution sweep to match against
+                    t_errs = [e for _, e, _, _, _ in t_pts]
                     flat = max(t_errs) - min(t_errs) < FLAT_TOL
                     groups = [t_pts] if flat else [[p] for p in t_pts]
                     for g in groups:
-                        walls = [wl for _, _, wl in g]
+                        walls = [wl for _, _, wl, _, _ in g]
                         t_wall = statistics.median(walls)
                         status, r_star, w_star, note = match_one(g[0][1], curve)
                         rows.append({
                             "target": T, "sweep": S, "workload": w, "component": c,
-                            "target_resolutions": [r for r, _, _ in g],
+                            "target_knob": g[0][4],
+                            "target_resolutions": [r for r, _, _, _, _ in g],
                             "target_error": g[0][1],
                             "target_wall": t_wall,
                             "target_wall_spread": (min(walls), max(walls)),
-                            "target_points": latest[(T, w, g[0][0])].get("points"),
+                            "target_points": g[0][3],
                             "target_is_resolution_blind": flat,
                             "status": status,
                             "matched_resolution": r_star,
@@ -157,7 +174,8 @@ def render(rows) -> str:
            "|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         res = ("all (resolution-blind)" if r["target_is_resolution_blind"]
-               else str(r["target_resolutions"][0]))
+               else (f"tol {r['target_resolutions'][0]:g}" if r.get("target_knob") == "tolerance"
+                     else str(r["target_resolutions"][0])))
         if r["status"] == "MATCHED":
             tail = (f"{r['matched_resolution']:.1f} | {r['matched_points']:,} | {r['matched_wall']:.4f} s | "
                     f"{r['ratio_sweep_over_target']:.3f}x | MATCHED ({r['note']})")

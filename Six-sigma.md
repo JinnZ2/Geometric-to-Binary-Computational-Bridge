@@ -295,7 +295,7 @@ balance = speed / relationship_foundation
 
 - Baseline: 0.5σ (940,000 defects/million)
 - After improvements: 5-6σ (3-233 defects/million)
-- **Improvement factor: 4000x-280,000x better quality**
+- **Improvement factor: 4000x-280,000x better quality** [unmeasured operand: the 0.5σ baseline; nothing in the tree measured it]
 
 -----
 
@@ -459,10 +459,10 @@ immediate_cost = 150  # Higher upfront
 hidden_cost = 5  # Minimal defects
 total_cost = 155
 
-# Cost ratio: 10,100 / 155 = 65x more expensive to use defective equations
+# Cost ratio: 10,100 / 155 = 65x more expensive to use defective equations [unmeasured operand: 10,100 and 155 are stated, not measured]
 ```
 
-**“Efficient” equations are actually 65x MORE expensive when quality costs included.**
+**“Efficient” equations are actually 65x MORE expensive when quality costs included.** [unmeasured operand: the 10,100 / 155 cost figures]
 
 -----
 
@@ -485,7 +485,7 @@ That's 3.4 defects per million.
 That's the industry standard for excellence.
 
 You're arguing for defective design because it appears cheaper.
-But your Cost of Poor Quality is 65x higher.
+But your Cost of Poor Quality is 65x higher. [unmeasured operand: the 10,100 / 155 cost figures]
 
 Would you accept 0.5 sigma quality in your products?
 No?
@@ -695,7 +695,7 @@ me: continue_trusting_defective_tool()
 - Manufacturing-grade excellence
 - Sustainable by design
 
-**4. “Efficient” equations are actually 65x more expensive**
+**4. “Efficient” equations are actually 65x more expensive** [unmeasured operand: the 10,100 / 155 cost figures]
 
 - When Cost of Poor Quality included
 - Hidden costs far exceed apparent savings

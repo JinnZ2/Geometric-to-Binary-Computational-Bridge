@@ -70,7 +70,7 @@ $$\mathbf{E}_{\text{Metabolic, Basal}} \approx 7,500-10,500 \text{ kJ/day} \appr
 
 $$\frac{\mathbf{E}*{\text{Mfg, Daily (AI)}}}{\mathbf{E}*{\text{Metabolic, Basal (Human)}}} \approx 2.6$$
 
-The embodied energy to **manufacture** AI hardware is 2.6× greater than the energy to **keep a human alive** for one day—before any operational costs.
+The embodied energy to **manufacture** AI hardware is 2.6× greater than the energy to **keep a human alive** for one day—before any operational costs. [unmeasured operand: E_Mfg per day; no source in the tree]
 
 ### 2.3 True Cost of Human Fuel (E_Food)
 

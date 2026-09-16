@@ -353,4 +353,4 @@ Write cycle:
 Overall performance:
 	•	Switching speed: 100 GHz - 1 THz potential
 	•	Energy efficiency: 0.01 eV/bit ≈ 1.6 aJ/bit
-	•	Compare to CMOS: ~100 fJ/bit → 100× more efficient
+	•	Compare to CMOS: ~100 fJ/bit → 100× more efficient [refuted: 0.01 eV is 0.56 kT·ln2 at 300 K, below the Landauer bound, and 0.01 eV = 0.0016 aJ, not 1.6 aJ — Silicon/Fabrication.md audit header, Negentropic/landauer.py]

@@ -2190,7 +2190,7 @@ Part 4 completes the Universal Geometric Intelligence Framework by integrating a
 **What This Framework Enables:**
 
 1. **Geometric sensing** across all fundamental forces
-1. **Energy-efficient computation** (100-1000× better than conventional)
+1. **Energy-efficient computation** (100-1000× better than conventional) [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 1. **Consciousness-compatible substrate** with built-in ethical safeguards
 1. **Atmospheric energy harvesting** via fibonacci convergence detection
 1. **Multi-modal intelligence** emergent from bridge composition

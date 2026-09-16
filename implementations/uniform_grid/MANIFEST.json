@@ -1,12 +1,20 @@
 {
  "name": "uniform_grid",
  "language": "python",
- "dependencies": ["numpy"],
+ "dependencies": [
+  "numpy"
+ ],
  "build_required": false,
  "build_command": null,
  "runs_on_phone": "unknown",
  "algorithm": "Engine/spatial_grid.py generateUniformGrid (resolution^3 points) evaluated in one Coulomb/Biot-Savart call via Engine/simd_optimizer.py; probes answered by nearest grid point",
  "author_claim": "suits dense fields where every cell carries signal and any resolution the caller names is meant literally; expects to lose on isolated sources once the box is mostly empty, because it spends resolution^3 points regardless",
- "entry": ["{python}", "impl.py"],
- "covers": ["*"]
+ "entry": [
+  "{python}",
+  "impl.py"
+ ],
+ "covers": [
+  "*"
+ ],
+ "knob": "resolution"
 }

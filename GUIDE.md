@@ -140,7 +140,7 @@ is directly applicable to preventing manipulation, prompt injection,
 and coercion. `Geometric-Intelligence/Self-partition.md` describes
 geometric barriers for sensitive internal state.
 
-**For efficiency:** The geometric EM solver achieves 15-30x speedup
+**For efficiency:** The geometric EM solver achieves 15-30x speedup [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py]
 over uniform grid methods through adaptive spatial decomposition and
 symmetry detection. The crystalline neural network model shows how
 phi-spacing produces natural multi-scale computation with no parameter
@@ -175,7 +175,7 @@ modify by gradient-only methods -- which is a feature, not a bug.
 | 109.47 degrees | tetrahedral angle | Silicon's natural bond angle, foundation of all octahedral encoding |
 | phi = 1.618 | golden ratio | Shell spacing in crystalline network; produces scale invariance |
 | 8 states | per octahedral cell | 3 bits per unit, derived from silicon's natural coordination |
-| 15-30x | spatial speedup | Adaptive grid vs. uniform grid in EM solver |
+| 15-30x | spatial speedup | Adaptive grid vs. uniform grid in EM solver [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py] |
 | 22 | parallel sensors | Full sensor suite channels, all independent |
 | 231 | bridge tests passing | Coverage of all 11 domain encoders |
 

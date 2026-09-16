@@ -58,7 +58,7 @@ Sound wave → Extract geometric properties → Binary encoding → Direct inter
 - Geometric properties are **invariant** under coordinate transformations
 - Encoding preserves **relational structure** rather than absolute values
 - Binary thresholds exploit **natural discontinuities** in phase space
-- Result: 100-1000× lower computational cost for equivalent information
+- Result: 100-1000× lower computational cost for equivalent information [unmeasured: no benchmark or device in the tree produced this figure]
 
 ### 1.2 Geometric Properties vs. Raw Measurements
 
@@ -1598,7 +1598,7 @@ Total: 10-22 ms per classification
 Hardware: Raspberry Pi, 2-5W power consumption
 ```
 
-**Speedup: 3-15× faster, 10-100× lower power**
+**Speedup: 3-15× faster, 10-100× lower power** [unmeasured: no benchmark or device in the tree produced this figure]
 
 ### 7.2 Accuracy Comparison
 
@@ -2012,7 +2012,7 @@ The five bridge encoders provide **production-ready geometric sensing** across a
 
 ✓ **Works today** - Python code, minimal hardware  
 ✓ **Physics-based** - No training data required  
-✓ **Efficient** - 10-100× less compute than ML  
+✓ **Efficient** - 10-100× less compute than ML [unmeasured: no benchmark or device in the tree produced this figure]  
 ✓ **Explainable** - Each bit = specific geometric property  
 ✓ **Extensible** - Add new bridges, compose existing  
 ✓ **Deployable** - $20-80 complete systems

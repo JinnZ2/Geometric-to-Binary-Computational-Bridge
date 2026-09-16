@@ -18,7 +18,7 @@ Parts 1-2 established bridge encoders (sensing) and computation engine (processi
 - **8 states per cell** (octal, not binary) using natural geometry
 - **Magnetic read/write** via tensor state manipulation
 - **Geometric error correction** built into physics
-- **100× energy efficiency** vs. conventional memory
+- **100× energy efficiency** vs. conventional memory [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 - **Infinite endurance** (no wear-out, reversible transitions)
 
 **Fabrication Status:**
@@ -703,7 +703,7 @@ def validate_parallel_operations():
 | Write time | <100 ms | Mesoscale, room temperature |
 | Read time | <50 ms | 4 measurements × 10 ms each |
 | Retention | >1 hour | Proof-of-concept (not optimized) |
-| Parallel speedup | 2-4× | Time-division or frequency multiplexing |
+| Parallel speedup | 2-4× | Time-division or frequency multiplexing [unmeasured: no benchmark or device in the tree produced this figure] |
 
 **Proof-of-Concept Validates:**
 1. ✅ Octahedral encoding works (8 states distinguishable)
@@ -779,7 +779,7 @@ strained_silicon = {
     'benefit': {
         'barrier_enhancement': 'β_strained ≈ 1.5 × β_pristine',
         'eigenvalue_separation': '+50% (easier discrimination)',
-        'radiation_hardness': '10× better (higher barriers)',
+        'radiation_hardness': '10× better (higher barriers)', [unmeasured: no benchmark or device in the tree produced this figure]
         'thermal_stability': 'Improved retention'
     },
     
@@ -992,7 +992,7 @@ three_d_integration = {
 | Radiation tolerance | High (geometric ECC) | Moderate | Low-moderate |
 
 **Key Advantages:**
-- **Energy:** 100-10000× better than conventional
+- **Energy:** 100-10000× better than conventional [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 - **Speed:** Comparable to DRAM
 - **Non-volatile:** Like Flash but no wear-out
 - **Endurance:** Unlimited (reversible physics)
@@ -1187,7 +1187,7 @@ specialty_markets = {
 ```python
 hpc_market = {
     'requirements': 'Energy efficiency, bandwidth',
-    'octahedral_fit': 'Excellent (100× energy advantage)',
+    'octahedral_fit': 'Excellent (100× energy advantage)', [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
     'applications': [
         'AI training (power-limited)',
         'Edge inference (battery-limited)',
@@ -1355,7 +1355,7 @@ why_octahedral_wins = {
     'works_with_physics': {
         'conventional': 'Impose binary against natural structure',
         'octahedral': 'Use natural 8-state geometry',
-        'result': '100-1000× energy advantage'
+        'result': '100-1000× energy advantage' [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
     },
     
     'reversible_transitions': {
@@ -1465,7 +1465,7 @@ market_risks = {
         'concern': 'Not invented here, compatibility concerns',
         'likelihood': 'High (always with new tech)',
         'mitigation': [
-            'Demonstrate clear advantages (100× energy)',
+            'Demonstrate clear advantages (100× energy)', [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
             'Standards compatibility (look like DDR interface)',
             'Reference designs (easy integration)',
             'Prove in specialty first, consumer follows'
@@ -1556,7 +1556,7 @@ Part 3 specifies the **physical substrate** for geometric intelligence:
 ✅ **Proof-of-concept pathway** - $15-50k, 6-12 months, fully detailed  
 ✅ **Advanced prototype** - Nanoscale fabrication, complete process  
 ✅ **Production integration** - Foundry partnership model, cost analysis  
-✅ **Performance projections** - 100-10000× energy advantage  
+✅ **Performance projections** - 100-10000× energy advantage [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]  
 ✅ **Risk analysis** - Technical and market mitigation strategies  
 
 **Status:**

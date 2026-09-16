@@ -126,7 +126,7 @@ sources = [
 bounds = {'min': [-5,-5,-5], 'max': [5,5,5]}
 
 field_data = solver.calculateElectromagneticField(sources, bounds)
-# -> 2080 adaptive grid points (vs 32768 for uniform grid: 15x speedup)
+# -> 2080 adaptive grid points (vs 32768 for uniform grid: 15x speedup) [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py]
 ```
 
 The adaptive grid places more evaluation points near the charges

@@ -21,7 +21,7 @@
 > Measured Er³⁺ T₁ in the best host (Er:Y₂SiO₅): ~10 ms at 1.5–2 K, ~µs at 10 K,
 > and above ~20–30 K the EPR lines are lifetime-broadened past detection. At
 > 300 K T₁ is at the phonon floor, ps–ns. With `T₂ ≤ 2T₁` that caps T₂ in the ns
-> class, so 166 ms is **~8 orders high**. Grant a 1000× improvement on T₁ and it
+> class, so 166 ms is **~8 orders high**. Grant a 1000× improvement on T₁ and it [refutation of ER-1]
 > is still 5 orders out.
 >
 > Independent calibration: the best room-temperature solid-state spin coherence

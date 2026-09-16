@@ -26,7 +26,7 @@ bridges/                       11 domain encoders (magnetic, light, sound, gravi
 │                              consciousness, emotion) — 231 tests passing
 
 Engine/
-├── geometric_solver.py        EM field solver, symmetry-aware, ~15–30× speedup
+├── geometric_solver.py        EM field solver, symmetry-aware, ~15–30× speedup [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py]
 ├── simd_optimizer.py          Vectorised Coulomb + Biot-Savart
 ├── symmetry_detector.py       Reflective + rotational symmetry detection
 └── spatial_grid.py            Adaptive octree (~2000 pts vs 32 000 uniform)
@@ -79,7 +79,7 @@ def solve(self, n_steps: int = 2000):
         self._mh_step(T)
 ```
 
-**Expected gain**: ~3× fewer residual vortices vs linear schedule; asymptotically better for large grids.
+**Expected gain**: ~3× fewer residual vortices vs linear schedule; asymptotically better for large grids. [unmeasured: no benchmark or device in the tree produced this figure]
 
 **Reference**: `Silicon/kt_annealing.py` — full derivation, three schedule comparison, simulation results.
 

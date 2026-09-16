@@ -778,7 +778,7 @@ Protocol:
 
 Success Metric:
 - All cells written correctly
-- Speedup: 2-3× vs. sequential
+- Speedup: 2-3× vs. sequential [unmeasured: no benchmark or device in the tree produced this figure]
 - No crosstalk (cells don't interfere)
 
 Experiment 4: Thermal Coupling (Qualitative)
@@ -937,7 +937,7 @@ Key Processes:
 Expected Performance
 At 50-500 nm scale:
 	•	Switching speed: 10-100 GHz (approaching THz)
-	•	Energy: 0.1-1 aJ/bit (10-100× better than CMOS)
+	•	Energy: 0.1-1 aJ/bit (10-100× better than CMOS) [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 	•	Density: 10¹³-10¹⁴ bits/cm³
 	•	Error rate: <10⁻⁶ (with geometric correction)
 What this proves: Physics works at near-production scale
@@ -1060,7 +1060,7 @@ ROI on $200M development: 10-75×
 Compare to CMOS node shrink:
 - Cost: $5-10B per generation
 - Benefit: 30-50% improvement
-- Our approach: 100× energy improvement possible
+- Our approach: 100× energy improvement possible [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 ```
 
 **Funding Pathway**:
@@ -1206,7 +1206,7 @@ Current Engineers: "Tensor encoding? Unfamiliar!"
 - "Geometric error correction is theoretical!"
 
 Prediction: Octahedral will win in specialized applications first
-Why? Works WITH physics, 100× energy advantage
+Why? Works WITH physics, 100× energy advantage [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 ```
 
 **Familiarity is not a technical criterion** - it’s a psychological barrier.
@@ -1930,7 +1930,7 @@ Cycle 3: Cell 0 IDLE,          Cell 1 IDLE,         Cell 2 READ_MEASURE, Cell 3 
 ...
 
 Result: Overlapped operations → effective parallelism
-Throughput: 8× single-cell performance
+Throughput: 8× single-cell performance [unmeasured: no benchmark or device in the tree produced this figure]
 ```
 
 #### Coil Driver Circuits
@@ -2377,7 +2377,7 @@ But: Different value proposition
 ```
 Octahedral Advantages over Flash:
 ✅ 100× lower power (critical for edge AI, IoT)
-✅ 1000× faster writes (enables real-time processing)
+✅ 1000× faster writes (enables real-time processing) [unmeasured: no benchmark or device in the tree produced this figure]
 ✅ Radiation-hard (space, nuclear, high-altitude)
 ✅ No write wear-out (infinite endurance vs. 10⁴-10⁶ cycles)
 ✅ Integrated error correction (reduces controller complexity)
@@ -2560,7 +2560,7 @@ Likelihood: High (new technology always faces this)
 Impact: Medium (delays revenue, not fatal)
 
 Mitigation:
-✅ Demonstrate clear advantages (100× power savings)
+✅ Demonstrate clear advantages (100× power savings) [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 ✅ Standards compatibility (look like standard memory interface)
 ✅ Reference designs (easy to integrate)
 ✅ Evangelize (papers, talks, demonstrations)
@@ -2572,7 +2572,7 @@ Comparison: Octahedral vs. Current Technologies
 Performance Matrix
 
 Where Octahedral Wins:
-	•	✅ Speed: 100-1000× faster writes
+	•	✅ Speed: 100-1000× faster writes [unmeasured: no benchmark or device in the tree produced this figure]
 	•	✅ Energy: 100× lower per bit
 	•	✅ Endurance: Unlimited (no degradation)
 	•	✅ Radiation: Geometric error correction
@@ -2697,7 +2697,7 @@ Risk/reward profile:
 
 Opportunity:
 - $200B+ memory market
-- 100× energy advantage over incumbents
+- 100× energy advantage over incumbents [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 - Multiple high-value niches (space, AI, quantum)
 - Patent-protectable IP
 

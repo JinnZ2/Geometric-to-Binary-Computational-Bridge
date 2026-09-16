@@ -31,7 +31,7 @@ STDLIB = set(getattr(sys, "stdlib_module_names", ()))
 def _manifest(**over):
     m = {"name": "fake", "language": "python", "dependencies": [], "build_required": False,
          "build_command": None, "runs_on_phone": "unknown", "algorithm": "does nothing",
-         "author_claim": "suits nothing", "entry": ["{python}", "impl.py"], "covers": ["*"]}
+         "author_claim": "suits nothing", "entry": ["{python}", "impl.py"], "covers": ["*"], "knob": "none"}
     m.update(over)
     return m
 
@@ -86,9 +86,11 @@ class TestHC1Manifest(unittest.TestCase):
         with self.assertRaises(C.ContractError):
             C.load_manifest(self._write(_manifest(algorithm="two\nlines")))
 
-    def test_shipped_manifests_validate_and_are_two(self):
+    def test_shipped_manifests_validate_and_are_three(self):
         names = [m["name"] for m in C.discover(ROOT)]
-        self.assertEqual(names, ["py_octree", "uniform_grid"])
+        self.assertEqual(names, ["py_octree", "py_octree_tol", "uniform_grid"])
+        knobs = {m["name"]: m["knob"] for m in C.discover(ROOT)}
+        self.assertEqual(knobs, {"py_octree": "none", "py_octree_tol": "tolerance", "uniform_grid": "resolution"})
 
 
 class TestHC2SpecAndReference(unittest.TestCase):
@@ -202,7 +204,8 @@ class TestHC4Selection(unittest.TestCase):
             self.skipTest("no results committed")
         with open(R.SELECTION, encoding="utf-8") as fh:
             committed = fh.read()
-        rendered = R.render_selection(recs, C.discover(ROOT), C.load_workloads(R.WORKLOADS), P.probe_all(ROOT))
+        rendered = R.render_selection(recs, C.discover(ROOT), C.load_workloads(R.WORKLOADS), P.probe_all(ROOT),
+                                      held=C.load_held_workloads(R.HELD))
         # the probe column depends on this machine; compare everything below it
         self.assertEqual(committed.split("## Field sparsity")[1], rendered.split("## Field sparsity")[1])
 
@@ -229,6 +232,13 @@ class TestHC5RunCell(unittest.TestCase):
         m = _manifest()
         m["_dir"] = self.dir
         return m
+
+    def test_tolerance_cell_records_its_tolerance(self):
+        m = self._impl("raise RuntimeError('boom')\n")
+        rec = R.run_cell(m, self.w, 8, timeout=30, repeats=1, tolerance=0.5)
+        self.assertEqual(rec["tolerance"], 0.5)
+        self.assertEqual(rec["status"]["kind"], "FAILED")
+        self.assertIsNone(R.run_cell(m, self.w, 8, timeout=30, repeats=1)["tolerance"])
 
     def test_failure_becomes_FAILED_with_stderr_tail(self):
         m = self._impl("raise RuntimeError('boom')\n")

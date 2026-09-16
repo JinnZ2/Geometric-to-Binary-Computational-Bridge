@@ -27,7 +27,7 @@ Performance:
 
 	•	100 GHz - 1 THz switching speeds
 	
-	•	1.6 aJ/bit energy efficiency (100× better than CMOS)
+	•	1.6 aJ/bit energy efficiency (100× better than CMOS) [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 	•	Theoretical density: 10¹⁵ bits/cm³
 	•	Self-healing via topological redundancy
 	

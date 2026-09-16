@@ -1,0 +1,35 @@
+{
+ "_comment": "SPECCED, NOT BUILT. Three sparsity / multi-scale workloads, held until the tolerance-driven refinement (py_octree_tol) has been measured on the three space-filling ones: testing the sparse regime with no accuracy knob would repeat the confound F1 names (README, Performance). Each validates as a workload and would run unchanged once `held` is removed. They never produce a record while held; SELECTION.md counts them at the top.",
+ "workloads": [
+  {"name": "sparse_point",
+   "conditions": {"sparsity": "isolated", "scale_separation": "multi",
+                  "why": "one point charge in a 40-unit box: 99.9% of the volume is more than 10 source-radii away; the regime the octree's author_claim names"},
+   "bounds": {"min": [-20.0, -20.0, -20.0], "max": [20.0, 20.0, 20.0]},
+   "sources": [{"position": [0.7, -0.3, 0.2], "strength": 1e-9, "type": "charge"}],
+   "held": {
+    "reason": "the sparse regime is where placement is supposed to pay; measuring it with py_octree, whose error cannot move, would again confound placement with the missing accuracy knob",
+    "settles": "at matched accuracy, does the tolerance-driven octree need fewer points than the uniform grid, and by how much, when most of the box is empty (F2's 'unmeasured' cell)",
+    "build_after": "py_octree_tol matched-accuracy rows on dipole / quadrupole / wire_charge are in results.jsonl"}},
+  {"name": "boundary_layer",
+   "conditions": {"sparsity": "mixed", "scale_separation": "multi",
+                  "why": "a 12 x 12 sheet of 144 charges on one face of the box and nothing else: the field is a thin layer near z = -2 and smooth elsewhere; two length scales, sheet pitch 0.33 and box 4"},
+   "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+   "sources": [{"position": [-1.8333, -1.8333, -2.0], "strength": 1e-11, "type": "charge", "_sheet": "12x12 pitch 0.3333 on z=-2; the runner expands this record into 144 sources when the workload is un-held"}],
+   "held": {
+    "reason": "thin-layer fields are the second regime adaptivity is claimed for; the same confound applies until a knob exists, and the sheet expansion (144 sources) is not written",
+    "settles": "whether the tolerance-driven octree concentrates leaves in the layer and holds the far-field error at the same tolerance with fewer points than a uniform grid whose pitch must resolve the layer everywhere",
+    "build_after": "py_octree_tol measured on the three space-filling workloads; then write the sheet expansion in the runner"}},
+  {"name": "two_scale",
+   "conditions": {"sparsity": "mixed", "scale_separation": "multi",
+                  "why": "a dipole of separation 0.02 at the origin and a single charge 1.5 units away: features at 0.02 and at 1.5, a 75:1 scale ratio in one box"},
+   "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+   "sources": [
+    {"position": [0.01, 0.0, 0.0], "strength": 1e-9, "type": "charge"},
+    {"position": [-0.01, 0.0, 0.0], "strength": -1e-9, "type": "charge"},
+    {"position": [1.5, 0.0, 0.0], "strength": 5e-10, "type": "charge"}],
+   "held": {
+    "reason": "the multi-scale regime; a uniform grid must be pitched at the small scale everywhere, an adaptive one only near it, but only if its refinement reads the field, which py_octree's does not",
+    "settles": "the point-count ratio at matched accuracy as the scale ratio grows; with the uniform grid at 75:1 this is res >= 200 per axis, 8e6 points, which is the memory-ceiling cell as well",
+    "build_after": "py_octree_tol measured on the three space-filling workloads"}}
+ ]
+}

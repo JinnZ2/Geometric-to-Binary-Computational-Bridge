@@ -133,9 +133,9 @@ state_capacity = 8 ** N          # Total configurations
 bits_per_cell  = 3                # log₂(8)
 total_bits     = 3 * N
 
-# With SIMD (Engine/simd_optimizer.py): 8× vectorised throughput
-# With symmetry detection (Engine/symmetry_detector.py): 2–4× reduction
-# Combined typical speedup vs uniform grid: ~15–30×
+# With SIMD (Engine/simd_optimizer.py): 8× vectorised throughput [unmeasured: never timed against a scalar path; the Engine reports SIMD efficiency as a constant 12.5% — ENG-6, Engine/geometric_solver.py]
+# With symmetry detection (Engine/symmetry_detector.py): 2–4× reduction [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+# Combined typical speedup vs uniform grid: ~15–30× [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py]
 ```
 
 The mandala's "memory amplification" formula `PHI^(golden_depth × dimensional_fold)`

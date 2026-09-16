@@ -1,0 +1,13 @@
+{
+ "name": "py_octree_tol",
+ "language": "python",
+ "dependencies": ["numpy"],
+ "build_required": false,
+ "build_command": null,
+ "runs_on_phone": "unknown",
+ "algorithm": "Engine/spatial_grid.py octree with error_tol: subdivide while the estimated local error (max corner deviation of the 1/r^2 magnitude proxy from the centre) exceeds the spec's tolerance, max_depth 8; then the same one Coulomb/Biot-Savart call per leaf as py_octree; probes answered by nearest leaf sample",
+ "author_claim": "the same placement as py_octree with the accuracy knob py_octree lacks; the claim is only that error now moves with the tolerance, so a matched-accuracy comparison exists. It keeps py_octree's per-leaf evaluation on purpose so the refinement change is measured alone (ENG-5 untouched)",
+ "entry": ["{python}", "impl.py"],
+ "covers": ["*"],
+ "knob": "tolerance"
+}

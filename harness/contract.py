@@ -61,6 +61,7 @@ SPEC_VERSION = 1
 STATUSES = ("OK", "NOT_RUNNABLE", "TIMEOUT", "FAILED", "NOT_APPLICABLE")
 SPARSITY = ("dense", "mixed", "isolated")
 SCALE_SEPARATION = ("single", "multi")
+KNOBS = ("resolution", "tolerance", "none")   # "none": no accuracy knob; the sweep argument is ignored
 PROBE_COUNT = 256
 PROBE_SEED = 20260916
 
@@ -79,6 +80,7 @@ MANIFEST_SCHEMA = {
     "author_claim": (str, None),           # the conditions it expects to suit: a CLAIM, not a result
     "entry": (list, None),                 # argv; "{python}" is replaced by the running interpreter
     "covers": (list, None),                # workload names, or ["*"]
+    "knob": (str, KNOBS),                  # what the harness sweeps for it: the accuracy knob it exposes
 }
 
 
@@ -139,6 +141,22 @@ def load_workloads(path: str) -> list[dict]:
     return ws
 
 
+def load_held_workloads(path: str) -> list[dict]:
+    """Workloads that are SPECCED and deliberately NOT RUN. Each validates as a workload and
+    carries `held`: {"reason", "settles", "build_after"}. They render in SELECTION.md as held,
+    counted at the top, and never produce a record."""
+    if not os.path.isfile(path):
+        return []
+    with open(path, encoding="utf-8") as fh:
+        ws = json.load(fh)["workloads"]
+    for w in ws:
+        validate_workload(w)
+        h = w.get("held")
+        if not isinstance(h, dict) or not all(isinstance(h.get(k), str) and h.get(k) for k in ("reason", "settles", "build_after")):
+            raise ContractError(f"held workload {w['name']}: held needs reason/settles/build_after")
+    return ws
+
+
 def validate_workload(w: dict) -> None:
     for key in ("name", "sources", "bounds", "conditions"):
         if key not in w:
@@ -159,10 +177,15 @@ def _probes(bounds: dict, n: int = PROBE_COUNT, seed: int = PROBE_SEED) -> list[
     return [[lo[i] + rng.random() * (hi[i] - lo[i]) for i in range(3)] for _ in range(n)]
 
 
-def make_spec(workload: dict, resolution: int) -> dict:
+def make_spec(workload: dict, resolution: int, tolerance: float | None = None) -> dict:
+    """tolerance is the second knob: an impl whose manifest says knob=tolerance reads it and
+    refines until its estimated local error is below it; every other impl ignores it. It is
+    carried in the record so a tolerance-swept cell is never confused with a resolution one."""
     validate_workload(workload)
     if not isinstance(resolution, int) or resolution < 2:
         raise ContractError("resolution must be an integer >= 2")
+    if tolerance is not None and not (isinstance(tolerance, (int, float)) and tolerance > 0):
+        raise ContractError("tolerance must be a positive number or None")
     return {
         "spec_version": SPEC_VERSION,
         "workload": workload["name"],
@@ -170,6 +193,7 @@ def make_spec(workload: dict, resolution: int) -> dict:
         "sources": [dict(s) for s in workload["sources"]],
         "bounds": {"min": list(workload["bounds"]["min"]), "max": list(workload["bounds"]["max"])},
         "resolution": resolution,
+        "tolerance": tolerance,
         "probes": _probes(workload["bounds"]),
     }
 
@@ -268,9 +292,9 @@ def render_status(st: dict) -> str:
 
 def result_record(impl: str, workload: str, resolution: int, st: dict, *, wall_time=None,
                   peak_memory_mb=None, accuracy_vs_reference=None, points=None,
-                  conditions=None, run_id=None, repeats=None, extra=None) -> dict:
+                  conditions=None, run_id=None, repeats=None, extra=None, tolerance=None) -> dict:
     rec = {
-        "impl": impl, "workload": workload, "resolution": resolution,
+        "impl": impl, "workload": workload, "resolution": resolution, "tolerance": tolerance,
         "wall_time": wall_time, "peak_memory_mb": peak_memory_mb,
         "accuracy_vs_reference": accuracy_vs_reference, "status": st,
         "points": points, "conditions": conditions or {}, "run_id": run_id,

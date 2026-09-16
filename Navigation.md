@@ -117,10 +117,10 @@ spiral_field = {
 
 **Output Layer - Optimized Binary:**
 
-- SIMD-vectorized operations (4-8x speedup)
-- Cache-aware data layout (3-5x speedup)
-- Symmetry-reduced computation (2-10x speedup)
-- Combined: 50-200x faster than naive implementation
+- SIMD-vectorized operations (4-8x speedup) [unmeasured: never timed against a scalar path; the Engine reports SIMD efficiency as a constant 12.5% — ENG-6, Engine/geometric_solver.py]
+- Cache-aware data layout (3-5x speedup) [unmeasured: no cache-layout experiment exists in the tree]
+- Symmetry-reduced computation (2-10x speedup) [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+- Combined: 50-200x faster than naive implementation [unmeasured: no benchmark or device in the tree produced this figure]
 
 **Visualization Layer:**
 
@@ -374,7 +374,7 @@ Each bridge specializes in translating geometric patterns for specific physical 
 
 **What it means:** Modern CPUs can process 4-16 numbers at once instead of one at a time.
 
-**Why it matters:** If you’re computing a field at 1 million points, SIMD makes it 4-16x faster automatically.
+**Why it matters:** If you’re computing a field at 1 million points, SIMD makes it 4-16x faster automatically. [unmeasured operand: SIMD efficiency, never timed; a constant 12.5% in PerformanceTracker — ENG-6]
 
 **How bridge uses it:** Automatically detects which operations can be vectorized and generates SIMD-optimized code.
 
@@ -383,7 +383,7 @@ Each bridge specializes in translating geometric patterns for specific physical 
 ```
 Without SIMD: Process points 1,2,3,4 sequentially (4 operations)
 With SIMD: Process points 1,2,3,4 simultaneously (1 operation)
-= 4x speedup
+= 4x speedup [unmeasured operand: SIMD efficiency — ENG-6]
 ```
 
 -----
@@ -392,7 +392,7 @@ With SIMD: Process points 1,2,3,4 simultaneously (1 operation)
 
 **What it means:** If a pattern repeats, compute once and copy instead of computing everywhere.
 
-**Why it matters:** A 6-fold symmetric pattern? Compute 1/6 of it, rotate copies = 6x faster.
+**Why it matters:** A 6-fold symmetric pattern? Compute 1/6 of it, rotate copies = 6x faster. [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
 
 **How bridge uses it:** Automatically detects rotational, reflective, and translational symmetries.
 
@@ -402,14 +402,14 @@ With SIMD: Process points 1,2,3,4 simultaneously (1 operation)
 Snowflake (6-fold symmetry):
 Without symmetry: Compute all 10,000 points
 With symmetry: Compute 1,667 points, rotate 6 times
-= 6x speedup + perfect accuracy
+= 6x speedup + perfect accuracy [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
 ```
 
 -----
 
 ### 3. Cache Optimization
 
-**What it means:** CPU cache is 100x faster than RAM. Organize data so CPU can use cache effectively.
+**What it means:** CPU cache is 100x faster than RAM. Organize data so CPU can use cache effectively. [unmeasured: no cache-layout experiment exists in the tree]
 
 **Why it matters:** Poor cache usage = spending 99% of time waiting for RAM.
 
@@ -420,7 +420,7 @@ With symmetry: Compute 1,667 points, rotate 6 times
 ```
 Bad layout: Jump randomly between distant memory locations
 Good layout: Process nearby points together (stay in cache)
-= 3-5x speedup from same code, better arrangement
+= 3-5x speedup from same code, better arrangement [unmeasured: no cache-layout experiment exists in the tree]
 ```
 
 -----
@@ -449,22 +449,22 @@ Combined: Accurate + fast + optimizable
 
 **Basic Optimization (everyone gets this):**
 
-- SIMD auto-vectorization: 4-8x faster
-- Cache-aware layout: 2-3x faster
-- Combined: 8-24x faster than naive code
+- SIMD auto-vectorization: 4-8x faster [unmeasured: never timed against a scalar path; the Engine reports SIMD efficiency as a constant 12.5% — ENG-6, Engine/geometric_solver.py]
+- Cache-aware layout: 2-3x faster [unmeasured: no cache-layout experiment exists in the tree]
+- Combined: 8-24x faster than naive code [unmeasured: no benchmark or device in the tree produced this figure]
 
 **With Symmetry (if your problem has it):**
 
-- 2-fold symmetry: 2x additional speedup
-- 4-fold symmetry: 4x additional speedup
-- 6-fold symmetry: 6x additional speedup
-- Spherical symmetry: 10-100x additional speedup
+- 2-fold symmetry: 2x additional speedup [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+- 4-fold symmetry: 4x additional speedup [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+- 6-fold symmetry: 6x additional speedup [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+- Spherical symmetry: 10-100x additional speedup [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
 
 **Total Realistic Gains:**
 
-- Simple problems: 10-50x faster
-- Symmetric problems: 50-500x faster
-- Best case (high symmetry + SIMD): 1000x faster
+- Simple problems: 10-50x faster [unmeasured: no benchmark or device in the tree produced this figure]
+- Symmetric problems: 50-500x faster [unmeasured: no benchmark or device in the tree produced this figure]
+- Best case (high symmetry + SIMD): 1000x faster [unmeasured: no benchmark or device in the tree produced this figure]
 
 **Comparison to Manual Optimization:**
 
@@ -480,7 +480,7 @@ Combined: Accurate + fast + optimizable
 
 - Was: 24 hours compute time
 - Now: 2-5 minutes
-- Impact: Iterate 100x more, discover faster
+- Impact: Iterate 100x more, discover faster [unmeasured: no benchmark or device in the tree produced this figure]
 
 **Educational Demo:**
 

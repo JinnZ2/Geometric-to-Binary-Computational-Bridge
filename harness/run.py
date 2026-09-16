@@ -7,6 +7,7 @@ stdlib only.
     python harness/run.py --resolutions 16,32,48,64,96,128 --repeats 3 --timeout 600
     python harness/run.py --impl py_octree --workload dipole --resolutions 32
     python harness/run.py --regenerate                      # SELECTION.md from harness/results.jsonl, no runs
+    python harness/run.py --impl py_octree_tol --tolerances 0.9,0.7,0.5,0.35,0.25   # the tolerance knob
 
 Every (impl, workload, resolution) cell yields one result record (contract.result_record),
 appended to harness/results.jsonl. NOT_RUNNABLE, TIMEOUT, FAILED and NOT_APPLICABLE are
@@ -37,17 +38,18 @@ import probe  # noqa: E402
 RESULTS = os.path.join(HERE, "results.jsonl")
 SELECTION = os.path.join(ROOT, "SELECTION.md")
 WORKLOADS = os.path.join(HERE, "workloads.json")
+HELD = os.path.join(HERE, "workloads_held.json")
 MEMORY_CEILINGS_MB = (256, 1024, 4096, 16384)
 
 
 # ----------------------------------------------------------------- one cell
 
 def run_cell(m: dict, workload: dict, resolution: int, *, timeout: float, repeats: int,
-             python: str = sys.executable, run_id: str | None = None) -> dict:
+             python: str = sys.executable, run_id: str | None = None, tolerance=None) -> dict:
     """One result record. Best-of-N wall time (the minimum is least contaminated by the
     scheduler); accuracy and memory from the last run."""
     name, wname = m["name"], workload["name"]
-    spec = contract.make_spec(workload, resolution)
+    spec = contract.make_spec(workload, resolution, tolerance)
     argv = [python if t == "{python}" else t for t in m["entry"]]
     walls, last, err = [], None, None
     with tempfile.TemporaryDirectory() as td:
@@ -63,16 +65,16 @@ def run_cell(m: dict, workload: dict, resolution: int, *, timeout: float, repeat
             except subprocess.TimeoutExpired:
                 return contract.result_record(name, wname, resolution,
                                               contract.status("TIMEOUT", f"{timeout:g}s"),
-                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats)
+                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats, tolerance=tolerance)
             except OSError as e:
                 return contract.result_record(name, wname, resolution,
                                               contract.status("FAILED", str(e)[:160]),
-                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats)
+                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats, tolerance=tolerance)
             if r.returncode != 0 or not os.path.exists(out_path):
                 tail = (r.stderr.strip().splitlines() or [f"exit {r.returncode}"])[-1][:160]
                 return contract.result_record(name, wname, resolution,
                                               contract.status("FAILED", tail),
-                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats)
+                                              conditions=spec["conditions"], run_id=run_id, repeats=repeats, tolerance=tolerance)
             with open(out_path, encoding="utf-8") as fh:
                 last = json.load(fh)
             walls.append(float(last["wall_time"]))
@@ -81,12 +83,12 @@ def run_cell(m: dict, workload: dict, resolution: int, *, timeout: float, repeat
     except (contract.ContractError, KeyError, TypeError) as e:
         return contract.result_record(name, wname, resolution,
                                       contract.status("FAILED", f"probe answer malformed: {e}"),
-                                      conditions=spec["conditions"], run_id=run_id, repeats=repeats)
+                                      conditions=spec["conditions"], run_id=run_id, repeats=repeats, tolerance=tolerance)
     return contract.result_record(name, wname, resolution, contract.status("OK"),
                                   wall_time=min(walls), peak_memory_mb=last.get("peak_memory_mb"),
                                   accuracy_vs_reference=acc, points=last.get("points"),
                                   conditions=spec["conditions"], run_id=run_id, repeats=repeats,
-                                  extra={"notes": last.get("notes", "")})
+                                  extra={"notes": last.get("notes", "")}, tolerance=tolerance)
 
 
 def covers(m: dict, wname: str) -> bool:
@@ -95,7 +97,11 @@ def covers(m: dict, wname: str) -> bool:
 
 # ----------------------------------------------------------------- a run
 
-def run_all(resolutions, repeats, timeout, only_impl=None, only_workload=None, python=sys.executable):
+def run_all(resolutions, repeats, timeout, only_impl=None, only_workload=None, python=sys.executable,
+            tolerances=()):
+    """Sweep each impl along ITS knob: knob=resolution or none over `resolutions` (none ignores
+    the value and says so in the record), knob=tolerance over `tolerances` at resolutions[0].
+    Held workloads (harness/workloads_held.json) are never run."""
     manifests = contract.discover(ROOT)
     workloads = contract.load_workloads(WORKLOADS)
     rep = probe.probe_all(ROOT, python)
@@ -105,25 +111,32 @@ def run_all(resolutions, repeats, timeout, only_impl=None, only_workload=None, p
         if only_impl and m["name"] != only_impl:
             continue
         pr = rep["implementations"][m["name"]]
+        if m["knob"] == "tolerance":
+            cells = [(resolutions[0], float(t)) for t in tolerances]
+        else:
+            cells = [(res, None) for res in resolutions]
         for w in workloads:
             if only_workload and w["name"] != only_workload:
                 continue
-            for res in resolutions:
+            for res, tolerance in cells:
                 if not pr["runnable"]:
                     rec = contract.result_record(m["name"], w["name"], res,
                                                  contract.status("NOT_RUNNABLE", pr["reason"]),
-                                                 conditions=w["conditions"], run_id=run_id)
+                                                 conditions=w["conditions"], run_id=run_id, tolerance=tolerance)
                 elif not covers(m, w["name"]):
                     rec = contract.result_record(m["name"], w["name"], res,
                                                  contract.status("NOT_APPLICABLE",
                                                                  f"manifest covers {m['covers']}"),
-                                                 conditions=w["conditions"], run_id=run_id)
+                                                 conditions=w["conditions"], run_id=run_id, tolerance=tolerance)
                 else:
-                    rec = run_cell(m, w, res, timeout=timeout, repeats=repeats, python=python, run_id=run_id)
+                    rec = run_cell(m, w, res, timeout=timeout, repeats=repeats, python=python, run_id=run_id,
+                                   tolerance=tolerance)
                 rec["machine"] = rep["machine"]
+                rec["knob"] = m["knob"]
                 records.append(rec)
-                print(f"  {m['name']:<14} {w['name']:<12} res {res:<4} {contract.render_status(rec['status'])}"
-                      + (f"  {rec['wall_time']:.4f}s  {rec['peak_memory_mb'] or 0:.0f} MB"
+                knob = f"tol {tolerance:<6}" if tolerance is not None else f"res {res:<4}"
+                print(f"  {m['name']:<14} {w['name']:<12} {knob} {contract.render_status(rec['status'])}"
+                      + (f"  {rec['wall_time']:.4f}s  {rec['peak_memory_mb'] or 0:.0f} MB  {rec['points']} pts"
                          if rec["status"]["kind"] == "OK" else ""), flush=True)
     with open(RESULTS, "a", encoding="utf-8") as fh:
         for rec in records:
@@ -139,10 +152,25 @@ def load_results(path=RESULTS):
 
 
 def latest_per_cell(records):
-    """The newest record for each (impl, workload, resolution), across runs."""
+    """The newest record for each (impl, workload, resolution) with no tolerance, across runs.
+    Tolerance-swept records are a different cell kind; see latest_per_tol_cell."""
     latest = {}
     for rec in records:
+        if rec.get("tolerance") is not None:
+            continue
         key = (rec["impl"], rec["workload"], rec["resolution"])
+        if key not in latest or rec["ts"] >= latest[key]["ts"]:
+            latest[key] = rec
+    return latest
+
+
+def latest_per_tol_cell(records):
+    """The newest record for each (impl, workload, tolerance), tolerance-swept records only."""
+    latest = {}
+    for rec in records:
+        if rec.get("tolerance") is None:
+            continue
+        key = (rec["impl"], rec["workload"], rec["tolerance"])
         if key not in latest or rec["ts"] >= latest[key]["ts"]:
             latest[key] = rec
     return latest
@@ -170,10 +198,13 @@ def _cell(rec):
     return f"{rec['wall_time']:.4f} s · {mem} · {_fmt_acc(rec.get('accuracy_vs_reference'))}"
 
 
-def render_selection(records, manifests, workloads, probe_report=None) -> str:
+def render_selection(records, manifests, workloads, probe_report=None, held=()) -> str:
     latest = latest_per_cell(records)
+    latest_tol = latest_per_tol_cell(records)
     impls = [m["name"] for m in manifests]                     # manifest order, alphabetical by folder
+    tol_impls = [m["name"] for m in manifests if m.get("knob") == "tolerance"]
     resolutions = sorted({k[2] for k in latest})
+    tolerances = sorted({k[2] for k in latest_tol}, reverse=True)
     L = []
     L.append("# SELECTION.md — GENERATED by `python harness/run.py`. Never hand-edited.")
     L.append("")
@@ -185,9 +216,9 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
     L.append("E and B separately. No implementation is the reference; `uniform_grid` is a peer.")
     L.append("")
     # counts at the top
-    n_ok = sum(1 for r in latest.values() if r["status"]["kind"] == "OK")
+    n_ok = sum(1 for r in list(latest.values()) + list(latest_tol.values()) if r["status"]["kind"] == "OK")
     not_ok = {}
-    for r in latest.values():
+    for r in list(latest.values()) + list(latest_tol.values()):
         if r["status"]["kind"] != "OK":
             not_ok.setdefault(contract.render_status(r["status"]), 0)
             not_ok[contract.render_status(r["status"])] += 1
@@ -209,18 +240,20 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
     for k, v in sorted(not_ok.items()):
         L.append(f"| {v} | cells {k} |")
     L.append(f"| {n_not_measured} | cells NOT_MEASURED: condition combinations no workload or implementation in this order instantiates (listed below) |")
+    if held:
+        L.append(f"| {len(held)} | workloads SPECCED and HELD, never run (listed at the end, with what un-holds each) |")
     L.append("")
     # implementations, from manifests only
     L.append("## Implementations (from each folder's MANIFEST.json; nothing else describes them)")
     L.append("")
-    L.append("| name | language | dependencies | build | runs on phone | algorithm | author claim | on this machine |")
-    L.append("|---|---|---|---|---|---|---|---|")
+    L.append("| name | language | dependencies | build | runs on phone | knob | algorithm | author claim | on this machine |")
+    L.append("|---|---|---|---|---|---|---|---|---|")
     for m in manifests:
         pr = (probe_report or {}).get("implementations", {}).get(m["name"])
         here = "?" if pr is None else ("runnable" if pr["runnable"] else f"NOT_RUNNABLE({pr['reason']})")
         deps = ", ".join(m["dependencies"]) or "stdlib only"
         build = m["build_command"] if m["build_required"] else "none"
-        L.append(f"| {m['name']} | {m['language']} | {deps} | {build} | {m['runs_on_phone']} | "
+        L.append(f"| {m['name']} | {m['language']} | {deps} | {build} | {m['runs_on_phone']} | {m.get('knob', '?')} | "
                  f"{m['algorithm']} | {m['author_claim']} | {here} |")
     L.append("")
     # sparsity x scale, resolution swept
@@ -244,6 +277,31 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
                     row = [_cell(latest.get((i, w["name"], res))) for i in impls]
                     L.append(f"| {res} | " + " | ".join(row) + " |")
                 L.append("")
+    # tolerance swept: only impls whose knob is a tolerance have cells here
+    L.append("## Tolerance swept (implementations whose knob is an error tolerance)")
+    L.append("")
+    L.append("Resolution means nothing to these; the sweep argument is the tolerance the implementation")
+    L.append("refines to. Same probes, same reference, same error metric as the resolution tables.")
+    L.append("")
+    if not tol_impls:
+        L.append("NOT_MEASURED(no implementation in this order declares knob=tolerance)")
+        L.append("")
+    elif not tolerances:
+        L.append("NOT_MEASURED(no tolerance-swept record yet; run `python harness/run.py --tolerances ...`)")
+        L.append("")
+    else:
+        for w in workloads:
+            L.append(f"**workload `{w['name']}`**")
+            L.append("")
+            L.append("| tolerance | " + " | ".join(tol_impls) + " |")
+            L.append("|---|" + "---|" * len(tol_impls))
+            for tol in tolerances:
+                row = []
+                for i in tol_impls:
+                    r = latest_tol.get((i, w["name"], tol))
+                    row.append(_cell(r) + (f" · {r['points']:,} pts" if r and r["status"]["kind"] == "OK" else ""))
+                L.append(f"| {tol:g} | " + " | ".join(row) + " |")
+            L.append("")
     # build tolerance
     L.append("## Build tolerance")
     L.append("")
@@ -267,13 +325,13 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
     L.append("|---|---|")
     peak = {}
     nomem = []
-    for (i, w, res), r in latest.items():
+    for (i, w, knob), r in list(latest.items()) + [((i, w, f"tol{t:g}"), r) for (i, w, t), r in latest_tol.items()]:
         if r["status"]["kind"] != "OK":
             continue
         if r.get("peak_memory_mb") is None:
-            nomem.append(f"{i}@{res}/{w}")
+            nomem.append(f"{i}@{knob}/{w}")
             continue
-        peak[(i, res)] = max(peak.get((i, res), 0.0), r["peak_memory_mb"])
+        peak[(i, knob)] = max(peak.get((i, knob), 0.0), r["peak_memory_mb"])
     for ceil in MEMORY_CEILINGS_MB:
         fits = sorted(f"{i}@{res} ({mb:.0f} MB)" for (i, res), mb in peak.items() if mb <= ceil)
         L.append(f"| {ceil} MB | " + (", ".join(fits) if fits else "NOT_MEASURED(no measured cell fits)") + " |")
@@ -289,6 +347,19 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
     if not compiled:
         L.append("- build tolerance=compiler available: NOT_MEASURED(no compiled implementation in this order)")
     L.append("")
+    if held:
+        L.append("## Held workloads (specced, not built)")
+        L.append("")
+        L.append("Each validates as a workload and would run unchanged once its `held` field is removed.")
+        L.append("None has a record. The reason each is held, what running it would settle, and what")
+        L.append("un-holds it come from `harness/workloads_held.json`.")
+        L.append("")
+        L.append("| workload | sparsity | scale separation | why held | what it settles | build after |")
+        L.append("|---|---|---|---|---|---|")
+        for w in held:
+            c, h = w["conditions"], w["held"]
+            L.append(f"| {w['name']} | {c['sparsity']} | {c['scale_separation']} | {h['reason']} | {h['settles']} | {h['build_after']} |")
+        L.append("")
     import matched_accuracy  # local import: matched_accuracy imports this module
     L.append("")
     L.append(matched_accuracy.render(matched_accuracy.matched_rows(records)))
@@ -297,7 +368,8 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
 
 def regenerate(probe_report=None) -> str:
     text = render_selection(load_results(), contract.discover(ROOT), contract.load_workloads(WORKLOADS),
-                            probe_report or probe.probe_all(ROOT))
+                            probe_report or probe.probe_all(ROOT),
+                            held=contract.load_held_workloads(HELD))
     with open(SELECTION, "w", encoding="utf-8") as fh:
         fh.write(text)
     return text
@@ -308,6 +380,8 @@ def regenerate(probe_report=None) -> str:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--resolutions", default="16,32,48")
+    ap.add_argument("--tolerances", default="",
+                    help="comma list for impls whose knob is a tolerance, e.g. 0.9,0.7,0.5,0.35,0.25")
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--timeout", type=float, default=600.0)
     ap.add_argument("--impl", default=None)
@@ -319,7 +393,8 @@ def main(argv=None) -> int:
         print("wrote", os.path.relpath(SELECTION, ROOT))
         return 0
     resolutions = [int(x) for x in a.resolutions.split(",") if x.strip()]
-    run_id, records = run_all(resolutions, a.repeats, a.timeout, a.impl, a.workload)
+    tolerances = [float(x) for x in a.tolerances.split(",") if x.strip()]
+    run_id, records = run_all(resolutions, a.repeats, a.timeout, a.impl, a.workload, tolerances=tolerances)
     regenerate()
     print(f"run {run_id}: {len(records)} records appended to {os.path.relpath(RESULTS, ROOT)}; "
           f"wrote {os.path.relpath(SELECTION, ROOT)}")

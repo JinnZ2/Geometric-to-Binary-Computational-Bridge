@@ -131,40 +131,86 @@ Option 2: Solve a field (needs numpy)
 
 📊 Performance
 
-Two numbers exist for the Engine and they answer different questions. The
-one that may be called a speedup is the time ratio at **equal accuracy**, and
-at equal accuracy the adaptive path is slower than a uniform grid on every
-workload measured. Everything else below is a cost ratio at unmatched accuracy.
+Three findings, kept apart because they have three different causes. All
+three come from `harness/results.jsonl` (256 seeded probes, one pure-Python
+reference, median relative error, the same on both sides) and are rendered
+in `SELECTION.md`. The only figure below that is a speedup is the time ratio
+at equal error, and it is below 1 everywhere it was measured.
 
-**Matched accuracy** (`python harness/matched_accuracy.py`, from
-`harness/results.jsonl`; same 256 seeded probes, same pure-Python reference,
-same median-relative-error metric on both sides). For each workload the
-uniform resolution whose field error equals the adaptive path's is found by
-log-log interpolation between the two bracketing sweep records, and the time
-ratio is read at that point:
+**F1, structural: the shipped octree has no refinement parameter.** Its leaf
+set is fixed by the source layout and a depth cap, and nothing the caller
+passes reaches it. Its error is therefore flat across every resolution asked
+for, 8 through 128, on every workload:
 
-| workload | adaptive error | adaptive points | adaptive wall | uniform resolution at equal error | uniform points | uniform wall | uniform / adaptive |
-|---|---|---|---|---|---|---|---|
-| dipole, E | 0.174 | 2,150 | 0.085 s | 12.2 | 1,728 | 0.0028 s | 0.032x |
-| quadrupole, E | 0.106 | 2,864 | 0.179 s | 12.5 | 2,197 | 0.0030 s | 0.017x |
-| wire+charge, E | 0.128 | 2,024 | 0.140 s | 10.8 | 1,331 | 0.0024 s | 0.017x |
-| wire+charge, B | 0.146 | 2,024 | 0.140 s | 10.6 | 1,331 | 0.0023 s | 0.016x |
+| workload | octree points | octree error, all resolutions |
+|---|---|---|
+| dipole | 2,150 | 0.174 |
+| quadrupole | 2,864 | 0.106 |
+| wire+charge | 2,024 | 0.128 (E), 0.146 (B) |
 
-At the accuracy the adaptive path actually delivers, a uniform grid of about
-the same point count gets there in 1/30 to 1/60 of the time. The point
-placement is not buying accuracy per point; the time goes to one numpy call
-per leaf (ENG-5). That is the speedup figure for this Engine today: below 1.
+A comparison against it at any single resolution compares two different
+accuracies. The uniform grid is at or below the octree's error from
+resolution 12 up, so no row of the cost table further down is a comparison
+of equal answers. `implementations/py_octree_tol/` adds the missing knob
+(`SpatialGrid(error_tol=...)`: subdivide while the estimated local error is
+above the tolerance) so that the question F1 blocks can be asked; its error
+moves with the tolerance, 0.49 down to 0.11 on the dipole across tolerances
+3.0 to 0.3.
+
+**F2, scoped: for smooth, space-filling fields, placement buys nothing per
+point.** All three measured workloads are that case: a few point sources in
+a box that is nowhere empty. With the knob present, the matched-accuracy
+comparison (`python harness/matched_accuracy.py`: for each octree record,
+the uniform resolution whose error equals it, by log-log interpolation) puts
+the tolerance-driven octree at 4 to 14 times MORE points than the uniform
+grid for the same error:
+
+| workload | tolerance | octree error | octree points | uniform resolution at equal error | uniform points | points ratio octree/uniform |
+|---|---|---|---|---|---|---|
+| dipole | 0.5 | 0.162 | 14,372 | 13.0 | 2,197 | 6.5 |
+| dipole | 0.3 | 0.112 | 41,546 | 18.1 | 5,832 | 7.1 |
+| quadrupole | 0.5 | 0.107 | 23,528 | 12.4 | 1,728 | 13.6 |
+| quadrupole | 0.3 | 0.067 | 65,248 | 19.2 | 6,859 | 9.5 |
+| wire+charge, E | 0.5 | 0.113 | 8,912 | 12.1 | 1,728 | 5.2 |
+| wire+charge, E | 0.3 | 0.067 | 29,184 | 19.5 | 6,859 | 4.3 |
+
+The shipped octree's fixed placement does no better: at its 2,024 to 2,864
+points it lands where a uniform grid of 1,331 to 2,197 points lands. Two
+things bound this finding. The probes are uniform over the box, so the error
+metric weights the far field the way a uniform grid samples it, and the
+tolerance rule spends most of its leaves within a few cells of a source
+where no probe lands. And the three workloads have one length scale each.
+For sparse fields (most of the box empty), thin layers and multi-scale
+sources this is **UNMEASURED**: the three workloads that would measure it
+are specced in `harness/workloads_held.json` and held until the knob above
+had been measured, because testing the sparse regime with no accuracy knob
+would have repeated F1's confound.
+
+**F3, implementation: a per-point penalty of about 30x, cause known.** The
+octree emits one sample point per leaf and the solver makes one numpy call
+per leaf (ENG-5), so the time per point is that of a 1-element array. The
+shipped octree's time ratio at equal error, uniform wall over octree wall:
+
+| workload | octree wall | uniform wall at equal error | uniform / octree |
+|---|---|---|---|
+| dipole | 0.085 s | 0.0028 s | 0.032x |
+| quadrupole | 0.179 s | 0.0030 s | 0.017x |
+| wire+charge, E | 0.140 s | 0.0024 s | 0.017x |
+| wire+charge, B | 0.140 s | 0.0023 s | 0.016x |
+
+That is the speedup figure for this Engine today: below 1, by 30 to 60
+times, and F2's point-count ratio times F3's per-point penalty gives the
+tolerance octree's 0.001x to 0.006x. Batching the leaf evaluation into one
+call removes F3 (measured at 26x on the field evaluation alone,
+`Engine/engine_benchmark.py`, ENG-5); it does not touch F1 or F2.
 
 **Cost ratio at unmatched accuracy** (`Engine/engine_benchmark.py`, swept
 2026-09-16, Intel Xeon 2.10 GHz, 4 cores, 16 GB, Python 3.11.15, numpy
-2.4.6, minimum of 3 repeats; dipole, quadrupole and wire+charge sources).
-The adaptive point count is fixed at 2,024 to 2,864 whatever resolution is
-asked for, so the adaptive column of this table is flat and the uniform
-column grows as the cube of the resolution. Adaptive error is 11 to 17 percent
-(the harness figure above; the benchmark's own nearest-neighbour metric puts
-it at 7 to 17 percent). Uniform error falls from 26 percent at resolution 8 to
-1 percent at 128, and is at or below the adaptive error from resolution 12 up
-on every workload, so no row of this table compares equal answers:
+2.4.6, minimum of 3 repeats). The adaptive point count is fixed (F1) and the
+uniform count grows as the cube of the resolution; uniform error falls from
+26 percent at resolution 8 to 1 percent at 128. The column is uniform wall
+time over adaptive wall time at the same resolution argument, and it
+compares unequal answers:
 
 | resolution | uniform points | dipole | quadrupole | wire+charge |
 |---|---|---|---|---|
@@ -175,12 +221,10 @@ on every workload, so no row of this table compares equal answers:
 | 96 | 884,736 | 30.4x | 15.0x | 18.4x |
 | 128 | 2,097,152 | 78.0x | 36.9x | 44.2x |
 
-The column is uniform wall time over adaptive wall time at the same resolution
-argument. Above 1x the adaptive path finished first, having answered a
-different question at a coarser accuracy; the ratio measures how much of the
-box the uniform grid was asked to fill, not the solver getting faster. It is
-not a speedup and should not be quoted as one. Resolutions above 128 were not
-run. `SELECTION.md` carries every record of both kinds and is regenerated by
+Above 1x the adaptive path finished first having answered a coarser
+question; the ratio measures how much of the box the uniform grid was asked
+to fill. It is not a speedup and should not be quoted as one. Resolutions
+above 128 were not run. Regenerate the full record with
 `python harness/run.py --regenerate`.
 
 🎯 The Big Vision

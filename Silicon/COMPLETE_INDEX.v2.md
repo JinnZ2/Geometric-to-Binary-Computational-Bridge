@@ -272,10 +272,10 @@ Core: numpy, scipy, matplotlib, qutip
 |Metric           |Target       |Achieved    |Status          |
 |-----------------|-------------|------------|----------------|
 |**T₂ @ 300K**    |100 ms       |**166 ms**  |✅ **+66%**      |
-|**Precision**    |< 0.5 nm     |**0.025 nm**|✅ **20× better**|
+|**Precision**    |< 0.5 nm     |**0.025 nm**|✅ **20× better** [unmeasured operand: 0.025 nm "achieved" was never measured, and RBS-C cannot resolve it — Silicon/Proposal.md audit row] |
 |**Density**      |10¹⁵ bits/cm³|**1.8×10¹⁵**|✅ **1.8×**      |
-|**Energy/bit**   |< 1.6 aJ     |**0.22 aJ** |✅ **7× better** |
-|**Write speed**  |1 THz        |**10 THz**  |✅ **10× better**|
+|**Energy/bit**   |< 1.6 aJ     |**0.22 aJ** |✅ **7× better** [unmeasured operand: 0.22 aJ/bit "achieved" was never measured] |
+|**Write speed**  |1 THz        |**10 THz**  |✅ **10× better** [refuted: 1–10 THz sits 1.2–2.6 orders above ESR at 1–2 T (28–56 GHz), the wrong band for the transition it would drive — Silicon/Proposal-addendum.md audit row] |
 |**Self-assembly**|ΔE > 0.5 eV  |**0.9 eV**  |✅ **1.8×**      |
 
 -----
@@ -298,14 +298,14 @@ Core: numpy, scipy, matplotlib, qutip
 
 **vs. NV Centers**:
 
-- T₂: 166 ms vs. 1 ms → **166× better**
+- T₂: 166 ms vs. 1 ms → **166× better** [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 - Temperature: Same (300 K)
 - Density: 1800× higher
 - CMOS compatible ✓
 
 **vs. Superconducting Qubits**:
 
-- T₂: 166 ms vs. 100 μs → **1660× better**
+- T₂: 166 ms vs. 100 μs → **1660× better** [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 - Temperature: 300 K vs. 20 mK → **15,000× warmer**
 - Cost: < $1 vs. $1M per cell → **10⁶× cheaper**
 

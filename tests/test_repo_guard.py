@@ -516,6 +516,26 @@ class TestProseStage(unittest.TestCase):
         self._w("a.md", "Their code is MIT. <!-- licence-ref: external, GEV -->\nLicense: MIT\n")
         self.assertEqual([(h[1], h[2]) for h in licence_scan(self.tmp)], [(2, "MIT")])
 
+    # -- claim-status markers ---------------------------------------------
+    def test_status_marked_speedup_is_counted_not_a_hit(self):
+        self._w("a.md", "intro\n\nSIMD 4-8x speedup [unmeasured]\n15-30x faster [refuted: timed slower, ENG-1]\n"
+                        "8x [unmeasured operand: SIMD efficiency, ENG-6]\n166x better [refutation of ER-1]\n")
+        marked = {}
+        self.assertEqual(speedup_claims(self.tmp, marked=marked), [])
+        self.assertEqual({k: len(v) for k, v in marked.items()},
+                         {"unmeasured": 1, "refuted": 1, "unmeasured operand": 1, "refutation of": 1})
+        self.assertEqual(marked["refuted"][0][2], "timed slower, ENG-1")
+
+    def test_refuted_marker_without_a_reason_is_a_defect(self):
+        self._w("a.md", "intro\n\n15-30x faster [refuted]\n")
+        hits = speedup_claims(self.tmp)
+        self.assertEqual(len(hits), 1)
+        self.assertIn("MARKER DEFECT", hits[0][2])
+
+    def test_unmarked_claim_still_fires_beside_a_marked_one(self):
+        self._w("a.md", "intro\n\n4x faster [unmeasured]\n\n\n\n50x faster\n")
+        self.assertEqual([h[1] for h in speedup_claims(self.tmp)], [7])
+
     # -- speedup ----------------------------------------------------------
     def test_speedup_without_benchmark_fires(self):
         self._w("a.md", "intro\n\nSIMD Auto-vectorization 4-8x speedup\nCombined 50-200x faster\n")

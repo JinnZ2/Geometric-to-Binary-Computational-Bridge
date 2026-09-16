@@ -580,16 +580,44 @@ _SPEEDUP = re.compile(
 _PERF = re.compile(r"speed|faster|slower|perf|throughput|accelerat|efficien|improvement|"
                    r"reduction|gain|advantage|compression|better|cost|overhead", re.I)
 _BENCH = re.compile(r"benchmark", re.I)
+# A claim that carries its own status is not an unsupported claim. The marker convention
+# (PROSE_AUDIT.md, "claim-status markers"): `[refuted: <why, claim id, file>]` for a figure
+# something in the tree kills, `[unmeasured]` / `[unmeasured: <what is missing>]` for one nothing
+# in the tree produced, `[unmeasured operand: <which>]` for arithmetic on such a figure, and
+# `[refutation of <id>]` for a line that derives a number in order to kill it. `[refuted]` with
+# no reason is a defect: a refutation names what did the killing.
+_CLAIM_STATUS = re.compile(r"\[(refuted|unmeasured(?: operand)?|refutation of)\b\s*:?\s*([^\]]*)\]", re.I)
 
 
-def speedup_claims(root=".", window=3):
-    """[(file, line, text)] for a numeric `Nx` performance claim with no 'benchmark' within `window` lines."""
+def claim_status(ln):
+    """(kind, body, defect) for a status-marked line; (None, None, None) for an unmarked one."""
+    m = _CLAIM_STATUS.search(ln)
+    if not m:
+        return None, None, None
+    kind, body = m.group(1).lower(), m.group(2).strip()
+    if kind in ("refuted", "refutation of") and not body:
+        return kind, body, "a refuted marker names what refuted it"
+    return kind, body, None
+
+
+def speedup_claims(root=".", window=3, marked=None):
+    """[(file, line, text)] for a numeric `Nx` performance claim with no 'benchmark' within `window`
+    lines and no claim-status marker on the line. Pass a dict as `marked` to receive the marked
+    lines by kind; a defective marker is a hit."""
     hits = []
     for path in _md_files(root):
         with open(path, encoding="utf-8", errors="replace") as fh:
             lines = fh.read().split("\n")
         for i, ln in enumerate(lines):
             if not (_SPEEDUP.search(ln) and _PERF.search(ln)):
+                continue
+            kind, body, defect = claim_status(ln)
+            if kind and not defect:
+                if marked is not None:
+                    marked.setdefault(kind, []).append((os.path.relpath(path, root), i + 1, body[:60], ln.strip()[:80]))
+                continue
+            if defect:
+                hits.append((os.path.relpath(path, root), i + 1, "MARKER DEFECT: " + defect + " -- " + ln.strip()[:60]))
                 continue
             lo, hi = max(0, i - window), min(len(lines), i + window + 1)
             if any(_BENCH.search(l2) for l2 in lines[lo:hi]):
@@ -796,11 +824,14 @@ def prose_audit(root="."):
     """All five checks. Returns {check: [hits]}; a run with any hit fails."""
     marked = {}
     scan = licence_scan(root, marked=marked)
+    status_marked = {}
+    speed = speedup_claims(root, marked=status_marked)
     return {
         "licence": licence_mismatch(root),
         "licence_scan": scan,
         "licence_refs": marked,
-        "speedup": speedup_claims(root),
+        "speedup": speed,
+        "speedup_marked": status_marked,
         "shell": shell_commands(root),
         "second_person": second_person(root),
         "spaces": spaced_filenames(root),
@@ -826,6 +857,11 @@ def prose_report(root="."):
     print("  speedup claims, no benchmark near %d" % len(res["speedup"]))
     for f, ln, txt in res["speedup"]:
         print("      %s:%d  %s" % (f, ln, txt))
+    sm = res.get("speedup_marked", {})
+    for kind in ("refuted", "refutation of", "unmeasured", "unmeasured operand"):
+        rows = sm.get(kind, [])
+        if rows:
+            print("  claim-status %-19s (not a claim) %d" % (kind, len(rows)))
     print("  shell commands that cannot run    %d" % len(res["shell"]))
     for f, ln, txt, why in res["shell"]:
         print("      %s:%d  %s  <- %s" % (f, ln, txt, why))
@@ -835,7 +871,7 @@ def prose_report(root="."):
     print("  filenames with a space            %d" % len(res["spaces"]))
     for p in res["spaces"]:
         print("      %s" % p)
-    n = sum(len(v) for k, v in res.items() if k != "licence_refs")
+    n = sum(len(v) for k, v in res.items() if k not in ("licence_refs", "speedup_marked"))
     print("  %s" % ("prose holds" if not n else
                     "%d hit(s) -- each is a fix in a separate pass; nothing was changed" % n))
     return n
