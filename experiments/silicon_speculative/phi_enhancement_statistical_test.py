@@ -14,7 +14,7 @@ energy transfer rates show enhancement at phi-ratio distances.
 Primary Test: LHC-II pigment pair analysis
 Methods: t-test, permutation test, correlation, bootstrap CI
 
-MIT License
+CC0-1.0
 """
 
 import numpy as np

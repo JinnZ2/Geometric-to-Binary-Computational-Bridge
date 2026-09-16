@@ -50,7 +50,7 @@ Section B  (9b): crisis phase, buffer state, flags
 Section C  (6b): cascade coupling
 Section D  (6b): seed geometry
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 from __future__ import annotations

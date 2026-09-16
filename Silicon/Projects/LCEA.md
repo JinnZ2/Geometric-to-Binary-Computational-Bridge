@@ -444,4 +444,4 @@ E_Ego-driven management forces biological systems into exothermic cycles, wastin
 -----
 
 *Framework developed for rational energy analysis independent of institutional constraints.*
-*Released under MIT License as stepping stone for further development.*
+*Released under CC0-1.0 as stepping stone for further development.*

@@ -14,7 +14,7 @@ between substrates through Förster Resonance Energy Transfer, with phi-ratio
 geometric configurations achieving higher efficiency than classical predictions.
 
 Collaborative Development Framework
-MIT License
+CC0-1.0
 """
 
 import numpy as np

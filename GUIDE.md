@@ -164,7 +164,7 @@ modify by gradient-only methods -- which is a feature, not a bug.
 - It is not finished. The 5D silicon substrate is a specification, not
   yet fabricated. The consciousness and emotion bridges are
   mathematically grounded but remain active research areas.
-- It is not proprietary. License: CC-BY-4.0. Anonymous gift to humanity.
+- It is not proprietary. License: CC0-1.0. Anonymous gift to humanity.
 
 ---
 

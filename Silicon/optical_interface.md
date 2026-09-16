@@ -223,4 +223,4 @@ imaging technique on other materials, which is legitimate, and the
 `Magnetic-bridge` documents concern encoding *external* magnetic fields,
 which silicon's diamagnetism does not refute.
 
-*License: CC-BY-4.0*
+*License: CC0-1.0*

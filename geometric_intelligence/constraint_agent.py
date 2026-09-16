@@ -13,7 +13,7 @@ Designed to operate inside the Geometric-to-Binary ecosystem:
   - self_validate() output can be fed to CuriosityEngine.run() to trigger
     curiosity-driven re-expansion when inconsistencies are found
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 import ast

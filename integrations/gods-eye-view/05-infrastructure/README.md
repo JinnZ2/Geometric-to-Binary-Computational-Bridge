@@ -64,7 +64,7 @@ Each one names what would make it FAIL. An avenue that cannot fail is not listed
 ### `av-inf-2` Consent gate on any GEV dataset mounted into the atlas
 
 - direction `gev->bridge` · cost `trivial`
-- **moves:** each local_data pack gets a .fieldlink.json-shaped consent record {license, share_ok}; TeleGeography gets share_ok:false under this repo's CC-BY-4.0
+- **moves:** each local_data pack gets a .fieldlink.json-shaped consent record {license, share_ok}; TeleGeography gets share_ok:false under this repo's CC0-1.0
 - **fails if:** a mount is written for the cables pack; the validator in this folder rejects share_ok:false mounts by construction
 
 ### `av-inf-3` Installation feed as a stale-aware claim
@@ -75,7 +75,7 @@ Each one names what would make it FAIL. An avenue that cannot fail is not listed
 
 ## Interference
 
-- Licence asymmetry: this repo is CC-BY-4.0 and the hub of a CC-BY/CC0/MIT ecosystem; CC BY-NC-SA data cannot cross that boundary. The consent field exists for this
+- Licence asymmetry: this repo is CC0-1.0 and the hub of a CC0/CC-BY/MIT ecosystem; CC BY-NC-SA data cannot cross that boundary. The consent field exists for this
 - Infrastructure entities are polygons; every bridge helper wants a point. Centroid is a projection and must be named (FCL-9)
 - The INFRASTRUCTURE tile was cut for frame rate. The bridge's octree (Engine/spatial_grid.py) is the right shape for a globe LOD and the wrong implementation (ENG-5); do not transplant it as-is
 

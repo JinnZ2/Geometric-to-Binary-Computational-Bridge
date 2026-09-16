@@ -31,7 +31,7 @@ Interaction summary  (6 bits):
   [fractal_active 1b]       any field has fractal_depth > 0 = 1
   [phase_spread   1b]       fields span more than one distinct phase state = 1
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 import math

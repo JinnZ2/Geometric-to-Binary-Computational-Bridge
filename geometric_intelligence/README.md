@@ -34,7 +34,7 @@ Not For:
 	•	Any application involving human subjects without IRB approval
 Citation:
 If you use these concepts in research, cite appropriately and acknowledge that this is early-stage work requiring significant development before practical application.
-License: AGPL-3.0
+License: CC0-1.0
 Contact:
 For questions about appropriate use: JinnZ2
 Remember: The ability to detect trojans is also the ability to detect dissent.
@@ -124,7 +124,7 @@ Unacceptable uses:
 See /docs/Implementation_Philosophy.md for full details.
 🤝 Contributing:
 Improvements welcome. Institutional capture attempts will be obvious.
-📄 License: MIT
+📄 License: CC0-1.0
 
 
 Remember: If you don’t understand why this has governance built in,

@@ -53,7 +53,7 @@ Section D — System integration  (6 bits):
                             it is a useful conductor. See thermal_runaway().
   [semiconductor  1b]       is semiconductor (diode/transistor/IC) = 1; passive = 0
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 import math

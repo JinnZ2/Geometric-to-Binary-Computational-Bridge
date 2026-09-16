@@ -8,7 +8,7 @@
 
 Theoretical framework developed between truck stops. Not peer-reviewed, not validated, not approved by anyone with credentials. If useful, take it. If not, close the tab.
 
-**MIT License.** Do whatever you want with it.
+**CC0-1.0.** Do whatever you want with it.
 
 -----
 
@@ -383,7 +383,7 @@ Both are valid. Know which one you’re in.
 -----
 
 *Originated by JinnZ2 and co-created with AI systems.*
-*License: MIT (code), CC BY-SA 4.0 (text)*
+*License: CC0-1.0*
 
 
 notes:

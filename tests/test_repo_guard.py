@@ -21,6 +21,7 @@ from repo_guard import (  # noqa: E402
     VETO,
     duplicate_bodies,
     licence_mismatch,
+    licence_scan,
     licence_strings,
     prose_audit,
     second_person,
@@ -429,6 +430,44 @@ class TestProseStage(unittest.TestCase):
         root = os.path.join(os.path.dirname(__file__), "..")
         self.assertEqual(licence_mismatch(root), [], licence_strings(root))
         self.assertEqual({v[1] for v in licence_strings(root).values() if v}, {"CC0-1.0"})
+
+    # -- licence, every tracked file ---------------------------------------
+    def test_scan_reports_a_header_that_disagrees_with_LICENSE(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w("pkg/mod.py", '"""\nA module.\nLicense: CC-BY-4.0\n"""\n')
+        self._w("notes.md", "*License: MIT*\n")
+        hits = licence_scan(self.tmp)
+        self.assertEqual([(h[0], h[1], h[2]) for h in hits],
+                         [("notes.md", 1, "MIT"), (os.path.join("pkg", "mod.py"), 3, "CC-BY-4.0")])
+
+    def test_scan_is_silent_when_every_header_matches(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w("pkg/mod.py", '"""\nLicense: CC0-1.0\n"""\n')
+        self._w("notes.md", "CC0-1.0\n")
+        self.assertEqual(licence_scan(self.tmp), [])
+
+    def test_bare_mit_needs_a_declaring_context(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w("a.py", '# Nature (2026). MIT/Ju lab.\nDENY = ["MIT", "GPL"]\n')
+        self._w("b.md", "`AGPL-3` drops out of the index on its own\n")
+        self.assertEqual(licence_scan(self.tmp), [])
+        self._w("c.py", "# MIT License\n")
+        self.assertEqual([h[2] for h in licence_scan(self.tmp)], ["MIT"])
+
+    def test_fieldlink_sibling_consents_exempt_but_own_is_not(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w(".fieldlink.json", '{\n  "fieldlink": {\n    "sources": [\n      {\n        "name": "x",\n'
+                                   '        "consent": { "license": "MIT", "share_ok": true }\n      }\n    ],\n'
+                                   '    "consent": { "license": "CC-BY-4.0", "share_ok": true }\n  }\n}\n')
+        hits = licence_scan(self.tmp)
+        self.assertEqual([(h[0], h[1], h[2]) for h in hits], [(".fieldlink.json", 9, "CC-BY-4.0")])
+
+    def test_lockfiles_and_kept_provenance_are_not_declarations(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w("package-lock.json", '{"license": "MIT"}\n')
+        self._w("legacy/old.py", "# MIT License\n")
+        self._w("x/evidence/as_received.py", "# MIT License\n")
+        self.assertEqual(licence_scan(self.tmp), [])
 
     # -- speedup ----------------------------------------------------------
     def test_speedup_without_benchmark_fires(self):

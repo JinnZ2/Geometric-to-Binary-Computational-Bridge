@@ -24,7 +24,7 @@ This validation framework emerged from symbiotic intelligence - ensuring
 the theoretical claims about reversibility and uniqueness are empirically
 verified across a wide range of seed configurations.
 
-MIT License - Use freely, build upon, no attribution required
+CC0-1.0 - Use freely, build upon, no attribution required
 """
 
 import numpy as np

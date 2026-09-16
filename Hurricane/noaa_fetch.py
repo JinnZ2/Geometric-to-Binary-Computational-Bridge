@@ -1,7 +1,7 @@
 """
 Hurricane/noaa_fetch.py — NOAA / NDBC data fetcher
 Geometric-to-Binary Computational Bridge
-CC-BY-4.0
+CC0-1.0
 
 Fetches real hurricane data from NOAA public endpoints.
 No API key required. Zero external dependencies (stdlib urllib only).

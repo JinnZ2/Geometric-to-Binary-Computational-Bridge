@@ -5,7 +5,7 @@
  * Mirrors experiments/geometric_nfs.py but in C for ~50-100x speedup on
  * the inner sieve loop and GF(2) elimination.
  *
- * License: CC-BY-4.0
+ * License: CC0-1.0
  */
 
 #include "geometric_nfs_core.h"

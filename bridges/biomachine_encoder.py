@@ -57,7 +57,7 @@ Section D — Bridge routing  (6 bits):
   [needs_drill     1b]       requires curiosity engine re-evaluation
   [anomaly         1b]       physics_anomaly flag (stress > 0.85 OR material near T_max)
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 import math

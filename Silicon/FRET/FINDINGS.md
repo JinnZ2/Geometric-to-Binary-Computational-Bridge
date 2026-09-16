@@ -100,7 +100,7 @@ If too short, increase rate headroom (lower \(\mathcal F\), raise \(R_0\)) befor
 ---
 
 *Originated by **JinnZ2 (bioswarm)** and co-created with AI systems.  
-License: CC BY-SA 4.0 (text), MIT (code).*
+License: CC0-1.0.*
 
 
 Research validation:

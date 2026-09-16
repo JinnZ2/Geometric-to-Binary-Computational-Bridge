@@ -59,7 +59,7 @@ Section D — Seed geometry  (6 bits):
   [opposing_balance 2b Gray]  paired-axis symmetry across 4 bands ([0, 0.33, 0.67, 1.0])
   [transmissible    1b]       all 6 proportions > 0 (packet can be sent / decoded)
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 import math

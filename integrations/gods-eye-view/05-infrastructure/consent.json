@@ -1,6 +1,6 @@
 {
  "_comment": "av-inf-2. One record per GEV bundled dataset, in the shape of .fieldlink.json's consent field. A pack with share_ok:false has mount:null and crosslinks.py refuses a mount for it. Licences are as recorded in GEV's DATA_SOURCES.md.",
- "hub_license": "CC-BY-4.0",
+ "hub_license": "CC0-1.0",
  "packs": [
   {"source": "datacenters", "path": "src/data/local_data/datacenters", "license": "ODbL-1.0", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/datacenters.geojsonl", "attribution": "(c) OpenStreetMap contributors",
@@ -10,7 +10,7 @@
    "note": "same terms as datacenters"},
   {"source": "telegeography_submarine_cables", "path": "src/data/local_data/telegeography_submarine_cables", "license": "CC-BY-NC-SA-3.0", "share_ok": false,
    "mount": null, "attribution": "(c) TeleGeography",
-   "note": "NonCommercial and ShareAlike; cannot cross into a CC-BY-4.0 hub. Not mounted, by construction"},
+   "note": "NonCommercial and ShareAlike; cannot cross into a CC0-1.0 hub. Not mounted, by construction"},
   {"source": "natural_earth", "path": "src/data/local_data/natural_earth", "license": "public-domain", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/natural_earth", "attribution": "Made with Natural Earth (courtesy)",
    "note": "regions.json + marine.json; the named-region rings analystEngine scopes by"},

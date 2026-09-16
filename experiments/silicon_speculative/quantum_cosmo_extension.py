@@ -16,7 +16,7 @@ scales (structure formation, gravitational coupling).
 Literature review and experimental proposals are in:
     Silicon/quantum_cosmo_extension_notes.md
 
-MIT License
+CC0-1.0
 """
 
 import numpy as np

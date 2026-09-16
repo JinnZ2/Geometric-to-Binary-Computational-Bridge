@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's 8 ⟨111⟩ sp³ bond directions (8 states = 3 bits per unit). License: CC-BY-4.0.
+> Geometric-to-Binary Computational Bridge — a framework that encodes human geometric intuition into binary using silicon's 8 ⟨111⟩ sp³ bond directions (8 states = 3 bits per unit). License: CC0-1.0.
 
 ---
 
@@ -47,7 +47,7 @@ python tests/test_gies_core.py          # GIES tensor collapse + codec bijection
 python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59 tests, no deps)
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
 python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
-python tests/test_repo_guard.py         # Null harness / symmetry veto / reach / collisions / prose (60 tests, no deps)
+python tests/test_repo_guard.py         # Null harness / symmetry veto / reach / collisions / prose (65 tests, no deps)
 python tests/test_field_claim_loop.py   # Field claim loop: router + calibrated gates (93 tests, no deps)
 python tests/test_playground.py         # Open bench: can each verdict actually fire (41 tests, no deps)
 python tests/test_playground_review.py  # Archive provenance, principles, staleness (55 tests, no deps)
@@ -190,7 +190,7 @@ cd "Front end" && npm install && npm run dev
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
-| Repo guard | `tests/test_repo_guard.py` | 60 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands, stage 4: identical file bodies, screen names with two definitions, both directions; stage 5: each prose check shown firing and silent on a built tree, the real tree's four licence surfaces required to agree, and the audit shown to change nothing on disk |
+| Repo guard | `tests/test_repo_guard.py` | 65 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands, stage 4: identical file bodies, screen names with two definitions, both directions; stage 5: each prose check shown firing and silent on a built tree, the real tree's four licence surfaces required to agree, and the audit shown to change nothing on disk |
 | Adaptive sim | `tests/test_adaptive_sim.py` | 64 | ASF-1..16: a provenance log that does not reproduce under the code shipped with it, a seed field passed to nothing, an unreachable diagnosis branch, an R2 gate that passes a rising distribution, and a fixation claim that measures the step budget |
 | Explore | `tests/test_explore.py` | 30 | EX-1..4: coverage matrix, gap complement, folder-spanning principles, and the scope guard that keeps it from proposing |
 | Geometric network, temperature, trend | `tests/test_gi_network.py` | 133 | GI-1..16, GR-1..6, GB-1..5, TMP-1..5, TRD-0..7: measurements that do not propagate, an unsatisfiable threshold clause, a design contradiction resolved in the measurement's favour, non-monotonic band edges, an unread constructor parameter, and a 15.7% false-alarm rate on noise |

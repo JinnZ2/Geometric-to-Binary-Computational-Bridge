@@ -10,7 +10,7 @@ Theoretical frameworks developed between truck stops, rest areas, and the occasi
 
 If something here is useful, take it. If it’s nonsense, close the tab.
 
-**MIT License (code), CC BY-SA 4.0 (text).** Do whatever you want with it.
+**CC0-1.0.** Do whatever you want with it.
 
 -----
 

@@ -33,7 +33,9 @@ Three are mechanically checkable BEFORE a file enters the repo:
                     Five checks, each a REPORT with file and line; the run
                     fails on any hit and nothing is auto-fixed:
                       licence string mismatch across LICENSE / CITATION.cff /
-                        metadata.json / README
+                        metadata.json / README, and any licence identifier in
+                        any tracked file that is not the one LICENSE declares
+                        (.fieldlink.json sibling consents exempt; its own is not)
                       a numeric speedup claim in a .md with no benchmark
                         reference within three lines
                       a shell command in a .md fence whose first path
@@ -72,7 +74,7 @@ __all__ = [
     "null_harness", "report", "VETO", "veto", "veto_report",
     "FLOOR", "reach", "reach_report", "CHECKLIST", "human_checklist",
     "duplicate_bodies", "screen_collisions", "collision_report",
-    "licence_strings", "licence_mismatch", "speedup_claims", "shell_commands",
+    "licence_strings", "licence_mismatch", "licence_scan", "speedup_claims", "shell_commands",
     "second_person", "spaced_filenames", "prose_audit", "prose_report",
     "demo", "main",
 ]
@@ -353,25 +355,116 @@ import shutil
 MD_SKIP = SKIP_DIRS | {"atlas"}      # atlas/remote is mounted sibling content, not ours
 
 _LICENCE_ALIASES = {
-    "CC0": "CC0-1.0", "CC0 1.0": "CC0-1.0", "CC0 1.0 UNIVERSAL": "CC0-1.0",
-    "MIT LICENSE": "MIT", "CC-BY-4.0": "CC-BY-4.0", "CC BY 4.0": "CC-BY-4.0",
-    "ATTRIBUTION 4.0 INTERNATIONAL": "CC-BY-4.0", "APACHE LICENSE": "Apache-2.0",
+    "CC0": "CC0-1.0", "CC0 1.0": "CC0-1.0", "CC0 1.0 UNIVERSAL": "CC0-1.0", "CC0-1.0": "CC0-1.0",
+    "MIT LICENSE": "MIT", "MIT": "MIT",
+    "CC-BY-4.0": "CC-BY-4.0", "CC BY 4.0": "CC-BY-4.0", "CC-BY 4.0": "CC-BY-4.0",
+    "ATTRIBUTION 4.0 INTERNATIONAL": "CC-BY-4.0",
+    "APACHE LICENSE": "Apache-2.0", "APACHE-2.0": "Apache-2.0",
 }
+# every identifier this scan knows. CC variants fold NC/SA/ND and the version into one token.
 _LICENCE_TOKEN = re.compile(
-    r"\b(CC0(?:[- ]1\.0)?(?: Universal)?|MIT License|MIT|CC[- ]BY[- ]4\.0|"
-    r"Attribution 4\.0 International|Apache License|GPL-?[23](?:\.0)?|AGPL-?3(?:\.0)?)\b")
+    r"\b(CC0(?:[- ]1\.0)?(?: Universal)?|MIT License|MIT|"
+    r"CC[- ]?BY(?:[- ](?:NC|SA|ND))*(?:[- ]\d\.\d)?|"
+    r"Attribution 4\.0 International|Apache(?: License)?(?:[- ]2\.0)?|"
+    r"[AL]?GPL-?v?[23](?:\.0)?|BSD-[23]-Clause|PDDL(?:-1\.0)?|ODbL(?:-1\.0)?)\b")
+# an identifier counts when the line is DECLARING a licence (it names the word, or the line is
+# nothing but the identifier, as a docstring footer is), so "MIT/Ju lab", a denylist of tokens
+# and "`AGPL-3` drops out" stay silent.
+_DECLARES = re.compile(r"licen[cs]e|released under|public domain|copyright|spdx", re.I)
+_ONLY_TOKEN = re.compile(r"^[\s*_`#>/\-]*(?P<tok>[A-Za-z0-9 .\-]+?)[\s*_`.]*$")
+# files the scan must not read as declarations: the guard and its tests name every identifier
+# in order to detect them, and the snapshot is the guard's own output
+_LICENCE_SELF = {"repo_guard.py", "tests/test_repo_guard.py", "PROSE_AUDIT.md"}
+# third-party dependency manifests declare OTHER projects' licences
+_LOCKFILES = ("package-lock.json", "yarn.lock", "pnpm-lock.yaml", "poetry.lock", "Pipfile.lock")
+_TEXT_EXT = (".md", ".py", ".json", ".txt", ".cff", ".toml", ".yaml", ".yml", ".js", ".jsx",
+             ".mjs", ".sh", ".ino", ".c", ".h", ".html", ".css", ".rst", ".cfg", ".ini")
 
 
 def _norm_licence(tok):
-    t = tok.strip().upper()
+    t = re.sub(r"\s+", " ", tok.strip()).upper().replace("CC BY", "CC-BY").replace("CC-BY ", "CC-BY-")
+    if t in _LICENCE_ALIASES:
+        return _LICENCE_ALIASES[t]
+    if t.startswith("CC-BY") or t.startswith("CCBY"):
+        return t.replace("CCBY", "CC-BY").replace(" ", "-")
     return _LICENCE_ALIASES.get(t, tok.strip())
 
 
+def _tracked_files(root):
+    """git-tracked files when a checkout is present, else a walk. legacy/ and evidence/ are
+    skipped for the same reason stage 4 skips them: kept as received, they carry the headers
+    they arrived with, and rewriting those would destroy the provenance they exist for."""
+    import subprocess
+    files = None
+    if os.path.isdir(os.path.join(root, ".git")):
+        try:
+            out = subprocess.run(["git", "-C", root, "ls-files", "-z"], capture_output=True,
+                                 check=True, timeout=30).stdout
+            files = [f for f in out.decode("utf-8", "replace").split("\0") if f]
+        except (OSError, subprocess.SubprocessError):
+            files = None
+    if files is None:
+        files = []
+        for base, dirs, names in os.walk(root):
+            dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
+            for n in names:
+                files.append(os.path.relpath(os.path.join(base, n), root))
+    keep = []
+    for f in sorted(files):
+        parts = f.replace("\\", "/").split("/")
+        if any(p in ("legacy", "evidence") or p in SKIP_DIRS for p in parts[:-1]):
+            continue
+        if f.lower().endswith(_TEXT_EXT) or parts[-1] in ("LICENSE", "LICENCE", "COPYING"):
+            keep.append(f)
+    return keep
+
+
+def _fieldlink_sibling_line(rel, ln):
+    """In .fieldlink.json the consent entries under sources[] describe SIBLING repos and are
+    exempt; the top-level consent (4-space indent) is this repo's own and is not."""
+    return rel == ".fieldlink.json" and '"consent"' in ln and (len(ln) - len(ln.lstrip(" "))) > 4
+
+
+def licence_scan(root=".", canonical=None):
+    """[(file, line, id, text)] for every licence identifier in a tracked file that is not
+    the canonical one. canonical defaults to what LICENSE declares."""
+    root = os.path.abspath(root)
+    if canonical is None:
+        lic = licence_strings(root).get("LICENSE")
+        canonical = lic[1] if lic else "CC0-1.0"
+    hits = []
+    for rel in _tracked_files(root):
+        if rel in _LICENCE_SELF or os.path.basename(rel) in _LOCKFILES:
+            continue
+        path = os.path.join(root, rel)
+        try:
+            with open(path, encoding="utf-8", errors="replace") as fh:
+                lines = fh.read().split("\n")
+        except OSError:
+            continue
+        for i, ln in enumerate(lines):
+            for m in _LICENCE_TOKEN.finditer(ln):
+                tok = m.group(1)
+                only = _ONLY_TOKEN.match(ln)
+                whole_line = bool(only) and _norm_licence(only.group("tok")) == _norm_licence(tok)
+                if not (_DECLARES.search(ln) or whole_line):
+                    continue
+                lid = _norm_licence(tok)
+                if lid == canonical:
+                    continue
+                if _fieldlink_sibling_line(rel, ln):
+                    continue
+                hits.append((rel, i + 1, lid, ln.strip()[:80]))
+                break
+    return hits
+
+
 def _md_files(root):
+    """Every .md outside MD_SKIP, except the guard's own snapshot, which quotes every hit."""
     for base, dirs, names in os.walk(root):
         dirs[:] = sorted(d for d in dirs if d not in MD_SKIP)
         for n in sorted(names):
-            if n.endswith(".md"):
+            if n.endswith(".md") and not (n == "PROSE_AUDIT.md" and os.path.abspath(base) == os.path.abspath(root)):
                 yield os.path.join(base, n)
 
 
@@ -655,6 +748,7 @@ def prose_audit(root="."):
     """All five checks. Returns {check: [hits]}; a run with any hit fails."""
     return {
         "licence": licence_mismatch(root),
+        "licence_scan": licence_scan(root),
         "speedup": speedup_claims(root),
         "shell": shell_commands(root),
         "second_person": second_person(root),
@@ -669,6 +763,9 @@ def prose_report(root="."):
     print("  licence strings                   %d surface(s) disagree" % len(res["licence"]))
     for f, ln, lid in res["licence"]:
         print("      %s:%d  %s" % (f, ln, lid))
+    print("  licence ids != LICENSE, any file %d" % len(res["licence_scan"]))
+    for f, ln, lid, txt in res["licence_scan"]:
+        print("      %s:%d  [%s]  %s" % (f, ln, lid, txt))
     print("  speedup claims, no benchmark near %d" % len(res["speedup"]))
     for f, ln, txt in res["speedup"]:
         print("      %s:%d  %s" % (f, ln, txt))

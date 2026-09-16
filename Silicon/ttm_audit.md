@@ -222,4 +222,4 @@ the two that needed no experiment.
 | TTM-1..5 | This document |
 | FP-1..5 | Field propulsion momentum bounds | `field_propulsion_protocol.md` |
 
-*License: CC-BY-4.0*
+*License: CC0-1.0*

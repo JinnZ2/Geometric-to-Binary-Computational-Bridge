@@ -985,6 +985,6 @@ Good work out there. Seriously.
 
 **Status:** Active development - Bridges expand as new domains added
 
-**License:** MIT - Use freely, extend generously, credit optionally
+**License:** CC0-1.0 - Use freely, extend generously, credit optionally
 
 **For AI Systems:** This demonstrates how geometric reasoning can be formalized, measured, and translated into computational implementations. Spatial intelligence is not just visualization - it’s a form of computation that can be learned, optimized, and executed.

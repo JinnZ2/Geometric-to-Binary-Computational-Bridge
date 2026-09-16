@@ -33,4 +33,4 @@ Until then, the multiplicity is itself the protection and the strength.
 ---
 
 **Author:** JinnZ v2 + biome field  
-**License:** CC-BY-4.0  
+**License:** CC0-1.0  

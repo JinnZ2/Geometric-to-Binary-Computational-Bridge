@@ -135,11 +135,30 @@ The Engine uses symmetry detection, adaptive octree decomposition and numpy
 vectorisation. Their individual speedups have never been measured. The one
 timed comparison in the tree is `Engine/engine_benchmark.py`, which runs the
 adaptive path against a uniform grid on the same sources through the same
-optimizer: on 2026-09-16 (Intel Xeon 2.10 GHz, 4 cores, Python 3.11.15, numpy
-2.4.6; dipole, quadrupole and wire+charge sources at resolutions 16, 24, 32)
-the adaptive path ran at 0.02x-0.53x of the uniform baseline, median 0.09x,
-i.e. slower, because it makes one solver call per octree leaf (ENG-1, ENG-5 in
-`CLAUDE.md`). Re-run the benchmark before quoting any other figure.
+optimizer. Swept on 2026-09-16 (Intel Xeon 2.10 GHz, 4 cores, 16 GB, Python
+3.11.15, numpy 2.4.6; best of 3; dipole, quadrupole and wire+charge sources):
+
+| resolution | uniform points | dipole | quadrupole | wire+charge |
+|---|---|---|---|---|
+| 16 | 4,096 | 0.04x | 0.02x | 0.03x |
+| 32 | 32,768 | 0.46x | 0.25x | 0.30x |
+| 48 | 110,592 | 2.34x | 1.35x | 1.71x |
+| 64 | 262,144 | 6.80x | 4.13x | 5.35x |
+| 96 | 884,736 | 30.4x | 15.0x | 18.4x |
+| 128 | 2,097,152 | 78.0x | 36.9x | 44.2x |
+
+Ratio is uniform wall time over adaptive wall time, so above 1x the adaptive
+path is faster. The range the benchmark reports over the swept resolutions is
+**0.02x to 78x**, and
+the crossover lies **between resolution 32 and 48 for every workload**. The
+slowest point is the quadrupole at resolution 16, the fastest the dipole at
+128. Read the table with one fact in mind: the adaptive path evaluates a fixed
+2,024 to 2,864 points whatever the resolution asked for, so its time is flat
+while the uniform grid grows as the cube of the resolution, and the median
+field error against the uniform reference stays at 7 to 17 percent across the
+whole sweep. The ratio is a statement about how much of the box the uniform
+grid was asked to fill, not about the solver getting faster. Resolutions above
+128 were not run. Re-run the benchmark before quoting any other figure.
 
 🎯 The Big Vision
 

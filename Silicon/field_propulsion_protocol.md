@@ -385,4 +385,4 @@ The FRET one-liner above inherits both. Drawing `true_coupling` from
 Bayes factor moves toward H₀ on the `0` draws — not merely that it moves
 toward H₁ on the `0.3` draws.
 
-*License: CC-BY-4.0*
+*License: CC0-1.0*
