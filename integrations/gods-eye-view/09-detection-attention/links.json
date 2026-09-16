@@ -44,6 +44,10 @@
   {
    "path": "scripts/track-regression.mjs",
    "role": "the tracked entity survived four regressions because the harness couples to per-frame position"
+  },
+  {
+   "path": "src/data/labelArbiterNull.test.mjs",
+   "role": "av-det-1: the null harness, measured numbers in the header, both halves pinned"
   }
  ],
  "bridge": [
@@ -99,7 +103,8 @@
    "direction": "bridge->gev",
    "cost": "trivial",
    "moves": "pure function, node-testable: random reweightings vs the shipped weights over recorded demand vectors; fraction of draws with the same allocation",
-   "fails_if": "the fraction is near 1 (weights carry no information at the shipped capacity, the AISS shape) or near 0 (weights are load-bearing and a doc should say what they encode). Either answer is a finding; only 'untested' is not"
+   "fails_if": "the fraction is near 1 (weights carry no information at the shipped capacity, the AISS shape) or near 0 (weights are load-bearing and a doc should say what they encode). Either answer is a finding; only 'untested' is not",
+   "status": "MEASURED 2026-09-16, src/data/labelArbiterNull.test.mjs in the fork: random weights in [0.5, 2] reproduce the shipped allocation 18-31% of the time at capacities 16-128 (not the 77% AISS shape), and the shipped weights move ~3% of labels against flat weights (0.45 of 16, 1.84 of 64). Reading: load-bearing and small, a tiebreak on top of sqrt(count). Both halves pinned."
   },
   {
    "id": "av-det-2",

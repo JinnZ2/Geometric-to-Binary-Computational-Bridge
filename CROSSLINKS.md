@@ -104,6 +104,8 @@ Two artifacts already cross:
 |---|---|---|
 | `integrations/gods-eye-view/06-feed-integrity/feed_state_epistemology.py` | GEV → here | a port of `src/data/manager.js: layerFeedState()` joined to `sensing/processing/epi_classifier.py`'s four grades, tested against the cases GEV ships |
 | `docs/INTEGRATION_AVENUES.md` (in the fork) | here → GEV | a VIEW rendered by `crosslinks.py gev-view`; the folders here stay the authority |
+| `src/data/labelArbiterNull.test.mjs` (in the fork) | here → GEV | av-det-1: `repo_guard`'s null harness applied to the label-arbiter weights; measured, both halves pinned |
+| `integrations/gods-eye-view/04-mobility-transport/coast_divergence.py` | GEV → here | av-mob-1: ports of `motionModel.js` coast kinematics + a recorder and a divergence-vs-horizon measurement; harness self-tested, measurement unrun |
 
 ### Reciprocal pointer for the fork side
 
