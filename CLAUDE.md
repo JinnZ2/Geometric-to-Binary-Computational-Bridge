@@ -61,9 +61,16 @@ python tests/test_engine_metrics.py      # ENG-1..6: what the Engine's numbers m
 python tests/test_aiss.py               # AISS framework shape/round-trip tests (27 tests, needs numpy)
 python tests/test_aiss_scoring.py       # AISS scoring VALUES: placeholder removal, flat-weight null (26 tests)
 python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
+python tests/test_integration_crosslinks.py # God's Eye View integration map guard, IX-1..6 (29 tests, no deps)
 
 # Pre-commit guard: null harness, symmetry veto, instrument reach
 python repo_guard.py
+
+# God's Eye View integration map: 11 domain folders, crosslinked, ecosystem as third axis
+python integrations/gods-eye-view/crosslinks.py           # 10 checks, exit nonzero
+python integrations/gods-eye-view/crosslinks.py render    # regenerate README.md per folder + INTEGRATION_INDEX.json
+python integrations/gods-eye-view/crosslinks.py matrix    # domains x fieldlink mounts; empty cells are absences
+python integrations/gods-eye-view/crosslinks.py gev-view  # the pointer doc the fork carries at docs/INTEGRATION_AVENUES.md
 
 # The map the guards are one implementation of
 cat META-PROTOCOL.md
@@ -192,6 +199,7 @@ cd "Front end" && npm install && npm run dev
 | AISS (shape) | `tests/test_aiss.py` | 27 | Evaluator/governance/CCGF round-trips and return-type shape |
 | AISS (values) | `tests/test_aiss_scoring.py` | 26 | Coherence placeholder removed, `total_score` weight-sum normalisation, flat-weight null harness, trust-score product form |
 | Experiments topology | `tests/test_experiments_topology.py` | 47 | Vacuum assertion tautology (VAC-1/4), mode-count floor (VAC-2), zero circulation gradient, pin removes the zero mode (ATT-1) |
+| Integration map | `tests/test_integration_crosslinks.py` | 29 | IX-1..6: the God's Eye View map holds; a one-way sibling link, a missing path, an unknown mount, an avenue with no `fails_if`, a hand-edited view and an NC pack with a mount each FAIL the guard; avenue ids cannot read as claim ids; the feed-state port reproduces every case GEV ships |
 | Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
 | Transient suppression | `tests/test_transient_suppression.py` | 59 | Write-pulse rotation authority (R2-8), mismatch and skew budgets (R2-3/4), pulse selectivity (R2-5), probe bandwidth (R2-6), measurable CMRR (R2-2) |
@@ -682,6 +690,16 @@ examples/                       Sample .gshape and .json files
 scripts/                        Utility scripts (bridge_convert.py)
 tests/                          Bridge and Engine test suites
 falsifier-survey/               Delivered Run 2 falsifier survey, this repo's share; filed, instructions pending
+
+integrations/gods-eye-view/     Integration map with the gods-eye-view fork (live globe: ADS-B, AIS,
+                                TLEs, USGS, FIRMS, weather, cameras, voice agent). One folder per
+                                domain, each a links.json (authority) + README.md (view). 40 avenues,
+                                every one naming what would make it FAIL; sibling links reciprocal;
+                                fieldlink mounts as the third axis. crosslinks.py is the guard.
+                                Ships two artifacts: 06-feed-integrity/feed_state_epistemology.py
+                                (GEV's six feed states joined to the four epistemology grades, with
+                                a tested port of layerFeedState) and 05-infrastructure/consent.json
+                                (per-pack licence records; the CC BY-NC-SA cables pack has no mount).
 ```
 
 ---

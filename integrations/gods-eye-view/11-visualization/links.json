@@ -1,0 +1,121 @@
+{
+ "id": "visualization",
+ "folder": "11-visualization",
+ "title": "Visualization: Cesium globe, GLSL styles and world overlays; React + Three.js field view, the JS solver mirror and Gaussian splats in the bridge",
+ "shape": "The bridge has a field solver with a JavaScript mirror that has never been drawn on a globe. GEV has a globe that has never drawn a field.",
+ "flow": [
+  "  records ──setOverlayEntries──▶ worldOverlay (priority, lane, edge fade, horizon cull)   (GEV)",
+  "  track ──trailRenderer──▶ one polyline per entity",
+  "  RGB ──GLSL post──▶ NVG / FLIR / noir / CRT / snow   (looks)",
+  "",
+  "  sources ──Front end/solver.js (vanilla)──▶ field samples ──▶ FieldVisualization.jsx (Three.js)   (bridge)",
+  "  Gaussian4DSource: space+time kernels; bhattacharyya_distance between two of them",
+  "",
+  "  av-vis-1: geo sources ──solver.js──▶ samples ──▶ overlay entries   (batch: ENG-5)",
+  "  av-vis-2: trail (positions + times) ──▶ splat chain; covariance from motionModel noise floor",
+  "  av-vis-3: octahedral glyph ──▶ overlay token   (only once a node carries a state: 07)"
+ ],
+ "notes": {
+  "bottleneck": "ENG-5: one solver call per sample point. A globe layer must batch or it will not hold frame rate.",
+  "leverage": "solver.js is already vanilla JavaScript; it can be imported by a GEV layer without React.",
+  "harmonics": "A trail is a chain of 4D splats; the covariance is the one number the fix history can supply (turn-rate noise floor).",
+  "tertiary": "Glyphs on a map with no state behind them are decoration; gate av-vis-3 on 07-sensing-edge."
+ },
+ "gev": [
+  {
+   "path": "src/overlays/worldOverlay.js",
+   "role": "setOverlayEntries(): source-owned entries with priority, collision group, paint lane, edge fade, horizon cull"
+  },
+  {
+   "path": "src/overlays/worldOverlayTokens.js",
+   "role": "overlay token vocabulary"
+  },
+  {
+   "path": "src/data/trailRenderer.js",
+   "role": "one entity polyline per track; whole history at one alpha, dimmed behind geometry"
+  },
+  {
+   "path": "src/styles/surveillance.js",
+   "role": "post-process shader pattern (NVG); thermal.js, noir.js, retro.js, snow.js share it"
+  },
+  {
+   "path": "src/data/firmsHeatmap.js",
+   "role": "the one scalar-field render in GEV today"
+  }
+ ],
+ "bridge": [
+  {
+   "path": "Front end/solver.js",
+   "role": "GeometricEMSolver in plain JS: electricFieldCharge, magneticFieldCurrent, adaptiveGrid; no React dependency inside"
+  },
+  {
+   "path": "Front end/Components/FieldVisualization.jsx",
+   "role": "field magnitude/direction rendering in Three.js"
+  },
+  {
+   "path": "Engine/gaussian_splats/gaussian_4d.py",
+   "role": "space+time Gaussians; a trail is a chain of them"
+  },
+  {
+   "path": "docs/gaussian_splats/01_4d_splats.md",
+   "role": "the design note for the above"
+  },
+  {
+   "path": "Engine/engine_benchmark.py",
+   "role": "measured: adaptive path 0.26-0.48x of uniform; batch before drawing"
+  },
+  {
+   "path": "mappings/octahedral_state_encoding.json",
+   "role": "the eight glyphs an overlay token could carry"
+  }
+ ],
+ "ecosystem": [
+  {
+   "mount": "mandala",
+   "why": "octahedral glyphs as overlay tokens"
+  },
+  {
+   "mount": "polyhedral",
+   "why": "glyph atlas for the same"
+  },
+  {
+   "mount": "rosetta",
+   "why": "shape ontology behind a glyph on a map"
+  }
+ ],
+ "siblings": [
+  "infrastructure",
+  "detection-attention",
+  "encoding-wire"
+ ],
+ "avenues": [
+  {
+   "id": "av-vis-1",
+   "title": "solver.js as a GEV layer",
+   "direction": "bridge->gev",
+   "cost": "medium",
+   "moves": "sources at geographic positions (a dam as a current element, a substation as a charge) -> Front end/solver.js -> field samples -> worldOverlay entries with magnitude as accent; solver.js is vanilla and imports nothing from React",
+   "fails_if": "the field is drawn in ECEF metres while the solver's constants assume a local frame; a dipole field computed in the wrong frame looks plausible and is wrong, and the check is a known-source unit test at two latitudes"
+  },
+  {
+   "id": "av-vis-2",
+   "title": "Trails as 4D splat chains",
+   "direction": "gev->bridge",
+   "cost": "low",
+   "moves": "a track history (positions + times) -> Gaussian4DSource chain; bhattacharyya_distance between two aircraft trails is a separation metric that has time in it",
+   "fails_if": "the splat covariance is set by hand; it must come from the fix-history noise (motionModel's turn-rate noise floor is the one measured number available)"
+  },
+  {
+   "id": "av-vis-3",
+   "title": "Octahedral glyphs as overlay tokens",
+   "direction": "bridge->gev",
+   "cost": "low",
+   "moves": "mappings/octahedral_state_encoding.json glyph_unicode -> worldOverlayTokens; a node's 3-bit state drawn as its glyph",
+   "fails_if": "no GEV entity has an octahedral state to draw; a glyph with no state behind it is decoration, and the layer should not ship until 07-sensing-edge lands a node that carries one"
+  }
+ ],
+ "interference": [
+  "React vs vanilla ES modules: the seam is data (overlay entries, sample arrays), never a component",
+  "ENG-1/5: the adaptive octree is slower than a uniform grid at the current one-point-per-leaf; a globe layer must batch samples into one solver call or it will not hold 60 fps"
+ ]
+}

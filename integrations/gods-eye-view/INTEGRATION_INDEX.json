@@ -1,0 +1,639 @@
+{
+ "_comment": "VIEW rendered by crosslinks.py render. Authority is each folder's links.json.",
+ "gev_repo": "https://github.com/JinnZ2/gods-eye-view-fork",
+ "bridge_repo": "https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge",
+ "directions": [
+  "gev->bridge",
+  "bridge->gev",
+  "both",
+  "bridge->bridge",
+  "gev->ecosystem"
+ ],
+ "costs": [
+  "trivial",
+  "low",
+  "medium",
+  "high"
+ ],
+ "domains": [
+  {
+   "id": "geo-seismic",
+   "folder": "01-geo-seismic",
+   "title": "Geo-seismic: USGS quakes on the globe, IRIS seismo-acoustics in the bridge",
+   "shape": "Point-process transducer (USGS) -> band claim -> residual router. The globe shows every event; nothing tests a rate.",
+   "gev_paths": [
+    "src/data/earthquakes.js",
+    "src/data/analystEngine.js",
+    "src/data/manager.js"
+   ],
+   "bridge_paths": [
+    "Hurricane/seismo_fetch.py",
+    "Hurricane/bridges/seismo_encoder.py",
+    "field/field_claim_loop.py",
+    "sensing/processing/anomaly_detector.py",
+    "bridges/pressure_encoder.py"
+   ],
+   "mounts": [
+    "earth-systems",
+    "physics-guard",
+    "noise-sensor"
+   ],
+   "siblings": [
+    "atmosphere-storm",
+    "feed-integrity",
+    "analyst-agent"
+   ],
+   "avenues": [
+    {
+     "id": "av-geo-1",
+     "title": "USGS feed as a transducer for the field claim loop",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-geo-2",
+     "title": "Aftershock structure as the NOISE_AS_SIGNAL positive control",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-geo-3",
+     "title": "Depth bands are a 2-bit non-Gray code",
+     "direction": "bridge->gev",
+     "cost": "trivial"
+    }
+   ]
+  },
+  {
+   "id": "atmosphere-storm",
+   "folder": "02-atmosphere-storm",
+   "title": "Atmosphere and storm: Open-Meteo + FIRMS on the globe, NDBC buoys + HURDAT2 in the bridge",
+   "shape": "Two live thermal/fluid feeds on the globe (weather, fires) and one live thermal/fluid feed in the bridge (buoys) that has never been drawn.",
+   "gev_paths": [
+    "src/weatherEffectsMath.js",
+    "src/data/firmsAdapt.js",
+    "src/data/firmsHeatmap.js",
+    "src/styles/thermal.js",
+    "DATA_SOURCES.md"
+   ],
+   "bridge_paths": [
+    "Hurricane/noaa_fetch.py",
+    "Hurricane/hurricane_coupling.py",
+    "GI/hurricane_validator.py",
+    "bridges/thermal_encoder.py",
+    "fabrication/temperature.py",
+    "physical_coupling_matrix.py"
+   ],
+   "mounts": [
+    "earth-systems",
+    "physics-guard",
+    "urban-resilience",
+    "noise-sensor"
+   ],
+   "siblings": [
+    "geo-seismic",
+    "feed-integrity",
+    "infrastructure",
+    "sensing-edge"
+   ],
+   "avenues": [
+    {
+     "id": "av-atm-1",
+     "title": "NDBC buoys as a GEV data layer",
+     "direction": "bridge->gev",
+     "cost": "medium"
+    },
+    {
+     "id": "av-atm-2",
+     "title": "NHC active storms as annotation polygons",
+     "direction": "bridge->gev",
+     "cost": "low"
+    },
+    {
+     "id": "av-atm-3",
+     "title": "FIRMS confidence <-> epistemology grade",
+     "direction": "both",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-atm-4",
+     "title": "Buoy pressure/wind residuals through the claim loop during a named storm",
+     "direction": "bridge->bridge",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "orbital",
+   "folder": "03-orbital",
+   "title": "Orbital: CelesTrak TLEs and SGP4 on the globe, gravity encoder and precession in the bridge",
+   "shape": "TLE -> SGP4 -> position is a forecast whose error grows with epoch age. GEV draws it; the bridge has the potential-energy encoder and a drift detector but no orbit.",
+   "gev_paths": [
+    "src/data/satellites.js",
+    "src/data/issPass.js",
+    "src/data/rocketLaunches.js",
+    "src/data/geoid.js",
+    "src/celestialRing.js"
+   ],
+   "bridge_paths": [
+    "bridges/gravity_encoder.py",
+    "Negentropic/precession.py",
+    "geometric_intelligence/network/trend.py",
+    "Engine/spatial_grid.py"
+   ],
+   "mounts": [
+    "orbital-phycom",
+    "fractal-compass",
+    "keystone-codex"
+   ],
+   "siblings": [
+    "feed-integrity",
+    "encoding-wire",
+    "mobility-transport"
+   ],
+   "avenues": [
+    {
+     "id": "av-orb-1",
+     "title": "SGP4 state -> gravity encoder payload",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-orb-2",
+     "title": "TLE epoch age as a drift claim",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-orb-3",
+     "title": "precession.py vs celestialRing.js cross-check",
+     "direction": "both",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-orb-4",
+     "title": "ISS pass windows as orbital-phycom link opportunities",
+     "direction": "gev->ecosystem",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "mobility-transport",
+   "folder": "04-mobility-transport",
+   "title": "Mobility: ADS-B flights, AIS vessels, road traffic on the globe; interval propagation and residual routing in the bridge",
+   "shape": "A dead-reckoning coast between polls is a point forecast. The bridge's Kimchi engine widens an interval instead and flags when the fitted regime expired.",
+   "gev_paths": [
+    "src/data/motionModel.js",
+    "src/data/routePlausible.js",
+    "src/data/flights.js",
+    "src/data/aisWatchdog.js",
+    "src/data/traffic.js",
+    "scripts/track-regression.mjs"
+   ],
+   "bridge_paths": [
+    "Kimchi/forward_predict.py",
+    "Kimchi/horizon_sweep.py",
+    "field/field_claim_loop.py",
+    "sensing/processing/anomaly_detector.py"
+   ],
+   "mounts": [
+    "trdap",
+    "urban-resilience",
+    "be2-communication",
+    "cyclic"
+   ],
+   "siblings": [
+    "feed-integrity",
+    "orbital",
+    "detection-attention",
+    "analyst-agent"
+   ],
+   "avenues": [
+    {
+     "id": "av-mob-1",
+     "title": "Coast error vs coast time, measured from GEV's own fix history",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-mob-2",
+     "title": "Cross-track distance as a band claim",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-mob-3",
+     "title": "Traffic simulation must enter the bridge as 'asserted'",
+     "direction": "gev->bridge",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-mob-4",
+     "title": "Validity scope on the kinematic constants",
+     "direction": "bridge->gev",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "infrastructure",
+   "folder": "05-infrastructure",
+   "title": "Infrastructure: datacenters, dams, submarine cables, installations on the globe; energy coupling and consent in the bridge",
+   "shape": "Dams are G->EM nodes, datacenters are EM->T sinks, cables are EM information channels. The coupling matrix has the efficiencies; the globe has the positions; neither has the flows.",
+   "gev_paths": [
+    "src/data/local_data/datacenters/README.md",
+    "src/data/local_data/dams/README.md",
+    "src/data/local_data/telegeography_submarine_cables/README.md",
+    "src/data/militaryInstallations.js",
+    "src/data/localGeojson.js",
+    "docs/CURRENT-STATE.md"
+   ],
+   "bridge_paths": [
+    "physical_coupling_matrix.py",
+    "mappings/field_system.py",
+    "Negentropic/persistence.py",
+    ".fieldlink.json",
+    "fabrication/ledger.py"
+   ],
+   "mounts": [
+    "thermodynamic-accountability",
+    "component-failure",
+    "urban-resilience",
+    "resilience",
+    "coop"
+   ],
+   "siblings": [
+    "atmosphere-storm",
+    "feed-integrity",
+    "visualization",
+    "detection-attention"
+   ],
+   "avenues": [
+    {
+     "id": "av-inf-1",
+     "title": "Coupling-matrix nodes at geographic positions",
+     "direction": "gev->bridge",
+     "cost": "medium"
+    },
+    {
+     "id": "av-inf-2",
+     "title": "Consent gate on any GEV dataset mounted into the atlas",
+     "direction": "gev->bridge",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-inf-3",
+     "title": "Installation feed as a stale-aware claim",
+     "direction": "gev->bridge",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "feed-integrity",
+   "folder": "06-feed-integrity",
+   "title": "Feed integrity: GEV's six feed states and serve-stale caches; the bridge's epistemology grades, drift detector and instrument route",
+   "shape": "Both repos already refuse to render a dead channel as healthy. They do it in two vocabularies. One table joins them.",
+   "gev_paths": [
+    "src/data/manager.js",
+    "src/data/retryableLoad.js",
+    "src/data/adsbLolFallback.js",
+    "CHANGELOG.md",
+    "scripts/track-regression.mjs",
+    "src/data/aisWatchdog.js"
+   ],
+   "bridge_paths": [
+    "sensing/processing/epi_classifier.py",
+    "geometric_intelligence/network/trend.py",
+    "field/field_claim_loop.py",
+    "repo_guard.py",
+    "adaptive_sim/adaptive_sim_framework.py",
+    "playground/PRINCIPLES.json"
+   ],
+   "mounts": [
+    "noise-sensor",
+    "physics-guard",
+    "logic-ferret",
+    "component-failure",
+    "symbolic-sensors"
+   ],
+   "siblings": [
+    "geo-seismic",
+    "atmosphere-storm",
+    "orbital",
+    "mobility-transport",
+    "infrastructure",
+    "sensing-edge",
+    "analyst-agent"
+   ],
+   "avenues": [
+    {
+     "id": "av-fdi-1",
+     "title": "One feed-state to epistemology table",
+     "direction": "both",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-fdi-2",
+     "title": "Refusal-cached-as-data as a registered principle instance",
+     "direction": "gev->bridge",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-fdi-3",
+     "title": "A null run for the tracking harness",
+     "direction": "bridge->gev",
+     "cost": "low"
+    },
+    {
+     "id": "av-fdi-4",
+     "title": "Age distributions instead of a stale boolean",
+     "direction": "bridge->gev",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "sensing-edge",
+   "folder": "07-sensing-edge",
+   "title": "Sensing edge: public cameras and radio on the globe; Pi Zero field nodes, LoRa, HAM and CB relay in the bridge",
+   "shape": "GEV consumes other people's sensors over HTTP. The bridge builds its own and moves their readings over radio. The seam is the .obs line.",
+   "gev_paths": [
+    "src/data/cctv.js",
+    "src/data/radio.js",
+    "config/cctv_sources.shinjuku.json",
+    "SECURITY.md"
+   ],
+   "bridge_paths": [
+    "sensing/sensing_node.py",
+    "sensing/processing/primitives_encoder.py",
+    "sensing/transmission/cb_relay_format.py",
+    "sensing/transmission/ham_kiss_wrapper.py",
+    "sensing/transmission/lora_transmit.py",
+    "sensing/hardware/tier3_rf_sensing.md",
+    "sensing/processing/claim_match.py"
+   ],
+   "mounts": [
+    "be2-communication",
+    "symbolic-sensors",
+    "noise-sensor",
+    "biogrid",
+    "living-intelligence"
+   ],
+   "siblings": [
+    "atmosphere-storm",
+    "feed-integrity",
+    "encoding-wire",
+    "analyst-agent"
+   ],
+   "avenues": [
+    {
+     "id": "av-sen-1",
+     "title": "A field-nodes layer: .obs lines on the globe",
+     "direction": "bridge->gev",
+     "cost": "medium"
+    },
+    {
+     "id": "av-sen-2",
+     "title": "Camera pack schema as a sensor-pack schema",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-sen-3",
+     "title": "A spoken relay through the voice agent",
+     "direction": "both",
+     "cost": "high"
+    }
+   ]
+  },
+  {
+   "id": "analyst-agent",
+   "folder": "08-analyst-agent",
+   "title": "Analyst and agent: spoken queries and voice tools on the globe; residual router, T1-T4 claim tester and null gates in the bridge",
+   "shape": "GEV answers questions over records and confirms only what happened. The bridge proposes routes with evidence and refuses to conclude. Same posture, opposite directions.",
+   "gev_paths": [
+    "src/data/analystEngine.js",
+    "src/voice/gevActions.js",
+    "vite.config.js",
+    "src/hudSummaryResponse.js"
+   ],
+   "bridge_paths": [
+    "field/field_claim_loop.py",
+    "github/claim_playground/claim_tester.py",
+    "AISS/sovereignty_evaluator.py",
+    "playground/playground.py",
+    "Kimchi/constraint_playground.py",
+    "META-PROTOCOL.md"
+   ],
+   "mounts": [
+    "haas",
+    "defense",
+    "logic-ferret",
+    "ai-arena",
+    "ai-human-audit",
+    "adaptive-intelligence"
+   ],
+   "siblings": [
+    "feed-integrity",
+    "geo-seismic",
+    "mobility-transport",
+    "sensing-edge",
+    "detection-attention"
+   ],
+   "avenues": [
+    {
+     "id": "av-agt-1",
+     "title": "Coverage and feed state on every narrated answer",
+     "direction": "bridge->gev",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-agt-2",
+     "title": "A spoken claim through T1-T4",
+     "direction": "gev->bridge",
+     "cost": "medium"
+    },
+    {
+     "id": "av-agt-3",
+     "title": "A null harness for the HUD summary",
+     "direction": "bridge->gev",
+     "cost": "low"
+    },
+    {
+     "id": "av-agt-4",
+     "title": "The analyst result set as a Reading",
+     "direction": "gev->bridge",
+     "cost": "low"
+    }
+   ]
+  },
+  {
+   "id": "detection-attention",
+   "folder": "09-detection-attention",
+   "title": "Detection and attention: bounded cohorts, label quotas, focus and the render governor on the globe; pins, strobe scheduling and drill targets in the bridge",
+   "shape": "Both repos ration attention: which of 12k objects gets a label, which frame gets a heavy computation. GEV's governor is the better design. The bridge has the null test the quota weights have never had.",
+   "gev_paths": [
+    "src/data/detectionCohort.js",
+    "src/data/labelArbiter.js",
+    "src/data/focusDeemphasis.js",
+    "src/renderGovernor.js",
+    "src/overlays/worldOverlayAllocation.worker.mjs",
+    "scripts/track-regression.mjs"
+   ],
+   "bridge_paths": [
+    "experiments/silicon_speculative/topological_pin.py",
+    "sensing/exploration/stroboscopic_scheduler.py",
+    "sensing/exploration/rl_router.py",
+    "bridges/cognitive/emotion_encoder.py",
+    "AISS/sovereignty_evaluator.py",
+    "Engine/spatial_grid.py"
+   ],
+   "mounts": [
+    "shadow-hunting",
+    "fractal-compass",
+    "geometric-manifold"
+   ],
+   "siblings": [
+    "mobility-transport",
+    "infrastructure",
+    "analyst-agent",
+    "visualization"
+   ],
+   "avenues": [
+    {
+     "id": "av-det-1",
+     "title": "Null harness on allocateLayerQuotas layerWeights",
+     "direction": "bridge->gev",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-det-2",
+     "title": "Render governor holds replace the strobe modulo",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-det-3",
+     "title": "Priority is a projection and says so",
+     "direction": "bridge->gev",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-det-4",
+     "title": "The tracking harness as a worked pin",
+     "direction": "gev->bridge",
+     "cost": "trivial"
+    }
+   ]
+  },
+  {
+   "id": "encoding-wire",
+   "folder": "10-encoding-wire",
+   "title": "Encoding and wire: share-link tokens and layer-state params on the globe; Gray codes, GEIS tokens, the 32-bit bridge header and the 41-byte claim in the bridge",
+   "shape": "GEV serialises a view into a URL hash. The bridge serialises a measurement into Gray bands and a claim into 41 bytes. Both have a version field; only one has a checksum.",
+   "gev_paths": [
+    "src/sharelink.js",
+    "src/data/layerState.js",
+    "src/scopeMask.js"
+   ],
+   "bridge_paths": [
+    "bridges/abstract_encoder.py",
+    "GEIS/gies_codec.py",
+    "bridge_protocol.yaml",
+    "CLAIM_SCHEMA.py",
+    "bridges/glyph_state_encoder.py",
+    "bridge_contract_manifest.json"
+   ],
+   "mounts": [
+    "rosetta",
+    "soms",
+    "mandala",
+    "keystone-codex"
+   ],
+   "siblings": [
+    "orbital",
+    "sensing-edge",
+    "visualization"
+   ],
+   "avenues": [
+    {
+     "id": "av-enc-1",
+     "title": "A view as a Primitive over a voice-only channel",
+     "direction": "both",
+     "cost": "low"
+    },
+    {
+     "id": "av-enc-2",
+     "title": "Layer tokens and the modality nibble in one table",
+     "direction": "both",
+     "cost": "trivial"
+    },
+    {
+     "id": "av-enc-3",
+     "title": "GEV feed claims in .claims line format",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-enc-4",
+     "title": "Share-link round-trip as a lossless-ness test",
+     "direction": "bridge->gev",
+     "cost": "trivial"
+    }
+   ]
+  },
+  {
+   "id": "visualization",
+   "folder": "11-visualization",
+   "title": "Visualization: Cesium globe, GLSL styles and world overlays; React + Three.js field view, the JS solver mirror and Gaussian splats in the bridge",
+   "shape": "The bridge has a field solver with a JavaScript mirror that has never been drawn on a globe. GEV has a globe that has never drawn a field.",
+   "gev_paths": [
+    "src/overlays/worldOverlay.js",
+    "src/overlays/worldOverlayTokens.js",
+    "src/data/trailRenderer.js",
+    "src/styles/surveillance.js",
+    "src/data/firmsHeatmap.js"
+   ],
+   "bridge_paths": [
+    "Front end/solver.js",
+    "Front end/Components/FieldVisualization.jsx",
+    "Engine/gaussian_splats/gaussian_4d.py",
+    "docs/gaussian_splats/01_4d_splats.md",
+    "Engine/engine_benchmark.py",
+    "mappings/octahedral_state_encoding.json"
+   ],
+   "mounts": [
+    "mandala",
+    "polyhedral",
+    "rosetta"
+   ],
+   "siblings": [
+    "infrastructure",
+    "detection-attention",
+    "encoding-wire"
+   ],
+   "avenues": [
+    {
+     "id": "av-vis-1",
+     "title": "solver.js as a GEV layer",
+     "direction": "bridge->gev",
+     "cost": "medium"
+    },
+    {
+     "id": "av-vis-2",
+     "title": "Trails as 4D splat chains",
+     "direction": "gev->bridge",
+     "cost": "low"
+    },
+    {
+     "id": "av-vis-3",
+     "title": "Octahedral glyphs as overlay tokens",
+     "direction": "bridge->gev",
+     "cost": "low"
+    }
+   ]
+  }
+ ]
+}

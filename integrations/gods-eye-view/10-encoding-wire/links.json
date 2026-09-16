@@ -1,0 +1,124 @@
+{
+ "id": "encoding-wire",
+ "folder": "10-encoding-wire",
+ "title": "Encoding and wire: share-link tokens and layer-state params on the globe; Gray codes, GEIS tokens, the 32-bit bridge header and the 41-byte claim in the bridge",
+ "shape": "GEV serialises a view into a URL hash. The bridge serialises a measurement into Gray bands and a claim into 41 bytes. Both have a version field; only one has a checksum.",
+ "flow": [
+  "  view {lat, lon, alt, heading, pitch, style, layers} ──sharelink──▶ #hash   (GEV; version, no checksum)",
+  "  16 layer ids ──LAYER_STATE_REGISTRY──▶ single letters   a f m s e w ...",
+  "",
+  "  measurement ──Gray bands──▶ payload_bits ──bridge_protocol header (magic, ver, modality, len) + XOR",
+  "  claim ──CLAIM_SCHEMA──▶ .claims line (80 tok) ──▶ 41 bytes",
+  "",
+  "  av-enc-1: view ──Gray bands──▶ cb_relay script ──voice──▶ decode ──▶ share link   (a noisy channel)",
+  "  av-enc-3: 'dN_quakes/dt within band' as a .claims line with fail=['feed_state != nominal']",
+  "  'flir' on the wire names a sensor the app does not have"
+ ],
+ "notes": {
+  "bottleneck": "A share link has no checksum and fails open; a bridge frame has one and fails closed. Do not unify them; document why they differ.",
+  "leverage": "The .claims line format (80 tokens) is the cheapest way to make a GEV feed claim readable by every repo in the ecosystem.",
+  "harmonics": "Gray banding is irrelevant on a URL bar and decisive on a voice channel; av-enc-1 is where the bridge's rule 3 earns its keep in GEV.",
+  "tertiary": "Every wire token is a claim. 'flir' claims a sensor."
+ },
+ "gev": [
+  {
+   "path": "src/sharelink.js",
+   "role": "hash format: lat, lon, alt, heading, pitch, style token, bloom, hud, detection, map; STYLE_TO_URL maps thermal -> 'flir'"
+  },
+  {
+   "path": "src/data/layerState.js",
+   "role": "LAYER_STATE_REGISTRY: 16 single-letter tokens; LAYER_STATE_VERSION = 2; encode/decodeLayerStateParams"
+  },
+  {
+   "path": "src/scopeMask.js",
+   "role": "clampScopeTerminusPct: a bounded scalar on the wire"
+  }
+ ],
+ "bridge": [
+  {
+   "path": "bridges/abstract_encoder.py",
+   "role": "BinaryBridgeEncoder: from_geometry()/to_binary(), Gray bands so adjacent values differ in one bit"
+  },
+  {
+   "path": "GEIS/gies_codec.py",
+   "role": "bijective 7-bit token codec, all four operators (GIES-4/8)"
+  },
+  {
+   "path": "bridge_protocol.yaml",
+   "role": "32-bit header: magic, version nibble, modality nibble, 16-bit length; XOR trailer"
+  },
+  {
+   "path": "CLAIM_SCHEMA.py",
+   "role": ".claims line format and 41-byte binary claim via CLAIM_TABLE.json"
+  },
+  {
+   "path": "bridges/glyph_state_encoder.py",
+   "role": "33-byte wire that is lossy while documented exact (GLY-5): the failure to not repeat"
+  },
+  {
+   "path": "bridge_contract_manifest.json",
+   "role": "payload_bits per domain; vortex is variable-width and says so"
+  }
+ ],
+ "ecosystem": [
+  {
+   "mount": "rosetta",
+   "why": "shape/family/entity semantics; the layer registry is a family table"
+  },
+  {
+   "mount": "soms",
+   "why": "src/geometric_encoder.py was ported from this repo; a third token surface to keep aligned"
+  },
+  {
+   "mount": "mandala",
+   "why": "octahedral glyph consumer of the encoding"
+  },
+  {
+   "mount": "keystone-codex",
+   "why": "a verifiable codec is a library entry"
+  }
+ ],
+ "siblings": [
+  "orbital",
+  "sensing-edge",
+  "visualization"
+ ],
+ "avenues": [
+  {
+   "id": "av-enc-1",
+   "title": "A view as a Primitive over a voice-only channel",
+   "direction": "both",
+   "cost": "low",
+   "moves": "camera {lat, lon, alt, heading, pitch} + layer tokens -> Gray bands -> cb_relay_format script; the receiver decodes to a share link. Banding matters here because the channel is a human voice on a noisy radio, not a URL bar",
+   "fails_if": "banded altitude (say 8 bands over 100 m..20,000 km) does not reproduce the framing; then the band count is the finding and it is a number, not a design"
+  },
+  {
+   "id": "av-enc-2",
+   "title": "Layer tokens and the modality nibble in one table",
+   "direction": "both",
+   "cost": "trivial",
+   "moves": "LAYER_STATE_REGISTRY (16 letters) and bridge_protocol's 8 modalities side by side with version and checksum columns; a table, so the collision stage (repo_guard stage 4) can see two names for one thing",
+   "fails_if": "there is no mapping worth having because a GEV layer is a source and a bridge modality is a physics; the table then documents that they do not correspond, which is still the useful output"
+  },
+  {
+   "id": "av-enc-3",
+   "title": "GEV feed claims in .claims line format",
+   "direction": "gev->bridge",
+   "cost": "low",
+   "moves": "'dN_quakes/dt within band under bounds(global, 24h, M2.5+)' as a .claims line with meas=['usgs all_day'] and fail=['feed_state != nominal']; 80 tokens instead of 600",
+   "fails_if": "CLAIM_SCHEMA's cycle enum has no value for a polled feed; then the enum is short one class and that is a schema change, not an adapter"
+  },
+  {
+   "id": "av-enc-4",
+   "title": "Share-link round-trip as a lossless-ness test",
+   "direction": "bridge->gev",
+   "cost": "trivial",
+   "moves": "encodeLayerStateParams -> decode -> encode must be identity (repo rule 4, applied to GEV); GEV has unit tests, this names the property",
+   "fails_if": "float rounding in the hash makes a second encode differ; then the link is lossy and the created-at param is doing the work of a version, which it is not"
+  }
+ ],
+ "interference": [
+  "'flir' on the wire names a sensor the app does not have; see 02-atmosphere-storm. A token is a claim",
+  "The bridge header has a checksum and the share link does not; a mangled link fails open to defaults, a mangled bridge frame fails closed. Different channels, different correct answers"
+ ]
+}

@@ -20,7 +20,8 @@
     "bridge_convert": "scripts/bridge_convert.py",
     "nfs_factorization": "experiments/geometric_nfs.py",
     "c_acceleration": "experiments/c/gnfs_ctypes.py",
-    "frontend": "Front end/App.jsx"
+    "frontend": "Front end/App.jsx",
+    "gods_eye_view_integration_map": "integrations/gods-eye-view/README.md — 11 crosslinked domain folders; python integrations/gods-eye-view/crosslinks.py checks them"
   },
 
   "test_suites": {

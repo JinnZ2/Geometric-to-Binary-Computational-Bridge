@@ -79,3 +79,33 @@ add a new section above with:
 4. License compatibility
 5. What flows each way (modules, concepts, schemas)
 6. Reciprocal pointer text for the other side
+
+---
+
+## gods-eye-view (fork)
+
+- **Upstream**: https://github.com/bilawalsidhu/gods-eye-view — fork at https://github.com/JinnZ2/gods-eye-view-fork
+- **Fieldlink mount name**: none yet. Its bundled data packs have consent records in `integrations/gods-eye-view/05-infrastructure/consent.json`; a mount is declared only for packs with `share_ok: true`.
+- **Direction**: bidirectional, by avenue (each avenue in the map states its own)
+- **License**: MIT (their code) / per-dataset (their bundled data: ODbL, PDDL, public domain, one CC BY-NC-SA pack) / CC-BY-4.0 (this repo). Code crosses either way; data crosses only with a consent record; the NC pack does not cross.
+
+### What flows
+
+Nothing is wired yet. The map is `integrations/gods-eye-view/`: eleven domain
+folders, each with a `links.json` (authority) naming entry points on both
+sides, the fieldlink mounts that plug in, reciprocal sibling links, and
+avenues that each state what would make them FAIL. `crosslinks.py` checks
+all of it and exits nonzero; `tests/test_integration_crosslinks.py` checks
+the checker.
+
+Two artifacts already cross:
+
+| Artifact | Direction | What it is |
+|---|---|---|
+| `integrations/gods-eye-view/06-feed-integrity/feed_state_epistemology.py` | GEV → here | a port of `src/data/manager.js: layerFeedState()` joined to `sensing/processing/epi_classifier.py`'s four grades, tested against the cases GEV ships |
+| `docs/INTEGRATION_AVENUES.md` (in the fork) | here → GEV | a VIEW rendered by `crosslinks.py gev-view`; the folders here stay the authority |
+
+### Reciprocal pointer for the fork side
+
+Already placed at `docs/INTEGRATION_AVENUES.md` in the fork, rendered rather
+than written so it cannot drift from the map.

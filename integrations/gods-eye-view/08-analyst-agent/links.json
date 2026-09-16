@@ -1,0 +1,138 @@
+{
+ "id": "analyst-agent",
+ "folder": "08-analyst-agent",
+ "title": "Analyst and agent: spoken queries and voice tools on the globe; residual router, T1-T4 claim tester and null gates in the bridge",
+ "shape": "GEV answers questions over records and confirms only what happened. The bridge proposes routes with evidence and refuses to conclude. Same posture, opposite directions.",
+ "flow": [
+  "  voice ──realtime──▶ GEV_REALTIME_TOOLS (28) ──▶ gevActions: confirm only what happened   (GEV)",
+  "  'how many flights over Texas' ──▶ analystEngine.query ──▶ {items, coverage.layersQueried}",
+  "",
+  "  residual ──▶ route() ──▶ ranked candidates + evidence   (bridge: proposes, never concludes)",
+  "  text ──▶ claim_playground T1 T2 T3 T4 ──▶ four readings   (bridge: stdlib, keyless)",
+  "",
+  "  av-agt-1: coverage ⨝ layerFeedState ──▶ every narrated answer carries its feed state",
+  "  av-agt-2: transcript ──sidecar──▶ T1..T4 ──▶ readback of four readings, not a verdict",
+  "  av-agt-3: shuffle values vs ids ──▶ re-summarise ──▶ same text? then it never read them"
+ ],
+ "notes": {
+  "bottleneck": "Language boundary: GEV proxies are Node, the bridge's judges are Python. A keyless sidecar behind a Vite proxy is the seam.",
+  "leverage": "analystEngine already returns coverage; joining it with feed state is a one-line change with a large honesty gain.",
+  "harmonics": "Both agents refuse to conclude. Keep it that way: T1..T4 return four readings, never a pass/fail.",
+  "tertiary": "A voice tool that tests claims will be asked to test claims about the app; the null harness on the HUD summary is where that starts."
+ },
+ "gev": [
+  {
+   "path": "src/data/analystEngine.js",
+   "role": "pure query over record arrays: applyFilter, applyScope, follow-up memory; returns {items, coverage}; never fetches"
+  },
+  {
+   "path": "src/voice/gevActions.js",
+   "role": "client-side tool execution: confirm only what actually happened"
+  },
+  {
+   "path": "vite.config.js",
+   "role": "GEV_REALTIME_TOOLS (28 tools, ~line 5664) declared server-side; /api/openai/hud-summary; /api/realtime/token"
+  },
+  {
+   "path": "src/hudSummaryResponse.js",
+   "role": "LLM summary over the HUD state"
+  }
+ ],
+ "bridge": [
+  {
+   "path": "field/field_claim_loop.py",
+   "role": "route() proposes ranked candidates with evidence; next_query() spends against a ledger; yield_rate() reports what the spend bought"
+  },
+  {
+   "path": "github/claim_playground/claim_tester.py",
+   "role": "T1 thermodynamic closure, T2 cascade exposure, T3 scale invariance, T4 ontology translation; CLI takes raw text"
+  },
+  {
+   "path": "AISS/sovereignty_evaluator.py",
+   "role": "weights_are_flat reported beside every score; verdict_is_weight_sensitive()"
+  },
+  {
+   "path": "playground/playground.py",
+   "role": "null(): structure replaced by noise; broken(): a deliberately wrong version the checks must reject"
+  },
+  {
+   "path": "Kimchi/constraint_playground.py",
+   "role": "metacognition narrates its reasoning geometry before each act; unknowns are first-class"
+  },
+  {
+   "path": "META-PROTOCOL.md",
+   "role": "readings have outgoing edges; verdicts do not"
+  }
+ ],
+ "ecosystem": [
+  {
+   "mount": "haas",
+   "why": "human-automation-AI safety: handshake.py and risk.py are the contract a voice tool surface should honour"
+  },
+  {
+   "mount": "defense",
+   "why": "Symbolic-Defense-Protocol: voice is an untrusted input channel; coercion resistance applies to tool calls"
+  },
+  {
+   "mount": "logic-ferret",
+   "why": "fallacy detection over a spoken claim before it is tested"
+  },
+  {
+   "mount": "ai-arena",
+   "why": "argument competition: two analysts over the same records"
+  },
+  {
+   "mount": "ai-human-audit",
+   "why": "the audit protocol for an AI that narrates a live picture to a human"
+  },
+  {
+   "mount": "adaptive-intelligence",
+   "why": "substrate-independent intelligence theory the agent layer is an instance of"
+  }
+ ],
+ "siblings": [
+  "feed-integrity",
+  "geo-seismic",
+  "mobility-transport",
+  "sensing-edge",
+  "detection-attention"
+ ],
+ "avenues": [
+  {
+   "id": "av-agt-1",
+   "title": "Coverage and feed state on every narrated answer",
+   "direction": "bridge->gev",
+   "cost": "trivial",
+   "moves": "analystEngine already returns coverage.layersQueried; join it with layerFeedState() per layer so 'how many flights over Texas' is answered with 'from a stale OpenSky snapshot' when that is the case",
+   "fails_if": "narration drops the epistemic tag to sound fluent; the test is a stale fixture whose narration must contain the word"
+  },
+  {
+   "id": "av-agt-2",
+   "title": "A spoken claim through T1-T4",
+   "direction": "gev->bridge",
+   "cost": "medium",
+   "moves": "a test_claim tool: the transcript of an assertion -> claim_playground.cli -c '<text>' -> the four verdicts read back; a Python sidecar behind a Vite proxy, keyless",
+   "fails_if": "T1-T4 on raw text with no waste-entropy or subsidy inputs returns the same verdict for every sentence; then the tool is a null artifact and playground's null() gate is the check to run before shipping it"
+  },
+  {
+   "id": "av-agt-3",
+   "title": "A null harness for the HUD summary",
+   "direction": "bridge->gev",
+   "cost": "low",
+   "moves": "shuffle the record values against their ids and re-summarise; if the summary reads the same, it was never reading the records (repo_guard.null_harness applied to prose)",
+   "fails_if": "the summary is templated from counts alone and passes trivially; then the finding is that it is a count, and it should say so in the UI"
+  },
+  {
+   "id": "av-agt-4",
+   "title": "The analyst result set as a Reading",
+   "direction": "gev->bridge",
+   "cost": "low",
+   "moves": "query -> {count, min, max} is a projection of the record set; reading(channel=query_spec, value=count, projection='analystEngine.summarize', shape=items)",
+   "fails_if": "the claim loop is fed the count without the projection name; FCL-9 forbids it and the reading() constructor raises"
+  }
+ ],
+ "interference": [
+  "Both agents must not conclude. GEV's tools 'confirm only what actually happened'; the bridge's router 'proposes, it does not conclude'. A tool that returns a verdict from T1-T4 is a verdict, and META-PROTOCOL says verdicts have no outgoing edge. Return the four readings, not a pass/fail",
+  "The realtime agent runs on a paid API; the bridge's tools are stdlib. A sidecar that requires a key breaks GEV's keyless-first rule; claim_playground needs none"
+ ]
+}
