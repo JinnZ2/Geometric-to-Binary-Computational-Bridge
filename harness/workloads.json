@@ -1,0 +1,29 @@
+{
+ "_comment": "The workloads this order covers: the three source sets Engine/engine_benchmark.py has always timed. Each declares the CONDITIONS it instantiates; SELECTION.md's axes are read from here, never inferred. The dense and mixed sparsity workloads and multi-scale workloads are NOT in this order, so their cells print NOT_MEASURED.",
+ "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+ "workloads": [
+  {"name": "dipole",
+   "conditions": {"sparsity": "isolated", "scale_separation": "single",
+                  "why": "two point charges in an otherwise empty 4-unit box; one length scale"},
+   "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+   "sources": [
+    {"position": [0.3, 0.11, -0.7], "strength": 1e-9, "type": "charge"},
+    {"position": [1.3, -0.4, 0.2], "strength": -2e-9, "type": "charge"}]},
+  {"name": "quadrupole",
+   "conditions": {"sparsity": "isolated", "scale_separation": "single",
+                  "why": "four equal charges on the axes, 2-fold symmetric; one length scale"},
+   "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+   "sources": [
+    {"position": [1.0, 0.0, 0.0], "strength": 1e-9, "type": "charge"},
+    {"position": [-1.0, 0.0, 0.0], "strength": 1e-9, "type": "charge"},
+    {"position": [0.0, 1.0, 0.0], "strength": 1e-9, "type": "charge"},
+    {"position": [0.0, -1.0, 0.0], "strength": 1e-9, "type": "charge"}]},
+  {"name": "wire_charge",
+   "conditions": {"sparsity": "isolated", "scale_separation": "single",
+                  "why": "one current element and one charge; the element's B and the charge's E are both probed"},
+   "bounds": {"min": [-2.0, -2.0, -2.0], "max": [2.0, 2.0, 2.0]},
+   "sources": [
+    {"position": [0.0, 0.0, 0.0], "strength": 1.0, "type": "current", "direction": [0, 0, 1]},
+    {"position": [0.8, 0.2, 0.0], "strength": 5e-10, "type": "charge"}]}
+ ]
+}

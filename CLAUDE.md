@@ -62,6 +62,7 @@ python tests/test_aiss.py               # AISS framework shape/round-trip tests 
 python tests/test_aiss_scoring.py       # AISS scoring VALUES: placeholder removal, flat-weight null (26 tests)
 python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
 python tests/test_integration_crosslinks.py # God's Eye View integration map guard, IX-1..7 (37 tests, no deps)
+python tests/test_harness_contract.py    # Implementation contract, HC-1..6 (26 tests, no deps)
 
 # Pre-commit guard: null harness, symmetry veto, instrument reach, collisions, prose.
 # Exits nonzero on any stage-5 (prose) hit: licence mismatch across the four surfaces,
@@ -147,8 +148,14 @@ python adaptive_sim/adaptive_sim_framework.py --verify \
 # Run GEIS demo
 python GEIS/demo.py
 
-# Measured speedup: uniform grid vs adaptive octree, both timed
+# Measured speedup: uniform grid vs adaptive octree, both timed (standalone; the harness below supersedes it)
 python Engine/engine_benchmark.py
+
+# Implementation contract: several implementations of one spec, selected by CONDITIONS, no leaderboard
+python harness/probe.py                              # what THIS machine can run, before any run
+python harness/run.py                                # every runnable impl x every workload, res 16,32,48
+python harness/run.py --resolutions 16,32,48,64,96,128 --repeats 3   # the sweep, through the contract
+python harness/run.py --regenerate                   # SELECTION.md from harness/results.jsonl, no runs
 
 # Bridge format conversion
 python scripts/bridge_convert.py
@@ -203,6 +210,7 @@ cd "Front end" && npm install && npm run dev
 | AISS (shape) | `tests/test_aiss.py` | 27 | Evaluator/governance/CCGF round-trips and return-type shape |
 | AISS (values) | `tests/test_aiss_scoring.py` | 26 | Coherence placeholder removed, `total_score` weight-sum normalisation, flat-weight null harness, trust-score product form |
 | Experiments topology | `tests/test_experiments_topology.py` | 47 | Vacuum assertion tautology (VAC-1/4), mode-count floor (VAC-2), zero circulation gradient, pin removes the zero mode (ATT-1) |
+| Implementation contract | `tests/test_harness_contract.py` | 26 | HC-1..6: every manifest field required and the name tied to its folder; a versioned spec with seeded probes; the pure-Python reference reproduces the spec's Coulomb and current-element definitions; every status first-class and never blank; SELECTION.md renders NOT_RUNNABLE with its reason, counts NOT_MEASURED at the top and contains no best, rank or winner; a failing, hanging or malformed implementation becomes a record; harness/ imports only the standard library |
 | Integration map | `tests/test_integration_crosslinks.py` | 37 | IX-1..7: the God's Eye View map holds; a one-way sibling link, a missing path, an unknown mount, an avenue with no `fails_if`, a hand-edited view and an NC pack with a mount each FAIL the guard; avenue ids cannot read as claim ids; the feed-state port reproduces every case GEV ships; the coast-harness ports (arcOffsetEnu, estimateTurnRateDps, staleCoastLimitSeconds) and its mechanics on great-circle synthetics, with the real-fix measurement recorded as unrun |
 | Keating + seed | `tests/test_keating_seed.py` | 63 | Unique Keating minimum (KEA-1), exact inversion symmetry (KEA-7), phi vs lattice sites (KEA-3), gate-set coverage (KEA-4), Toffoli linearity (KEA-5), identity influence matrix (SEED-1), row-sum tautology (SEED-5) |
 | Er bounds | `tests/test_er_bounds.py` | 66 | Orbach saturation at 300 K (ER-1), LVM mass gate (ER-2), k_well/omega consistency (ER-3/4), implant dose (ER-7), Ge fraction (ER-5), energy-per-bit legality |
@@ -699,6 +707,27 @@ examples/                       Sample .gshape and .json files
 scripts/                        Utility scripts (bridge_convert.py)
 tests/                          Bridge and Engine test suites
 falsifier-survey/               Delivered Run 2 falsifier survey, this repo's share; filed, instructions pending
+
+harness/                        The implementation CONTRACT: one geometric spec in, one result record out.
+├── contract.py                   Spec format (versioned), MANIFEST.json schema, the five first-class
+│                                 statuses (OK, NOT_RUNNABLE, TIMEOUT, FAILED, NOT_APPLICABLE), the
+│                                 pure-Python reference field, accuracy, the impl-side finish(). stdlib.
+├── probe.py                      What THIS machine can run, before any run. stdlib.
+├── run.py                        Runs every runnable impl on every workload as a subprocess with a
+│                                 timeout; appends results.jsonl; generates SELECTION.md. stdlib.
+├── workloads.json                The workloads and the CONDITIONS each declares (sparsity, scale)
+└── results.jsonl                 Every result record ever produced here; SELECTION.md is its view
+implementations/                One folder per implementation. MANIFEST.json is the ONLY thing that
+│                                 describes it: name, language, dependencies ([] = stdlib), build,
+│                                 runs_on_phone, algorithm, author_claim (a claim, not a result).
+├── py_octree/                    The Engine's adaptive octree path, as a thin adapter (numpy)
+└── uniform_grid/                 The Engine's uniform grid, as a PEER implementation, not a reference
+SELECTION.md                    GENERATED by harness/run.py, never hand-edited. Axes are conditions:
+                                sparsity x scale separation with resolution swept, build tolerance,
+                                memory ceiling. Every impl that ran, with its number; no best column,
+                                no rank; NOT_MEASURED cells carry their reason and are counted at top.
+                                The stdlib-only rule is now PER FOLDER: harness/ is stdlib, each
+                                implementation declares its own dependencies in its manifest.
 
 integrations/gods-eye-view/     Integration map with the gods-eye-view fork (live globe: ADS-B, AIS,
                                 TLEs, USGS, FIRMS, weather, cameras, voice agent). One folder per

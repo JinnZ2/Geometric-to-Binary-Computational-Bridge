@@ -1,0 +1,12 @@
+{
+ "name": "py_octree",
+ "language": "python",
+ "dependencies": ["numpy"],
+ "build_required": false,
+ "build_command": null,
+ "runs_on_phone": "unknown",
+ "algorithm": "Engine/spatial_grid.py adaptive octree (max_depth 4, refine near sources), one Coulomb/Biot-Savart call per leaf via Engine/simd_optimizer.py; probes answered by nearest leaf sample",
+ "author_claim": "suits isolated sources in a large box, where most of the volume is far from any source and a uniform grid spends its points on empty space; the point count is fixed by the source layout, not by the resolution asked for, so the claim is that it wins once the uniform grid is asked for more points than the leaves supply",
+ "entry": ["{python}", "impl.py"],
+ "covers": ["*"]
+}
