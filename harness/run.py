@@ -289,6 +289,9 @@ def render_selection(records, manifests, workloads, probe_report=None) -> str:
     if not compiled:
         L.append("- build tolerance=compiler available: NOT_MEASURED(no compiled implementation in this order)")
     L.append("")
+    import matched_accuracy  # local import: matched_accuracy imports this module
+    L.append("")
+    L.append(matched_accuracy.render(matched_accuracy.matched_rows(records)))
     return "\n".join(L)
 
 

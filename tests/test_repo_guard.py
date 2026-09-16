@@ -449,7 +449,7 @@ class TestProseStage(unittest.TestCase):
     def test_bare_mit_needs_a_declaring_context(self):
         self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
         self._w("a.py", '# Nature (2026). MIT/Ju lab.\nDENY = ["MIT", "GPL"]\n')
-        self._w("b.md", "`AGPL-3` drops out of the index on its own\n")
+        self._w("b.md", "`AG" + "PL-3` drops out of the index on its own\n")   # split so claims_index sees no id here
         self.assertEqual(licence_scan(self.tmp), [])
         self._w("c.py", "# MIT License\n")
         self.assertEqual([h[2] for h in licence_scan(self.tmp)], ["MIT"])
@@ -468,6 +468,53 @@ class TestProseStage(unittest.TestCase):
         self._w("legacy/old.py", "# MIT License\n")
         self._w("x/evidence/as_received.py", "# MIT License\n")
         self.assertEqual(licence_scan(self.tmp), [])
+
+    # -- licence-ref markers ------------------------------------------------
+    def _cc0_tree(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+
+    def test_marked_external_line_is_counted_not_a_mismatch(self):
+        self._cc0_tree()
+        self._w("notes.md", "Their code is MIT. <!-- licence-ref: external, GEV data pack -->\n")
+        self._w("consent.json", '{"licence": "ODbL", "licence_ref": "external, GEV data pack"}\n')
+        marked = {}
+        self.assertEqual(licence_scan(self.tmp, marked=marked), [])
+        self.assertEqual(sorted((m[0], m[2], m[3]) for m in marked["external"]),
+                         [("consent.json", "ODbL", "GEV data pack"), ("notes.md", "MIT", "GEV data pack")])
+
+    def test_marked_historical_line_is_a_record_not_a_mismatch(self):
+        self._cc0_tree()
+        self._w("REVIEW.md", "- `LICENSE`: MIT License text. <!-- licence-ref: historical, audit record -->\n")
+        marked = {}
+        self.assertEqual(licence_scan(self.tmp, marked=marked), [])
+        self.assertEqual([m[2] for m in marked["historical"]], ["MIT"])
+        self.assertNotIn("external", marked)
+
+    def test_marker_that_names_nobody_is_a_defect(self):
+        self._cc0_tree()
+        self._w("notes.md", "Their code is MIT. <!-- licence-ref: external -->\n")
+        hits = licence_scan(self.tmp)
+        self.assertEqual(len(hits), 1)
+        self.assertIn("MARKER DEFECT", hits[0][3])
+        self.assertIn("names nobody", hits[0][3])
+
+    def test_marking_this_repos_own_licence_external_is_a_defect(self):
+        self._cc0_tree()
+        self._w("notes.md", "This repo is MIT. <!-- licence-ref: external, GEV -->\n")
+        hits = licence_scan(self.tmp)
+        self.assertEqual(len(hits), 1)
+        self.assertIn("attributes MIT to this repo", hits[0][3])
+
+    def test_external_marker_survives_this_repo_named_beside_the_canonical_id(self):
+        self._cc0_tree()
+        self._w("a.md", "MIT (their code) / CC0-1.0 (this repo). <!-- licence-ref: external, GEV -->\n")
+        self._w("b.md", "GEV code is MIT; This repo is CC0-1.0. <!-- licence-ref: external, GEV -->\n")
+        self.assertEqual(licence_scan(self.tmp), [])
+
+    def test_unmarked_mismatch_still_fires_beside_a_marked_one(self):
+        self._cc0_tree()
+        self._w("a.md", "Their code is MIT. <!-- licence-ref: external, GEV -->\nLicense: MIT\n")
+        self.assertEqual([(h[1], h[2]) for h in licence_scan(self.tmp)], [(2, "MIT")])
 
     # -- speedup ----------------------------------------------------------
     def test_speedup_without_benchmark_fires(self):

@@ -75,7 +75,7 @@ Each one names what would make it FAIL. An avenue that cannot fail is not listed
 
 ## Interference
 
-- Licence asymmetry: this repo is CC0-1.0 and the hub of a CC0/CC-BY/MIT ecosystem; CC BY-NC-SA data cannot cross that boundary. The consent field exists for this
+- Licence asymmetry: this repo is CC0-1.0 and the hub of a CC0/CC-BY/MIT ecosystem; CC BY-NC-SA data cannot cross that boundary. <!-- licence-ref: external, ecosystem repos and gods-eye-view data --> The consent field exists for this
 - Infrastructure entities are polygons; every bridge helper wants a point. Centroid is a projection and must be named (FCL-9)
 - The INFRASTRUCTURE tile was cut for frame rate. The bridge's octree (Engine/spatial_grid.py) is the right shape for a globe LOD and the wrong implementation (ENG-5); do not transplant it as-is
 

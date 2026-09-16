@@ -29,12 +29,12 @@ is stated explicitly rather than papered over.
 ### 1. Inconsistencies
 
 **1.1 — Four different licenses claimed across the repo (highest severity).**
-- `LICENSE` (root, 21 lines): full MIT License text, copyright JinnZ2 2025.
-- `CLAUDE.md` header (line 5 of this session's system context): "License: CC-BY-4.0."
+- `LICENSE` (root, 21 lines): full MIT License text, copyright JinnZ2 2025. <!-- licence-ref: historical, REVIEW.md audit record of the pre-CC0 state -->
+- `CLAUDE.md` header (line 5 of this session's system context): "License: CC-BY-4.0." <!-- licence-ref: historical, REVIEW.md audit record of the pre-CC0 state -->
 - `README.md` (top banner + `## License` section): "Public domain (CC0)... CC0 (public domain) per author intent."
 - `CITATION.cff` line 8: `license: CC0-1.0`.
 - `metadata.json` line 6: `"license": "CC0"`, and line 48 already contains a `note_on_license` field acknowledging the LICENSE/CC0 mismatch.
-- `README.md` and `FALSIFIABILITY_NOTICE.txt` both already self-disclose the LICENSE-vs-CC0 conflict, but **`CLAUDE.md`'s "CC-BY-4.0" is a *third*, undisclosed value that contradicts even the author's own acknowledged CC0 intent**, and the root `LICENSE` file — the one GitHub's license detector and most legal tooling actually read — still says MIT.
+- `README.md` and `FALSIFIABILITY_NOTICE.txt` both already self-disclose the LICENSE-vs-CC0 conflict, but **`CLAUDE.md`'s "CC-BY-4.0" is a *third*, undisclosed value that contradicts even the author's own acknowledged CC0 intent**, and the root `LICENSE` file — the one GitHub's license detector and most legal tooling actually read — still says MIT. <!-- licence-ref: historical, REVIEW.md audit record of the pre-CC0 state -->
 - **Fix:** replace `LICENSE`'s contents with the CC0 1.0 Universal text (https://creativecommons.org/publicdomain/zero/1.0/legalcode.txt), then remove the now-resolved reconciliation notes from `README.md`, `FALSIFIABILITY_NOTICE.txt`, and `metadata.json`, and correct `CLAUDE.md`'s header to `License: CC0-1.0`.
 
 **1.2 — `CLAUDE.md`'s own test counts contradict each other and reality.**
@@ -250,7 +250,7 @@ No formal proof system exists anywhere in the repo (no `sympy`/`z3`/`Coq`/`Lean`
 | "Why This Matters" | ✅ Present | README's "🌟 Why This Matters" section. |
 | Structured metadata (YAML frontmatter/JSON-LD) | ❌ Missing in markdown | `metadata.json` exists as a separate file but isn't embedded as frontmatter in `README.md`. |
 | Clear public API import example | ⚠️ Present but wrong | `from geometric_bridge import FieldSolver` doesn't exist (1.6) — needs a real replacement. |
-| Open license clearly marked | ⚠️ Marked but contradictory | Four different values across four files (1.1) — worse than missing, since automated license detectors will read `LICENSE` and report MIT regardless of stated intent. **Fix this first; it undermines every other discoverability claim.** |
+| Open license clearly marked | ⚠️ Marked but contradictory | Four different values across four files (1.1) — worse than missing, since automated license detectors will read `LICENSE` and report MIT regardless of stated intent. **Fix this first; it undermines every other discoverability claim.** | <!-- licence-ref: historical, REVIEW.md audit record of the pre-CC0 state -->
 | GitHub Pages / docs site | ❌ Missing | No `_config.yml`/`mkdocs.yml`/`gh-pages` index found. Optional — CLAUDE.md/README.md already serve much of this role. |
 | Anonymous feedback mechanism | ❌ Missing | `.github/` has only `workflows/`, no `ISSUE_TEMPLATE/` — notable since `FALSIFIABILITY_NOTICE.txt` explicitly asks readers to "report discrepancy as a GitHub issue with evidence" with no template to structure that. |
 

@@ -1,40 +1,72 @@
-# PROSE_AUDIT — snapshot of `python repo_guard.py prose`, 2026-09-16 (second pass)
+# PROSE_AUDIT — snapshot of `python repo_guard.py prose`, 2026-09-16 (third pass)
 
 > A VIEW. The authority is stage 5 of `repo_guard.py`; rerun it before trusting this file.
 > Every hit is a fix for a separate pass. Nothing here was auto-changed.
 >
 > Licence: the four surfaces agree on CC0-1.0 and every per-file header in this repo's own
-> code and docs now says CC0-1.0. The residue below is prose that names OTHER projects'
-> licences (GEV data packs, sibling toolkits) and REVIEW.md's record of the old state.
+> code and docs says CC0-1.0. Every remaining line that names another licence carries a
+> `licence-ref` marker (convention below), so the licence stage reports 0 unmarked.
 >
-> Nx claims are classified at the bottom: MEASURED (a benchmark or sweep in the tree produced
-> the number), DERIVED (arithmetic from operands stated on or beside the line), CARRIED (no
-> operands, no benchmark), NOT-A-CLAIM (the detector matched a gain or an exponent).
-> The CARRIED list is the fixing order.
+> Nx claims are classified at the bottom. MEASURED: a benchmark or sweep in the tree produced
+> the number. DERIVED: arithmetic whose operands are all MEASURED, literature constants with a
+> source in the tree, or the document's own design inputs. DERIVED_WEAK: arithmetic with at
+> least one operand that is CARRIED (stated, no source in the tree) or DEAD (a claim the
+> register killed); the weak operand and its file are named on each line, and `[refutation]`
+> marks the three lines that derive the number in order to kill the operand rather than to
+> assert it. CARRIED: no operands, no benchmark. NOT-A-CLAIM: the detector matched a gain or
+> an exponent. DERIVED inherits its weakest operand, so the 51 of the second pass was an upper
+> bound; the recount is 13 DERIVED and 38 DERIVED_WEAK. The CARRIED list is the fixing order
+> and is held until this recount has been read.
+
+## licence-ref markers
+
+A line that names a licence other than this repo's is either a mismatch or a reference to
+someone else's licence, and the guard cannot tell which from the identifier alone. The
+convention is an inline marker that says which, and whose:
+
+```
+<!-- licence-ref: external, gods-eye-view data pack -->     in Markdown
+"licence_ref": "external, gods-eye-view data pack"          in JSON
+<!-- licence-ref: historical, REVIEW.md audit record of the pre-CC0 state -->
+```
+
+- `external` — the line describes another project's licence. The attribution after the
+  comma is REQUIRED; a marker that names nobody is reported as a MARKER DEFECT.
+- `historical` — the line is a record of a past state of THIS repo (REVIEW.md 32/33/37/253).
+  The record is not edited; the marker says it is a record.
+- A marked line is counted under `licence-ref external/historical (not a mismatch)` and is
+  not a hit. The stage goes green only when every remaining non-canonical identifier is marked.
+- Marking a line about this repo's own licence `external` is a defect the guard still
+  catches: if the clause naming "this repo" carries a non-canonical identifier and no
+  canonical one, the line is reported as `MARKER DEFECT: marked external but the line
+  attributes MIT to this repo`. "MIT (their code) / CC0-1.0 (this repo)" passes;
+  "this repo is MIT" under an external marker does not. tests/test_repo_guard.py has both.
 
 ```
   licence strings                   0 surface(s) disagree
-  licence ids != LICENSE, any file 15
-      CLAUDE.md:711  [CC-BY-NC-SA]  (per-pack licence records; the CC BY-NC-SA cables pack has no mount).
-      CLAUDE.md:965  [MIT]  - **`repo_guard.py` is the pre-commit check that would have caught most of this 
-      CROSSLINKS.md:90  [MIT]  - **License**: MIT (their code) / per-dataset (their bundled data: ODbL, PDDL, p
-      REVIEW.md:32  [MIT]  - `LICENSE` (root, 21 lines): full MIT License text, copyright JinnZ2 2025.
-      REVIEW.md:33  [CC-BY-4.0]  - `CLAUDE.md` header (line 5 of this session's system context): "License: CC-BY-
-      REVIEW.md:37  [CC-BY-4.0]  - `README.md` and `FALSIFIABILITY_NOTICE.txt` both already self-disclose the LIC
-      REVIEW.md:253  [MIT]  | Open license clearly marked | ⚠️ Marked but contradictory | Four different val
-      integrations/gods-eye-view/05-infrastructure/README.md:78  [CC-BY]  - Licence asymmetry: this repo is CC0-1.0 and the hub of a CC0/CC-BY/MIT ecosyst
-      integrations/gods-eye-view/05-infrastructure/consent.json:5  [ODbL-1.0]  {"source": "datacenters", "path": "src/data/local_data/datacenters", "license": 
-      integrations/gods-eye-view/05-infrastructure/consent.json:8  [ODbL-1.0]  {"source": "dams", "path": "src/data/local_data/dams", "license": "ODbL-1.0", "s
-      integrations/gods-eye-view/05-infrastructure/consent.json:11  [CC-BY-NC-SA-3.0]  {"source": "telegeography_submarine_cables", "path": "src/data/local_data/telege
-      integrations/gods-eye-view/05-infrastructure/consent.json:17  [PDDL-1.0]  {"source": "neighborhoods", "path": "src/data/local_data/neighborhoods", "licens
-      integrations/gods-eye-view/05-infrastructure/consent.json:21  [CC-BY-4.0]  "live_sources_not_bundled": "FIRMS (CC0), USGS (public domain), Open-Meteo (CC B
-      integrations/gods-eye-view/05-infrastructure/links.json:127  [CC-BY]  "Licence asymmetry: this repo is CC0-1.0 and the hub of a CC0/CC-BY/MIT ecosyste
-      integrations/gods-eye-view/README.md:118  [MIT]  GEV code is MIT; its bundled data carries its own terms (ODbL, PDDL, public doma
+  licence ids != LICENSE, unmarked 0
+  licence-ref external   (not a mismatch) 10
+      CLAUDE.md:740  [CC-BY-NC-SA]  gods-eye-view data pack
+      CROSSLINKS.md:90  [MIT]  gods-eye-view code and data
+      integrations/gods-eye-view/05-infrastructure/README.md:78  [CC-BY]  ecosystem repos and gods-eye-view data
+      integrations/gods-eye-view/05-infrastructure/consent.json:5  [ODbL-1.0]  gods-eye-view data pack
+      integrations/gods-eye-view/05-infrastructure/consent.json:8  [ODbL-1.0]  gods-eye-view data pack
+      integrations/gods-eye-view/05-infrastructure/consent.json:11  [CC-BY-NC-SA-3.0]  gods-eye-view data pack
+      integrations/gods-eye-view/05-infrastructure/consent.json:17  [PDDL-1.0]  gods-eye-view data pack
+      integrations/gods-eye-view/05-infrastructure/consent.json:21  [CC-BY-4.0]  gods-eye-view live sources
+      integrations/gods-eye-view/05-infrastructure/links.json:127  [CC-BY]  ecosystem repos and gods-eye-view data
+      integrations/gods-eye-view/README.md:118  [MIT]  gods-eye-view code and data
+  licence-ref historical (not a mismatch) 5
+      CLAUDE.md:994  [MIT]  the state the README audit found and this guard was built to catch
+      REVIEW.md:32  [MIT]  REVIEW.md audit record of the pre-CC0 state
+      REVIEW.md:33  [CC-BY-4.0]  REVIEW.md audit record of the pre-CC0 state
+      REVIEW.md:37  [CC-BY-4.0]  REVIEW.md audit record of the pre-CC0 state
+      REVIEW.md:253  [MIT]  REVIEW.md audit record of the pre-CC0 state
   speedup claims, no benchmark near 128
-      CLAUDE.md:972  - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no targ
-      CLAUDE.md:981  - **Temperature is now threaded, and the one correction that is wrong is wrong b
-      CLAUDE.md:995  - **A φ-band spectrum analyser that drops the top of its own range and fires on 
-      CLAUDE.md:1011  - **Two claims that were about the simulation's budget rather than about biology
+      CLAUDE.md:1001  - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no targ
+      CLAUDE.md:1010  - **Temperature is now threaded, and the one correction that is wrong is wrong b
+      CLAUDE.md:1024  - **A φ-band spectrum analyser that drops the top of its own range and fires on 
+      CLAUDE.md:1040  - **Two claims that were about the simulation's budget rather than about biology
       GUIDE.md:143  **For efficiency:** The geometric EM solver achieves 15-30x speedup
       GUIDE.md:178  | 15-30x | spatial speedup | Adaptive grid vs. uniform grid in EM solver |
       Navigation.md:120  - SIMD-vectorized operations (4-8x speedup)
@@ -193,16 +225,16 @@
   filenames with a space            2
       Front end
       AISS/. well-known
-  174 hit(s) -- each is a fix in a separate pass; nothing was changed
+  159 hit(s) -- each is a fix in a separate pass; nothing was changed
 ```
 
 ## Nx claims, classified
 
 ```
-TOTAL 128 MEASURED 9 DERIVED 51 CARRIED 65 NOT-A-CLAIM 3
+TOTAL 128 MEASURED 9 DERIVED 13 DERIVED_WEAK 38 (of which refutation 3) CARRIED 65 NOT-A-CLAIM 3
 
 ### MEASURED (9)
-CLAUDE.md:1011  - **Two claims that were about the simulation's budget rather than about biology.** `fluctuating_fix
+CLAUDE.md:1040  - **Two claims that were about the simulation's budget rather than about biology.** `fluctuating_fix
 Navigation.md:787  > acceleration (10-100x additional speedup)"** was written on top of a reported
 Navigation.md:789  > adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is
 Navigation.md:800  - ~~GPU acceleration (10-100x additional speedup)~~ — see the note above
@@ -212,58 +244,111 @@ Engine/CLAIMS.md:16  | ENG-5 | SpatialGrid.createRegion emits one sample point p
 docs/Implementation_Roadmap.md:41  The adaptive path is **2× to 50× slower**, not 15–33× faster. ENG-1.
 falsifier-survey/falsifier_survey_report_run2.md:125  "speedup" 11–16× where wall-clock measured 0.26–0.48×; in ENG-3 the proxy
 
-### DERIVED (51)
-CLAUDE.md:972  - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no target.** `Proposal.md` 
-CLAUDE.md:981  - **Temperature is now threaded, and the one correction that is wrong is wrong by 20×.** `fabricatio
-CLAUDE.md:995  - **A φ-band spectrum analyser that drops the top of its own range and fires on noise.** `_compute_e
-Navigation.md:377  **Why it matters:** If you’re computing a field at 1 million points, SIMD makes it 4-16x faster auto
-Navigation.md:386  = 4x speedup
-Navigation.md:395  **Why it matters:** A 6-fold symmetric pattern? Compute 1/6 of it, rotate copies = 6x faster.
-Navigation.md:405  = 6x speedup + perfect accuracy
-Six-sigma.md:298  - **Improvement factor: 4000x-280,000x better quality**
-Six-sigma.md:462  # Cost ratio: 10,100 / 155 = 65x more expensive to use defective equations   <- operands 10,100 and 155 stated; their source is not
-Six-sigma.md:465  **“Efficient” equations are actually 65x MORE expensive when quality costs included.**
-Six-sigma.md:488  But your Cost of Poor Quality is 65x higher.
-Six-sigma.md:698  **4. “Efficient” equations are actually 65x more expensive**
-TRANSLATION_GUIDE.md:129  # -> 2080 adaptive grid points (vs 32768 for uniform grid: 15x speedup)   <- point-count ratio called a speedup (ENG-1 shape); arithmetic right, word wrong
-Universal-geometric-intelligence-P2.md:332  Average compression: 250×
-Universal-geometric-intelligence-P2.md:336  Healthy bearing: 6.1% loss, 280× compression → PASS   <- ratio stated with the loss it cost; the sample counts behind it are not on the page
-Universal-geometric-intelligence-P2.md:337  Worn bearing:    7.8% loss, 245× compression → PASS
-Universal-geometric-intelligence-P2.md:338  Misaligned:      9.5% loss, 225× compression → PASS
-Universal-geometric-intelligence-P2.md:344  - 200-300× compression: Removes measurement noise, keeps signal
-Universal-geometric-intelligence-P2.md:955  - **Speedup: 8× with zero algorithm change**   <- AVX lane width; a ceiling, not a measurement
-Universal-geometric-intelligence-P2.md:1157  - Single reflection plane: Compute 1/2, mirror → **2× faster**
-Universal-geometric-intelligence-P2.md:1158  - Two orthogonal planes: Compute 1/4 → **4× faster**
-Universal-geometric-intelligence-P2.md:1161  **Combined with SIMD:** 8× (SIMD) × 4× (symmetry) = **32× total speedup**   <- operands 8x and 4x are themselves CARRIED
-Universal-geometric-intelligence-P2.md:1396  ✅ **SIMD optimizer** - Parallel acceleration (8× typical)   <- AVX lane width; a ceiling, not a measurement
-Silicon/COMPLETE_INDEX.v2.md:275  |**Precision**    |< 0.5 nm     |**0.025 nm**|✅ **20× better**|
-Silicon/COMPLETE_INDEX.v2.md:277  |**Energy/bit**   |< 1.6 aJ     |**0.22 aJ** |✅ **7× better** |
-Silicon/COMPLETE_INDEX.v2.md:278  |**Write speed**  |1 THz        |**10 THz**  |✅ **10× better**|
-Silicon/COMPLETE_INDEX.v2.md:301  - T₂: 166 ms vs. 1 ms → **166× better**   <- arithmetic from a dead claim (ER-1)
-Silicon/COMPLETE_INDEX.v2.md:308  - T₂: 166 ms vs. 100 μs → **1660× better**   <- arithmetic from a dead claim (ER-1)
-Silicon/Energy-pattern.md:208  "$10M vs $300M, 10-30x capital reduction"
-Silicon/FINAL_VALIDATION_REPORT.md:147  |NV centers in diamond          |~1 ms     |300 K      |**166× better**             |   <- arithmetic from a dead claim (ER-1)
-Silicon/FINAL_VALIDATION_REPORT.md:149  |Superconducting qubits         |~100 μs   |20 mK      |**1660× better** + room temp|   <- arithmetic from a dead claim (ER-1)
-Silicon/FINAL_VALIDATION_REPORT.md:289  |**Positional Precision**|< 0.5 nm      |**0.025 nm**         |✓ **20× better** |
-Silicon/FINAL_VALIDATION_REPORT.md:291  |**Energy per Bit**      |< 1.6 aJ/bit  |**0.22 aJ/bit**      |✓ **7× better**  |
-Silicon/FINAL_VALIDATION_REPORT.md:292  |**Write Speed**         |~1 THz        |**10 THz** (parallel)|✓ **10× better** |
-Silicon/FINAL_VALIDATION_REPORT.md:333  - ✓ **T₂ = 166 ms** (166× better than NV)   <- arithmetic from a dead claim (ER-1)
+### DERIVED (13) — every operand MEASURED, a sourced constant, or the document's own design input
+CLAUDE.md:1010  - **Temperature is now threaded, and the one correction that is wrong is wrong by 20×.** `fabricatio
+    operands: α = 12e-6/°C and dE/E = −2.4e-4/°C, literature; asserted by tests/test_gi_network.py TMP-1
+CLAUDE.md:1024  - **A φ-band spectrum analyser that drops the top of its own range and fires on noise.** `_compute_e
+    operands: 2.3156 / 1.315, both constants read from geometric_intelligence/network/resonance.py
 Silicon/Fabrication.md:17  > | micro-coil at 10 mA | **100× OVER EM LIMIT** | 50 nm × 200 nm → J = 1e8 A/cm² against a 1e6 desi
+    operands: 10 mA over 50 nm × 200 nm (the document's own design input) against the 1e6 A/cm² electromigration limit; tests/test_magnetic_authority.py FAB-5
 Silicon/Fabrication.md:2038  - Aggregate rate: 8× slower per sensor
-Silicon/MAGNETIC_BRIDGE_ADDENDUM.md:343  •	Read speed: 50ns → 25ns (2× faster)
-Silicon/MAGNETIC_BRIDGE_ADDENDUM.md:347  •	Crosstalk: 1% → 0.1% (10× better)
+    operands: 8 sensors on one ADC, the document's own design input; definitional
 Silicon/Magnetic-bridge.md:35  > shortfall against 1 GHz channels is **714×**, not 700,000×, and the gradient
+    operands: g·μ_B/h = 28.0 GHz/T, 1000 T/m × 50 nm; Silicon/magnetic_authority.py BRG-5
 Silicon/Magnetic-bridge.md:48  > magnitude only because a 12×-low coefficient was paired with a 10×-high
-Silicon/Octahedral-computation.md:356  •	Compare to CMOS: ~100 fJ/bit → 100× more efficient
+    operands: π₁₁ vs (π₁₁+π₁₂+π₄₄)/2, literature; strain 1% vs 0.1%; magnetic_authority.PIEZO_NOTE, BRG-6
 Silicon/Proposal-addendum.md:37  > | 5 ps pulse can address a transition | **NO** | bandwidth ≈ 200 GHz (1/Δt) or 88 GHz (Gaussian) a
-Silicon/Proposal.md:24  > class, so 166 ms is **~8 orders high**. Grant a 1000× improvement on T₁ and it
-Silicon/Proposal.md:67  > | RBS-C "sub-pm precision" | **WILL NOT SEE IT** | 5e11 cm⁻² areal against a 1e13–1e14 RBS limit: 
+    operands: 1/Δt at 5 ps against g·μ_B·B at 1–2 T; tests/test_transient_suppression.py R2-8
+Silicon/Proposal.md:67  > | RBS-C "sub-pm precision" | **WILL NOT SEE IT** | 5e11 cm⁻² areal against a 1e13–1e14 RBS limit:
+    operands: 5e11 cm⁻² areal from the stated dose against the 1e13–1e14 cm⁻² RBS limit, literature; ER-7
 Silicon/Proposal.md:84  > longitudinal coefficient is (π₁₁+π₁₂+π₄₄)/2 = **7.18e-10**, 12× larger, and it
+    operands: π coefficients, literature; magnetic_authority.PIEZO_NOTE
 Silicon/Tensor-encode.md:153  Overhead: 3× storageBenefit: Tolerates any single-cell failure per triplet
+    operands: three cells per bit, definitional
 Silicon/optical_interface.md:200  | "3D light controls octahedral states" | **FATAL** | **Mode-size mismatch.** Diffraction limit in S
+    operands: λ/2n = 1550/(2×3.48) nm against a = 0.543 nm, constants
 Silicon/ttm_audit.md:158  against **0.0845 meV** for 0.73 T. **Strain beats magnetic by ~1080× at
-Silicon/Projects/LCEA.md:73  The embodied energy to **manufacture** AI hardware is 2.6× greater than the energy to **keep a human
+    operands: Ξ_u = 9.16 eV × 1% against g·μ_B × 0.73 T; Silicon/magnetic_authority.py BRG-1
 fabrication/CLAIMS.md:12  | TMP-1 | the mechanical resonance correction uses thermal expansion where the modulus term dominate
+    operands: generated from CLAIMS_REGISTER.json; the TMP-1 operands above, tests/test_gi_network.py
+
+### DERIVED_WEAK (38) — inherits a CARRIED or DEAD operand; weak operand and file named
+CLAUDE.md:1001  - **Er3+ cannot hold coherence at 300 K, and the flagship experiment has no target.** `Proposal.md`
+    weak operand [refutation]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Navigation.md:377  **Why it matters:** If you’re computing a field at 1 million points, SIMD makes it 4-16x faster auto
+    weak operand [asserted]: SIMD efficiency = 1 — never timed; PerformanceTracker.simdEfficiency is a constant 12.5% (ENG-6, Engine/geometric_solver.py)
+Navigation.md:386  = 4x speedup
+    weak operand [asserted]: SIMD efficiency = 1 — never timed; PerformanceTracker.simdEfficiency is a constant 12.5% (ENG-6, Engine/geometric_solver.py)
+Navigation.md:395  **Why it matters:** A 6-fold symmetric pattern? Compute 1/6 of it, rotate copies = 6x faster.
+    weak operand [asserted]: symmetry reduction taken — the solver computes all and reports the potential reduction (ENG-3, Engine/geometric_solver.py)
+Navigation.md:405  = 6x speedup + perfect accuracy
+    weak operand [asserted]: symmetry reduction taken — the solver computes all and reports the potential reduction (ENG-3, Engine/geometric_solver.py)
+Six-sigma.md:298  - **Improvement factor: 4000x-280,000x better quality**
+    weak operand [asserted]: baseline 0.5σ and the cost figures 10,100 / 155 — stated in Six-sigma.md, nothing measured
+Six-sigma.md:462  # Cost ratio: 10,100 / 155 = 65x more expensive to use defective equations
+    weak operand [asserted]: baseline 0.5σ and the cost figures 10,100 / 155 — stated in Six-sigma.md, nothing measured
+Six-sigma.md:465  **“Efficient” equations are actually 65x MORE expensive when quality costs included.**
+    weak operand [asserted]: baseline 0.5σ and the cost figures 10,100 / 155 — stated in Six-sigma.md, nothing measured
+Six-sigma.md:488  But your Cost of Poor Quality is 65x higher.
+    weak operand [asserted]: baseline 0.5σ and the cost figures 10,100 / 155 — stated in Six-sigma.md, nothing measured
+Six-sigma.md:698  **4. “Efficient” equations are actually 65x more expensive**
+    weak operand [asserted]: baseline 0.5σ and the cost figures 10,100 / 155 — stated in Six-sigma.md, nothing measured
+TRANSLATION_GUIDE.md:129  # -> 2080 adaptive grid points (vs 32768 for uniform grid: 15x speedup)
+    weak operand [asserted]: point count ∝ time — DEAD (ENG-1, Engine/engine_benchmark.py: fewer points ran 2–50x slower)
+Universal-geometric-intelligence-P2.md:332  Average compression: 250×
+    weak operand [asserted]: bearing sample counts and loss figures — Universal-geometric-intelligence-P2.md §2.3, no code or data in the tree
+Universal-geometric-intelligence-P2.md:336  Healthy bearing: 6.1% loss, 280× compression → PASS
+    weak operand [asserted]: bearing sample counts and loss figures — Universal-geometric-intelligence-P2.md §2.3, no code or data in the tree
+Universal-geometric-intelligence-P2.md:337  Worn bearing:    7.8% loss, 245× compression → PASS
+    weak operand [asserted]: bearing sample counts and loss figures — Universal-geometric-intelligence-P2.md §2.3, no code or data in the tree
+Universal-geometric-intelligence-P2.md:338  Misaligned:      9.5% loss, 225× compression → PASS
+    weak operand [asserted]: bearing sample counts and loss figures — Universal-geometric-intelligence-P2.md §2.3, no code or data in the tree
+Universal-geometric-intelligence-P2.md:344  - 200-300× compression: Removes measurement noise, keeps signal
+    weak operand [asserted]: bearing sample counts and loss figures — Universal-geometric-intelligence-P2.md §2.3, no code or data in the tree
+Universal-geometric-intelligence-P2.md:955  - **Speedup: 8× with zero algorithm change**
+    weak operand [asserted]: SIMD efficiency = 1 — never timed; PerformanceTracker.simdEfficiency is a constant 12.5% (ENG-6, Engine/geometric_solver.py)
+Universal-geometric-intelligence-P2.md:1157  - Single reflection plane: Compute 1/2, mirror → **2× faster**
+    weak operand [asserted]: symmetry reduction taken — the solver computes all and reports the potential reduction (ENG-3, Engine/geometric_solver.py)
+Universal-geometric-intelligence-P2.md:1158  - Two orthogonal planes: Compute 1/4 → **4× faster**
+    weak operand [asserted]: symmetry reduction taken — the solver computes all and reports the potential reduction (ENG-3, Engine/geometric_solver.py)
+Universal-geometric-intelligence-P2.md:1161  **Combined with SIMD:** 8× (SIMD) × 4× (symmetry) = **32× total speedup**
+    weak operand [asserted]: SIMD efficiency = 1 — never timed; PerformanceTracker.simdEfficiency is a constant 12.5% (ENG-6, Engine/geometric_solver.py); symmetry reduction taken — the solver computes all and reports the potential reduction (ENG-3, Engine/geometric_solver.py)
+Universal-geometric-intelligence-P2.md:1396  ✅ **SIMD optimizer** - Parallel acceleration (8× typical)
+    weak operand [asserted]: SIMD efficiency = 1 — never timed; PerformanceTracker.simdEfficiency is a constant 12.5% (ENG-6, Engine/geometric_solver.py)
+Silicon/COMPLETE_INDEX.v2.md:275  |**Precision**    |< 0.5 nm     |**0.025 nm**|✅ **20× better**|
+    weak operand [asserted]: 0.025 nm "achieved" — never measured; RBS-C cannot resolve it (Silicon/Proposal.md:67 audit row)
+Silicon/COMPLETE_INDEX.v2.md:277  |**Energy/bit**   |< 1.6 aJ     |**0.22 aJ** |✅ **7× better** |
+    weak operand [asserted]: 0.22 aJ/bit "achieved" — never measured (Silicon/COMPLETE_INDEX.v2.md, Silicon/FINAL_VALIDATION_REPORT.md)
+Silicon/COMPLETE_INDEX.v2.md:278  |**Write speed**  |1 THz        |**10 THz**  |✅ **10× better**|
+    weak operand [asserted]: 10 THz write "achieved" — never measured; THz is the wrong band for ESR at 1–2 T (Silicon/Proposal-addendum.md:37 audit row)
+Silicon/COMPLETE_INDEX.v2.md:301  - T₂: 166 ms vs. 1 ms → **166× better**
+    weak operand [asserted]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/COMPLETE_INDEX.v2.md:308  - T₂: 166 ms vs. 100 μs → **1660× better**
+    weak operand [asserted]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/Energy-pattern.md:208  "$10M vs $300M, 10-30x capital reduction"
+    weak operand [refutation]: $10M / $300M — stated in Silicon/Energy-pattern.md, no source; the line quotes the claim to refute it
+Silicon/FINAL_VALIDATION_REPORT.md:147  |NV centers in diamond          |~1 ms     |300 K      |**166× better**             |
+    weak operand [asserted]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/FINAL_VALIDATION_REPORT.md:149  |Superconducting qubits         |~100 μs   |20 mK      |**1660× better** + room temp|
+    weak operand [asserted]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/FINAL_VALIDATION_REPORT.md:289  |**Positional Precision**|< 0.5 nm      |**0.025 nm**         |✓ **20× better** |
+    weak operand [asserted]: 0.025 nm "achieved" — never measured; RBS-C cannot resolve it (Silicon/Proposal.md:67 audit row)
+Silicon/FINAL_VALIDATION_REPORT.md:291  |**Energy per Bit**      |< 1.6 aJ/bit  |**0.22 aJ/bit**      |✓ **7× better**  |
+    weak operand [asserted]: 0.22 aJ/bit "achieved" — never measured (Silicon/COMPLETE_INDEX.v2.md, Silicon/FINAL_VALIDATION_REPORT.md)
+Silicon/FINAL_VALIDATION_REPORT.md:292  |**Write Speed**         |~1 THz        |**10 THz** (parallel)|✓ **10× better** |
+    weak operand [asserted]: 10 THz write "achieved" — never measured; THz is the wrong band for ESR at 1–2 T (Silicon/Proposal-addendum.md:37 audit row)
+Silicon/FINAL_VALIDATION_REPORT.md:333  - ✓ **T₂ = 166 ms** (166× better than NV)
+    weak operand [asserted]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/MAGNETIC_BRIDGE_ADDENDUM.md:343  •	Read speed: 50ns → 25ns (2× faster)
+    weak operand [asserted]: 50 ns → 25 ns read — stated in Silicon/MAGNETIC_BRIDGE_ADDENDUM.md; the magnetic channel is DEAD (FAB-1, Silicon/magnetic_authority.py)
+Silicon/MAGNETIC_BRIDGE_ADDENDUM.md:347  •	Crosstalk: 1% → 0.1% (10× better)
+    weak operand [asserted]: 1% → 0.1% crosstalk — stated in Silicon/MAGNETIC_BRIDGE_ADDENDUM.md; the magnetic channel is DEAD (FAB-1)
+Silicon/Octahedral-computation.md:356  •	Compare to CMOS: ~100 fJ/bit → 100× more efficient
+    weak operand [asserted]: 0.01 eV/bit — DEAD (below Landauer, Silicon/Fabrication.md audit header, Negentropic/landauer.py); "0.01 eV = 1.6 aJ" is wrong 1000x; 100 fJ/bit CMOS unsourced; 1.6 aJ vs 100 fJ is 62,500x, not 100x
+Silicon/Proposal.md:24  > class, so 166 ms is **~8 orders high**. Grant a 1000× improvement on T₁ and it
+    weak operand [refutation]: T₂ = 166 ms — DEAD (ER-1, Silicon/er_bounds.py; Silicon/Proposal.md audit header)
+Silicon/Projects/LCEA.md:73  The embodied energy to **manufacture** AI hardware is 2.6× greater than the energy to **keep a human
+    weak operand [asserted]: E_Mfg daily — Silicon/Projects/LCEA.md, no source in the tree
 
 ### CARRIED (65)
 GUIDE.md:143  **For efficiency:** The geometric EM solver achieves 15-30x speedup

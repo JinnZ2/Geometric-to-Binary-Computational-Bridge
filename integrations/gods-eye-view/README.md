@@ -115,4 +115,4 @@ sibling.
 
 ## Licences at the seam
 
-GEV code is MIT; its bundled data carries its own terms (ODbL, PDDL, public domain, and one CC BY-NC-SA pack). This repo is CC0-1.0. Code may cross either way. Data crosses only with a consent record, and the NC pack does not cross.
+GEV code is MIT; its bundled data carries its own terms (ODbL, PDDL, public domain, and one CC BY-NC-SA pack). This repo is CC0-1.0. Code may cross either way. Data crosses only with a consent record, and the NC pack does not cross. <!-- licence-ref: external, gods-eye-view code and data -->

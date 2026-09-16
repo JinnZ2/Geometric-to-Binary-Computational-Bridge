@@ -87,7 +87,7 @@ add a new section above with:
 - **Upstream**: https://github.com/bilawalsidhu/gods-eye-view — fork at https://github.com/JinnZ2/gods-eye-view-fork
 - **Fieldlink mount name**: none yet. Its bundled data packs have consent records in `integrations/gods-eye-view/05-infrastructure/consent.json`; a mount is declared only for packs with `share_ok: true`.
 - **Direction**: bidirectional, by avenue (each avenue in the map states its own)
-- **License**: MIT (their code) / per-dataset (their bundled data: ODbL, PDDL, public domain, one CC BY-NC-SA pack) / CC0-1.0 (this repo). Code crosses either way; data crosses only with a consent record; the NC pack does not cross.
+- **License**: MIT (their code) / per-dataset (their bundled data: ODbL, PDDL, public domain, one CC BY-NC-SA pack) / CC0-1.0 (this repo). Code crosses either way; data crosses only with a consent record; the NC pack does not cross. <!-- licence-ref: external, gods-eye-view code and data -->
 
 ### What flows
 

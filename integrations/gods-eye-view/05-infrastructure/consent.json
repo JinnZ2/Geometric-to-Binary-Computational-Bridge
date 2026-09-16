@@ -2,21 +2,21 @@
  "_comment": "av-inf-2. One record per GEV bundled dataset, in the shape of .fieldlink.json's consent field. A pack with share_ok:false has mount:null and crosslinks.py refuses a mount for it. Licences are as recorded in GEV's DATA_SOURCES.md.",
  "hub_license": "CC0-1.0",
  "packs": [
-  {"source": "datacenters", "path": "src/data/local_data/datacenters", "license": "ODbL-1.0", "share_ok": true,
+  {"source": "datacenters", "path": "src/data/local_data/datacenters", "license": "ODbL-1.0", "licence_ref": "external, gods-eye-view data pack", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/datacenters.geojsonl", "attribution": "(c) OpenStreetMap contributors",
    "note": "share-alike applies to the data, not this repo's code; a modified extract must stay ODbL"},
-  {"source": "dams", "path": "src/data/local_data/dams", "license": "ODbL-1.0", "share_ok": true,
+  {"source": "dams", "path": "src/data/local_data/dams", "license": "ODbL-1.0", "licence_ref": "external, gods-eye-view data pack", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/dams.geojsonl", "attribution": "(c) OpenStreetMap contributors (+ Open Infrastructure Map)",
    "note": "same terms as datacenters"},
-  {"source": "telegeography_submarine_cables", "path": "src/data/local_data/telegeography_submarine_cables", "license": "CC-BY-NC-SA-3.0", "share_ok": false,
+  {"source": "telegeography_submarine_cables", "path": "src/data/local_data/telegeography_submarine_cables", "license": "CC-BY-NC-SA-3.0", "licence_ref": "external, gods-eye-view data pack", "share_ok": false,
    "mount": null, "attribution": "(c) TeleGeography",
    "note": "NonCommercial and ShareAlike; cannot cross into a CC0-1.0 hub. Not mounted, by construction"},
-  {"source": "natural_earth", "path": "src/data/local_data/natural_earth", "license": "public-domain", "share_ok": true,
+  {"source": "natural_earth", "path": "src/data/local_data/natural_earth", "license": "public-domain", "licence_ref": "external, gods-eye-view data pack", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/natural_earth", "attribution": "Made with Natural Earth (courtesy)",
    "note": "regions.json + marine.json; the named-region rings analystEngine scopes by"},
-  {"source": "neighborhoods", "path": "src/data/local_data/neighborhoods", "license": "PDDL-1.0", "share_ok": true,
+  {"source": "neighborhoods", "path": "src/data/local_data/neighborhoods", "license": "PDDL-1.0", "licence_ref": "external, gods-eye-view data pack", "share_ok": true,
    "mount": "atlas/remote/gods-eye-view/neighborhoods", "attribution": "City & County of San Francisco, DataSF (courtesy)",
    "note": "41 polygons"}
  ],
- "live_sources_not_bundled": "FIRMS (CC0), USGS (public domain), Open-Meteo (CC BY 4.0), NDBC (public domain) are fetched at runtime by whichever side draws them and are not mounted as files. OpenSky is non-commercial research; a bridge-side reading of it inherits that."
+ "live_sources_not_bundled": "FIRMS (CC0), USGS (public domain), Open-Meteo (CC BY 4.0), NDBC (public domain) are fetched at runtime by whichever side draws them and are not mounted as files. OpenSky is non-commercial research; a bridge-side reading of it inherits that. licence-ref: external, gods-eye-view live sources"
 }

@@ -74,7 +74,7 @@ __all__ = [
     "null_harness", "report", "VETO", "veto", "veto_report",
     "FLOOR", "reach", "reach_report", "CHECKLIST", "human_checklist",
     "duplicate_bodies", "screen_collisions", "collision_report",
-    "licence_strings", "licence_mismatch", "licence_scan", "speedup_claims", "shell_commands",
+    "licence_strings", "licence_mismatch", "licence_scan", "licence_ref", "speedup_claims", "shell_commands",
     "second_person", "spaced_filenames", "prose_audit", "prose_report",
     "demo", "main",
 ]
@@ -419,15 +419,55 @@ def _tracked_files(root):
     return keep
 
 
+# The licence-ref marker: prose that names ANOTHER project's licence, or records a past
+# state of this repo's, is a different object from this repo's declaration. It is not
+# silenced; it is marked, and the marker must say whose licence it is:
+#     <!-- licence-ref: external, GEV data pack -->
+#     <!-- licence-ref: historical, REVIEW.md audit of the pre-CC0 state -->
+# In JSON, the same text inside a string or a "licence_ref" value on the line works.
+# A marker without the attribution, or an "external" marker on a line that says
+# "this repo", is a defect and still fails the run.
+_LICENCE_REF = re.compile(r"licen[cs]e[-_]ref\W{0,4}(external|historical)\s*(?:,\s*([^\"<>\n]*?))?\s*(?:-->|\"|$)", re.I)
+_THIS_REPO = re.compile(r"\bthis (?:repo|repository)\b", re.I)
+_CLAUSE_SPLIT = re.compile(r"[;.]\s|\s/\s|\s(?:while|whereas|but)\s", re.I)
+
+
+def licence_ref(ln, canonical="CC0-1.0"):
+    """(kind, attribution, defect) for a marked line; (None, None, None) for an unmarked one.
+
+    A marker marked `external` is a defect when the line attributes a NON-canonical identifier
+    to this repo: the clause naming "this repo" carries a licence id that is not the canonical
+    one and no canonical id beside it. "MIT (their code) / CC0-1.0 (this repo)" is fine;
+    "this repo is MIT" under an external marker is the defect the order says the guard must
+    still catch. Clauses split on `; `, `. `, ` / ` and while/whereas/but."""
+    m = _LICENCE_REF.search(ln)
+    if not m:
+        return None, None, None
+    kind = m.group(1).lower()
+    who = (m.group(2) or "").strip()
+    if not who:
+        return kind, who, "licence-ref marker names nobody: say whose licence it is"
+    if kind == "external":
+        body = ln[:m.start()] + " " + ln[m.end():]
+        for clause in _CLAUSE_SPLIT.split(body):
+            if not _THIS_REPO.search(clause):
+                continue
+            ids = {_norm_licence(t.group(1)) for t in _LICENCE_TOKEN.finditer(clause)}
+            if ids and canonical not in ids:
+                return kind, who, "marked external but the line attributes %s to this repo" % "/".join(sorted(ids))
+    return kind, who, None
+
+
 def _fieldlink_sibling_line(rel, ln):
     """In .fieldlink.json the consent entries under sources[] describe SIBLING repos and are
     exempt; the top-level consent (4-space indent) is this repo's own and is not."""
     return rel == ".fieldlink.json" and '"consent"' in ln and (len(ln) - len(ln.lstrip(" "))) > 4
 
 
-def licence_scan(root=".", canonical=None):
-    """[(file, line, id, text)] for every licence identifier in a tracked file that is not
-    the canonical one. canonical defaults to what LICENSE declares."""
+def licence_scan(root=".", canonical=None, marked=None):
+    """[(file, line, id, text)] for every UNMARKED licence identifier in a tracked file that is
+    not the canonical one, plus marker defects. canonical defaults to what LICENSE declares.
+    Pass a dict as `marked` to receive the marked lines: {"external": [...], "historical": [...]}."""
     root = os.path.abspath(root)
     if canonical is None:
         lic = licence_strings(root).get("LICENSE")
@@ -454,6 +494,14 @@ def licence_scan(root=".", canonical=None):
                     continue
                 if _fieldlink_sibling_line(rel, ln):
                     continue
+                kind, who, defect = licence_ref(ln, canonical)
+                if kind and not defect:
+                    if marked is not None:
+                        marked.setdefault(kind, []).append((rel, i + 1, lid, who, ln.strip()[:80]))
+                    break
+                if defect:
+                    hits.append((rel, i + 1, lid, "MARKER DEFECT: " + defect))
+                    break
                 hits.append((rel, i + 1, lid, ln.strip()[:80]))
                 break
     return hits
@@ -746,9 +794,12 @@ def spaced_filenames(root="."):
 
 def prose_audit(root="."):
     """All five checks. Returns {check: [hits]}; a run with any hit fails."""
+    marked = {}
+    scan = licence_scan(root, marked=marked)
     return {
         "licence": licence_mismatch(root),
-        "licence_scan": licence_scan(root),
+        "licence_scan": scan,
+        "licence_refs": marked,
         "speedup": speedup_claims(root),
         "shell": shell_commands(root),
         "second_person": second_person(root),
@@ -763,9 +814,15 @@ def prose_report(root="."):
     print("  licence strings                   %d surface(s) disagree" % len(res["licence"]))
     for f, ln, lid in res["licence"]:
         print("      %s:%d  %s" % (f, ln, lid))
-    print("  licence ids != LICENSE, any file %d" % len(res["licence_scan"]))
+    print("  licence ids != LICENSE, unmarked %d" % len(res["licence_scan"]))
     for f, ln, lid, txt in res["licence_scan"]:
         print("      %s:%d  [%s]  %s" % (f, ln, lid, txt))
+    refs = res.get("licence_refs", {})
+    for kind in ("external", "historical"):
+        rows = refs.get(kind, [])
+        print("  licence-ref %-10s (not a mismatch) %d" % (kind, len(rows)))
+        for f, ln, lid, who, _txt in rows:
+            print("      %s:%d  [%s]  %s" % (f, ln, lid, who))
     print("  speedup claims, no benchmark near %d" % len(res["speedup"]))
     for f, ln, txt in res["speedup"]:
         print("      %s:%d  %s" % (f, ln, txt))
@@ -778,7 +835,7 @@ def prose_report(root="."):
     print("  filenames with a space            %d" % len(res["spaces"]))
     for p in res["spaces"]:
         print("      %s" % p)
-    n = sum(len(v) for v in res.values())
+    n = sum(len(v) for k, v in res.items() if k != "licence_refs")
     print("  %s" % ("prose holds" if not n else
                     "%d hit(s) -- each is a fix in a separate pass; nothing was changed" % n))
     return n
