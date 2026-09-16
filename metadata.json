@@ -3,7 +3,7 @@
   "domain": "cross_substrate_systems",
   "methodology": "falsifiable_claims_based",
   "dependencies": "stdlib_only",
-  "license": "CC0",
+  "license": "CC0-1.0",
   "corpus_target": true,
   "falsifiability_level": "high",
   "claim_table_present": true,
@@ -44,6 +44,5 @@
     "runner": "python -m fabrication.smoke",
     "modules": 20,
     "status_at_last_run": "20/20 pass"
-  },
-  "note_on_license": "metadata claims CC0 per author intent; root LICENSE file currently contains MIT text — author should reconcile before relying on either."
+  }
 }

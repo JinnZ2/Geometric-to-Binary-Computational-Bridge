@@ -21,6 +21,25 @@ Three are mechanically checkable BEFORE a file enters the repo:
                     a scan found two byte-identical document pairs nobody had
                     recorded: PROJECTS.md/PROJECTS2.md and Silicon/GIES.md /
                     GEIS/GEIS_organization.md)
+  5. PROSE          does the repo's own README survive the questions it asks
+                    of the physics? An external audit of the published README
+                    found four things nothing here pointed at: a licence that
+                    said CC0 in the header and MIT in LICENSE; a speedup table
+                    whose rows did not multiply to its "Combined" line and
+                    whose numbers no benchmark had produced; quick-start
+                    commands naming directories that do not exist and a CLI
+                    with no entry point; and model output addressed to the
+                    author ("your projects") left on the crawler surface.
+                    Five checks, each a REPORT with file and line; the run
+                    fails on any hit and nothing is auto-fixed:
+                      licence string mismatch across LICENSE / CITATION.cff /
+                        metadata.json / README
+                      a numeric speedup claim in a .md with no benchmark
+                        reference within three lines
+                      a shell command in a .md fence whose first path
+                        argument does not exist in the tree
+                      second-person address to the author in a .md
+                      a filename containing a space
 
 The other two -- circular targets and unit errors -- need a human. Checklist
 for those at the bottom, and ``human_checklist()`` prints it.
@@ -53,6 +72,8 @@ __all__ = [
     "null_harness", "report", "VETO", "veto", "veto_report",
     "FLOOR", "reach", "reach_report", "CHECKLIST", "human_checklist",
     "duplicate_bodies", "screen_collisions", "collision_report",
+    "licence_strings", "licence_mismatch", "speedup_claims", "shell_commands",
+    "second_person", "spaced_filenames", "prose_audit", "prose_report",
     "demo", "main",
 ]
 
@@ -320,6 +341,353 @@ def collision_report(root=".", register=None):
 
 
 # =====================================================================
+# 5. PROSE -- the README is a claim surface like any other
+# =====================================================================
+
+import json
+import os
+import re
+import shlex
+import shutil
+
+MD_SKIP = SKIP_DIRS | {"atlas"}      # atlas/remote is mounted sibling content, not ours
+
+_LICENCE_ALIASES = {
+    "CC0": "CC0-1.0", "CC0 1.0": "CC0-1.0", "CC0 1.0 UNIVERSAL": "CC0-1.0",
+    "MIT LICENSE": "MIT", "CC-BY-4.0": "CC-BY-4.0", "CC BY 4.0": "CC-BY-4.0",
+    "ATTRIBUTION 4.0 INTERNATIONAL": "CC-BY-4.0", "APACHE LICENSE": "Apache-2.0",
+}
+_LICENCE_TOKEN = re.compile(
+    r"\b(CC0(?:[- ]1\.0)?(?: Universal)?|MIT License|MIT|CC[- ]BY[- ]4\.0|"
+    r"Attribution 4\.0 International|Apache License|GPL-?[23](?:\.0)?|AGPL-?3(?:\.0)?)\b")
+
+
+def _norm_licence(tok):
+    t = tok.strip().upper()
+    return _LICENCE_ALIASES.get(t, tok.strip())
+
+
+def _md_files(root):
+    for base, dirs, names in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d not in MD_SKIP)
+        for n in sorted(names):
+            if n.endswith(".md"):
+                yield os.path.join(base, n)
+
+
+def licence_strings(root="."):
+    """The licence each of the four surfaces declares. Returns {file: (line, id) | None}."""
+    out = {}
+    p = os.path.join(root, "LICENSE")
+    out["LICENSE"] = None
+    if os.path.isfile(p):
+        with open(p, encoding="utf-8", errors="replace") as fh:
+            for i, ln in enumerate(fh, 1):
+                m = _LICENCE_TOKEN.search(ln)
+                if m:
+                    out["LICENSE"] = (i, _norm_licence(m.group(1)))
+                    break
+    p = os.path.join(root, "CITATION.cff")
+    out["CITATION.cff"] = None
+    if os.path.isfile(p):
+        with open(p, encoding="utf-8", errors="replace") as fh:
+            for i, ln in enumerate(fh, 1):
+                m = re.match(r"\s*license\s*:\s*[\"']?([^\"'\s]+)", ln)
+                if m:
+                    out["CITATION.cff"] = (i, _norm_licence(m.group(1)))
+                    break
+    p = os.path.join(root, "metadata.json")
+    out["metadata.json"] = None
+    if os.path.isfile(p):
+        try:
+            with open(p, encoding="utf-8") as fh:
+                d = json.load(fh)
+            if isinstance(d, dict) and d.get("license"):
+                with open(p, encoding="utf-8") as fh:
+                    ln_no = next((i for i, ln in enumerate(fh, 1) if '"license"' in ln), 0)
+                out["metadata.json"] = (ln_no, _norm_licence(str(d["license"])))
+        except (OSError, ValueError):
+            pass
+    p = os.path.join(root, "README.md")
+    out["README.md"] = None
+    if os.path.isfile(p):
+        with open(p, encoding="utf-8", errors="replace") as fh:
+            lines = fh.read().split("\n")
+        # the License section if there is one, else the first licence token anywhere
+        start = next((i for i, ln in enumerate(lines) if re.match(r"#+\s*licen[cs]e\b", ln, re.I)), 0)
+        for i in range(start, len(lines)):
+            m = _LICENCE_TOKEN.search(lines[i])
+            if m:
+                out["README.md"] = (i + 1, _norm_licence(m.group(1)))
+                break
+    return out
+
+
+def licence_mismatch(root="."):
+    """[(file, line, id)] for every surface when they do not all agree; [] when they do."""
+    found = licence_strings(root)
+    ids = {v[1] for v in found.values() if v}
+    if len(ids) <= 1:
+        return []
+    return [(f, v[0], v[1]) if v else (f, 0, "(none)") for f, v in found.items()]
+
+
+# an `Nx` / `N-Mx` / `N×` token that is a multiplier, not a product (`3 × 5`, `$15 × 2`)
+_SPEEDUP = re.compile(
+    r"(?<![\w.$])\d+(?:[.,]\d+)?(?:\s*[-\u2013]\s*\d+(?:[.,]\d+)?)?\s?[x\u00d7](?!\s*[\d(])(?![\w])")
+# ...on a line that is talking about performance
+_PERF = re.compile(r"speed|faster|slower|perf|throughput|accelerat|efficien|improvement|"
+                   r"reduction|gain|advantage|compression|better|cost|overhead", re.I)
+_BENCH = re.compile(r"benchmark", re.I)
+
+
+def speedup_claims(root=".", window=3):
+    """[(file, line, text)] for a numeric `Nx` performance claim with no 'benchmark' within `window` lines."""
+    hits = []
+    for path in _md_files(root):
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            lines = fh.read().split("\n")
+        for i, ln in enumerate(lines):
+            if not (_SPEEDUP.search(ln) and _PERF.search(ln)):
+                continue
+            lo, hi = max(0, i - window), min(len(lines), i + window + 1)
+            if any(_BENCH.search(l2) for l2 in lines[lo:hi]):
+                continue
+            hits.append((os.path.relpath(path, root), i + 1, ln.strip()[:80]))
+    return hits
+
+
+_FENCE = re.compile(r"^\s*```\s*(\w*)")
+_SHELL_LANGS = {"bash", "sh", "shell", "console", "zsh"}
+# tools whose arguments are not paths in this tree, or are checked specially. Real tools that
+# may be absent on the machine running the guard are listed so the check is about the TREE.
+_KNOWN = {"python", "python3", "cd", "pip", "pip3", "npm", "npx", "node", "make", "git", "cat",
+          "ls", "echo", "export", "source", "curl", "wget", "head", "tail", "grep", "sed",
+          "awk", "column", "for", "do", "done", "if", "then", "fi", "else", "pytest", "ruff",
+          "rm", "mkdir", "cp", "mv", "touch", "wc", "sort", "uniq", "tr", "xargs", "find",
+          "diff", "chmod", "sudo", "apt", "apt-get", "brew", "docker", "sh", "bash", "time",
+          "watch", "openscad", "kicad", "raspi-config", "nvm", "printf", "true", "false",
+          "exit", "set", "unset", "env", "which", "less", "more", "tee", "date", "sleep",
+          "jq", "conda", "mpirun", "vasp_std", "arduino-cli", "picotool", "ssh", "scp",
+          "rsync", "tar", "unzip", "zip", "gcc", "cc", "clang", "cmake", "ninja"}
+_CREATES = {"mkdir", "touch", "tee", "rm", "cp", "mv", "rsync", "scp", "tar", "unzip", "zip"}
+_PLACEHOLDER = re.compile(r"[<>{}$*?\[\]|]|^https?://|^-|^\.\.\.$")
+_IDENT = re.compile(r"^[a-z][\w.+-]*$")
+_PY_STATEMENT = {"import", "from", "class", "def", "return", "print", "if", "for", "while",
+                 "with", "try", "except", "raise", "assert", "pass", "yield", "lambda",
+                 "and", "or", "not", "in", "is", "the", "a", "an", "you", "we", "it", "this"}
+
+
+def _looks_like_path(tok):
+    return ("/" in tok or "." in tok) and not _PLACEHOLDER.search(tok)
+
+
+def _exists(tok, *bases):
+    """A path counts as present if it resolves from ANY base: the block's tracked cwd, the repo
+    root (a command list is a menu, not a script) or the .md file's own directory (a folder's
+    README assumes you are standing in it). Absolute paths are outside the tree and not judged."""
+    if os.path.isabs(tok):
+        return True
+    return any(os.path.exists(os.path.normpath(os.path.join(b, tok))) for b in bases if b)
+
+
+def _module_present(name, *bases):
+    rel = name.replace(".", os.sep)
+    if _exists(rel + ".py", *bases) or _exists(rel, *bases):
+        return True
+    import sys                              # stdlib modules are not tree claims; nothing else is exempt
+    top = name.split(".")[0]
+    return top in getattr(sys, "stdlib_module_names", ()) or top in ("pip", "pytest", "ruff")
+
+
+def _shell_lines(lines):
+    """Yield (line_no, text) for lines inside shell fences, with `\\` continuations joined and
+    heredoc bodies dropped. Resets on every fence so cwd tracking starts fresh per block."""
+    in_shell, heredoc, buf, buf_no = False, None, "", 0
+    for i, raw in enumerate(lines):
+        m = _FENCE.match(raw)
+        if m:
+            lang = m.group(1).lower()
+            in_shell = (not in_shell) and lang in _SHELL_LANGS
+            heredoc, buf = None, ""
+            yield (i + 1, None)             # block boundary
+            continue
+        if not in_shell:
+            continue
+        if heredoc is not None:
+            if raw.strip() == heredoc:
+                heredoc = None
+            continue
+        ln = raw.strip()
+        if ln.startswith("$ "):
+            ln = ln[2:]
+        if buf:
+            ln, buf = buf + " " + ln, ""
+        else:
+            buf_no = i + 1
+        if ln.endswith("\\"):
+            buf = ln[:-1].strip()
+            continue
+        hd = re.search(r"<<-?\s*['\"]?(\w+)", ln)
+        if hd:
+            heredoc = hd.group(1)
+        if not ln or ln.startswith("#"):
+            continue
+        yield (buf_no, ln)
+
+
+def shell_commands(root="."):
+    """[(file, line, text, why)] for fenced shell lines whose command or first path does not exist.
+
+    A path is judged against the block's tracked cwd, the repo root and the .md's own folder
+    (see _exists). `cd X` moves the tracked cwd only when X resolves. An unknown command is
+    reported only when the line is shaped like a CLI call (a lowercase name with flags or
+    path arguments), so prose and Python inside a mislabelled ```bash fence stay silent."""
+    hits = []
+    root = os.path.abspath(root)
+    root_name = os.path.basename(root)
+    for path in _md_files(root):
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            lines = fh.read().split("\n")
+        mddir = os.path.dirname(path)
+        cwd = root
+        for line_no, ln in _shell_lines(lines):
+            if ln is None:
+                cwd = root
+                continue
+            for seg in re.split(r"&&|\|\||;|\|", ln.split(" #")[0]):
+                seg = seg.strip()
+                if not seg:
+                    continue
+                try:
+                    toks = shlex.split(seg)
+                except ValueError:
+                    toks = seg.split()
+                while toks and re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", toks[0]):
+                    toks = toks[1:]
+                if not toks:
+                    continue
+                # drop redirect targets: they are created, not referenced
+                clean = []
+                skip = False
+                for t in toks:
+                    if skip:
+                        skip = False
+                        continue
+                    if t in (">", ">>", "<", "<<", "2>", "&>"):
+                        skip = True
+                        continue
+                    if re.match(r"^[12]?>>?\S", t) or t.startswith("<<"):
+                        continue
+                    clean.append(t)
+                toks = clean
+                if not toks:
+                    continue
+                cmd, args = toks[0], toks[1:]
+                loc = (os.path.relpath(path, root), line_no, seg[:80])
+                if cmd == "cd":
+                    if not args or _PLACEHOLDER.search(args[0]):
+                        continue
+                    if args[0].strip("/") == root_name:         # `git clone X && cd X`
+                        cwd = root
+                        continue
+                    for base in (cwd, root, mddir):
+                        cand = os.path.normpath(os.path.join(base, args[0]))
+                        if os.path.isdir(cand):
+                            cwd = cand
+                            break
+                    else:
+                        hits.append(loc + ("cd target missing: %s" % args[0],))
+                    continue
+                if cmd in ("python", "python3"):
+                    if args[:1] == ["-m"] and len(args) > 1:
+                        if not _module_present(args[1], cwd, root, mddir):
+                            hits.append(loc + ("module missing: %s" % args[1],))
+                        continue
+                    first = next((a for a in args if not a.startswith("-")), None)
+                    if first and _looks_like_path(first) and not _exists(first, cwd, root, mddir):
+                        hits.append(loc + ("file missing: %s" % first,))
+                    continue
+                if cmd.startswith("./") or cmd.startswith("../"):
+                    if not _PLACEHOLDER.search(cmd) and not _exists(cmd, cwd, root, mddir):
+                        hits.append(loc + ("script missing: %s" % cmd,))
+                    continue
+                if cmd in _CREATES:
+                    continue
+                if cmd not in _KNOWN:
+                    cli_shaped = (_IDENT.match(cmd) and cmd not in _PY_STATEMENT
+                                  and any(a.startswith("-") or _looks_like_path(a) for a in args))
+                    if cli_shaped and not (shutil.which(cmd) or _exists(cmd, cwd, root, mddir)):
+                        hits.append(loc + ("command not found: %s" % cmd,))
+                    continue
+                first = next((a for a in args if _looks_like_path(a)), None)
+                if first and not _exists(first, cwd, root, mddir):
+                    hits.append(loc + ("path missing: %s" % first,))
+    return hits
+
+
+_SECOND_PERSON = re.compile(r"\byour (?:projects?|repos?|repositories|other (?:work|projects))\b", re.I)
+
+
+def second_person(root="."):
+    """[(file, line, text)] where a .md addresses the author's own projects in the second person."""
+    hits = []
+    for path in _md_files(root):
+        with open(path, encoding="utf-8", errors="replace") as fh:
+            for i, ln in enumerate(fh, 1):
+                if _SECOND_PERSON.search(ln):
+                    hits.append((os.path.relpath(path, root), i, ln.strip()[:80]))
+    return hits
+
+
+def spaced_filenames(root="."):
+    """[path] for every file or directory whose own name contains a space."""
+    hits = []
+    for base, dirs, names in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
+        for n in sorted(dirs + names):
+            if " " in n:
+                hits.append(os.path.relpath(os.path.join(base, n), root))
+    return hits
+
+
+def prose_audit(root="."):
+    """All five checks. Returns {check: [hits]}; a run with any hit fails."""
+    return {
+        "licence": licence_mismatch(root),
+        "speedup": speedup_claims(root),
+        "shell": shell_commands(root),
+        "second_person": second_person(root),
+        "spaces": spaced_filenames(root),
+    }
+
+
+def prose_report(root="."):
+    """Print stage 5 and return the number of hits. Reports; fixes nothing."""
+    res = prose_audit(root)
+    n = 0
+    print("  licence strings                   %d surface(s) disagree" % len(res["licence"]))
+    for f, ln, lid in res["licence"]:
+        print("      %s:%d  %s" % (f, ln, lid))
+    print("  speedup claims, no benchmark near %d" % len(res["speedup"]))
+    for f, ln, txt in res["speedup"]:
+        print("      %s:%d  %s" % (f, ln, txt))
+    print("  shell commands that cannot run    %d" % len(res["shell"]))
+    for f, ln, txt, why in res["shell"]:
+        print("      %s:%d  %s  <- %s" % (f, ln, txt, why))
+    print("  second-person address             %d" % len(res["second_person"]))
+    for f, ln, txt in res["second_person"]:
+        print("      %s:%d  %s" % (f, ln, txt))
+    print("  filenames with a space            %d" % len(res["spaces"]))
+    for p in res["spaces"]:
+        print("      %s" % p)
+    n = sum(len(v) for v in res.values())
+    print("  %s" % ("prose holds" if not n else
+                    "%d hit(s) -- each is a fix in a separate pass; nothing was changed" % n))
+    return n
+
+
+# =====================================================================
 # HUMAN CHECKLIST -- the two classes no code catches
 # =====================================================================
 
@@ -417,14 +785,28 @@ def demo(seed=0):
     collision_report(os.path.dirname(os.path.abspath(__file__)))
 
     print("=" * 70)
-    print("5. HUMAN CHECKLIST -- the two classes no code catches")
+    print("5. PROSE -- the README is a claim surface like any other")
+    print("=" * 70)
+    prose_hits = prose_report(os.path.dirname(os.path.abspath(__file__)))
+
+    print("=" * 70)
+    print("6. HUMAN CHECKLIST -- the two classes no code catches")
     print("=" * 70)
     human_checklist()
+    return prose_hits
 
 
-def main():
-    demo()
+def main(argv=None):
+    """Exit nonzero on any prose hit. Stages 1-4 report; stage 5 fails the run.
+    `python repo_guard.py prose` runs stage 5 alone."""
+    import os
+    import sys
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ["prose"]:
+        return 1 if prose_report(os.path.dirname(os.path.abspath(__file__))) else 0
+    return 1 if demo() else 0
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    sys.exit(main())

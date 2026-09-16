@@ -8,7 +8,9 @@ defect it exists to catch.
 import math
 import os
 import random
+import shutil
 import sys
+import tempfile
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -18,6 +20,13 @@ from repo_guard import (  # noqa: E402
     FLOOR,
     VETO,
     duplicate_bodies,
+    licence_mismatch,
+    licence_strings,
+    prose_audit,
+    second_person,
+    shell_commands,
+    spaced_filenames,
+    speedup_claims,
     null_harness,
     reach,
     screen_collisions,
@@ -372,6 +381,155 @@ class TestCollisionStage(unittest.TestCase):
         clauses across five claims; merged to one definition."""
         self.assertEqual(screen_collisions(), [])
 
+
+
+class TestProseStage(unittest.TestCase):
+    """Stage 5: the README is a claim surface. Each check is shown firing and
+    shown silent, on a tree built for it; then the real tree's licence
+    surfaces are required to agree, which is the one assertion here that a
+    future edit can fail."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp)
+
+    def _w(self, rel, text):
+        p = os.path.join(self.tmp, rel)
+        os.makedirs(os.path.dirname(p), exist_ok=True)
+        with open(p, "w", encoding="utf-8") as fh:
+            fh.write(text)
+        return p
+
+    # -- licence ----------------------------------------------------------
+    def _licence_tree(self, lic, cff, meta, readme):
+        self._w("LICENSE", lic)
+        self._w("CITATION.cff", "cff-version: 1.2.0\nlicense: %s\n" % cff)
+        self._w("metadata.json", '{"license": "%s"}' % meta)
+        self._w("README.md", "# x\n\n## License\n\n%s per author intent.\n" % readme)
+
+    def test_licence_agreement_is_silent(self):
+        self._licence_tree("Creative Commons Legal Code\n\nCC0 1.0 Universal\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self.assertEqual(licence_mismatch(self.tmp), [])
+
+    def test_mit_licence_under_cc0_readme_fires_and_names_every_surface(self):
+        self._licence_tree("MIT License\n\nCopyright (c)\n", "CC0-1.0", "CC0-1.0", "CC0")
+        hits = licence_mismatch(self.tmp)
+        self.assertEqual({h[0] for h in hits}, {"LICENSE", "CITATION.cff", "metadata.json", "README.md"})
+        self.assertIn(("LICENSE", 1, "MIT"), hits)
+
+    def test_missing_surface_is_reported_as_none_not_ignored(self):
+        self._licence_tree("MIT License\n", "MIT", "MIT", "MIT")
+        os.remove(os.path.join(self.tmp, "metadata.json"))
+        self.assertIsNone(licence_strings(self.tmp)["metadata.json"])
+        self.assertEqual(licence_mismatch(self.tmp), [])   # three agree; absence is not disagreement
+
+    def test_real_tree_licence_surfaces_agree(self):
+        root = os.path.join(os.path.dirname(__file__), "..")
+        self.assertEqual(licence_mismatch(root), [], licence_strings(root))
+        self.assertEqual({v[1] for v in licence_strings(root).values() if v}, {"CC0-1.0"})
+
+    # -- speedup ----------------------------------------------------------
+    def test_speedup_without_benchmark_fires(self):
+        self._w("a.md", "intro\n\nSIMD Auto-vectorization 4-8x speedup\nCombined 50-200x faster\n")
+        hits = speedup_claims(self.tmp)
+        self.assertEqual([h[1] for h in hits], [3, 4])
+
+    def test_speedup_with_benchmark_within_three_lines_is_silent(self):
+        self._w("a.md", "runs at 0.26x-0.48x, i.e. slower\n\n\nsee Engine/engine_benchmark.py\n")
+        self.assertEqual(speedup_claims(self.tmp), [])
+        self._w("a.md", "runs at 0.26x-0.48x, i.e. slower\n\n\n\nsee Engine/engine_benchmark.py\n")
+        self.assertEqual(len(speedup_claims(self.tmp)), 1)   # four lines away is not adjacent
+
+    def test_products_and_prices_are_not_speedups(self):
+        self._w("a.md", "N = 15  # = 3 x 5\nHall sensors (16x): $80\nphi 0.685 +- 5 x 10-4\n32x32 grid\n")
+        self.assertEqual(speedup_claims(self.tmp), [])
+
+    # -- shell ------------------------------------------------------------
+    def test_cd_into_missing_directory_fires_and_existing_is_silent(self):
+        os.makedirs(os.path.join(self.tmp, "Engine"))
+        self._w("Engine/solver.py", "")
+        self._w("a.md", "```bash\ncd engine\ncd Engine && python solver.py\n```\n")
+        hits = shell_commands(self.tmp)
+        self.assertEqual(len(hits), 1)
+        self.assertEqual(hits[0][1], 2)
+        self.assertIn("cd target missing: engine", hits[0][3])
+
+    def test_a_menu_of_commands_resolves_from_the_root_after_an_earlier_cd(self):
+        os.makedirs(os.path.join(self.tmp, "GEIS"))
+        os.makedirs(os.path.join(self.tmp, "tests"))
+        self._w("GEIS/test_simple.py", "")
+        self._w("tests/test_engine.py", "")
+        self._w("a.md", "```bash\ncd GEIS && python test_simple.py\npython tests/test_engine.py\n```\n")
+        self.assertEqual(shell_commands(self.tmp), [])
+
+    def test_a_folder_readme_resolves_from_its_own_folder(self):
+        os.makedirs(os.path.join(self.tmp, "github", "claim_playground"))
+        self._w("github/claim_playground/cli.py", "")
+        self._w("github/README.md", "```bash\npython -m claim_playground.cli --list\n```\n")
+        self.assertEqual(shell_commands(self.tmp), [])
+
+    def test_heredocs_continuations_and_redirects_are_not_paths(self):
+        self._w("a.md", "```bash\ncat > made/later.txt << EOF\nline\nEOF\n"
+                        "python -m unittest \\\n    discover -s tests\n```\n")
+        self.assertEqual(shell_commands(self.tmp), [])
+
+    def test_prose_inside_a_bash_fence_is_not_a_command(self):
+        self._w("a.md", "```bash\nimport random\nGood uses:\n1. Organic clean: 10 min\n"
+                        "you will misuse it.\n```\n")
+        self.assertEqual(shell_commands(self.tmp), [])
+
+    def test_cwd_is_tracked_within_a_block(self):
+        os.makedirs(os.path.join(self.tmp, "GEIS"))
+        self._w("GEIS/test_simple.py", "")
+        self._w("a.md", "```bash\ncd GEIS\npython test_simple.py\n```\n```bash\npython test_simple.py\n```\n")
+        hits = shell_commands(self.tmp)
+        self.assertEqual([h[1] for h in hits], [6])          # the second block starts at the root again
+        self.assertIn("file missing: test_simple.py", hits[0][3])
+
+    def test_unknown_command_and_module_fire(self):
+        os.makedirs(os.path.join(self.tmp, "fabrication"))
+        self._w("fabrication/smoke.py", "")
+        self._w("a.md", "```bash\nshapebridge --demo --visualize\npython -m fabrication.smoke\n"
+                        "python -m fabrication.nope\n```\n")
+        why = [h[3] for h in shell_commands(self.tmp)]
+        self.assertEqual(why, ["command not found: shapebridge", "module missing: fabrication.nope"])
+
+    def test_placeholders_quotes_and_non_shell_fences_are_skipped(self):
+        os.makedirs(os.path.join(self.tmp, "Front end"))
+        self._w("a.md", "```bash\ncd \"Front end\" && npm run dev\npython <your_script>.py\n"
+                        "for t in tests/test_*.py; do python \"$t\"; done\n```\n"
+                        "```python\nimport nothing_here\n```\n")
+        self.assertEqual(shell_commands(self.tmp), [])
+
+    # -- second person ----------------------------------------------------
+    def test_your_projects_fires_and_your_input_does_not(self):
+        self._w("a.md", "This bridges several of your projects.\nPaste your input here.\n")
+        hits = second_person(self.tmp)
+        self.assertEqual([(h[1]) for h in hits], [1])
+
+    # -- spaces -----------------------------------------------------------
+    def test_filename_with_space_fires(self):
+        self._w("energy. md", "")
+        os.makedirs(os.path.join(self.tmp, "Front end"))
+        self._w("clean.md", "")
+        self.assertEqual(spaced_filenames(self.tmp), ["Front end", "energy. md"])
+
+    # -- the audit is a report, not a fix ---------------------------------
+    def test_audit_changes_nothing_on_disk(self):
+        self._licence_tree("MIT License\n", "CC0-1.0", "CC0-1.0", "CC0")
+        self._w("b.md", "your projects\n```bash\ncd nowhere\n```\n4-8x speedup\n")
+        before = {}
+        for base, _, names in os.walk(self.tmp):
+            for n in names:
+                with open(os.path.join(base, n), "rb") as fh:
+                    before[os.path.join(base, n)] = fh.read()
+        res = prose_audit(self.tmp)
+        self.assertTrue(all(res[k] for k in ("licence", "speedup", "shell", "second_person")))
+        for path, body in before.items():
+            with open(path, "rb") as fh:
+                self.assertEqual(fh.read(), body)
 
 
 if __name__ == "__main__":

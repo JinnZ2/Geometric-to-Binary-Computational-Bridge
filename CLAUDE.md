@@ -47,7 +47,7 @@ python tests/test_gies_core.py          # GIES tensor collapse + codec bijection
 python tests/test_transient_suppression.py # Bifilar CM suppression, R2-1..8 (59 tests, no deps)
 python tests/test_er_bounds.py          # Er3+ coherence, LVM mass gate, ER-1..8 (66 tests, no deps)
 python tests/test_keating_seed.py       # Keating minima + seed influence matrix (63 tests, no deps)
-python tests/test_repo_guard.py         # Null harness / symmetry veto / reach / collisions (42 tests, no deps)
+python tests/test_repo_guard.py         # Null harness / symmetry veto / reach / collisions / prose (60 tests, no deps)
 python tests/test_field_claim_loop.py   # Field claim loop: router + calibrated gates (93 tests, no deps)
 python tests/test_playground.py         # Open bench: can each verdict actually fire (41 tests, no deps)
 python tests/test_playground_review.py  # Archive provenance, principles, staleness (55 tests, no deps)
@@ -63,8 +63,12 @@ python tests/test_aiss_scoring.py       # AISS scoring VALUES: placeholder remov
 python tests/test_experiments_topology.py # Vacuum tautology + vortex pinning (47 tests, needs numpy)
 python tests/test_integration_crosslinks.py # God's Eye View integration map guard, IX-1..7 (37 tests, no deps)
 
-# Pre-commit guard: null harness, symmetry veto, instrument reach
+# Pre-commit guard: null harness, symmetry veto, instrument reach, collisions, prose.
+# Exits nonzero on any stage-5 (prose) hit: licence mismatch across the four surfaces,
+# an Nx performance claim with no benchmark nearby, a fenced shell command whose path is
+# not in the tree, second-person address to the author, a filename with a space.
 python repo_guard.py
+python repo_guard.py prose             # stage 5 alone; PROSE_AUDIT.md is its dated snapshot
 
 # God's Eye View integration map: 11 domain folders, crosslinked, ecosystem as third axis
 python integrations/gods-eye-view/crosslinks.py           # 10 checks, exit nonzero
@@ -186,7 +190,7 @@ cd "Front end" && npm install && npm run dev
 | FP-4 autopilot | `tests/test_fp4_autopilot.py` | 66 | Anomaly-factor fit, identifiability guard (FP-6), firmware drive table (FP-7), two-sided null-world self-test |
 | Energy-pattern | `tests/test_epg_bounds.py` | 38 | Cubic transport isotropy (EPG-7), tetrahedral maximin bound (EPG-6), DSA defect floor (EPG-4), mechanism discriminators (EPG-8) |
 | Magnetic authority | `tests/test_magnetic_authority.py` | 67 | Hall/SQUID readout gap (FAB-1), Er vs host diamagnetism (FAB-2), electromigration (FAB-5), coil field and Zeeman authority (BRG-1), timing floors (BRG-2), gradient addressing (BRG-5), piezoresistive replacement (BRG-6) |
-| Repo guard | `tests/test_repo_guard.py` | 42 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands, and stage 4: identical file bodies, screen names with two definitions, both directions |
+| Repo guard | `tests/test_repo_guard.py` | 60 | Null harness verdicts incl. CLAIM_FAILS, symmetry veto hits/silence, instrument reach bands, stage 4: identical file bodies, screen names with two definitions, both directions; stage 5: each prose check shown firing and silent on a built tree, the real tree's four licence surfaces required to agree, and the audit shown to change nothing on disk |
 | Adaptive sim | `tests/test_adaptive_sim.py` | 64 | ASF-1..16: a provenance log that does not reproduce under the code shipped with it, a seed field passed to nothing, an unreachable diagnosis branch, an R2 gate that passes a rising distribution, and a fixation claim that measures the step budget |
 | Explore | `tests/test_explore.py` | 30 | EX-1..4: coverage matrix, gap complement, folder-spanning principles, and the scope guard that keeps it from proposing |
 | Geometric network, temperature, trend | `tests/test_gi_network.py` | 133 | GI-1..16, GR-1..6, GB-1..5, TMP-1..5, TRD-0..7: measurements that do not propagate, an unsatisfiable threshold clause, a design contradiction resolved in the measurement's favour, non-monotonic band edges, an unread constructor parameter, and a 15.7% false-alarm rate on noise |
@@ -674,9 +678,14 @@ graveyard.py                    The inverse view: what the archive stopped
                                 behind. Ranks them by REACH — how many
                                 independent claims each has already killed.
 
-repo_guard.py                   Stage 5.5 — the null stage. Three mechanical
-                                checks (null harness, symmetry veto, reach) plus
-                                the human checklist for circular targets and units
+repo_guard.py                   Stage 5.5 — the null stage. Five mechanical
+                                checks (null harness, symmetry veto, reach,
+                                collisions, prose) plus the human checklist for
+                                circular targets and units. Stage 5 points the
+                                apparatus at the repo's own README and fails the
+                                run on hits; it reports and fixes nothing.
+PROSE_AUDIT.md                  Dated snapshot of `python repo_guard.py prose`:
+                                every hit with file and line, for the fixing pass.
 
 experiments/silicon_speculative/
 ├── topological_pin.py            ATT-1: a registry is not a pin; V_pin removes the zero mode
@@ -953,7 +962,7 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `Silicon/field_propulsion_fp4.ino` is committed **unflashed** — no board was available here. Its phase-table logic is ported into `tests/test_fp4_autopilot.py` and verified against `propulsion_bounds.aliased_modes()`, but the timer backends (RP2040 / Teensy 4) and the HX711 and ADC paths are unexercised. Every calibration constant in it is a placeholder to be replaced by a bench measurement.
 - `Silicon/fp4_autopilot.py`'s `ber_sweep()` raises `NotImplementedError` on the simulator by design; the §9.1 Bridge communication test needs either hardware or an explicit channel model, and a synthetic BER curve would reproduce the rigged-simulator defect the same file exists to guard against.
 - **No magnetic state channel exists in silicon.** Five documents proposed one (`silicon_error_correction.json` v1, `octahedral_state_encoder.json` v1, `ttm_audit.md`'s fourth file, `Fabrication.md`, `Magnetic-bridge.md`). Si is diamagnetic at χ ~ −4e-6 and 95.3% of nuclei are spin-zero. A 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor and 7 below a SQUID; 2 T buys 0.23 meV against a 10–100 meV barrier. The replacement is strain throughout: Ξ_u = 9.16 eV gives 9.2 meV of valley splitting at 0.1 % strain (40× the 2 T figure), written piezo/optomechanically and read piezoresistively at dR/R ≈ 9 % (GF ≈ 93). Full arithmetic in `Silicon/magnetic_authority.py`.
-- **`repo_guard.py` is the pre-commit check that would have caught most of this archive's fatal findings.** Four mechanical stages: a null harness (does the result survive replacing structure with noise — killed the 17-lens isomorphism, the vacuum assertions, and topological attention's `run()`), a symmetry veto (does the material permit the mechanism — 9 instances across 6 files, free), and a reach check (is the signal above the instrument floor — the 11-order Hall gap, the 500x Er swamp, the RBS shortfall), and a collision stage (do two artifacts carry the same content, or does one name carry two definitions). Circular targets and unit errors are not mechanisable and get a human checklist.
+- **`repo_guard.py` is the pre-commit check that would have caught most of this archive's fatal findings.** Five mechanical stages, the fifth (prose) added after an external audit of the published README found a CC0 header over an MIT LICENSE, a speedup table whose rows did not multiply to its own total and that no benchmark had produced, quick-start commands naming directories that do not exist and a CLI with no entry point, and model output addressed to the author left on the crawler surface — none of which the physics-facing stages could see. The first four: a null harness (does the result survive replacing structure with noise — killed the 17-lens isomorphism, the vacuum assertions, and topological attention's `run()`), a symmetry veto (does the material permit the mechanism — 9 instances across 6 files, free), and a reach check (is the signal above the instrument floor — the 11-order Hall gap, the 500x Er swamp, the RBS shortfall), and a collision stage (do two artifacts carry the same content, or does one name carry two definitions). Circular targets and unit errors are not mechanisable and get a human checklist.
 - **P-DUPLICATE-AUTHORITY's detector is "hash the bodies", and nothing ran it.** The principle has been ESTABLISHED since it was written with `mechanised_by: None`, so a scan found two byte-identical document pairs nobody had recorded: `PROJECTS.md` == `PROJECTS2.md` (45 lines, and `Navigation.md` described both as "Example applications" when they are a connected-repository list, so the index was wrong about a file it names twice), and `Silicon/GIES.md` == `GEIS/GEIS_organization.md` (937 lines, the same document in two folders with nothing stating which is canonical — while `GEIS/GIES_AUDIT.md` cites "GIES.md" by name, which now resolves to neither path unambiguously). Both are recorded as instances rather than deleted, because which copy is canonical is an editorial call; `Navigation.md` is corrected. Mechanised as **`repo_guard.py` stage 4**, which also catches one screen name carrying two definitions — `measure-the-null` had two rule texts and two `applies_when` clauses across five claims, merged to one, so the reach ranking is no longer summing two different screens. `legacy/` and `evidence/` are skipped on purpose: a file kept for provenance is *supposed* to duplicate what replaced it, and flagging it would train a reader to ignore the stage.
 - **A shared principle instance is not evidence subtracted from either principle, and the first version of that check said it was.** Three instances are filed under two principles each — GIES-1 is both a representation blind to the sign (`P-SYMMETRY-COLLAPSE`) and a rank-1 projection that discarded it (`P-PREMATURE-SCALARIZATION`). The first `crossfiled()` stripped every shared instance before counting and duly reported `P-SYMMETRY-COLLAPSE` as unsupported, which would make a cross-folder finding a liability rather than this archive's best asset: GIES-1 and KEA-7 are two independent claims in two formalisms that never met, and that is exactly what the principle rests on. The real collision is *containment* — one principle whose instances are a subset of another's, which is two names for one shape — and `python playground/principles.py crossfiled` reports the sharing and exits nonzero only on that. None of the 11 is contained today.
 
