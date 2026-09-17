@@ -38,7 +38,7 @@ Timed against a uniform grid on the same sources, through the same optimizer:
 | quadrupole (2-fold) | 32 768 | 2 864 | 11.4× | **0.26×** |
 | wire + charge | 32 768 | 2 024 | 16.2× | **0.31×** |
 
-The adaptive path is **2× to 50× slower**, not 15–33× faster. ENG-1.
+The adaptive path is **2× to 50× slower**, not 15–33× faster. ENG-1. <!-- benchmark: Engine/engine_benchmark.py -->
 
 **The geometry is not the problem.** `SpatialGrid.createRegion` returns
 exactly one sample point per leaf region, so the solver calls

@@ -86,11 +86,12 @@ class TestHC1Manifest(unittest.TestCase):
         with self.assertRaises(C.ContractError):
             C.load_manifest(self._write(_manifest(algorithm="two\nlines")))
 
-    def test_shipped_manifests_validate_and_are_three(self):
+    def test_shipped_manifests_validate_and_are_four(self):
         names = [m["name"] for m in C.discover(ROOT)]
-        self.assertEqual(names, ["py_octree", "py_octree_tol", "uniform_grid"])
+        self.assertEqual(names, ["py_octree", "py_octree_mag", "py_octree_tol", "uniform_grid"])
         knobs = {m["name"]: m["knob"] for m in C.discover(ROOT)}
-        self.assertEqual(knobs, {"py_octree": "none", "py_octree_tol": "tolerance", "uniform_grid": "resolution"})
+        self.assertEqual(knobs, {"py_octree": "none", "py_octree_mag": "tolerance", "py_octree_tol": "tolerance",
+                                 "uniform_grid": "resolution"})
 
 
 class TestHC2SpecAndReference(unittest.TestCase):
@@ -377,6 +378,63 @@ class TestHC7MatchedAccuracy(unittest.TestCase):
         self.assertIn("## Matched accuracy", committed)
         self.assertEqual(committed.split("## Matched accuracy")[1].strip(),
                          MA.render(MA.matched_rows(recs)).split("## Matched accuracy")[1].strip())
+
+
+class TestHC8WeightedProbesAndCeiling(unittest.TestCase):
+    """HC-8: the second probe set (B2) is seeded, sits where the field is large, and is scored
+    beside the uniform one, never instead of it; depth_capped travels through the record; the
+    ceiling target is uniform_grid@128's E error per workload."""
+
+    def setUp(self):
+        self.ws = C.load_workloads(os.path.join(ROOT, "harness", "workloads.json"))
+        self.w = self.ws[0]
+
+    def test_weighted_probes_are_seeded_and_denser_near_sources(self):
+        a, b = C.make_spec(self.w, 16), C.make_spec(self.w, 16)
+        self.assertEqual(a["probes_weighted"], b["probes_weighted"])
+        self.assertEqual(len(a["probes_weighted"]), C.PROBE_COUNT)
+        self.assertNotEqual(a["probes_weighted"], a["probes"])
+
+        def mean_w(ps):
+            tot = 0.0
+            for p in ps:
+                for s in self.w["sources"]:
+                    r = C._sub(p, s["position"])
+                    tot += 1.0 / (r[0] ** 2 + r[1] ** 2 + r[2] ** 2)
+            return tot / len(ps)
+        self.assertGreater(mean_w(a["probes_weighted"]), 3 * mean_w(a["probes"]))
+
+    def test_accuracy_both_scores_both_sets_and_none_when_a_set_is_unanswered(self):
+        spec = C.make_spec(self.w, 16)
+        ref, ref_w = C.reference_field(spec), C.reference_field(spec, spec["probes_weighted"])
+        exact = {"E": ref["E"], "B": ref["B"], "E_w": ref_w["E"], "B_w": ref_w["B"]}
+        acc = C.accuracy_both(spec, exact)
+        self.assertEqual((acc["E"], acc["E_w"]), (0.0, 0.0))
+        self.assertIsNone(acc["B"])                       # charge-only workload has no B
+        half = {"E": [[x / 2 for x in v] for v in ref["E"]], "B": ref["B"]}
+        acc = C.accuracy_both(spec, half)
+        self.assertAlmostEqual(acc["E"], 0.5, places=9)
+        self.assertIsNone(acc["E_w"])                     # not answered, not 0
+
+    def test_finish_extra_reaches_the_record(self):
+        d = tempfile.mkdtemp()
+        try:
+            out = os.path.join(d, "r.json")
+            C.finish(out, 0.1, 5, {"E": [], "B": []}, notes="n", extra={"depth_capped": 7})
+            with open(out, encoding="utf-8") as fh:
+                self.assertEqual(json.load(fh)["depth_capped"], 7)
+        finally:
+            shutil.rmtree(d)
+
+    def test_ceiling_targets_read_uniform_128(self):
+        def rec(impl, w, r, e):
+            return {"impl": impl, "workload": w, "resolution": r, "tolerance": None, "wall_time": 1.0,
+                    "accuracy_vs_reference": {"E": e, "B": None}, "points": r ** 3,
+                    "status": {"kind": "OK", "reason": None}, "ts": "2026-09-17T00:00:00Z"}
+        recs = [rec("uniform_grid", "w", 128, 0.0158), rec("uniform_grid", "w", 64, 0.03),
+                rec("uniform_grid", "v", 96, 0.02), rec("py_octree", "w", 128, 0.17)]
+        self.assertEqual(R.ceiling_targets(recs), {"w": 0.0158})
+        self.assertEqual(R.CEILING_POINTS, 2097152)
 
 if __name__ == "__main__":
     unittest.main()

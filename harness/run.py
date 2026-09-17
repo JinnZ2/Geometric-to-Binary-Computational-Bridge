@@ -79,7 +79,7 @@ def run_cell(m: dict, workload: dict, resolution: int, *, timeout: float, repeat
                 last = json.load(fh)
             walls.append(float(last["wall_time"]))
     try:
-        acc = contract.accuracy(contract.reference_field(spec), last["probe_field"])
+        acc = contract.accuracy_both(spec, last["probe_field"])
     except (contract.ContractError, KeyError, TypeError) as e:
         return contract.result_record(name, wname, resolution,
                                       contract.status("FAILED", f"probe answer malformed: {e}"),
@@ -88,7 +88,8 @@ def run_cell(m: dict, workload: dict, resolution: int, *, timeout: float, repeat
                                   wall_time=min(walls), peak_memory_mb=last.get("peak_memory_mb"),
                                   accuracy_vs_reference=acc, points=last.get("points"),
                                   conditions=spec["conditions"], run_id=run_id, repeats=repeats,
-                                  extra={"notes": last.get("notes", "")}, tolerance=tolerance)
+                                  extra={"notes": last.get("notes", ""), "depth_capped": last.get("depth_capped")},
+                                  tolerance=tolerance)
 
 
 def covers(m: dict, wname: str) -> bool:
@@ -97,14 +98,30 @@ def covers(m: dict, wname: str) -> bool:
 
 # ----------------------------------------------------------------- a run
 
+CEILING_POINTS = 128 ** 3           # the uniform grid at resolution 128
+
+
+def ceiling_targets(records):
+    """{workload: error E of uniform_grid at resolution 128} from the records; the error a
+    tolerance sweep has to reach to have entered the high-accuracy regime."""
+    out = {}
+    for (i, w, r), rec in latest_per_cell(records).items():
+        if i == "uniform_grid" and r == 128 and rec["status"]["kind"] == "OK":
+            e = (rec.get("accuracy_vs_reference") or {}).get("E")
+            if e is not None:
+                out[w] = e
+    return out
+
+
 def run_all(resolutions, repeats, timeout, only_impl=None, only_workload=None, python=sys.executable,
-            tolerances=()):
+            tolerances=(), stop_at_ceiling=False):
     """Sweep each impl along ITS knob: knob=resolution or none over `resolutions` (none ignores
     the value and says so in the record), knob=tolerance over `tolerances` at resolutions[0].
     Held workloads (harness/workloads_held.json) are never run."""
     manifests = contract.discover(ROOT)
     workloads = contract.load_workloads(WORKLOADS)
     rep = probe.probe_all(ROOT, python)
+    targets = ceiling_targets(load_results()) if stop_at_ceiling else {}
     run_id = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()) + "-" + uuid.uuid4().hex[:6]
     records = []
     for m in manifests:
@@ -135,9 +152,21 @@ def run_all(resolutions, repeats, timeout, only_impl=None, only_workload=None, p
                 rec["knob"] = m["knob"]
                 records.append(rec)
                 knob = f"tol {tolerance:<6}" if tolerance is not None else f"res {res:<4}"
+                capped = rec.get("depth_capped")
                 print(f"  {m['name']:<14} {w['name']:<12} {knob} {contract.render_status(rec['status'])}"
                       + (f"  {rec['wall_time']:.4f}s  {rec['peak_memory_mb'] or 0:.0f} MB  {rec['points']} pts"
+                         + (f"  DEPTH_CAPPED({capped})" if capped else "")
+                         + "  " + _fmt_acc(rec.get("accuracy_vs_reference"))
                          if rec["status"]["kind"] == "OK" else ""), flush=True)
+                if stop_at_ceiling and tolerance is not None and rec["status"]["kind"] == "OK":
+                    e = (rec.get("accuracy_vs_reference") or {}).get("E")
+                    tgt = targets.get(w["name"], 0.016)
+                    if (rec.get("points") or 0) > CEILING_POINTS:
+                        print(f"    ceiling: POINT_CAP first at tol {tolerance} ({rec['points']:,} > {CEILING_POINTS:,})", flush=True)
+                        break
+                    if e is not None and e <= tgt:
+                        print(f"    ceiling: ERROR_TARGET first at tol {tolerance} (E {e:.4f} <= {tgt:.4f})", flush=True)
+                        break
     with open(RESULTS, "a", encoding="utf-8") as fh:
         for rec in records:
             fh.write(json.dumps(rec) + "\n")
@@ -179,13 +208,14 @@ def latest_per_tol_cell(records):
 # ----------------------------------------------------------------- SELECTION.md
 
 def _fmt_acc(acc):
+    """E/B on the uniform probes, then Ew/Bw on the weighted probes (B2). Both, always."""
     if not acc:
         return "err ?"
     parts = []
-    for k in ("E", "B"):
+    for k, label in (("E", "E"), ("B", "B"), ("E_w", "Ew"), ("B_w", "Bw")):
         v = acc.get(k)
         if v is not None:
-            parts.append(f"{k} {v:.2e}")
+            parts.append(f"{label} {v:.2e}")
     return " ".join(parts) if parts else "err ?"
 
 
@@ -213,7 +243,11 @@ def render_selection(records, manifests, workloads, probe_report=None, held=()) 
     L.append("could fill says NOT_MEASURED and why; a row that could not run on this machine says")
     L.append("NOT_RUNNABLE and why. Numbers: wall seconds (minimum of N repeats) · peak MB of the child")
     L.append("process · median relative error of the probe answers vs `contract.reference_field`,")
-    L.append("E and B separately. No implementation is the reference; `uniform_grid` is a peer.")
+    L.append("E and B on the 256 uniform probes, then Ew and Bw on the 256 source-weighted probes")
+    L.append("(density ~ sum 1/r^2; the cells an adaptive grid refines, which uniform probes never")
+    L.append("sample). Both are reported for every implementation; neither replaces the other.")
+    L.append("DEPTH_CAPPED(n): leaves still above the tolerance at the depth cap, first-class, not an")
+    L.append("error. No implementation is the reference; `uniform_grid` is a peer.")
     L.append("")
     # counts at the top
     n_ok = sum(1 for r in list(latest.values()) + list(latest_tol.values()) if r["status"]["kind"] == "OK")
@@ -299,7 +333,8 @@ def render_selection(records, manifests, workloads, probe_report=None, held=()) 
                 row = []
                 for i in tol_impls:
                     r = latest_tol.get((i, w["name"], tol))
-                    row.append(_cell(r) + (f" · {r['points']:,} pts" if r and r["status"]["kind"] == "OK" else ""))
+                    row.append(_cell(r) + (f" · {r['points']:,} pts" if r and r["status"]["kind"] == "OK" else "")
+                               + (f" · DEPTH_CAPPED({r['depth_capped']})" if r and r.get("depth_capped") else ""))
                 L.append(f"| {tol:g} | " + " | ".join(row) + " |")
             L.append("")
     # build tolerance
@@ -360,6 +395,38 @@ def render_selection(records, manifests, workloads, probe_report=None, held=()) 
             c, h = w["conditions"], w["held"]
             L.append(f"| {w['name']} | {c['sparsity']} | {c['scale_separation']} | {h['reason']} | {h['settles']} | {h['build_after']} |")
         L.append("")
+    L.append("## Ceiling: can a tolerance octree enter the high-accuracy regime")
+    L.append("")
+    L.append(f"Per workload and tolerance implementation, sweeping the tolerance down: which comes first,")
+    L.append(f"the uniform-probe E error of `uniform_grid` at resolution 128, or a point count above that")
+    L.append(f"grid's {CEILING_POINTS:,}. NOT_REACHED means the sweep ended before either.")
+    L.append("")
+    L.append("| workload | impl | target E (uniform @128) | verdict | at tolerance | points | E | Ew |")
+    L.append("|---|---|---|---|---|---|---|---|")
+    targets = ceiling_targets(records)
+    for w in workloads:
+        tgt = targets.get(w["name"])
+        for i in tol_impls:
+            cells = sorted(((t, r) for (ii, ww, t), r in latest_tol.items()
+                            if ii == i and ww == w["name"] and r["status"]["kind"] == "OK"), reverse=True)
+            verdict = "NOT_REACHED"; at = None
+            for t, r in cells:
+                e = (r.get("accuracy_vs_reference") or {}).get("E")
+                if (r.get("points") or 0) > CEILING_POINTS:
+                    verdict, at = "POINT_CAP first", (t, r); break
+                if tgt is not None and e is not None and e <= tgt:
+                    verdict, at = "ERROR_TARGET first", (t, r); break
+            if at is None and cells:
+                at = cells[-1]
+            if at is None:
+                L.append(f"| {w['name']} | {i} | {tgt if tgt is not None else 'NOT_MEASURED'} | NOT_MEASURED(no tolerance record) | — | — | — | — |")
+            else:
+                t, r = at; acc = r.get("accuracy_vs_reference") or {}
+                ew = acc.get("E_w"); e = acc.get("E")
+                L.append(f"| {w['name']} | {i} | {tgt:.4f} | {verdict}{'' if verdict != 'NOT_REACHED' else ' (sweep ended)'} | {t:g} | "
+                         f"{r['points']:,} | {e:.4f} | {ew:.4f} |" if tgt is not None and ew is not None and e is not None else
+                         f"| {w['name']} | {i} | {tgt if tgt is not None else 'NOT_MEASURED'} | {verdict} | {t:g} | {r['points']:,} | {e} | {ew} |")
+    L.append("")
     import matched_accuracy  # local import: matched_accuracy imports this module
     L.append("")
     L.append(matched_accuracy.render(matched_accuracy.matched_rows(records)))
@@ -381,7 +448,10 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--resolutions", default="16,32,48")
     ap.add_argument("--tolerances", default="",
-                    help="comma list for impls whose knob is a tolerance, e.g. 0.9,0.7,0.5,0.35,0.25")
+                    help="comma list for impls whose knob is a tolerance, e.g. 3,2,1.5,1,0.7,0.5,0.4,0.3")
+    ap.add_argument("--stop-at-ceiling", action="store_true",
+                    help="per workload, stop the tolerance sweep at the first cell whose points exceed "
+                         "128^3 or whose E error reaches uniform_grid@128's (the ceiling question)")
     ap.add_argument("--repeats", type=int, default=3)
     ap.add_argument("--timeout", type=float, default=600.0)
     ap.add_argument("--impl", default=None)
@@ -394,7 +464,8 @@ def main(argv=None) -> int:
         return 0
     resolutions = [int(x) for x in a.resolutions.split(",") if x.strip()]
     tolerances = [float(x) for x in a.tolerances.split(",") if x.strip()]
-    run_id, records = run_all(resolutions, a.repeats, a.timeout, a.impl, a.workload, tolerances=tolerances)
+    run_id, records = run_all(resolutions, a.repeats, a.timeout, a.impl, a.workload, tolerances=tolerances,
+                              stop_at_ceiling=a.stop_at_ceiling)
     regenerate()
     print(f"run {run_id}: {len(records)} records appended to {os.path.relpath(RESULTS, ROOT)}; "
           f"wrote {os.path.relpath(SELECTION, ROOT)}")

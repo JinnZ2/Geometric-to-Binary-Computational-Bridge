@@ -784,9 +784,9 @@ performance_report(optimized)
 > that the correction is visible rather than silent.
 >
 > Two things in the list below did not survive being measured. **"GPU
-> acceleration (10-100x additional speedup)"** was written on top of a reported
+> acceleration (10-100x additional speedup)"** was written on top of a reported <!-- benchmark: Engine/engine_benchmark.py -->
 > speedup that no clock had ever been on: timed against a uniform baseline the
-> adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is
+> adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is <!-- benchmark: Engine/engine_benchmark.py -->
 > per-point call overhead and Python-side decomposition, neither of which a GPU
 > removes (ENG-1, ENG-5). And **"hardware that natively understands geometry"**
 > still stands as intent, but its transduction layer changed completely: there
@@ -797,7 +797,7 @@ performance_report(optimized)
 
 - More physics bridges (chemistry, biology)
 - Improved quantum system support
-- ~~GPU acceleration (10-100x additional speedup)~~ — see the note above
+- ~~GPU acceleration (10-100x additional speedup)~~ — see the note above <!-- benchmark: Engine/engine_benchmark.py -->
 - Better mesh preprocessing
 
 **Mid-term (1-2 years):**

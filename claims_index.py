@@ -339,6 +339,11 @@ def render(root=ROOT, write=True):
                     cell = ("**%s** — %s" % (sv["cause"],
                                              sv["keep"].replace("|", "\\|"))
                             if sv else "")
+                    # a row whose claim has a falsifier names it for repo_guard's speedup
+                    # stage: the executable that produced or checks any figure in the row
+                    fals = (idx.get(cid) or {}).get("FALSIFIER") or []
+                    if fals:
+                        cell = (cell + " " if cell else "") + "<!-- benchmark: %s -->" % sorted(fals)[0]
                     lines.append("| %s | %s | %s | %s | %s | %s |"
                                  % (cid, c["statement"].replace("|", "\\|"),
                                     c["status"], c["names"], ev, cell))

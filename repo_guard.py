@@ -580,6 +580,12 @@ _SPEEDUP = re.compile(
 _PERF = re.compile(r"speed|faster|slower|perf|throughput|accelerat|efficien|improvement|"
                    r"reduction|gain|advantage|compression|better|cost|overhead", re.I)
 _BENCH = re.compile(r"benchmark", re.I)
+# An explicit pointer to the executable in the tree that produced or checks the figure, for a
+# line whose benchmark is not named within the window: `<!-- benchmark: Engine/engine_benchmark.py -->`.
+# The path must exist; a marker naming nothing in the tree is a defect. Counted apart as
+# `benchmark-marked`. Chosen over a wider window because a wider window lets a mention vouch
+# for unrelated lines; this vouches for one line and names the file.
+_BENCH_MARK = re.compile(r"<!--\s*benchmark:\s*([^\s>]+)\s*-->", re.I)
 # A claim that carries its own status is not an unsupported claim. The marker convention
 # (PROSE_AUDIT.md, "claim-status markers"): `[refuted: <why, claim id, file>]` for a figure
 # something in the tree kills, `[unmeasured]` / `[unmeasured: <what is missing>]` for one nothing
@@ -618,6 +624,16 @@ def speedup_claims(root=".", window=3, marked=None):
                 continue
             if defect:
                 hits.append((os.path.relpath(path, root), i + 1, "MARKER DEFECT: " + defect + " -- " + ln.strip()[:60]))
+                continue
+            bm = _BENCH_MARK.search(ln)
+            if bm:
+                target = bm.group(1)
+                if os.path.exists(os.path.join(root, target)):
+                    if marked is not None:
+                        marked.setdefault("benchmark", []).append((os.path.relpath(path, root), i + 1, target, ln.strip()[:80]))
+                    continue
+                hits.append((os.path.relpath(path, root), i + 1,
+                             "MARKER DEFECT: benchmark marker names %s, not in the tree -- %s" % (target, ln.strip()[:50])))
                 continue
             lo, hi = max(0, i - window), min(len(lines), i + window + 1)
             if any(_BENCH.search(l2) for l2 in lines[lo:hi]):
@@ -862,6 +878,10 @@ def prose_report(root="."):
         rows = sm.get(kind, [])
         if rows:
             print("  claim-status %-19s (not a claim) %d" % (kind, len(rows)))
+    if sm.get("benchmark"):
+        print("  benchmark-marked                  (names its executable) %d" % len(sm["benchmark"]))
+        for f, ln, target, _txt in sm["benchmark"]:
+            print("      %s:%d  -> %s" % (f, ln, target))
     print("  shell commands that cannot run    %d" % len(res["shell"]))
     for f, ln, txt, why in res["shell"]:
         print("      %s:%d  %s  <- %s" % (f, ln, txt, why))

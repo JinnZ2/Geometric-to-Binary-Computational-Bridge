@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """py_octree: the Engine's adaptive octree path, as an implementation of the harness contract.
 
-Thin adapter. The algorithm is Engine/spatial_grid.py + Engine/simd_optimizer.py, unchanged;
-this file only reads the spec, times the compute, answers the probes by nearest leaf sample,
-and calls contract.finish(). Needs numpy (declared in MANIFEST.json).
+Thin adapter. The algorithm is Engine/spatial_grid.py's distance rule + Engine/simd_optimizer.py,
+unchanged; this file only reads the spec, times the compute, answers both probe sets by nearest
+leaf sample, and calls contract.finish(). Needs numpy (declared in MANIFEST.json).
 """
 import os
 import sys
@@ -14,10 +14,20 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "harness"))
 import contract  # noqa: E402
 
+MAX_DEPTH = 8
+
+
+def nearest(P, probes):
+    """Index of the nearest sample for each probe; one probe at a time so a 2M-leaf P stays
+    one 48 MB temporary rather than a (probes x leaves x 3) block."""
+    import numpy as np
+    return [int(np.argmin(((P - p) ** 2).sum(1))) for p in probes]
+
 
 def main(argv):
     spec_path, out_path = contract.impl_args(argv)
     spec = contract.read_spec(spec_path)
+    tol = spec.get("tolerance")
     import numpy as np
     from Engine.simd_optimizer import SIMDOptimizer
     from Engine.spatial_grid import SpatialGrid
@@ -30,15 +40,15 @@ def main(argv):
         pts.extend(res["points"]); E.extend(res["electricField"]); B.extend(res["magneticField"])
     wall = time.perf_counter() - t0
 
-    # answer the probes: nearest leaf sample point (the octree's representation of the field)
     P = np.asarray(pts, dtype=float)
     Ea, Ba = np.asarray(E, dtype=float), np.asarray(B, dtype=float)
-    probes = np.asarray(spec["probes"], dtype=float)
-    d2 = ((probes[:, None, :] - P[None, :, :]) ** 2).sum(-1)
-    idx = np.argmin(d2, axis=1)
+    idx = nearest(P, np.asarray(spec["probes"], dtype=float))
+    idx_w = nearest(P, np.asarray(spec["probes_weighted"], dtype=float))
     contract.finish(out_path, wall, len(pts),
-                    {"E": Ea[idx].tolist(), "B": Ba[idx].tolist()},
-                    notes="probes answered by nearest leaf sample; the octree emits one point per leaf (ENG-5)")
+                    {"E": Ea[idx].tolist(), "B": Ba[idx].tolist(),
+                     "E_w": Ea[idx_w].tolist(), "B_w": Ba[idx_w].tolist()},
+                    notes="probes answered by nearest leaf sample; the octree emits one point per leaf (ENG-5); the distance rule has no knob (F1)",
+                    extra={"depth_capped": int(getattr(grid, "depth_capped", 0))})
     return 0
 
 

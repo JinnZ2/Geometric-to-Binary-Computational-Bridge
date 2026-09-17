@@ -32,6 +32,9 @@ The DERIVED recount (51 -> 13) is the first correction in this sequence that mad
 problem LARGER. The three shrinking corrections before it were all inherited numbers: values
 read off files, headers rewritten, hits marked. The one that grew came from an ordered
 recomputation, operands before lines. n = 1; recorded, not concluded from.
+A prior pattern of the same shape ("110/7/1") was referenced from a different Claude Code
+instance on a different tree; it is out-of-tree and unverified from here, and this ledger
+stands alone.
 
 ## Fixing pass, counts after each group
 
@@ -68,6 +71,39 @@ separately instead of counting it as a hit or letting it pass silently:
 - `[unmeasured operand: <which>]` — arithmetic on such a figure.
 - `[refutation of <id>]` — the line derives the number to refute its operand, not to assert it.
 - The number is left in place. Deleting it would delete the record of what was claimed.
+
+## benchmark markers, and the proximity split of the residual
+
+The speedup stage accepts an Nx line when the word "benchmark" appears within 3 lines. That
+is a proximity heuristic, and after the fixing pass 25 unmarked lines remained. Splitting
+them: of the 9 MEASURED rows, only 2 were hitting because the benchmark reference sat
+outside the 3-line window (CLAUDE.md's step-budget line, 5 lines from its mention;
+docs/Implementation_Roadmap.md:41, 23 lines from its). The other 7 named no benchmark
+anywhere near: Navigation.md's three ENG-1 lines are 237 lines from the file's nearest
+mention, and Engine/CLAIMS.md and the falsifier survey never use the word. So proximity was
+NOT the whole of the 9, and widening the window would not have reached 7 of them; it would
+also let one mention vouch for every unrelated line within reach. The choice is the explicit
+marker:
+
+```
+2x to 50x slower <!-- benchmark: Engine/engine_benchmark.py -->
+```
+
+- `<!-- benchmark: <path> -->` names the executable in the tree that produced or checks the
+  figure on that line. The path must exist; a marker naming nothing in the tree is a MARKER
+  DEFECT and stays a hit. Counted apart as `benchmark-marked`.
+- `python claims_index.py render` emits the marker on every CLAIMS.md row whose claim has a
+  FALSIFIER, naming that falsifier, so the generated tables carry their own evidence pointer.
+- Applied to the 9 MEASURED rows (6 by hand, 3 generated). The residual is 14: 12 DERIVED
+  rows (audit arithmetic on sourced constants: CLAUDE.md TMP-1 and GR-7, Fabrication.md's
+  electromigration row and ADC multiplexing, Magnetic-bridge.md's two corrections,
+  Proposal-addendum.md's bandwidth row, Proposal.md's RBS and piezo rows, Tensor-encode.md's
+  3x triplet, optical_interface.md's mode-size row, ttm_audit.md's strain-vs-magnetic
+  ratio) and 2 NOT-A-CLAIM rows (an INA128 amplifier gain, a FRET aperture ratio). These are
+  REPORTED, not marked: a derived audit figure could carry the same marker naming the script
+  that computes it (Silicon/magnetic_authority.py, Silicon/er_bounds.py, tests/test_gi_network.py),
+  and the two gains want the detector to learn that "gain" is not a speedup; neither was done
+  in this pass because the order asked for the split, not the fix.
 
 ## licence-ref markers
 

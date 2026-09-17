@@ -14,6 +14,13 @@ fixed by the source layout, so its error is the same whatever is asked for. Spat
   OT-5  the estimator tracks the quantity it claims to: the measured nearest-sample error at
         the harness probes falls as the tolerance tightens, on the dipole workload, against
         contract.reference_field, the same metric the harness scores with
+  OT-6  criterion="error": field_at reproduces contract.reference_field to 1e-9 on both
+        probe sets, so the estimator judges what the harness scores; the leaf count is
+        monotone in the tolerance; no sources gives one cell
+  OT-7  criterion="error" terminates at the depth cap and SAYS SO: depth_capped > 0 at a
+        tight tolerance, every capped leaf is at max_depth and carries the flag, and the
+        count is 0 at a tolerance the root satisfies. The magnitude criterion's count is the
+        record of why it was replaced: its proxy diverges at a source, so it caps too
 """
 import json
 import os
@@ -57,9 +64,10 @@ class TestOT2TolMonotone(unittest.TestCase):
 
 class TestOT3Loose(unittest.TestCase):
     def test_tolerance_above_root_estimate_gives_one_cell(self):
-        root_err = SpatialGrid().local_error(BOUNDS, DIPOLE)
-        self.assertEqual(len(_leaves(SpatialGrid(error_tol=root_err * 1.01, max_depth=8))), 1)
-        self.assertGreater(len(_leaves(SpatialGrid(error_tol=root_err * 0.99, max_depth=8))), 1)
+        for crit, est in (("magnitude", SpatialGrid.local_error), ("error", SpatialGrid.local_error_field)):
+            root_err = est(SpatialGrid(), BOUNDS, DIPOLE)
+            self.assertEqual(len(_leaves(SpatialGrid(error_tol=root_err * 1.01, max_depth=8, criterion=crit))), 1, crit)
+            self.assertGreater(len(_leaves(SpatialGrid(error_tol=root_err * 0.99, max_depth=8, criterion=crit))), 1, crit)
 
 
 class TestOT4SourceCellAndEmpty(unittest.TestCase):
@@ -100,6 +108,54 @@ class TestOT5EstimatorTracksMeasuredError(unittest.TestCase):
         self.assertGreater(errs[0], errs[1])
         self.assertGreater(errs[1], errs[2])
 
+
+
+class TestOT6ErrorCriterion(unittest.TestCase):
+    def test_field_at_matches_the_harness_reference(self):
+        with open(os.path.join(ROOT, "harness", "workloads.json"), encoding="utf-8") as fh:
+            ws = json.load(fh)["workloads"]
+        for w in ws:
+            spec = contract.make_spec(w, 8)
+            for probes in (spec["probes"][:40], spec["probes_weighted"][:40]):
+                ref = contract.reference_field(spec, probes)
+                for i, p in enumerate(probes):
+                    E, B = SpatialGrid.field_at(p, spec["sources"])
+                    for k in range(3):
+                        self.assertAlmostEqual(E[k], ref["E"][i][k], delta=1e-9 * (1 + abs(ref["E"][i][k])))
+                        self.assertAlmostEqual(B[k], ref["B"][i][k], delta=1e-9 * (1 + abs(ref["B"][i][k])))
+
+    def test_leaf_count_monotone_and_empty_is_one_cell(self):
+        counts = [len(_leaves(SpatialGrid(error_tol=t, max_depth=6, criterion="error"))) for t in (2.0, 1.0, 0.7, 0.5)]
+        for a, b in zip(counts, counts[1:]):
+            self.assertLessEqual(a, b, counts)
+        self.assertGreater(counts[-1], counts[0])
+        self.assertEqual(len(SpatialGrid(error_tol=0.1, max_depth=6, criterion="error").adaptiveDecomposition(BOUNDS, [])), 1)
+
+    def test_unknown_criterion_is_refused(self):
+        with self.assertRaises(ValueError):
+            SpatialGrid(error_tol=0.5, criterion="vibes")
+
+
+class TestOT7DepthCapIsReported(unittest.TestCase):
+    def test_capped_leaves_are_counted_flagged_and_at_max_depth(self):
+        g = SpatialGrid(error_tol=0.5, max_depth=5, criterion="error")
+        leaves = g.adaptiveDecomposition(BOUNDS, DIPOLE)
+        self.assertGreater(g.depth_capped, 0)
+        flagged = [l for l in leaves if l.get("depth_capped")]
+        self.assertEqual(len(flagged), g.depth_capped)
+        self.assertTrue(all(l["depth"] == 5 for l in flagged))
+        # every capped leaf still exceeds the tolerance by the estimator's own measure
+        self.assertTrue(all(g.local_error_field(l["bounds"], DIPOLE) > 0.5 for l in flagged))
+
+    def test_no_cap_when_the_root_satisfies_the_tolerance(self):
+        g = SpatialGrid(error_tol=50.0, max_depth=5, criterion="error")
+        self.assertEqual(len(g.adaptiveDecomposition(BOUNDS, DIPOLE)), 1)
+        self.assertEqual(g.depth_capped, 0)
+
+    def test_magnitude_criterion_caps_too_and_is_counted(self):
+        g = SpatialGrid(error_tol=0.5, max_depth=5, criterion="magnitude")
+        g.adaptiveDecomposition(BOUNDS, DIPOLE)
+        self.assertGreater(g.depth_capped, 0)
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,8 +10,8 @@
 | id | statement | status | names | can fail via | salvage |
 |----|-----------|--------|-------|--------------|---------|
 | GIES-1 | T = outer(v,v) cannot see the sign of v, so states i and 7-i are identical in every invariant | live | refutation | NAMED_IN_TEST |  |
-| GIES-2 | index parity equals site type, 8/8 | live | refutation | FALSIFIER | **MATH_ERROR** — Index parity IS site type, verified against the diamond-cubic basis, which hands the 3-bit address space a free single-bit error-detecting code -- exactly what the 'geometric error correction' claim wanted and could not derive. The carrier is J3, not the trace: trace and J2 are identical across all eight states. |
-| GIES-3 | every NOT crosses sublattices, so every NOT is a Frenkel pair | live | refutation | FALSIFIER | **PHYSICS_BOUND** — NOT crosses the sublattice, so every NOT is a Frenkel pair at ~4.75 eV. That converts a gate-set question into an energy budget, which is answerable. The honest state space is 4 states plus a site-type flag. |
+| GIES-2 | index parity equals site type, 8/8 | live | refutation | FALSIFIER | **MATH_ERROR** — Index parity IS site type, verified against the diamond-cubic basis, which hands the 3-bit address space a free single-bit error-detecting code -- exactly what the 'geometric error correction' claim wanted and could not derive. The carrier is J3, not the trace: trace and J2 are identical across all eight states. <!-- benchmark: Silicon/falsifiers.py --> |
+| GIES-3 | every NOT crosses sublattices, so every NOT is a Frenkel pair | live | refutation | FALSIFIER | **PHYSICS_BOUND** — NOT crosses the sublattice, so every NOT is a Frenkel pair at ~4.75 eV. That converts a gate-set question into an energy budget, which is answerable. The honest state space is 4 states plus a site-type flag. <!-- benchmark: Silicon/falsifiers.py --> |
 | GIES-4 | _no recorded statement_ | unregistered | - | NAMED_IN_TEST | |
 | GIES-5 | _no recorded statement_ | unregistered | - | PROSE | |
 | GIES-6 | _no recorded statement_ | unregistered | - | PROSE | |

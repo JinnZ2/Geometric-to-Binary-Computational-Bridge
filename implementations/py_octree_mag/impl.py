@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
-"""py_octree_tol: the Engine's octree with TOLERANCE-DRIVEN refinement on an ERROR estimate.
+"""py_octree_mag: the FIRST tolerance knob, kept for comparison at the same tolerances.
 
-SpatialGrid(error_tol=spec['tolerance'], criterion='error', max_depth=8): a cell is split while the
-field at its centre differs from the field at any child centre by more than the tolerance,
-relative to the child's value. Bounded near a source, so the depth cap terminates refinement
-there and the count of such leaves travels in the record as depth_capped. The field evaluation
-is py_octree's, one numpy call per leaf, so a change in the matched-accuracy ratio is the
-refinement rule and nothing else. Needs numpy.
+SpatialGrid(error_tol=spec['tolerance'], criterion='magnitude', max_depth=8): split while the
+largest symmetric corner/centre ratio of a sum|q|/r^2 magnitude proxy, minus 1, exceeds the
+tolerance. The proxy diverges at a point source, so refinement there is unbounded by construction
+and only the depth cap stops it; that is why py_octree_tol replaced it. Same evaluation path.
+Needs numpy.
 """
 import os
 import sys
@@ -36,7 +35,7 @@ def main(argv):
     from Engine.spatial_grid import SpatialGrid
 
     t0 = time.perf_counter()
-    grid, simd = SpatialGrid(error_tol=float(tol), max_depth=MAX_DEPTH, criterion="error"), SIMDOptimizer()
+    grid, simd = SpatialGrid(error_tol=float(tol), max_depth=MAX_DEPTH, criterion="magnitude"), SIMDOptimizer()
     pts, E, B = [], [], []
     for region in grid.adaptiveDecomposition(spec["bounds"], spec["sources"]):
         res = simd.calculateFieldChunk({"points": region["points"]}, spec["sources"])
@@ -50,7 +49,7 @@ def main(argv):
     contract.finish(out_path, wall, len(pts),
                     {"E": Ea[idx].tolist(), "B": Ba[idx].tolist(),
                      "E_w": Ea[idx_w].tolist(), "B_w": Ba[idx_w].tolist()},
-                    notes=f"error_tol={tol}, criterion=error, max_depth={MAX_DEPTH}; probes answered by nearest leaf sample; one numpy call per leaf kept on purpose (ENG-5)",
+                    notes=f"error_tol={tol}, criterion=magnitude, max_depth={MAX_DEPTH}; probes answered by nearest leaf sample; one numpy call per leaf kept on purpose (ENG-5)",
                     extra={"depth_capped": int(getattr(grid, "depth_capped", 0))})
     return 0
 

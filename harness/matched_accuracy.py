@@ -46,7 +46,7 @@ sys.path.insert(0, HERE)
 import run as _run  # noqa: E402
 
 FLAT_TOL = 1e-9          # error spread below this across resolutions -> the impl is resolution-blind
-COMPONENTS = ("E", "B")
+COMPONENTS = ("E", "B", "E_w", "B_w")   # uniform probes, then source-weighted probes (B2)
 
 
 def _ok(rec):

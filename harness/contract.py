@@ -177,6 +177,29 @@ def _probes(bounds: dict, n: int = PROBE_COUNT, seed: int = PROBE_SEED) -> list[
     return [[lo[i] + rng.random() * (hi[i] - lo[i]) for i in range(3)] for _ in range(n)]
 
 
+WEIGHTED_CANDIDATES = 64          # candidates drawn per weighted probe kept
+
+
+def _probes_weighted(bounds: dict, sources: list, n: int = PROBE_COUNT, seed: int = PROBE_SEED + 1) -> list[list[float]]:
+    """The second probe set (B2): density proportional to the field's scale. n*64 uniform
+    candidates are drawn and n kept by weighted sampling without replacement (Efraimidis &
+    Spirakis keys u^(1/w)), weight w(p) = sum_s 1 / |p - pos_s|^2 over the sources, which is
+    |E| exactly for one charge and the scale of |E| or |B| otherwise. Uniform probes never
+    land where an adaptive grid refines; these do. Both sets are scored, never one."""
+    rng = random.Random(seed)
+    lo, hi = bounds["min"], bounds["max"]
+    cands = [[lo[i] + rng.random() * (hi[i] - lo[i]) for i in range(3)] for _ in range(n * WEIGHTED_CANDIDATES)]
+    keyed = []
+    for p in cands:
+        w = 0.0
+        for s in sources:
+            r = _sub(p, s["position"])
+            w += 1.0 / (r[0] * r[0] + r[1] * r[1] + r[2] * r[2] + 1e-12)
+        keyed.append((rng.random() ** (1.0 / w) if w > 0 else 0.0, p))
+    keyed.sort(key=lambda kp: -kp[0])
+    return [p for _, p in keyed[:n]]
+
+
 def make_spec(workload: dict, resolution: int, tolerance: float | None = None) -> dict:
     """tolerance is the second knob: an impl whose manifest says knob=tolerance reads it and
     refines until its estimated local error is below it; every other impl ignores it. It is
@@ -195,6 +218,7 @@ def make_spec(workload: dict, resolution: int, tolerance: float | None = None) -
         "resolution": resolution,
         "tolerance": tolerance,
         "probes": _probes(workload["bounds"]),
+        "probes_weighted": _probes_weighted(workload["bounds"], workload["sources"]),
     }
 
 
@@ -220,14 +244,16 @@ def _cross(a, b):
     return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]
 
 
-def reference_field(spec: dict) -> dict:
-    """E and B at every probe, from the spec's own source definitions. Pure Python."""
-    E = [[0.0, 0.0, 0.0] for _ in spec["probes"]]
-    B = [[0.0, 0.0, 0.0] for _ in spec["probes"]]
+def reference_field(spec: dict, probes: list | None = None) -> dict:
+    """E and B at every probe (the spec's uniform probes unless `probes` is given), from the
+    spec's own source definitions. Pure Python."""
+    probes = spec["probes"] if probes is None else probes
+    E = [[0.0, 0.0, 0.0] for _ in probes]
+    B = [[0.0, 0.0, 0.0] for _ in probes]
     for s in spec["sources"]:
         if s["type"] == "charge":
             q = float(s["strength"])
-            for i, p in enumerate(spec["probes"]):
+            for i, p in enumerate(probes):
                 r = _sub(p, s["position"])
                 m = max(_norm(r), 1e-10)
                 f = K_E * q / (m * m * m)
@@ -238,7 +264,7 @@ def reference_field(spec: dict) -> dict:
             end = s.get("end", [c + 1 for c in s["position"]])
             dl = _sub(end, start)
             mid = [(start[k] + end[k]) / 2 for k in range(3)]
-            for i, p in enumerate(spec["probes"]):
+            for i, p in enumerate(probes):
                 r = _sub(p, mid)
                 m = max(_norm(r), 1e-10)
                 rhat = [c / m for c in r]
@@ -270,6 +296,20 @@ def accuracy(reference: dict, reported: dict) -> dict:
                 continue
             errs.append(_norm(_sub(g, r)) / nr)
         out[key] = _median(errs)
+    return out
+
+
+def accuracy_both(spec: dict, probe_field: dict) -> dict:
+    """{E, B, E_w, B_w}: median relative error on the uniform probes and on the weighted
+    probes (probe_field keys E_w / B_w). A missing weighted answer scores None, not 0."""
+    out = accuracy(reference_field(spec), probe_field)
+    if "E_w" in probe_field or "B_w" in probe_field:
+        ref_w = reference_field(spec, spec.get("probes_weighted", []))
+        got_w = {"E": probe_field.get("E_w", []), "B": probe_field.get("B_w", [])}
+        acc_w = accuracy(ref_w, got_w)
+        out["E_w"], out["B_w"] = acc_w["E"], acc_w["B"]
+    else:
+        out["E_w"] = out["B_w"] = None
     return out
 
 
@@ -314,8 +354,10 @@ def read_spec(path: str) -> dict:
     return spec
 
 
-def finish(out_path: str, wall_time: float, points: int, probe_field: dict, notes: str = "") -> None:
-    """Called by an implementation at the end of its entry. Adds the child's own peak memory."""
+def finish(out_path: str, wall_time: float, points: int, probe_field: dict, notes: str = "",
+           extra: dict | None = None) -> None:
+    """Called by an implementation at the end of its entry. Adds the child's own peak memory.
+    `extra` carries first-class quantities the record keeps by name: depth_capped today."""
     peak = None
     try:
         import resource
@@ -324,8 +366,11 @@ def finish(out_path: str, wall_time: float, points: int, probe_field: dict, note
     except (ImportError, AttributeError, OSError):
         peak = None
     with open(out_path, "w", encoding="utf-8") as fh:
-        json.dump({"wall_time": float(wall_time), "points": int(points),
-                   "probe_field": probe_field, "peak_memory_mb": peak, "notes": notes}, fh)
+        rec = {"wall_time": float(wall_time), "points": int(points),
+               "probe_field": probe_field, "peak_memory_mb": peak, "notes": notes}
+        for k, v in (extra or {}).items():
+            rec[k] = v
+        json.dump(rec, fh)
 
 
 def impl_args(argv: list[str]) -> tuple[str, str]:

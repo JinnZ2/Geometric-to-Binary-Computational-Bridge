@@ -536,6 +536,20 @@ class TestProseStage(unittest.TestCase):
         self._w("a.md", "intro\n\n4x faster [unmeasured]\n\n\n\n50x faster\n")
         self.assertEqual([h[1] for h in speedup_claims(self.tmp)], [7])
 
+    def test_benchmark_marker_names_an_existing_file_and_is_counted(self):
+        self._w("Engine/bench.py", "print(1)\n")
+        self._w("a.md", "intro\n\nthe adaptive path is 2x to 50x slower <!-- benchmark: Engine/bench.py -->\n")
+        marked = {}
+        self.assertEqual(speedup_claims(self.tmp, marked=marked), [])
+        self.assertEqual(marked["benchmark"][0][2], "Engine/bench.py")
+
+    def test_benchmark_marker_naming_nothing_in_the_tree_is_a_defect(self):
+        self._w("a.md", "intro\n\n2x to 50x slower <!-- benchmark: Engine/nope.py -->\n")
+        hits = speedup_claims(self.tmp)
+        self.assertEqual(len(hits), 1)
+        self.assertIn("MARKER DEFECT", hits[0][2])
+        self.assertIn("Engine/nope.py", hits[0][2])
+
     # -- speedup ----------------------------------------------------------
     def test_speedup_without_benchmark_fires(self):
         self._w("a.md", "intro\n\nSIMD Auto-vectorization 4-8x speedup\nCombined 50-200x faster\n")

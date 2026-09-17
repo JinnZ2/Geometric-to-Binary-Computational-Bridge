@@ -31,17 +31,22 @@ def main(argv):
     # answer the probes: nearest grid point by index arithmetic (the grid is regular)
     lo = np.asarray(spec["bounds"]["min"], dtype=float)
     hi = np.asarray(spec["bounds"]["max"], dtype=float)
-    probes = np.asarray(spec["probes"], dtype=float)
-    ijk = np.rint((probes - lo) / (hi - lo) * (r - 1)).astype(int).clip(0, r - 1)
     P = np.asarray(res["points"], dtype=float)
     # generateUniformGrid orders points as the meshgrid it builds; recover the flat index
     # from the point coordinates rather than assuming the order
     axis = [np.linspace(lo[k], hi[k], r) for k in range(3)]
     key = {tuple(np.round(p, 9)): i for i, p in enumerate(P)}
-    flat = [key[tuple(np.round([axis[0][i], axis[1][j], axis[2][k]], 9))] for i, j, k in ijk]
+
+    def flat_index(probes):
+        ijk = np.rint((probes - lo) / (hi - lo) * (r - 1)).astype(int).clip(0, r - 1)
+        return [key[tuple(np.round([axis[0][i], axis[1][j], axis[2][k]], 9))] for i, j, k in ijk]
+
+    flat = flat_index(np.asarray(spec["probes"], dtype=float))
+    flat_w = flat_index(np.asarray(spec["probes_weighted"], dtype=float))
     Ea, Ba = np.asarray(res["electricField"], dtype=float), np.asarray(res["magneticField"], dtype=float)
     contract.finish(out_path, wall, len(points),
-                    {"E": Ea[flat].tolist(), "B": Ba[flat].tolist()},
+                    {"E": Ea[flat].tolist(), "B": Ba[flat].tolist(),
+                     "E_w": Ea[flat_w].tolist(), "B_w": Ba[flat_w].tolist()},
                     notes="probes answered by nearest grid point")
     return 0
 
