@@ -133,7 +133,7 @@ convention is an inline marker that says which, and whose:
   licence strings                   0 surface(s) disagree
   licence ids != LICENSE, unmarked 0
   licence-ref external   (not a mismatch) 10
-      CLAUDE.md:763  [CC-BY-NC-SA]  gods-eye-view data pack
+      CLAUDE.md:771  [CC-BY-NC-SA]  gods-eye-view data pack
       CROSSLINKS.md:90  [MIT]  gods-eye-view code and data
       integrations/gods-eye-view/05-infrastructure/README.md:78  [CC-BY]  ecosystem repos and gods-eye-view data
       integrations/gods-eye-view/05-infrastructure/consent.json:5  [ODbL-1.0]  gods-eye-view data pack
@@ -144,22 +144,15 @@ convention is an inline marker that says which, and whose:
       integrations/gods-eye-view/05-infrastructure/links.json:127  [CC-BY]  ecosystem repos and gods-eye-view data
       integrations/gods-eye-view/README.md:118  [MIT]  gods-eye-view code and data
   licence-ref historical (not a mismatch) 5
-      CLAUDE.md:1017  [MIT]  the state the README audit found and this guard was built to catch
+      CLAUDE.md:1025  [MIT]  the state the README audit found and this guard was built to catch
       REVIEW.md:32  [MIT]  REVIEW.md audit record of the pre-CC0 state
       REVIEW.md:33  [CC-BY-4.0]  REVIEW.md audit record of the pre-CC0 state
       REVIEW.md:37  [CC-BY-4.0]  REVIEW.md audit record of the pre-CC0 state
       REVIEW.md:253  [MIT]  REVIEW.md audit record of the pre-CC0 state
-  speedup claims, no benchmark near 25
-      CLAUDE.md:1033  - **Temperature is now threaded, and the one correction that is wrong is wrong b
-      CLAUDE.md:1047  - **A φ-band spectrum analyser that drops the top of its own range and fires on 
-      CLAUDE.md:1064  - **Two claims that were about the simulation's budget rather than about biology
-      Navigation.md:787  > acceleration (10-100x additional speedup)"** was written on top of a reported
-      Navigation.md:789  > adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is
-      Navigation.md:800  - ~~GPU acceleration (10-100x additional speedup)~~ — see the note above
+  speedup claims, no benchmark near 14
+      CLAUDE.md:1041  - **Temperature is now threaded, and the one correction that is wrong is wrong b
+      CLAUDE.md:1055  - **A φ-band spectrum analyser that drops the top of its own range and fires on 
       Universal-geometric-intelligence-P3.md:405  'instrumentation_amp': 'INA128, gain 100-1000×',
-      Engine/CLAIMS.md:12  | ENG-1 | the reported geometric_speedup was a point-count ratio times a symmetr
-      Engine/CLAIMS.md:14  | ENG-3 | the reported figure multiplied in a symmetry reduction the solver expl
-      Engine/CLAIMS.md:16  | ENG-5 | SpatialGrid.createRegion emits one sample point per leaf region, so th
       Silicon/Fabrication.md:17  > | micro-coil at 10 mA | **100× OVER EM LIMIT** | 50 nm × 200 nm → J = 1e8 A/cm
       Silicon/Fabrication.md:2038  - Aggregate rate: 8× slower per sensor
       Silicon/Magnetic-bridge.md:35  > shortfall against 1 GHz channels is **714×**, not 700,000×, and the gradient
@@ -171,14 +164,22 @@ convention is an inline marker that says which, and whose:
       Silicon/optical_interface.md:200  | "3D light controls octahedral states" | **FATAL** | **Mode-size mismatch.** Di
       Silicon/ttm_audit.md:158  against **0.0845 meV** for 0.73 T. **Strain beats magnetic by ~1080× at
       Silicon/FRET/Fractalization.md:378  •	G (geometric gain): aperture/edge-cell area ratio, design 5–20×
-      docs/Implementation_Roadmap.md:41  The adaptive path is **2× to 50× slower**, not 15–33× faster. ENG-1.
-      fabrication/CLAIMS.md:12  | TMP-1 | the mechanical resonance correction uses thermal expansion where the m
-      falsifier-survey/falsifier_survey_report_run2.md:125  "speedup" 11–16× where wall-clock measured 0.26–0.48×; in ENG-3 the proxy
-      geometric_intelligence/CLAIMS.md:15  | GB-4 | three unsourced tolerances (0.05 edge, phi^-9 cycle, 0.10 integrity) an
   claim-status refuted             (not a claim) 33
   claim-status refutation of       (not a claim) 3
   claim-status unmeasured          (not a claim) 48
   claim-status unmeasured operand  (not a claim) 19
+  benchmark-marked                  (names its executable) 11
+      CLAUDE.md:1072  -> adaptive_sim/falsifiers_adaptive_sim.py
+      Navigation.md:787  -> Engine/engine_benchmark.py
+      Navigation.md:789  -> Engine/engine_benchmark.py
+      Navigation.md:800  -> Engine/engine_benchmark.py
+      Engine/CLAIMS.md:12  -> Engine/falsifiers_engine.py
+      Engine/CLAIMS.md:14  -> Engine/falsifiers_engine.py
+      Engine/CLAIMS.md:16  -> Engine/falsifiers_engine.py
+      docs/Implementation_Roadmap.md:41  -> Engine/engine_benchmark.py
+      fabrication/CLAIMS.md:12  -> geometric_intelligence/falsifiers_gi_network.py
+      falsifier-survey/falsifier_survey_report_run2.md:125  -> Engine/engine_benchmark.py
+      geometric_intelligence/CLAIMS.md:15  -> geometric_intelligence/falsifiers_gi_network.py
   shell commands that cannot run    28
       Navigation.md:675  shapebridge --demo --visualize  <- command not found: shapebridge
       Navigation.md:694  python em_coil_example.py  <- file missing: em_coil_example.py
@@ -213,16 +214,45 @@ convention is an inline marker that says which, and whose:
   filenames with a space            2
       Front end
       AISS/. well-known
-  56 hit(s) -- each is a fix in a separate pass; nothing was changed
+  45 hit(s) -- each is a fix in a separate pass; nothing was changed
 ```
 
-## Nx claims after the fixing pass
+## Nx claims after the fixing pass and the benchmark markers
 
 ```
-UNMARKED 25: MEASURED 9, DERIVED 13, NOT-A-CLAIM 3
-MARKED  103: refuted 33, refutation-of 3, unmeasured 48, unmeasured-operand 19
+UNMARKED 14: DERIVED 12, NOT-A-CLAIM 2  (reported, not marked; see "benchmark markers" above)
+MARKED  114: refuted 33, refutation-of 3, unmeasured 48, unmeasured-operand 19, benchmark-marked 11
 
-### MEASURED (9) — unmarked; a benchmark or sweep in the tree produced the number
+### unmarked (14)
+CLAUDE.md:1041  - **Temperature is now threaded, and the one correction that is wrong is wrong b
+CLAUDE.md:1055  - **A φ-band spectrum analyser that drops the top of its own range and fires on 
+Universal-geometric-intelligence-P3.md:405  'instrumentation_amp': 'INA128, gain 100-1000×',
+Silicon/Fabrication.md:17  > | micro-coil at 10 mA | **100× OVER EM LIMIT** | 50 nm × 200 nm → J = 1e8 A/cm
+Silicon/Fabrication.md:2038  - Aggregate rate: 8× slower per sensor
+Silicon/Magnetic-bridge.md:35  > shortfall against 1 GHz channels is **714×**, not 700,000×, and the gradient
+Silicon/Magnetic-bridge.md:48  > magnitude only because a 12×-low coefficient was paired with a 10×-high
+Silicon/Proposal-addendum.md:37  > | 5 ps pulse can address a transition | **NO** | bandwidth ≈ 200 GHz (1/Δt) or
+Silicon/Proposal.md:67  > | RBS-C "sub-pm precision" | **WILL NOT SEE IT** | 5e11 cm⁻² areal against a 1
+Silicon/Proposal.md:84  > longitudinal coefficient is (π₁₁+π₁₂+π₄₄)/2 = **7.18e-10**, 12× larger, and it
+Silicon/Tensor-encode.md:153  Overhead: 3× storageBenefit: Tolerates any single-cell failure per triplet
+Silicon/optical_interface.md:200  | "3D light controls octahedral states" | **FATAL** | **Mode-size mismatch.** Di
+Silicon/ttm_audit.md:158  against **0.0845 meV** for 0.73 T. **Strain beats magnetic by ~1080× at
+Silicon/FRET/Fractalization.md:378  •	G (geometric gain): aperture/edge-cell area ratio, design 5–20×
+
+### benchmark-marked (11) — the 9 MEASURED rows (6 by hand, 3 generated) plus the generator's other falsifier rows
+CLAUDE.md:1072  -> adaptive_sim/falsifiers_adaptive_sim.py
+Engine/CLAIMS.md:12  -> Engine/falsifiers_engine.py
+Engine/CLAIMS.md:14  -> Engine/falsifiers_engine.py
+Engine/CLAIMS.md:16  -> Engine/falsifiers_engine.py
+Navigation.md:787  -> Engine/engine_benchmark.py
+Navigation.md:789  -> Engine/engine_benchmark.py
+Navigation.md:800  -> Engine/engine_benchmark.py
+docs/Implementation_Roadmap.md:41  -> Engine/engine_benchmark.py
+fabrication/CLAIMS.md:12  -> geometric_intelligence/falsifiers_gi_network.py
+falsifier-survey/falsifier_survey_report_run2.md:125  -> Engine/engine_benchmark.py
+geometric_intelligence/CLAIMS.md:15  -> geometric_intelligence/falsifiers_gi_network.py
+
+### MEASURED (9), as classified in the third pass; now benchmark-marked
 CLAUDE.md:1040  - **Two claims that were about the simulation's budget rather than about biology.** `fluctuating_fix
 Navigation.md:787  > acceleration (10-100x additional speedup)"** was written on top of a reported
 Navigation.md:789  > adaptive path runs at 0.26x-0.48x, i.e. slower, and the bottleneck is
@@ -233,7 +263,7 @@ Engine/CLAIMS.md:16  | ENG-5 | SpatialGrid.createRegion emits one sample point p
 docs/Implementation_Roadmap.md:41  The adaptive path is **2× to 50× slower**, not 15–33× faster. ENG-1.
 falsifier-survey/falsifier_survey_report_run2.md:125  "speedup" 11–16× where wall-clock measured 0.26–0.48×; in ENG-3 the proxy
 
-### DERIVED (13) — unmarked; every operand measured, a sourced constant, or the document's own design input
+### DERIVED (13), as classified in the third pass; 12 still unmarked, TMP-1's generated row now benchmark-marked
 CLAUDE.md:1010  - **Temperature is now threaded, and the one correction that is wrong is wrong by 20×.** `fabricatio
     operands: α = 12e-6/°C and dE/E = −2.4e-4/°C, literature; asserted by tests/test_gi_network.py TMP-1
 CLAUDE.md:1024  - **A φ-band spectrum analyser that drops the top of its own range and fires on noise.** `_compute_e
@@ -261,7 +291,7 @@ Silicon/ttm_audit.md:158  against **0.0845 meV** for 0.73 T. **Strain beats magn
 fabrication/CLAIMS.md:12  | TMP-1 | the mechanical resonance correction uses thermal expansion where the modulus term dominate
     operands: generated from CLAIMS_REGISTER.json; the TMP-1 operands above, tests/test_gi_network.py
 
-### NOT-A-CLAIM (3) — unmarked; the detector matched a gain or an exponent
+### NOT-A-CLAIM (3), as classified in the third pass; 2 still unmarked, GB-4's generated row now benchmark-marked
 Universal-geometric-intelligence-P3.md:405  'instrumentation_amp': 'INA128, gain 100-1000×',
 Silicon/FRET/Fractalization.md:378  •	G (geometric gain): aperture/edge-cell area ratio, design 5–20×
 geometric_intelligence/CLAIMS.md:15  | GB-4 | three unsourced tolerances (0.05 edge, phi^-9 cycle, 0.10 integrity) and a drift band of (1

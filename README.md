@@ -132,84 +132,120 @@ Option 2: Solve a field (needs numpy)
 📊 Performance
 
 Three findings, kept apart because they have three different causes. All
-three come from `harness/results.jsonl` (256 seeded probes, one pure-Python
-reference, median relative error, the same on both sides) and are rendered
-in `SELECTION.md`. The only figure below that is a speedup is the time ratio
-at equal error, and it is below 1 everywhere it was measured.
+come from `harness/results.jsonl` and are rendered in `SELECTION.md`. Every
+record carries two error figures on the same run: the median relative error
+at 256 uniform probes (E, B) and at 256 source-weighted probes (Ew, Bw;
+density proportional to Σ1/r², the cells an adaptive grid refines and
+uniform probes never sample). Neither replaces the other. The only figure
+below that is a speedup is the time ratio at equal error, and it is below 1
+everywhere it was measured.
 
 **F1, structural: the shipped octree has no refinement parameter.** Its leaf
-set is fixed by the source layout and a depth cap, and nothing the caller
-passes reaches it. Its error is therefore flat across every resolution asked
-for, 8 through 128, on every workload:
+set is fixed by the source layout and a depth cap; nothing the caller passes
+reaches it, so its error is the same at every resolution asked for, 8
+through 128:
 
-| workload | octree points | octree error, all resolutions |
+| workload | octree points | E (uniform probes) | Ew (weighted probes) |
+|---|---|---|---|
+| dipole | 2,150 | 0.174 | 0.225 |
+| quadrupole | 2,864 | 0.106 | 0.136 |
+| wire+charge | 2,024 | 0.128 (B 0.146) | 0.143 (Bw 0.143) |
+
+`implementations/py_octree_tol/` adds the missing knob. It refines on an
+error estimate, not on field magnitude: a cell is split while the field at
+any child centre differs from the field at the cell centre by more than the
+tolerance, relative to the child's value. That estimate is bounded near a
+source, so the depth cap terminates refinement there and the number of
+leaves still above tolerance at the cap is reported as DEPTH_CAPPED, a
+first-class quantity. The first knob (`py_octree_mag`, kept for comparison)
+refined on a Σ|q|/r² proxy that diverges at a point source, so its
+refinement there was unbounded by construction. Both at the same
+tolerances, dipole:
+
+| tolerance | magnitude criterion: points / E / capped | error criterion: points / E / capped |
 |---|---|---|
-| dipole | 2,150 | 0.174 |
-| quadrupole | 2,864 | 0.106 |
-| wire+charge | 2,024 | 0.128 (E), 0.146 (B) |
+| 1.0 | 3,767 / 0.284 / 125 | 379 / 0.409 / 9 |
+| 0.5 | 14,372 / 0.162 / 523 | 2,360 / 0.278 / 48 |
+| 0.3 | 41,546 / 0.112 / 1,825 | 8,471 / 0.154 / 188 |
 
-A comparison against it at any single resolution compares two different
-accuracies. The uniform grid is at or below the octree's error from
-resolution 12 up, so no row of the cost table further down is a comparison
-of equal answers. `implementations/py_octree_tol/` adds the missing knob
-(`SpatialGrid(error_tol=...)`: subdivide while the estimated local error is
-above the tolerance) so that the question F1 blocks can be asked; its error
-moves with the tolerance, 0.49 down to 0.11 on the dipole across tolerances
-3.0 to 0.3.
+The two criteria do not mean the same thing by "tolerance 0.3", which is why
+the comparison that matters is at equal error, below. One degenerate case is
+recorded rather than hidden: on the quadrupole the field at the box centre
+is zero by symmetry, so the error estimate at the root is exactly 1 and any
+tolerance of 1.0 or more leaves the box as one cell reporting E = 1.000.
 
-**F2, scoped: for smooth, space-filling fields, placement buys nothing per
-point.** All three measured workloads are that case: a few point sources in
-a box that is nowhere empty. With the knob present, the matched-accuracy
-comparison (`python harness/matched_accuracy.py`: for each octree record,
-the uniform resolution whose error equals it, by log-log interpolation) puts
-the tolerance-driven octree at 4 to 14 times MORE points than the uniform
-grid for the same error:
+**F2, scoped, and the metric settles it two ways.** For each octree record,
+`python harness/matched_accuracy.py` finds the uniform resolution whose
+error equals it, by log-log interpolation, on each probe set separately.
+Point count of the octree over point count of the uniform grid at equal
+error:
 
-| workload | tolerance | octree error | octree points | uniform resolution at equal error | uniform points | points ratio octree/uniform |
-|---|---|---|---|---|---|---|
-| dipole | 0.5 | 0.162 | 14,372 | 13.0 | 2,197 | 6.5 |
-| dipole | 0.3 | 0.112 | 41,546 | 18.1 | 5,832 | 7.1 |
-| quadrupole | 0.5 | 0.107 | 23,528 | 12.4 | 1,728 | 13.6 |
-| quadrupole | 0.3 | 0.067 | 65,248 | 19.2 | 6,859 | 9.5 |
-| wire+charge, E | 0.5 | 0.113 | 8,912 | 12.1 | 1,728 | 5.2 |
-| wire+charge, E | 0.3 | 0.067 | 29,184 | 19.5 | 6,859 | 4.3 |
+| implementation | workload | at equal E (uniform probes) | at equal Ew (weighted probes) |
+|---|---|---|---|
+| shipped octree | dipole | 1.24 | 0.64 |
+| shipped octree | quadrupole | 1.30 | 1.04 |
+| shipped octree | wire+charge | 1.52 | 0.60 |
+| error-criterion octree, tol 0.3 | dipole | 3.1 | 1.06 |
+| error-criterion octree, tol 0.05 | dipole | 2.8 | 0.88 |
+| error-criterion octree, tol 0.3 | quadrupole | 22 | 7.4 |
+| error-criterion octree, tol 0.03 | quadrupole | 4.7 | 2.5 |
+| error-criterion octree, tol 0.3 | wire+charge | 21 | 8.9 |
+| error-criterion octree, tol 0.03 | wire+charge | 3.6 | 1.5 |
 
-The shipped octree's fixed placement does no better: at its 2,024 to 2,864
-points it lands where a uniform grid of 1,331 to 2,197 points lands. Two
-things bound this finding. The probes are uniform over the box, so the error
-metric weights the far field the way a uniform grid samples it, and the
-tolerance rule spends most of its leaves within a few cells of a source
-where no probe lands. And the three workloads have one length scale each.
-For sparse fields (most of the box empty), thin layers and multi-scale
-sources this is **UNMEASURED**: the three workloads that would measure it
-are specced in `harness/workloads_held.json` and held until the knob above
-had been measured, because testing the sparse regime with no accuracy knob
-would have repeated F1's confound.
+The octree loses on one metric and wins on the other, and that is the
+result. On uniform probes, placement buys nothing per point: every octree
+needs more points than the uniform grid for the same median error, because
+the probes sit where the grid is coarse. On source-weighted probes the
+shipped octree needs 36 to 40 percent fewer points than the grid on the
+dipole and wire workloads, and the error-criterion octree closes to parity
+on the dipole as the tolerance tightens. Which figure is "the accuracy"
+depends on where the field will be read, and the harness now reports both
+for every implementation rather than choosing. Both hold for smooth,
+single-scale fields only. Sparse fields, thin layers and two-scale sources
+are **UNMEASURED**: specced in `harness/workloads_held.json` and held until
+the knob above existed, because testing the sparse regime with no accuracy
+knob would have repeated F1's confound.
+
+**Ceiling: can the octree enter the high-accuracy regime.** Sweeping the
+error-criterion tolerance down until either the octree's E reached the
+uniform grid's at resolution 128 or its point count passed that grid's
+2,097,152:
+
+| workload | uniform @128: E / Ew | first to happen | at tolerance | octree points | octree E / Ew |
+|---|---|---|---|---|---|
+| dipole | 0.0158 / 0.0255 | POINT_CAP | 0.03 | 3,166,626 | 0.0187 / 0.0190 |
+| quadrupole | 0.0094 / 0.0129 | NOT_REACHED at the sweep's end (2,082,032 points, 0.7% under the cap; tolerance 0.025 running) | 0.03 | 2,082,032 | 0.0170 / 0.0186 |
+| wire+charge | 0.0093 / 0.0146 | POINT_CAP | 0.03 | 2,880,431 | 0.0134 / 0.0151 |
+
+The point cap comes first on the dipole and the wire, and the quadrupole
+sweep ended 0.7 percent under the cap at 1.8 times the target error: on
+uniform probes the octree does not reach the resolution-128 grid's error
+inside that grid's point budget. On weighted probes it does, on the dipole, at tolerance 0.05 with
+933,199 points against the grid's 1,061,208 at equal Ew. Same answer as F2,
+at the ceiling.
 
 **F3, implementation: a per-point penalty of about 30x, cause known.** The
 octree emits one sample point per leaf and the solver makes one numpy call
 per leaf (ENG-5), so the time per point is that of a 1-element array. The
 shipped octree's time ratio at equal error, uniform wall over octree wall:
 
-| workload | octree wall | uniform wall at equal error | uniform / octree |
-|---|---|---|---|
-| dipole | 0.085 s | 0.0028 s | 0.032x |
-| quadrupole | 0.179 s | 0.0030 s | 0.017x |
-| wire+charge, E | 0.140 s | 0.0024 s | 0.017x |
-| wire+charge, B | 0.140 s | 0.0023 s | 0.016x |
+| workload | at equal E | at equal Ew |
+|---|---|---|
+| dipole | 0.024x | 0.043x |
+| quadrupole | 0.013x | 0.018x |
+| wire+charge | 0.010x | 0.026x |
 
-That is the speedup figure for this Engine today: below 1, by 30 to 60
-times, and F2's point-count ratio times F3's per-point penalty gives the
-tolerance octree's 0.001x to 0.006x. Batching the leaf evaluation into one
-call removes F3 (measured at 26x on the field evaluation alone,
-`Engine/engine_benchmark.py`, ENG-5); it does not touch F1 or F2.
+That is the speedup figure for this Engine today: below 1 on both metrics,
+even where the octree needs fewer points, because F3's per-point penalty is
+larger than F2's per-point gain. Batching the leaf evaluation into one call
+removes F3 (26x measured on the field evaluation alone, ENG-5) and does not
+touch F1 or F2.
 
 **Cost ratio at unmatched accuracy** (`Engine/engine_benchmark.py`, swept
 2026-09-16, Intel Xeon 2.10 GHz, 4 cores, 16 GB, Python 3.11.15, numpy
 2.4.6, minimum of 3 repeats). The adaptive point count is fixed (F1) and the
-uniform count grows as the cube of the resolution; uniform error falls from
-26 percent at resolution 8 to 1 percent at 128. The column is uniform wall
-time over adaptive wall time at the same resolution argument, and it
+uniform count grows as the cube of the resolution. The column is uniform
+wall time over adaptive wall time at the same resolution argument, and it
 compares unequal answers:
 
 | resolution | uniform points | dipole | quadrupole | wire+charge |
@@ -222,10 +258,8 @@ compares unequal answers:
 | 128 | 2,097,152 | 78.0x | 36.9x | 44.2x |
 
 Above 1x the adaptive path finished first having answered a coarser
-question; the ratio measures how much of the box the uniform grid was asked
-to fill. It is not a speedup and should not be quoted as one. Resolutions
-above 128 were not run. Regenerate the full record with
-`python harness/run.py --regenerate`.
+question. It is not a speedup and should not be quoted as one. Regenerate
+the full record with `python harness/run.py --regenerate`.
 
 🎯 The Big Vision
 
