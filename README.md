@@ -214,13 +214,13 @@ uniform grid's at resolution 128 or its point count passed that grid's
 | workload | uniform @128: E / Ew | first to happen | at tolerance | octree points | octree E / Ew |
 |---|---|---|---|---|---|
 | dipole | 0.0158 / 0.0255 | POINT_CAP | 0.03 | 3,166,626 | 0.0187 / 0.0190 |
-| quadrupole | 0.0094 / 0.0129 | NOT_REACHED at the sweep's end (2,082,032 points, 0.7% under the cap; tolerance 0.025 running) | 0.03 | 2,082,032 | 0.0170 / 0.0186 |
+| quadrupole | 0.0094 / 0.0129 | POINT_CAP | 0.025 | 2,740,480 | 0.0143 / 0.0163 |
 | wire+charge | 0.0093 / 0.0146 | POINT_CAP | 0.03 | 2,880,431 | 0.0134 / 0.0151 |
 
-The point cap comes first on the dipole and the wire, and the quadrupole
-sweep ended 0.7 percent under the cap at 1.8 times the target error: on
-uniform probes the octree does not reach the resolution-128 grid's error
-inside that grid's point budget. On weighted probes it does, on the dipole, at tolerance 0.05 with
+The point cap comes first on every workload: on uniform probes the octree
+does not reach the resolution-128 grid's error inside that grid's point
+budget, and on the quadrupole it is 1.5 times that error with 30 percent
+more points. On weighted probes it does, on the dipole, at tolerance 0.05 with
 933,199 points against the grid's 1,061,208 at equal Ew. Same answer as F2,
 at the ceiling.
 

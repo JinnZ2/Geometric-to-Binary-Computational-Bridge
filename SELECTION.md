@@ -11,11 +11,11 @@ sample). Both are reported for every implementation; neither replaces the other.
 DEPTH_CAPPED(n): leaves still above the tolerance at the depth cap, first-class, not an
 error. No implementation is the reference; `uniform_grid` is a peer.
 
-Latest run `20260917T010308Z-12cf47` on Linux-6.18.44-fc-v33-x86_64-with-glibc2.39, python 3.11.15, 4 cpus, compiler cc. Records: 226 total, 60 cells current.
+Latest run `20260917T014825Z-4ae4c3` on Linux-6.18.44-fc-v33-x86_64-with-glibc2.39, python 3.11.15, 4 cpus, compiler cc. Records: 227 total, 60 cells current.
 
 | count | what |
 |---|---|
-| 138 | cells measured (status OK) |
+| 139 | cells measured (status OK) |
 | 51 | cells NOT_MEASURED: condition combinations no workload or implementation in this order instantiates (listed below) |
 | 3 | workloads SPECCED and HELD, never run (listed at the end, with what un-holds each) |
 
@@ -124,6 +124,7 @@ refines to. Same probes, same reference, same error metric as the resolution tab
 | 0.05 | NOT_MEASURED(no record) | 76.1824 s · 1800 MB · E 2.89e-02 Ew 3.10e-02 · 933,199 pts · DEPTH_CAPPED(34126) |
 | 0.04 | NOT_MEASURED(no record) | 129.5327 s · 3129 MB · E 2.54e-02 Ew 2.38e-02 · 1,632,387 pts · DEPTH_CAPPED(66648) |
 | 0.03 | NOT_MEASURED(no record) | 252.6886 s · 6046 MB · E 1.87e-02 Ew 1.90e-02 · 3,166,626 pts · DEPTH_CAPPED(161523) |
+| 0.025 | NOT_MEASURED(no record) | NOT_MEASURED(no record) |
 
 **workload `quadrupole`**
 
@@ -147,6 +148,7 @@ refines to. Same probes, same reference, same error metric as the resolution tab
 | 0.05 | NOT_MEASURED(no record) | 114.9433 s · 1849 MB · E 2.98e-02 Ew 3.07e-02 · 958,952 pts · DEPTH_CAPPED(109600) |
 | 0.04 | NOT_MEASURED(no record) | 162.8203 s · 2617 MB · E 2.23e-02 Ew 2.49e-02 · 1,362,880 pts · DEPTH_CAPPED(216560) |
 | 0.03 | NOT_MEASURED(no record) | 246.9558 s · 3984 MB · E 1.70e-02 Ew 1.86e-02 · 2,082,032 pts · DEPTH_CAPPED(493920) |
+| 0.025 | NOT_MEASURED(no record) | 327.4216 s · 5236 MB · E 1.43e-02 Ew 1.63e-02 · 2,740,480 pts · DEPTH_CAPPED(691904) |
 
 **workload `wire_charge`**
 
@@ -170,6 +172,7 @@ refines to. Same probes, same reference, same error metric as the resolution tab
 | 0.05 | NOT_MEASURED(no record) | 146.6196 s · 2095 MB · E 2.18e-02 B 2.51e-02 Ew 2.34e-02 Bw 2.36e-02 · 1,088,011 pts · DEPTH_CAPPED(139702) |
 | 0.04 | NOT_MEASURED(no record) | 228.6360 s · 3232 MB · E 1.78e-02 B 2.05e-02 Ew 1.86e-02 Bw 1.84e-02 · 1,686,175 pts · DEPTH_CAPPED(228393) |
 | 0.03 | NOT_MEASURED(no record) | 386.1837 s · 5502 MB · E 1.34e-02 B 1.64e-02 Ew 1.51e-02 Bw 1.51e-02 · 2,880,431 pts · DEPTH_CAPPED(428195) |
+| 0.025 | NOT_MEASURED(no record) | NOT_MEASURED(no record) |
 
 ## Build tolerance
 
@@ -188,7 +191,7 @@ ceiling is listed at the end; a cell with no memory reading says so.
 | 256 MB | py_octree@10 (32 MB), py_octree@12 (32 MB), py_octree@128 (32 MB), py_octree@14 (32 MB), py_octree@16 (32 MB), py_octree@32 (32 MB), py_octree@48 (32 MB), py_octree@64 (32 MB), py_octree@8 (32 MB), py_octree@96 (32 MB), py_octree_mag@tol0.3 (150 MB), py_octree_mag@tol0.4 (96 MB), py_octree_mag@tol0.5 (71 MB), py_octree_mag@tol0.7 (50 MB), py_octree_mag@tol1 (40 MB), py_octree_mag@tol1.5 (33 MB), py_octree_mag@tol2 (29 MB), py_octree_mag@tol3 (27 MB), py_octree_tol@tol0.2 (161 MB), py_octree_tol@tol0.25 (107 MB), py_octree_tol@tol0.3 (95 MB), py_octree_tol@tol0.4 (61 MB), py_octree_tol@tol0.5 (52 MB), py_octree_tol@tol0.7 (48 MB), py_octree_tol@tol1 (27 MB), py_octree_tol@tol1.5 (27 MB), py_octree_tol@tol2 (27 MB), py_octree_tol@tol3 (27 MB), uniform_grid@10 (27 MB), uniform_grid@12 (28 MB), uniform_grid@14 (29 MB), uniform_grid@16 (31 MB), uniform_grid@32 (62 MB), uniform_grid@48 (147 MB), uniform_grid@8 (27 MB) |
 | 1024 MB | py_octree@10 (32 MB), py_octree@12 (32 MB), py_octree@128 (32 MB), py_octree@14 (32 MB), py_octree@16 (32 MB), py_octree@32 (32 MB), py_octree@48 (32 MB), py_octree@64 (32 MB), py_octree@8 (32 MB), py_octree@96 (32 MB), py_octree_mag@tol0.3 (150 MB), py_octree_mag@tol0.4 (96 MB), py_octree_mag@tol0.5 (71 MB), py_octree_mag@tol0.7 (50 MB), py_octree_mag@tol1 (40 MB), py_octree_mag@tol1.5 (33 MB), py_octree_mag@tol2 (29 MB), py_octree_mag@tol3 (27 MB), py_octree_tol@tol0.08 (845 MB), py_octree_tol@tol0.1 (544 MB), py_octree_tol@tol0.12 (390 MB), py_octree_tol@tol0.15 (262 MB), py_octree_tol@tol0.2 (161 MB), py_octree_tol@tol0.25 (107 MB), py_octree_tol@tol0.3 (95 MB), py_octree_tol@tol0.4 (61 MB), py_octree_tol@tol0.5 (52 MB), py_octree_tol@tol0.7 (48 MB), py_octree_tol@tol1 (27 MB), py_octree_tol@tol1.5 (27 MB), py_octree_tol@tol2 (27 MB), py_octree_tol@tol3 (27 MB), uniform_grid@10 (27 MB), uniform_grid@12 (28 MB), uniform_grid@14 (29 MB), uniform_grid@16 (31 MB), uniform_grid@32 (62 MB), uniform_grid@48 (147 MB), uniform_grid@64 (309 MB), uniform_grid@8 (27 MB), uniform_grid@96 (993 MB) |
 | 4096 MB | py_octree@10 (32 MB), py_octree@12 (32 MB), py_octree@128 (32 MB), py_octree@14 (32 MB), py_octree@16 (32 MB), py_octree@32 (32 MB), py_octree@48 (32 MB), py_octree@64 (32 MB), py_octree@8 (32 MB), py_octree@96 (32 MB), py_octree_mag@tol0.3 (150 MB), py_octree_mag@tol0.4 (96 MB), py_octree_mag@tol0.5 (71 MB), py_octree_mag@tol0.7 (50 MB), py_octree_mag@tol1 (40 MB), py_octree_mag@tol1.5 (33 MB), py_octree_mag@tol2 (29 MB), py_octree_mag@tol3 (27 MB), py_octree_tol@tol0.04 (3232 MB), py_octree_tol@tol0.05 (2095 MB), py_octree_tol@tol0.06 (1461 MB), py_octree_tol@tol0.08 (845 MB), py_octree_tol@tol0.1 (544 MB), py_octree_tol@tol0.12 (390 MB), py_octree_tol@tol0.15 (262 MB), py_octree_tol@tol0.2 (161 MB), py_octree_tol@tol0.25 (107 MB), py_octree_tol@tol0.3 (95 MB), py_octree_tol@tol0.4 (61 MB), py_octree_tol@tol0.5 (52 MB), py_octree_tol@tol0.7 (48 MB), py_octree_tol@tol1 (27 MB), py_octree_tol@tol1.5 (27 MB), py_octree_tol@tol2 (27 MB), py_octree_tol@tol3 (27 MB), uniform_grid@10 (27 MB), uniform_grid@12 (28 MB), uniform_grid@128 (2281 MB), uniform_grid@14 (29 MB), uniform_grid@16 (31 MB), uniform_grid@32 (62 MB), uniform_grid@48 (147 MB), uniform_grid@64 (309 MB), uniform_grid@8 (27 MB), uniform_grid@96 (993 MB) |
-| 16384 MB | py_octree@10 (32 MB), py_octree@12 (32 MB), py_octree@128 (32 MB), py_octree@14 (32 MB), py_octree@16 (32 MB), py_octree@32 (32 MB), py_octree@48 (32 MB), py_octree@64 (32 MB), py_octree@8 (32 MB), py_octree@96 (32 MB), py_octree_mag@tol0.3 (150 MB), py_octree_mag@tol0.4 (96 MB), py_octree_mag@tol0.5 (71 MB), py_octree_mag@tol0.7 (50 MB), py_octree_mag@tol1 (40 MB), py_octree_mag@tol1.5 (33 MB), py_octree_mag@tol2 (29 MB), py_octree_mag@tol3 (27 MB), py_octree_tol@tol0.03 (6046 MB), py_octree_tol@tol0.04 (3232 MB), py_octree_tol@tol0.05 (2095 MB), py_octree_tol@tol0.06 (1461 MB), py_octree_tol@tol0.08 (845 MB), py_octree_tol@tol0.1 (544 MB), py_octree_tol@tol0.12 (390 MB), py_octree_tol@tol0.15 (262 MB), py_octree_tol@tol0.2 (161 MB), py_octree_tol@tol0.25 (107 MB), py_octree_tol@tol0.3 (95 MB), py_octree_tol@tol0.4 (61 MB), py_octree_tol@tol0.5 (52 MB), py_octree_tol@tol0.7 (48 MB), py_octree_tol@tol1 (27 MB), py_octree_tol@tol1.5 (27 MB), py_octree_tol@tol2 (27 MB), py_octree_tol@tol3 (27 MB), uniform_grid@10 (27 MB), uniform_grid@12 (28 MB), uniform_grid@128 (2281 MB), uniform_grid@14 (29 MB), uniform_grid@16 (31 MB), uniform_grid@32 (62 MB), uniform_grid@48 (147 MB), uniform_grid@64 (309 MB), uniform_grid@8 (27 MB), uniform_grid@96 (993 MB) |
+| 16384 MB | py_octree@10 (32 MB), py_octree@12 (32 MB), py_octree@128 (32 MB), py_octree@14 (32 MB), py_octree@16 (32 MB), py_octree@32 (32 MB), py_octree@48 (32 MB), py_octree@64 (32 MB), py_octree@8 (32 MB), py_octree@96 (32 MB), py_octree_mag@tol0.3 (150 MB), py_octree_mag@tol0.4 (96 MB), py_octree_mag@tol0.5 (71 MB), py_octree_mag@tol0.7 (50 MB), py_octree_mag@tol1 (40 MB), py_octree_mag@tol1.5 (33 MB), py_octree_mag@tol2 (29 MB), py_octree_mag@tol3 (27 MB), py_octree_tol@tol0.025 (5236 MB), py_octree_tol@tol0.03 (6046 MB), py_octree_tol@tol0.04 (3232 MB), py_octree_tol@tol0.05 (2095 MB), py_octree_tol@tol0.06 (1461 MB), py_octree_tol@tol0.08 (845 MB), py_octree_tol@tol0.1 (544 MB), py_octree_tol@tol0.12 (390 MB), py_octree_tol@tol0.15 (262 MB), py_octree_tol@tol0.2 (161 MB), py_octree_tol@tol0.25 (107 MB), py_octree_tol@tol0.3 (95 MB), py_octree_tol@tol0.4 (61 MB), py_octree_tol@tol0.5 (52 MB), py_octree_tol@tol0.7 (48 MB), py_octree_tol@tol1 (27 MB), py_octree_tol@tol1.5 (27 MB), py_octree_tol@tol2 (27 MB), py_octree_tol@tol3 (27 MB), uniform_grid@10 (27 MB), uniform_grid@12 (28 MB), uniform_grid@128 (2281 MB), uniform_grid@14 (29 MB), uniform_grid@16 (31 MB), uniform_grid@32 (62 MB), uniform_grid@48 (147 MB), uniform_grid@64 (309 MB), uniform_grid@8 (27 MB), uniform_grid@96 (993 MB) |
 | above 16384 MB | none |
 
 ## Undeclared condition cells
@@ -223,7 +226,7 @@ grid's 2,097,152. NOT_REACHED means the sweep ended before either.
 | dipole | py_octree_mag | 0.0158 | NOT_REACHED (sweep ended) | 0.3 | 41,546 | 0.1124 | 0.0985 |
 | dipole | py_octree_tol | 0.0158 | POINT_CAP first | 0.03 | 3,166,626 | 0.0187 | 0.0190 |
 | quadrupole | py_octree_mag | 0.0094 | NOT_REACHED (sweep ended) | 0.3 | 65,248 | 0.0669 | 0.0734 |
-| quadrupole | py_octree_tol | 0.0094 | NOT_REACHED (sweep ended) | 0.03 | 2,082,032 | 0.0170 | 0.0186 |
+| quadrupole | py_octree_tol | 0.0094 | POINT_CAP first | 0.025 | 2,740,480 | 0.0143 | 0.0163 |
 | wire_charge | py_octree_mag | 0.0093 | NOT_REACHED (sweep ended) | 0.3 | 29,184 | 0.0667 | 0.0723 |
 | wire_charge | py_octree_tol | 0.0093 | POINT_CAP first | 0.03 | 2,880,431 | 0.0134 | 0.0151 |
 
@@ -429,6 +432,7 @@ sides (`contract.accuracy`). NOT_BRACKETED and NON_MONOTONE rows say why.
 | py_octree_tol @ tol 0.05 | py_octree | quadrupole | E | 0.0298 | 958,952 | 114.9433 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1057 (target 0.02975) |
 | py_octree_tol @ tol 0.04 | py_octree | quadrupole | E | 0.0223 | 1,362,880 | 162.8203 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1057 (target 0.02228) |
 | py_octree_tol @ tol 0.03 | py_octree | quadrupole | E | 0.0170 | 2,082,032 | 246.9558 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1057 (target 0.01703) |
+| py_octree_tol @ tol 0.025 | py_octree | quadrupole | E | 0.0143 | 2,740,480 | 327.4216 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1057 (target 0.01426) |
 | py_octree_tol @ tol 3 | py_octree | quadrupole | E_w | 1.0000 | 1 | 0.0004 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1363 (target 1) |
 | py_octree_tol @ tol 2 | py_octree | quadrupole | E_w | 1.0000 | 1 | 0.0004 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1363 (target 1) |
 | py_octree_tol @ tol 1.5 | py_octree | quadrupole | E_w | 1.0000 | 1 | 0.0003 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1363 (target 1) |
@@ -447,6 +451,7 @@ sides (`contract.accuracy`). NOT_BRACKETED and NON_MONOTONE rows say why.
 | py_octree_tol @ tol 0.05 | py_octree | quadrupole | E_w | 0.0307 | 958,952 | 114.9433 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1363 (target 0.03071) |
 | py_octree_tol @ tol 0.04 | py_octree | quadrupole | E_w | 0.0249 | 1,362,880 | 162.8203 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1363 (target 0.0249) |
 | py_octree_tol @ tol 0.03 | py_octree | quadrupole | E_w | 0.0186 | 2,082,032 | 246.9558 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1363 (target 0.0186) |
+| py_octree_tol @ tol 0.025 | py_octree | quadrupole | E_w | 0.0163 | 2,740,480 | 327.4216 s | — | — | — | — | NOT_BRACKETED: sweep never got below 0.1363 (target 0.0163) |
 | py_octree_tol @ tol 3 | py_octree | wire_charge | E | 0.6853 | 8 | 0.0016 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1277 (target 0.6853) |
 | py_octree_tol @ tol 2 | py_octree | wire_charge | E | 0.6853 | 8 | 0.0015 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1277 (target 0.6853) |
 | py_octree_tol @ tol 1.5 | py_octree | wire_charge | E | 0.5835 | 106 | 0.0137 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1277 (target 0.5835) |
@@ -573,6 +578,7 @@ sides (`contract.accuracy`). NOT_BRACKETED and NON_MONOTONE rows say why.
 | py_octree_tol @ tol 0.05 | uniform_grid | quadrupole | E | 0.0298 | 958,952 | 114.9433 s | 42.6 | 79,507 | 0.1792 s | 0.002x | MATCHED (32..48) |
 | py_octree_tol @ tol 0.04 | uniform_grid | quadrupole | E | 0.0223 | 1,362,880 | 162.8203 s | 57.6 | 195,112 | 0.4790 s | 0.003x | MATCHED (48..64) |
 | py_octree_tol @ tol 0.03 | uniform_grid | quadrupole | E | 0.0170 | 2,082,032 | 246.9558 s | 76.4 | 438,976 | 1.1736 s | 0.005x | MATCHED (64..96) |
+| py_octree_tol @ tol 0.025 | uniform_grid | quadrupole | E | 0.0143 | 2,740,480 | 327.4216 s | 91.5 | 778,688 | 2.1909 s | 0.007x | MATCHED (64..96) |
 | py_octree_tol @ tol 3 | uniform_grid | quadrupole | E_w | 1.0000 | 1 | 0.0004 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.2343 (target 1) |
 | py_octree_tol @ tol 2 | uniform_grid | quadrupole | E_w | 1.0000 | 1 | 0.0004 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.2343 (target 1) |
 | py_octree_tol @ tol 1.5 | uniform_grid | quadrupole | E_w | 1.0000 | 1 | 0.0003 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.2343 (target 1) |
@@ -591,6 +597,7 @@ sides (`contract.accuracy`). NOT_BRACKETED and NON_MONOTONE rows say why.
 | py_octree_tol @ tol 0.05 | uniform_grid | quadrupole | E_w | 0.0307 | 958,952 | 114.9433 s | 55.8 | 175,616 | 0.4415 s | 0.004x | MATCHED (48..64) |
 | py_octree_tol @ tol 0.04 | uniform_grid | quadrupole | E_w | 0.0249 | 1,362,880 | 162.8203 s | 69.6 | 343,000 | 0.8508 s | 0.005x | MATCHED (64..96) |
 | py_octree_tol @ tol 0.03 | uniform_grid | quadrupole | E_w | 0.0186 | 2,082,032 | 246.9558 s | 94.0 | 830,584 | 2.4013 s | 0.010x | MATCHED (64..96) |
+| py_octree_tol @ tol 0.025 | uniform_grid | quadrupole | E_w | 0.0163 | 2,740,480 | 327.4216 s | 105.3 | 1,157,625 | 3.2695 s | 0.010x | MATCHED (96..128) |
 | py_octree_tol @ tol 3 | uniform_grid | wire_charge | E | 0.6853 | 8 | 0.0016 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1755 (target 0.6853) |
 | py_octree_tol @ tol 2 | uniform_grid | wire_charge | E | 0.6853 | 8 | 0.0015 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1755 (target 0.6853) |
 | py_octree_tol @ tol 1.5 | uniform_grid | wire_charge | E | 0.5835 | 106 | 0.0137 s | — | — | — | — | NOT_BRACKETED: sweep never got above 0.1755 (target 0.5835) |
