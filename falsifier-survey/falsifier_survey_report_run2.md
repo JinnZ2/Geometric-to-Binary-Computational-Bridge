@@ -122,7 +122,7 @@ cross-unit restatement pairs: ASF-11, ENG-1, ENG-3, NLS-3, TMP-2, TRD-4).
   vs null-stream baseline), Silicon/F9 (raw vs covariate-adjusted BMR).
 - **Kind 2 — proxy instrument, no transform exists** (only re-measurement
   repairs), N=3: docs/F1, ENG-1, ENG-3 — point-count × symmetry quoted as
-  "speedup" 11–16× where wall-clock measured 0.26–0.48×; in ENG-3 the proxy
+  "speedup" 11–16× where wall-clock measured 0.26–0.48×; in ENG-3 the proxy <!-- benchmark: Engine/engine_benchmark.py -->
   moves OPPOSITE to the truth.
 - **Kind 3 — missing unit/convention conversion** (explicit rescaling
   repairs), N=4: ASF-11 (rate consumed as Bernoulli p), TMP-2 (TCR at 15 C

@@ -34,10 +34,10 @@
 
 | id | statement | status | names | can fail via | salvage |
 |----|-----------|--------|-------|--------------|---------|
-| ER-1 | Orbach is saturated at 300 K, not merely open | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The Orbach screen generalises to any deep-level or rare-earth coherence claim in any host: compare the crystal-field gap to kT, check the Bose occupation, and if Delta << kT the rate is linear in T and the claim is finished. Two lines, no apparatus. Er's 1.5 um optical transition is untouched and is where the real literature works -- at cryogenic temperature. |
-| ER-2 | no Er gap mode exists in the searched window | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The gap-mode mass criterion m_impurity < m_host is a one-line screen for every local-vibrational-mode proposal. It killed the $10k Er search and the 'P local mode at ~500 cm^-1' claim in the same stroke, for free. |
-| ER-2b | the same criterion kills 'P local mode at ~500 cm^-1' | live | refutation | FALSIFIER | **PHYSICS_BOUND** — Same mass criterion, second target. That a single screen kills two independent claims in one archive is the argument for writing screens down rather than re-deriving them. |
-| ER-3 | the stated (omega, k) pair is inconsistent by ~8x | live | refutation | FALSIFIER | **MATH_ERROR** — Checking (omega, k) for mutual consistency before quoting either is a two-line screen and it caught an 8x discrepancy. |
+| ER-1 | Orbach is saturated at 300 K, not merely open | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The Orbach screen generalises to any deep-level or rare-earth coherence claim in any host: compare the crystal-field gap to kT, check the Bose occupation, and if Delta << kT the rate is linear in T and the claim is finished. Two lines, no apparatus. Er's 1.5 um optical transition is untouched and is where the real literature works -- at cryogenic temperature. <!-- benchmark: Silicon/falsifiers.py --> |
+| ER-2 | no Er gap mode exists in the searched window | live | refutation | FALSIFIER | **PHYSICS_BOUND** — The gap-mode mass criterion m_impurity < m_host is a one-line screen for every local-vibrational-mode proposal. It killed the $10k Er search and the 'P local mode at ~500 cm^-1' claim in the same stroke, for free. <!-- benchmark: Silicon/falsifiers.py --> |
+| ER-2b | the same criterion kills 'P local mode at ~500 cm^-1' | live | refutation | FALSIFIER | **PHYSICS_BOUND** — Same mass criterion, second target. That a single screen kills two independent claims in one archive is the argument for writing screens down rather than re-deriving them. <!-- benchmark: Silicon/falsifiers.py --> |
+| ER-3 | the stated (omega, k) pair is inconsistent by ~8x | live | refutation | FALSIFIER | **MATH_ERROR** — Checking (omega, k) for mutual consistency before quoting either is a two-line screen and it caught an 8x discrepancy. <!-- benchmark: Silicon/falsifiers.py --> |
 | ER-4 | _no recorded statement_ | unregistered | - | PROSE | |
 | ER-5 | _no recorded statement_ | unregistered | - | PROSE | |
 | ER-6 | _no recorded statement_ | unregistered | - | PROSE | |
@@ -72,13 +72,13 @@
 
 | id | statement | status | names | can fail via | salvage |
 |----|-----------|--------|-------|--------------|---------|
-| KEA-1 | exactly one minimum, at the ideal centre | live | refutation | FALSIFIER | **MATH_ERROR** — The Keating parameters alpha = 48.1 and beta = 12.0 N/m are correct and reusable. 'Eight octahedral faces' is the one correct use of that terminology in the whole set. And the general form of the error is a screen: a sum of squares has ONE zero, so any 'N degenerate minima' claim about a VFF model is checkable by inspection before anyone runs an optimiser. |
+| KEA-1 | exactly one minimum, at the ideal centre | live | refutation | FALSIFIER | **MATH_ERROR** — The Keating parameters alpha = 48.1 and beta = 12.0 N/m are correct and reusable. 'Eight octahedral faces' is the one correct use of that terminology in the whole set. And the general form of the error is a screen: a sum of squares has ONE zero, so any 'N degenerate minima' claim about a VFF model is checkable by inspection before anyone runs an optimiser. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 | KEA-2 | _no recorded statement_ | unregistered | - | PROSE | |
-| KEA-3 | no lattice separation lands on phi*a | live | refutation | FALSIFIER | **MATH_ERROR** — The phi-spacing check is reusable: enumerate the real lattice separations before claiming any of them lands on an irrational multiple of a. |
+| KEA-3 | no lattice separation lands on phi*a | live | refutation | FALSIFIER | **MATH_ERROR** — The phi-spacing check is reusable: enumerate the real lattice separations before claiming any of them lands on an irrational multiple of a. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 | KEA-4 | _no recorded statement_ | unregistered | - | PROSE | |
 | KEA-5 | _no recorded statement_ | unregistered | - | PROSE | |
 | KEA-6 | _no recorded statement_ | unregistered | - | PROSE | |
-| KEA-7 | energy is exactly even, so vertex and face are degenerate | live | refutation | FALSIFIER | **MATH_ERROR** — The tetrahedral identities sum(v_k) = 0 and v_k.v_l = -d0^2/3 are exact and reusable anywhere the cluster appears. The error's general form is the more valuable half: an encoding must be tested against the operation that is supposed to distinguish its states, which is the same blindness GIES-1 hit in a formalism that never met this one. |
+| KEA-7 | energy is exactly even, so vertex and face are degenerate | live | refutation | FALSIFIER | **MATH_ERROR** — The tetrahedral identities sum(v_k) = 0 and v_k.v_l = -d0^2/3 are exact and reusable anywhere the cluster appears. The error's general form is the more valuable half: an encoding must be tested against the operation that is supposed to distinguish its states, which is the same blindness GIES-1 hit in a formalism that never met this one. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 
 ## R2
 
@@ -97,11 +97,11 @@
 
 | id | statement | status | names | can fail via | salvage |
 |----|-----------|--------|-------|--------------|---------|
-| SEED-1 | W is the identity, so the channels are independent scalars | live | refutation | FALSIFIER | **MATH_ERROR** — W = I is itself a usable fact: the channels are independent scalars, so anything built on cross-channel structure needs a different matrix, and SEED-5 shows one that is non-trivial while keeping proportions invariant. |
+| SEED-1 | W is the identity, so the channels are independent scalars | live | refutation | FALSIFIER | **MATH_ERROR** — W = I is itself a usable fact: the channels are independent scalars, so anything built on cross-channel structure needs a different matrix, and SEED-5 shows one that is non-trivial while keeping proportions invariant. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 | SEED-2 | _no recorded statement_ | unregistered | - | PROSE | |
-| SEED-3 | the claimed fidelity is 13 orders below the seed resolution | live | refutation | FALSIFIER | **UNITS** — The resolution comparison is the reusable part: state the seed's own resolution before claiming a fidelity against it. Thirteen orders is not a tuning problem. |
+| SEED-3 | the claimed fidelity is 13 orders below the seed resolution | live | refutation | FALSIFIER | **UNITS** — The resolution comparison is the reusable part: state the seed's own resolution before claiming a fidelity against it. Thirteen orders is not a tuning problem. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 | SEED-4 | _no recorded statement_ | unregistered | - | PROSE | |
-| SEED-5 | the fix makes W non-trivial but keeps proportions invariant | live | refutation | FALSIFIER | **SUPERSEDED** — Carried forward as the working influence matrix. This is the constructive half of the SEED audit -- non-trivial W, proportions invariant. |
+| SEED-5 | the fix makes W non-trivial but keeps proportions invariant | live | refutation | FALSIFIER | **SUPERSEDED** — Carried forward as the working influence matrix. This is the constructive half of the SEED audit -- non-trivial W, proportions invariant. <!-- benchmark: Silicon/falsifiers_keating_seed.py --> |
 
 ## SIL
 

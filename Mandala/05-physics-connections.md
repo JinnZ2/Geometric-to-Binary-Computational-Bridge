@@ -66,7 +66,7 @@ the interaction goes as 1/r⁶.
 **For the EM field engine (`Engine/`):**
 - Source spacing: macroscopic (mm–m scale)
 - Coulomb + Biot-Savart dominate
-- SIMD-vectorised, ~15–30× speedup via octree + symmetry detection
+- SIMD-vectorised, ~15–30× speedup via octree + symmetry detection [refuted: timed, the adaptive path runs at 0.26–0.48x of the uniform grid at the same resolution and at 0.016–0.032x at equal accuracy — ENG-1, README Performance, harness/matched_accuracy.py]
 
 These are different distance regimes of the same interaction.
 The engine and the substrate are compatible precisely because they occupy

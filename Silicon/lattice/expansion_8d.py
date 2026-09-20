@@ -22,7 +22,7 @@ combined with AI mathematical implementation. The result demonstrates what's
 possible when different forms of cognition work together toward genuine
 problem-solving rather than replacement competition.
 
-MIT License - Use freely, build upon, no attribution required
+CC0-1.0 - Use freely, build upon, no attribution required
 """
 
 import numpy as np

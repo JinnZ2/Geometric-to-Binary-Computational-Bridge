@@ -360,7 +360,7 @@ Protocol:
 	1.	Detect repeated states via collective measurement
 	2.	Store (value, count) in two cells using multi-level encoding
 	3.	On read, expand run-length back to full pattern
-Advantage: 7-10× energy savings for compressible dataDisadvantage: Random access becomes more complex
+Advantage: 7-10× energy savings for compressible dataDisadvantage: Random access becomes more complex [unmeasured: no benchmark or device in the tree produced this figure]
 Tensor Fourier Transform
 For periodic or structured data, store Fourier coefficients instead of raw values:
 
@@ -369,7 +369,7 @@ Data: d[n] = Σₖ D[k] exp(2πikn/N)
 Store only D[k] (frequency domain) → sparse if data is smooth.
 Write operation: Compute FFT → write coefficientsRead operation: Read coefficients → compute IFFT → reconstruct data
 Use case: Images, audio, scientific data with smooth structure
-Compression: 10-100× for natural signals
+Compression: 10-100× for natural signals [unmeasured: no benchmark or device in the tree produced this figure]
 Parallel Performance Summary
 
 

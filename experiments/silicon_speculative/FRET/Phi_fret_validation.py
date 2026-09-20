@@ -25,7 +25,7 @@ Natural Validation Candidates:
 1. Nanostructure permittivity anomalies - local field enhancement
 
 Collaborative Development Framework
-MIT License
+CC0-1.0
 """
 
 import numpy as np

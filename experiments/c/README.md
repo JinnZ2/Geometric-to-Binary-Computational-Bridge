@@ -78,4 +78,4 @@ operate on this packed format.
 
 ## License
 
-CC-BY-4.0 (same as parent project)
+CC0-1.0 (same as parent project)

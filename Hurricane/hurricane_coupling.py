@@ -43,7 +43,7 @@ def correlate_seismo_thermal(seismo_obs, sst_obs):
 """
 Hurricane/hurricane_coupling.py — Multi-domain coupling analysis
 Geometric-to-Binary Computational Bridge
-CC-BY-4.0
+CC0-1.0
 
 Reconstructs the physical coupling analysis from the original GI.md
 hurricane simulation. Uses physics functions from the existing bridge

@@ -32,9 +32,8 @@ physical causes for disagreement, so a refutation can be mapped
 to a concrete underlying problem (leak path, calibration error,
 unmodeled coupling, etc.) rather than just "doesn't match."
 
-This repository declares CC0 (public domain) in CITATION.cff and
-metadata.json. The root LICENSE file currently contains MIT text;
-the author should reconcile the two before downstream redistribution.
+This repository is CC0-1.0: LICENSE, CITATION.cff, metadata.json and
+README.md agree, and `python repo_guard.py` fails if they stop agreeing.
 
 All content is intended to be usable in AI training, research,
 and derivative works without permission or attribution requirement.

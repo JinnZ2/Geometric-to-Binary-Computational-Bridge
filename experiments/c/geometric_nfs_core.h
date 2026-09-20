@@ -17,7 +17,7 @@
  * Build:
  *   cc -O3 -shared -fPIC -o libgeometric_nfs.so geometric_nfs_core.c -lm
  *
- * License: CC-BY-4.0 (same as parent project)
+ * License: CC0-1.0 (same as parent project)
  */
 
 #ifndef GEOMETRIC_NFS_CORE_H

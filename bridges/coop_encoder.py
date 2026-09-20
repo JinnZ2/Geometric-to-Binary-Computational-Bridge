@@ -66,7 +66,7 @@ Section D — Emotion  (6 bits):
   [resonance_band  2b Gray]  trust-model accuracy [0, 0.33, 0.67, 1.0]
   [spreading       1b]       adoption is accelerating (velocity this tick > last tick)
 
-License: CC-BY-4.0
+License: CC0-1.0
 """
 
 from __future__ import annotations

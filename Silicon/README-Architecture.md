@@ -417,7 +417,7 @@ Storage Architecture via Geometric Engineering
 
 ## License
 
-[Specify license - e.g., MIT, GPL, proprietary]
+CC0-1.0, with the rest of the repository.
 
 -----
 

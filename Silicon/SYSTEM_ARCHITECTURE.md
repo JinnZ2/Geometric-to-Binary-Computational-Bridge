@@ -8,9 +8,9 @@
 
 The Octahedral Silicon Encoding architecture is a **room-temperature quantum memory** system that achieves:
 
-- **166 ms coherence** at 300 K (166× better than NV centers)
+- **166 ms coherence** at 300 K (166× better than NV centers) [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 - **225 TB/cm³** storage density (1800× NAND flash)
-- **0.22 aJ/bit** energy efficiency (7× better than target)
+- **0.22 aJ/bit** energy efficiency (7× better than target) [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py]
 - **10 THz** parallel write rate (10× target)
 
 **Key Innovation**: Geometric engineering at the atomic scale creates intrinsic quantum protection.
@@ -324,7 +324,7 @@ Average: ~1 mW (@ 100 MHz write rate)
 
 |Parameter           |Value      |Comparison           |
 |--------------------|-----------|---------------------|
-|**Write energy**    |0.22 aJ/bit|7× better than target|
+|**Write energy**    |0.22 aJ/bit|7× better than target [unmeasured: no device exists; the energy per bit is a design target, and what a strain channel permits is in Silicon/magnetic_authority.py] |
 |**Read energy**     |~1 aJ/bit  |Quantum-limited      |
 |**Idle power**      |~0 W       |No refresh needed    |
 |**Total efficiency**|< 1 aJ/bit |Best in class        |

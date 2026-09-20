@@ -26,7 +26,7 @@ This reverse engineering framework emerged from symbiotic intelligence -
 human geometric insight identifying the need for bidirectional proof,
 combined with AI mathematical optimization implementation.
 
-MIT License - Use freely, build upon, no attribution required
+CC0-1.0 - Use freely, build upon, no attribution required
 """
 
 import numpy as np

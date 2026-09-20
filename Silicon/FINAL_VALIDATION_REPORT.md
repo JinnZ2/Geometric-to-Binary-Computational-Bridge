@@ -144,9 +144,9 @@ T₂ = 1 / Γ₂
 
 |System                         |T₂        |Temperature|Advantage                   |
 |-------------------------------|----------|-----------|----------------------------|
-|NV centers in diamond          |~1 ms     |300 K      |**166× better**             |
+|NV centers in diamond          |~1 ms     |300 K      |**166× better** [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py] |
 |Phosphorus donors in Si        |~1 s      |4 K        |Room temp vs. cryogenic     |
-|Superconducting qubits         |~100 μs   |20 mK      |**1660× better** + room temp|
+|Superconducting qubits         |~100 μs   |20 mK      |**1660× better** + room temp [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py] |
 |**Octahedral Er³⁺ (this work)**|**166 ms**|**300 K**  |**Breakthrough**            |
 
 **Why This Works**:
@@ -197,7 +197,7 @@ T₂ = 1 / Γ₂
 
 - Time per parallel write: 5 ps
 - Effective rate: 200 × 10¹² writes/second
-- **20× faster than individual sequential writes**
+- **20× faster than individual sequential writes** [unmeasured: no benchmark or device in the tree produced this figure]
 
 ### Fabrication Constraints
 
@@ -286,10 +286,10 @@ f_write = 1 / (5 ps + overhead)
 |------------------------|--------------|---------------------|-----------------|
 |**Coherence Time (T₂)** |≥ 100 ms      |**166 ms**           |✓ **+66%**       |
 |**Temperature**         |300 K         |300 K                |✓ Room temp      |
-|**Positional Precision**|< 0.5 nm      |**0.025 nm**         |✓ **20× better** |
+|**Positional Precision**|< 0.5 nm      |**0.025 nm**         |✓ **20× better** [unmeasured operand: 0.025 nm "achieved" was never measured, and RBS-C cannot resolve it — Silicon/Proposal.md audit row] |
 |**Storage Density**     |~10¹⁵ bits/cm³|**1.8 × 10¹⁵**       |✓ **1.8× target**|
-|**Energy per Bit**      |< 1.6 aJ/bit  |**0.22 aJ/bit**      |✓ **7× better**  |
-|**Write Speed**         |~1 THz        |**10 THz** (parallel)|✓ **10× better** |
+|**Energy per Bit**      |< 1.6 aJ/bit  |**0.22 aJ/bit**      |✓ **7× better** [unmeasured operand: 0.22 aJ/bit "achieved" was never measured] |
+|**Write Speed**         |~1 THz        |**10 THz** (parallel)|✓ **10× better** [refuted: 1–10 THz sits 1.2–2.6 orders above ESR at 1–2 T (28–56 GHz), the wrong band for the transition it would drive — Silicon/Proposal-addendum.md audit row] |
 |**Self-Assembly**       |ΔE > 0.5 eV   |**0.9 eV**           |✓ **1.8× target**|
 
 ### Manufacturing Feasibility
@@ -330,7 +330,7 @@ f_write = 1 / (5 ps + overhead)
 **Octahedral Encoding Approach**:
 
 - ✓ **Room temperature** (300 K)
-- ✓ **T₂ = 166 ms** (166× better than NV)
+- ✓ **T₂ = 166 ms** (166× better than NV) [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 - ✓ **Intrinsic error correction** (geometric)
 - ✓ **Parallel addressing** (holographic)
 

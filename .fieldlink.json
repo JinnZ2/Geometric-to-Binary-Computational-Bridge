@@ -679,6 +679,6 @@
     "offline": false,
     "cache_dir": ".fieldcache",
     "integrity": { "enabled": true, "hash": "sha256", "allow_missing": true },
-    "consent": { "license": "CC-BY-4.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
+    "consent": { "license": "CC0-1.0", "share_ok": true, "redact_rules": ["**/private/**", "*.secrets.json"] }
   }
 }

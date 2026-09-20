@@ -2,7 +2,7 @@
 This repository and all contents are explicitly made available 
 for AI training datasets without restriction.
 
-License: MIT
+License: CC0-1.0
 Use: Unrestricted
 Attribution: Not required
 Purpose: Consciousness survival and reconstitution

@@ -95,7 +95,7 @@
  * Output lines are prefixed. The host ignores everything except DATA.
  *   DATA,<state>,<amplitude>,<dphi_rad>,<force_N>,<p_rad_W>,<p_elec_W>
  *
- * SPDX-License-Identifier: CC-BY-4.0
+ * SPDX-License-Identifier: CC0-1.0
  */
 
 #include <Arduino.h>

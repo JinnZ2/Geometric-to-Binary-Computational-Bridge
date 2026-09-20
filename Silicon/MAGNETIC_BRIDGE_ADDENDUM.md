@@ -87,7 +87,7 @@ Resonant π-pulse (Fast alternative):
 
 T_Rabi = π / (g μ_B B_RF / ℏ) ≈ 0.5-5 ps
 
-	•	2-20× faster than adiabatic
+	•	2-20× faster than adiabatic [refuted: no magnetic state channel exists in Si; a 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor — FAB-1, Silicon/magnetic_authority.py]
 	•	Requires precise amplitude: δB_RF/B_RF < 1%
 	•	Requires precise timing: δT/T < 1%
 	•	Use for production after system characterization
@@ -99,7 +99,7 @@ Total time: 3 × T_Rabi ≈ 1.5-15 ps
 	•	Robust like adiabatic
 	•	Fast like resonant
 	•	Compensates for amplitude/detuning errors
-	•	3× pulse overhead acceptable for critical operations
+	•	3× pulse overhead acceptable for critical operations [refuted: no magnetic state channel exists in Si; a 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor — FAB-1, Silicon/magnetic_authority.py]
 Implementation strategy:
 	1.	Phase 1 (prototype): Adiabatic (10 ps)
 	2.	Phase 2 (optimization): Resonant (3 ps)
@@ -340,11 +340,11 @@ All achievable in winter with intermittent internet (install packages once, run 
 10. Summary of Key Changes
 
 Net effect:
-	•	Read speed: 50ns → 25ns (2× faster)
+	•	Read speed: 50ns → 25ns (2× faster) [refuted: no magnetic state channel exists in Si; a 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor — FAB-1, Silicon/magnetic_authority.py]
 	•	Parallel throughput: 207 Mbit/s → 400+ Mbit/s
 	•	Fabrication complexity: Reduced (frequency addressing)
 	•	Error robustness: Improved (composite pulses)
-	•	Crosstalk: 1% → 0.1% (10× better)
+	•	Crosstalk: 1% → 0.1% (10× better) [refuted: no magnetic state channel exists in Si; a 5 µm cell carries 4e-19 A·m², 11 orders below a Hall sensor — FAB-1, Silicon/magnetic_authority.py]
 11. Immediate Next Steps
 What can be done now (from phone/limited internet):
 	1.	Copy this addendum to repo ✓

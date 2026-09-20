@@ -153,7 +153,7 @@ If k_well = 2 eV/Å²:
 
 **Optimal**:
 
-- 32 cores per job (2× speedup)
+- 32 cores per job (2× speedup) [unmeasured: no benchmark or device in the tree produced this figure]
 - 128 GB RAM
 - Parallel submission of all strain/distance configurations
 
@@ -330,7 +330,7 @@ The only way to answer that is to run the DFT calculations. The framework is rea
 
 **Expected value**: Even if you only achieve 50 ms @ 250 K, this would still be:
 
-- 10× better than existing room-temp quantum memories
+- 10× better than existing room-temp quantum memories [refuted: T₂ ≤ 2T₁ and Er³⁺ T₁ at 300 K is ps–ns by Orbach relaxation through a 40–60 cm⁻¹ crystal-field gap, 8 orders below 166 ms — ER-1, Silicon/er_bounds.py]
 - Publishable in top-tier journal (Nature Communications, PRX)
 - Fundable by DARPA, NSF, industry
 

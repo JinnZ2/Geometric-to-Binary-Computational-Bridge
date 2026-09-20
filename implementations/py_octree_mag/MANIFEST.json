@@ -1,0 +1,20 @@
+{
+ "language": "python",
+ "dependencies": [
+  "numpy"
+ ],
+ "build_required": false,
+ "build_command": null,
+ "runs_on_phone": "unknown",
+ "entry": [
+  "{python}",
+  "impl.py"
+ ],
+ "covers": [
+  "*"
+ ],
+ "name": "py_octree_mag",
+ "algorithm": "Engine/spatial_grid.py octree, criterion=magnitude: split while max over 8 corners of max(f_k/f_c, f_c/f_k) - 1 exceeds the spec's tolerance, f = sum|q|/r^2; max_depth 8; then one Coulomb/Biot-Savart call per leaf as py_octree; probes answered by nearest leaf sample",
+ "author_claim": "superseded by py_octree_tol; kept so the error criterion can be reported against it at the same tolerances. Its refinement at a point source is unbounded by construction, so its point count is not a property of the tolerance",
+ "knob": "tolerance"
+}

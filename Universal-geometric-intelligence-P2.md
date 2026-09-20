@@ -329,19 +329,19 @@ def validate_encoding_quality(bridge_name, test_cases):
 ```
 Sound Bridge Encoding Validation:
   Average information loss: 8.2%
-  Average compression: 250×
+  Average compression: 250× [unmeasured operand: bearing sample counts; no code or data in the tree]
   Pass rate: 100%
 
 Details:
-  Healthy bearing: 6.1% loss, 280× compression → PASS
-  Worn bearing:    7.8% loss, 245× compression → PASS
-  Misaligned:      9.5% loss, 225× compression → PASS
+  Healthy bearing: 6.1% loss, 280× compression → PASS [unmeasured operand: bearing sample counts; no code or data in the tree]
+  Worn bearing:    7.8% loss, 245× compression → PASS [unmeasured operand: bearing sample counts; no code or data in the tree]
+  Misaligned:      9.5% loss, 225× compression → PASS [unmeasured operand: bearing sample counts; no code or data in the tree]
 ```
 
 **Interpretation:**
 
 - <10% loss: Encoding captures essential geometric structure
-- 200-300× compression: Removes measurement noise, keeps signal
+- 200-300× compression: Removes measurement noise, keeps signal [unmeasured operand: bearing sample counts; no code or data in the tree]
 - 100% pass: All failure modes distinguishable after encoding
 
 ### 2.4 Adaptive Threshold Optimization
@@ -952,7 +952,7 @@ class SIMDOptimizer:
 
 - Sequential: 1 point per operation
 - SIMD (AVX-256): 8 points per operation
-- **Speedup: 8× with zero algorithm change**
+- **Speedup: 8× with zero algorithm change** [unmeasured operand: SIMD efficiency; 8 is the AVX-256 lane count, a ceiling — ENG-6]
 
 -----
 
@@ -1154,11 +1154,11 @@ class SymmetryDetector:
 
 **Speedup from Symmetry:**
 
-- Single reflection plane: Compute 1/2, mirror → **2× faster**
-- Two orthogonal planes: Compute 1/4 → **4× faster**
+- Single reflection plane: Compute 1/2, mirror → **2× faster** [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
+- Two orthogonal planes: Compute 1/4 → **4× faster** [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance]
 - N-fold rotational: Compute 1/N → **N× faster**
 
-**Combined with SIMD:** 8× (SIMD) × 4× (symmetry) = **32× total speedup**
+**Combined with SIMD:** 8× (SIMD) × 4× (symmetry) = **32× total speedup** [refuted: the solver computes every point and reports a symmetry reduction it does not take; a symmetric configuration ran 1.89x MORE wall clock — ENG-3, Engine/geometric_solver.py; README Performance] [unmeasured operand: the 8× SIMD factor, ENG-6]
 
 -----
 
@@ -1220,7 +1220,7 @@ def complete_geometric_pipeline():
 
 **Hardware:** Intel i7 (AVX-256), single-threaded
 
-**Scaling:** With 8 cores, total speedup approaches **700×**
+**Scaling:** With 8 cores, total speedup approaches **700×** [unmeasured: no benchmark or device in the tree produced this figure]
 
 ### 8.2 Entropy Validation Overhead
 
@@ -1393,11 +1393,11 @@ Part 2 provides the **computation and validation framework** for geometric intel
 ✅ **Entropy analyzer** - Validates information preservation  
 ✅ **Bridge orchestrator** - Multi-modal fusion patterns  
 ✅ **Geometric solver** - Field computation framework  
-✅ **SIMD optimizer** - Parallel acceleration (8× typical)  
+✅ **SIMD optimizer** - Parallel acceleration (8× typical) [unmeasured operand: SIMD efficiency — ENG-6]  
 ✅ **Spatial grid** - Adaptive refinement (10-100× fewer points)  
 ✅ **Symmetry detector** - Automatic optimization discovery
 
-**Combined speedup: 100-1000× vs. naive implementation**
+**Combined speedup: 100-1000× vs. naive implementation** [unmeasured: no benchmark or device in the tree produced this figure]
 
 **Status:**
 

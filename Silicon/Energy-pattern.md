@@ -205,7 +205,7 @@ $0 test that decides whether the program exists.
       (`optical_interface.md`), six <110> projections, complete
       (`tensor_readout.py`, TTM-3).
 
-    "$10M vs $300M, 10-30x capital reduction"
+    "$10M vs $300M, 10-30x capital reduction" [refutation of the quoted capital figure; no source]
       Litho cost is dominated by overlay and CD control, not the
       exposure tool. A maskless route still needs the full metrology
       stack. Defect density, not capex, is what has blocked DSA.

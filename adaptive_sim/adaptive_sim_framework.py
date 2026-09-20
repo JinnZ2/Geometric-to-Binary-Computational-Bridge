@@ -192,7 +192,7 @@ OPEN
          cheap guard would be a floor on `num_trees` as a precondition for
          testing distributional claims at all.
 
-License: CC-BY-4.0.
+License: CC0-1.0.
 """
 
 import argparse

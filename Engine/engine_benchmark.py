@@ -106,7 +106,14 @@ def accuracy(uniform_pts, uniform_E, adaptive_pts, adaptive_E):
     ae = np.linalg.norm(np.asarray(adaptive_E, dtype=float), axis=1)
     if not len(ap) or not len(up):
         return float("nan"), float("nan")
-    idx = np.argmin(((up[:, None, :] - ap[None, :, :]) ** 2).sum(-1), axis=1)
+    # nearest adaptive neighbour of every uniform point, in blocks: the full
+    # (n_uniform, n_adaptive, 3) distance tensor is 42 GiB at resolution 96
+    # and the block form is the same argmin at a bounded footprint.
+    idx = np.empty(len(up), dtype=np.intp)
+    block = 8192
+    for start in range(0, len(up), block):
+        d2 = ((up[start:start + block, None, :] - ap[None, :, :]) ** 2).sum(-1)
+        idx[start:start + block] = np.argmin(d2, axis=1)
     ref, got = ue, ae[idx]
     scale = np.maximum(np.abs(ref), 1e-30)
     rel = np.abs(got - ref) / scale
