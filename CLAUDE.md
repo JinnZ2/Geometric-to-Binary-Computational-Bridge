@@ -1085,3 +1085,17 @@ Fieldlink syncs glyphs, shapes, and bridges across repos using deep-merge strate
 - `field/field_claim_loop.py`'s `shape` is documented canonical ("Do NOT scalarize on ingest") and **no code path reads it** — `test()` compares `value` only, so every claim in the system is a claim about one scalar projection. Storing the shape without testing against it is scalarizing with a receipt. Partial fix only: a reading carrying a shape must now name the `projection` that produced `value`, making the scalarization explicit and auditable. What a shape-level band should *be* is a physics question, not a coding one. FCL-9.
 - `AISS/AISS.md` and `AISS/AISS1.md` are the same document with two different preambles — bodies byte-identical, MD5 `59eb94de…`. Deleting one is safe; which preamble to keep is an editorial call, not a technical one.
 - `Octahedral_State_Encoder` still carries a misleading name (its states are ⟨111⟩ bond directions, not octahedron vertices). Renaming it to `Bond_Direction_State_Encoder` touches `linked_sensors` across the Silicon specs, `Engine/gaussian_splats/octahedral.py`, and the GEIS `OctahedralState` class — repo-wide vocabulary, deferred deliberately.
+
+<!-- clone-refspec-note v1 -->
+## Cloning and pushing
+Shallow clones are single-branch by default.
+Before pushing any branch other than main, run:
+
+    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+    git fetch --depth 1
+
+Or clone with: git clone --depth 1 --no-single-branch <url>
+Without this, the first push of a new branch
+fails the tracking-ref check even when the
+commit landed.
+<!-- /clone-refspec-note v1 -->
