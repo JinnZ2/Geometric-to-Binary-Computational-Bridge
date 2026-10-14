@@ -153,7 +153,6 @@ def demo_resonance():
     amps = [1.0 / f for f in freqs]
 
     # Add two resonant peaks
-    import math
     for i, f in enumerate(freqs):
         # Peak 1: 200 Hz, Q=10
         amps[i] += 0.5 * math.exp(-((f - 200) / 20) ** 2)
