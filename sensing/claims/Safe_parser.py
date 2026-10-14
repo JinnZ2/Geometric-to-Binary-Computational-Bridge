@@ -12,6 +12,7 @@ Only allows:
 import ast
 import operator
 import math
+import numpy as np
 from typing import Any, Dict, List, Set, Optional
 
 # ---------- Allowed operations ----------

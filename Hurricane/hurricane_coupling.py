@@ -1,4 +1,3 @@
-add:
 # In hurricane_coupling.py, add these functions and register them.
 
 def correlate_seismo_wind(seismo_obs, wind_obs):
@@ -81,10 +80,14 @@ Usage
 
 import math
 import sys
+import numpy as np
 from dataclasses import dataclass
 from typing import Optional
 
 from Hurricane.noaa_fetch import BuoyObs
+from Hurricane.bridges.seismo_encoder import (
+    turbulent_dissipation_rate, wind_speed_from_infrasound,
+)
 
 # ---------------------------------------------------------------------------
 # Bridge encoder physics imports (pure functions, no side effects)

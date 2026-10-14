@@ -17,7 +17,7 @@ from datetime import datetime
 
 # Import your existing components
 from .spectral_encoder import SpectralEncoder, SpectralPredictor, SpectralUncertainty
-from ..claims.scientific_claim import ScientificClaimTable, TrialResult
+from ..claims.scientific_claim import ScientificClaimTable
 from ..exploration.exploration_engine_complete import (
     FrameContext, ManifoldState, ExplorationFrame, FrameID,
     safe_evaluate, TrialResult

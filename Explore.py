@@ -6,7 +6,7 @@ New features:
 - Dynamic band tables that degrade under "Entropy Events"
 """
 
-import json, math, copy, uuid
+import json, math, copy, uuid, random
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -544,8 +544,6 @@ if __name__ == "__main__":
     ex.save_branch("entropy_aware_tree.json")
     print("Tree saved.")
 
-
-additions:
 
 # ----------------------------------------------------------------------
 # 6G Chip Architecture Models – crystal-inspired structural designs

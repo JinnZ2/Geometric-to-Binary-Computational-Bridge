@@ -5,6 +5,7 @@ LLM bridge: projects JEPA manifold states into language model space.
 
 import torch
 import torch.nn as nn
+from typing import List, Tuple
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from .jepa_manifold import ManifoldState
 

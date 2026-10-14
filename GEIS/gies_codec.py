@@ -63,7 +63,7 @@ SYMS: Dict[str, str] = {"O": "00", "I": "01", "X": "10", "D": "11"}
 IOPS: Dict[str, str] = {v: k for k, v in OPS.items()}
 ISYMS: Dict[str, str] = {v: k for k, v in SYMS.items()}
 
-_SYM_ALIASES = {"Δ": "D", "δ": "D", "Δ": "D"}
+_SYM_ALIASES = {"Δ": "D", "δ": "D"}
 
 TOKEN_BITS = 7          # 3 vertex + 2 operator + 2 symbol
 

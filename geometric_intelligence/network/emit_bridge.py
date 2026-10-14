@@ -28,7 +28,10 @@ License: CC0. Stdlib only.
 from __future__ import annotations
 
 import math
-from typing import Dict, List, Tuple, Optional
+from typing import TYPE_CHECKING, Dict, List, Tuple, Optional
+
+if TYPE_CHECKING:
+    from fabrication.substrate_ir import SubstrateIR
 from dataclasses import dataclass
 
 from .core import GeometricNetwork, PHI, PHI_INV_9
@@ -107,7 +110,7 @@ def network_to_fab_constraints(net: GeometricNetwork,
 
 
 def constraints_to_ir(constraints: List[FabConstraint],
-                      domain: str = "mechanical") -> "_I":
+                      domain: str = "mechanical") -> "SubstrateIR":
     """
     Convert FabConstraints to a fabrication IR.
 
