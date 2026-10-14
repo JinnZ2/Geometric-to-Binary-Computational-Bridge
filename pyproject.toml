@@ -72,3 +72,10 @@ ignore = ["F401", "F541", "F841"]
 "Silicon/FRET/triage_diagnosis.py" = ["F811"]
 "experiments/factorization_landscape.py" = ["F811"]
 "experiments/sim.py" = ["F811"]
+
+# WO-10 (2026-10-14): narrow, dated exceptions. Each has a path-local
+# LINT_SCOPE_2026-10-14.md explaining the original diagnostic and the exact
+# behavior choice that must not be invented merely to make CI green.
+"gb_explorer_2v.py" = ["F811"]
+"sensing/exploration/exploration_engine.py" = ["F821"]
+"fabrication/lowering.py" = ["F601"]
