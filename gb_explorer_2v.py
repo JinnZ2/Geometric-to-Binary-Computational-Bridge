@@ -384,7 +384,7 @@ class LatticeSimulator:
             side = int(self.node_count**0.5)
             return [(i/side, j/side) for i in range(side) for j in range(side)]
         elif g == "hexagonal":
-            return [(i + (j%2)*0.5)/5, (j*0.866)/5 for j in range(5) for i in range(5)][:self.node_count]
+            return [((i + (j%2)*0.5)/5, (j*0.866)/5) for j in range(5) for i in range(5)][:self.node_count]
         elif g == "kagome":
             nodes = []
             for i in range(4):
@@ -811,8 +811,6 @@ if __name__ == "__main__":
 
 
 
-additions:
-
 class LatticeSimulator:
     ...
     @staticmethod
@@ -1222,7 +1220,7 @@ class LatticeSimulator:
             side = int(self.node_count**0.5)
             return [(i/side, j/side) for i in range(side) for j in range(side)]
         elif g == "hexagonal":
-            return [(i + (j%2)*0.5)/5, (j*0.866)/5 for j in range(5) for i in range(5)][:self.node_count]
+            return [((i + (j%2)*0.5)/5, (j*0.866)/5) for j in range(5) for i in range(5)][:self.node_count]
         elif g == "kagome":
             nodes = []
             for i in range(4):

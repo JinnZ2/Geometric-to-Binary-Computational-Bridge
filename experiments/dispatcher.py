@@ -135,7 +135,6 @@ LANG_PROFILE: dict[str, dict[Shape, float]] = {
         Shape.METAPROG:      0.20,
         Shape.IO_BOUND:      0.85,
     },
-}
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -346,7 +345,6 @@ def plan(problem: Problem, registry: Registry | None = None) -> DispatchPlan:
             problem=problem,
             shapes=shapes,
             language=cached,
-            reason="registry cache: previously won for shape set",
             reason=f"registry cache: previously won for shape set",
             alternatives=ranking,
         )

@@ -8,6 +8,7 @@ while lightweight frames run every tick.
 
 from typing import Dict, List, Set, Optional, Callable
 from enum import Enum
+import numpy as np
 from .exploration_engine import FrameID, FrameContext, ExplorationFrame
 
 class SchedulerMode(Enum):

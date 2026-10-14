@@ -21,12 +21,17 @@ from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import json
+from datetime import datetime
 from pathlib import Path
 
 # Existing imports (adapt to your project structure)
 from ..processing.jepa_manifold import JEPAManifold, ManifoldState
 from ..claims.scientific_claim import ScientificClaimTable, TrialResult
-from .exploration_engine import ExplorationFrame, FrameContext, FrameID, FrameRouter
+from .exploration_engine import (
+    BayesianFrame, EpistemicFrame, ExplorationFrame, FalsificationistFrame,
+    FrameContext, FrameID, FrameRouter, LLMGatedFrame, ResonanceFrame,
+    SemanticTubeFrame,
+)
 
 # ============================================================
 # 1. DIFFUSION FRAME (Geometric Diffusion Bridge)

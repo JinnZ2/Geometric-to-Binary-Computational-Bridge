@@ -158,7 +158,6 @@ class PotentialWell:
 LANDSCAPE: dict[str, PotentialWell] = {
     "python": PotentialWell(
         name="python",
-        substrate_overhead=0.05,    # minimal — already running in-process
         substrate_overhead=0.05,    # minimal -- already running in-process
         weights={
             "bit":  +0.40,           # slow at raw bit ops (interp overhead)
@@ -167,7 +166,6 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "par":  +0.20,           # GIL tax
             "rel":  -0.10,           # decent at dicts/sets
             "stt":  -0.15,           # native big search is fine
-            "big":  -0.40,           # native arbitrary precision — STRENGTH
             "big":  -0.40,           # native arbitrary precision -- STRENGTH
             "io":   -0.10,           # async is OK
         }),
@@ -176,7 +174,6 @@ LANDSCAPE: dict[str, PotentialWell] = {
         name="c",
         substrate_overhead=0.40,    # fork+exec subprocess cost
         weights={
-            "bit":  -0.50,           # native bit ops — STRENGTH
             "bit":  -0.50,           # native bit ops -- STRENGTH
             "num":  -0.55,           # tight loops are its strength
             "mem":  -0.40,           # full control over layout
@@ -194,7 +191,6 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "bit":  -0.45,
             "num":  -0.50,
             "mem":  -0.40,
-            "par":  -0.50,           # fearless concurrency — DEEPEST par well
             "par":  -0.50,           # fearless concurrency -- DEEPEST par well
             "rel":  +0.35,
             "stt":  -0.10,
@@ -204,7 +200,6 @@ LANDSCAPE: dict[str, PotentialWell] = {
 
     "sql": PotentialWell(
         name="sql",
-        substrate_overhead=0.10,    # sqlite stdlib — minimal
         substrate_overhead=0.10,    # sqlite stdlib -- minimal
         weights={
             "bit":  +0.60,
@@ -224,14 +219,12 @@ LANDSCAPE: dict[str, PotentialWell] = {
             "bit":  +0.50,
             "num":  +0.65,
             "mem":  +0.30,
-            "par":  -0.40,           # xargs -P / GNU parallel — STRENGTH
             "par":  -0.40,           # xargs -P / GNU parallel -- STRENGTH
             "rel":  +0.30,
             "stt":  +0.40,
             "big":  +0.60,
             "io":   -0.40,           # io_bound is its native habitat
         }),
-}
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -438,8 +431,6 @@ def update_landscape(landscape: dict[str, PotentialWell],
 def shape_tags_to_state(tag_names: list[str]) -> ProblemState:
     """Heuristic projection: shape tags -> energetic state vector.
 
-    A real problem-encoder would measure the problem directly. This is the
-    compatibility shim for the v1 demo problems."""
     A real problem-encoder would measure the problem directly. This is
     the compatibility shim for the v1 demo problems."""
     s = {a: 0.0 for a in ("bit", "num", "mem", "par", "rel", "stt", "big", "io")}

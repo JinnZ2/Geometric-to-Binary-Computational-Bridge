@@ -22,6 +22,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict, Any, Optional, List, Tuple, Set, Callable
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 from collections import deque
