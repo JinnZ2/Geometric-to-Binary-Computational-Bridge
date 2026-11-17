@@ -43,3 +43,18 @@ Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate c
 ## Subsequent adversarial pass
 
 Note 2026-11-17, after v1: [adversarial/README.md](adversarial/README.md) records reproduced numerical, semantic-validation, resource-ingestion and output-preservation breakages. [v1_1](v1_1/README.md) contains separate candidate fixes and externally context-checked decoding. The retained v1 modules, contract and runs remain unchanged. The final 213-case experiment execution passes, including legacy/inherited compatibility cases; it is not an exhaustive attack count or a security/semantic certification. Trust limits and unimplemented protections stay explicit.
+
+## Subsequent reusable checks
+
+Note 2026-11-17, after the audit: two harnesses under `evidence/` turn findings the audit already holds into checks that can be run again. Both run unchanged specimens on copies in a temporary directory and refuse to overwrite an existing output file.
+
+```sh
+python experiments/experiment_bridge/evidence/printed_vs_executed.py --check experiments/experiment_bridge/evidence/printed_vs_executed.json
+python tests/test_experiment_bridge_tools.py
+```
+
+`printed_vs_executed.py` (T1) reads the two blocks of output printed in `raw/working_notes.txt`, runs the two as-received scripts and diffs them. Snapshot: `evidence/printed_vs_executed.json`. Both differ: the bridge prints distances 0.0608 and 0.6782 where execution gives 0.0574 and 0.7348, and the level walk prints two accepted levels where execution gives three VOIDs. These are the numbers in the [code audit](audit/code-audit.md); the speaker label in the notes is as supplied and is not authenticated.
+
+`claim_tools.py` takes a received claim-emitting script and records three things: a two-run replay with claims compared by scope, every claim whose `measured` value is a literal in the source (flagged STRUCTURAL, with the probe that backs it when one is named), and the stated reason for each tolerance (UNSOURCED when the source gives none). Run on the round-1 Kimi toy, snapshot `evidence/kimi_round1_claim_tools.json`: 4 of 4 claims equal on both comparisons; `void_escape_integrity` is STRUCTURAL (measured is the literal `0.0`), backed by the independent census in `evidence/kimi_reproduction.json`; all four tolerances are UNSOURCED in the source.
+
+**Not done here:** the Kimi round-2 specimens (`toy_rvq_void_v2.py`, `toy_rvq_orthogonal.py`, `snapshot_delta.py`, their seed-0 records and the revised entry) were not available to the session that added these tools, so nothing about round 2 is recorded: no `evidence/kimi_round2_as_received/`, no replay count, no tolerance table and no snapshot claims in the claim table.
