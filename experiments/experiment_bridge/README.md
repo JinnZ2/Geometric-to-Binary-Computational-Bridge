@@ -73,3 +73,8 @@ Snapshot: `evidence/kimi_round2_reproduction.json`.
 - **Claim table.** The snapshot findings are EBR_016 to EBR_019 in [CLAIM_TABLE.md](CLAIM_TABLE.md).
 
 These are synthetic toys. The entry's addendum reads the orthogonal variant as pricing a power-conjugate reading; that interpretation is the entry's and is not adopted here (see [SCOPE_BOUNDARY.md](SCOPE_BOUNDARY.md)). The addendum is dated 2026-11-18 inside a file received on 2026-11-17; the date is kept as received.
+
+## Subsequent tool — snapshot classes (T4)
+
+Note 2026-11-17, after Kimi round 2 merged: [snapshot/](snapshot/README.md) sorts the ten received `snapshot_delta` claims into four classes (CONTEXT_FREE_EXACT, STABLE_LOSSY, CHAOTIC_REFRESH, SUMMARY_ONLY) and applies one resume rule per class: exact always, lossy with a stated bound, growing error only with refresh, a summary VOID. Built from EBR_016 to EBR_019; it reads the specimen record and edits nothing under `evidence/`. PROPOSED.
+
