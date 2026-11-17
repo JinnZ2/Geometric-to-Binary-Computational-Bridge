@@ -39,3 +39,7 @@ This folder is deliberately not registered in `fabrication/substrate_ir.py`, `br
 ## Subsequent expansion — checked v1
 
 Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate checked numerical kernel, lossless role-aware semantic reference view, strict JSON byte envelope, and actual COBOL transport demonstration. It has 95 passing experiment tests, including deliberate broken/corrupt controls. This is a bounded software implementation; the original specimens and findings remain unchanged. Neural semantic validity, exact-decimal metrology and physical power conjugacy are not claimed.
+
+## Subsequent adversarial pass
+
+Note 2026-11-17, after v1: [adversarial/README.md](adversarial/README.md) records reproduced numerical, semantic-validation, resource-ingestion and output-preservation breakages. [v1_1](v1_1/README.md) contains separate candidate fixes and externally context-checked decoding. The retained v1 modules, contract and runs remain unchanged. The final 213-case experiment execution passes, including legacy/inherited compatibility cases; it is not an exhaustive attack count or a security/semantic certification. Trust limits and unimplemented protections stay explicit.

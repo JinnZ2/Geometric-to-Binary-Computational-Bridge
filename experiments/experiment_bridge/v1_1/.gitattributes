@@ -1,0 +1,2 @@
+# Fixed-size EB01 streams are byte records, not newline-delimited text.
+runs/**/*.dat binary

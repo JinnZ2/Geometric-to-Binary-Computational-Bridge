@@ -1,0 +1,142 @@
+{
+  "date": "2026-11-17",
+  "baseline_commit": "19c9a805e6acd99144451e1aa4b78a5973a39ce7",
+  "scope": "Versioned adversarial software fixtures; hashes identify received/implemented bytes, not authentication",
+  "files": [
+    {
+      "path": "experiments/experiment_bridge/adversarial/PLAN.md",
+      "bytes": 2531,
+      "sha256": "3450d8620ad4ca524de9de8a2abf51cae473c53fe9305b2653c1a40818b2dc2a"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/README.md",
+      "bytes": 9658,
+      "sha256": "a5ba4eebd7d43441d91e53bd89cb2e262f5c358660d574a7758eb94c38206753"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/consumer_probe.py",
+      "bytes": 5774,
+      "sha256": "672c33b7e586b1d1ae87ce562368d6d68d71fff918d27130c71c4e5d4e6fd6fd"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/core_findings.md",
+      "bytes": 19837,
+      "sha256": "8c085b5d5113638719352c71235e28efb1ac3555225bfa2642922fb7ce2933a4"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/core_probe.py",
+      "bytes": 15569,
+      "sha256": "e3e0d9d7396ef7472833a5ca66d962151ea73226a79b38d931a379a70cb6f0ce"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/core_results.json",
+      "bytes": 31983,
+      "sha256": "6d46939550b40c4f3ba8df920c96e51163768dd6c71bfe2451f5c4eafb6c4ead"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/semantics_findings.md",
+      "bytes": 10995,
+      "sha256": "7252427dc78d5b2342083ca1ca214ea5cff91fcda6f1ba9bee38ad5b152ee5cc"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/semantics_probe.py",
+      "bytes": 9126,
+      "sha256": "768de788df6d2af0806c418e13934036ca00a4c3c3378676ee339b8671503431"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/semantics_results.json",
+      "bytes": 8055,
+      "sha256": "b21c0317fc4939c96690ae3e350c88ea4c99e8cdf202ddaf802885f3cd58fe8d"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/wire_findings.md",
+      "bytes": 11496,
+      "sha256": "07c69497225e117c67ac9cad00e2faee97f60a8d5f9c05a8ff4edb87e853784d"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/wire_probe.py",
+      "bytes": 13586,
+      "sha256": "001cd730757222294f063d7f0c9050b15cd81d393079028210de7098217b686e"
+    },
+    {
+      "path": "experiments/experiment_bridge/adversarial/wire_results.json",
+      "bytes": 10592,
+      "sha256": "2c8670beca1f529cd82db74684ed7e1d3c3d18d1f4a5a783b7ef352b56859487"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1/__init__.py",
+      "bytes": 201,
+      "sha256": "48bb5e62c1a32b78aa3c106e7c53ee1084a0886b949b498ec32bd2010f34ffcf"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1/core.py",
+      "bytes": 13424,
+      "sha256": "2381c6ea03ea6dc0b3fbad0255ff870dc1fa1b2a3bb6444e38b063bb68737b8c"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1/demo.py",
+      "bytes": 5600,
+      "sha256": "5b9673d5486d6b81756daa3a74c2ff9f6dc43ad3a3a8151a5578092c52fa4cc7"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1/semantics.py",
+      "bytes": 10031,
+      "sha256": "f3d892b2aa2dcaee77282e55b1358def46154c446999d125a6d35eb5e3b23c98"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1/wire.py",
+      "bytes": 10716,
+      "sha256": "6f59d09dd9e4577b44f9f3165716ec0e51404560df03b01dae111c0e98a51656"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/__init__.py",
+      "bytes": 201,
+      "sha256": "48bb5e62c1a32b78aa3c106e7c53ee1084a0886b949b498ec32bd2010f34ffcf"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/core.py",
+      "bytes": 15289,
+      "sha256": "921a6aa8e1bad20e70a4d9cdd33b22d948c4bb149be788515b1e3b64f4c1f8c5"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/demo.py",
+      "bytes": 5911,
+      "sha256": "7454bd6bdf56ce70c4715ea461886d18cdb6297f5da814e2aa7a849d2f798316"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/semantics.py",
+      "bytes": 15325,
+      "sha256": "13b403765d94e221aed24764bcface1c8f1f8bae03174fa8b000174f02452094"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/verify.py",
+      "bytes": 1666,
+      "sha256": "64ac2e6968d0c06739dea98185deadf3370af833fb04f754fa77453b053d428a"
+    },
+    {
+      "path": "experiments/experiment_bridge/v1_1/wire.py",
+      "bytes": 16799,
+      "sha256": "f286447857b10b8f8021218df390124dd269fd9358440437be509014346705d7"
+    },
+    {
+      "path": "tests/test_experiment_bridge_adversarial_core.py",
+      "bytes": 16679,
+      "sha256": "b40360d2949aab9ba7e2027ec3daea7b3209b7ada0c3849bc4ae16beef92b045"
+    },
+    {
+      "path": "tests/test_experiment_bridge_adversarial_pipeline.py",
+      "bytes": 4819,
+      "sha256": "964b9b1f422f7ebd22ba8ba01a8797e1d5f64080312700df7d33e68c6680cba0"
+    },
+    {
+      "path": "tests/test_experiment_bridge_adversarial_semantics.py",
+      "bytes": 13386,
+      "sha256": "53ba19639fa26e39760cb2952fa323002ade2babc6667d64594f4267c5e30ce5"
+    },
+    {
+      "path": "tests/test_experiment_bridge_adversarial_wire.py",
+      "bytes": 14904,
+      "sha256": "e7e569f52692ee76ae55743520c18dedcd1a6c3d6a9b8bfb14f5a8591e9a65f4"
+    }
+  ]
+}
