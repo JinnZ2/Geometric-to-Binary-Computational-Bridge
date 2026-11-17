@@ -54,3 +54,7 @@ The existing bridge suite passed 768 tests and claim-index suite passed 52 tests
 [2]: https://github.com/HazyResearch/ncm/blob/c70274273f489abc73832b2b98584a8483b6b203/models/quant.py "Official NCM quantizer — pinned source inspected during audit"
 [3]: https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html "The Complete Lojban Language — section 13.11 Evidentials"
 [4]: https://www.20sim.com/webhelp/modeling_tutorial_bond_graphs_effortandflow.php "20-sim manual — effort, flow, power conjugacy and pseudothermal distinction"
+
+## Subsequent work — separate v1 implementation
+
+Note 2026-11-17, after this audit and at the user's request: [v1/README.md](v1/README.md) records a new checked software reference implementation and real COBOL transport round trip. Findings above concern the received specimens, which remain unchanged. The new version addresses numerical validation, explicit state separation and reversible byte transport; it does not establish NCM semantics, exact-decimal metrology or a physical bond. The original “not usable as delivered” findings are not erased by adding a different implementation.

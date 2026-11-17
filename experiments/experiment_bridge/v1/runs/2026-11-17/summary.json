@@ -1,0 +1,286 @@
+{
+  "version": "experiment-bridge/v1",
+  "scope": "ILLUSTRATIVE integration fixtures",
+  "semantic_validation": "NOT_PERFORMED",
+  "neural_model": "NOT_RUN",
+  "physical_interpretation": "NOT_ESTABLISHED",
+  "reference_sha256": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285",
+  "source_sha256": {
+    "__init__.py": "48bb5e62c1a32b78aa3c106e7c53ee1084a0886b949b498ec32bd2010f34ffcf",
+    "core.py": "2381c6ea03ea6dc0b3fbad0255ff870dc1fa1b2a3bb6444e38b063bb68737b8c",
+    "demo.py": "5b9673d5486d6b81756daa3a74c2ff9f6dc43ad3a3a8151a5578092c52fa4cc7",
+    "semantics.py": "f3d892b2aa2dcaee77282e55b1358def46154c446999d125a6d35eb5e3b23c98",
+    "wire.py": "6f59d09dd9e4577b44f9f3165716ec0e51404560df03b01dae111c0e98a51656"
+  },
+  "reference_rows": 41,
+  "case_count": 4,
+  "states": [
+    {
+      "fixture": "accepted_proposed_mapping",
+      "step": {
+        "level": 1,
+        "codebook_sha256": "c8ae9837104097a1cce89798a451a9ed4c73ff38b8047d7b60c5b7df33c03eb5",
+        "nearest_index": 0,
+        "code_index": 0,
+        "distance_squared": 0.003299999999999997,
+        "threshold_squared": 0.09,
+        "numerical_status": "ACCEPTED",
+        "contribution": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "reconstruction_before": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reconstruction_after": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "residual_before": [
+          0.15,
+          0.22,
+          0.28
+        ],
+        "residual_after": [
+          0.04999999999999999,
+          0.01999999999999999,
+          -0.019999999999999962
+        ],
+        "error_squared_before": 0.14930000000000002,
+        "error_squared_after": 0.003299999999999997,
+        "error_reduction": 0.14600000000000002,
+        "semantic_status": "PRESENT",
+        "semantic_row_id": "mapping:5b0c47a524ce4ba28c55e29b549eac185e317fa320141ad20640d603d84e2c05:1",
+        "semantic_row": {
+          "row_id": "mapping:5b0c47a524ce4ba28c55e29b549eac185e317fa320141ad20640d603d84e2c05:1",
+          "identifier": "xagmau",
+          "english": "better",
+          "role": "mapping",
+          "lexical_status": "PRESENT",
+          "source_collection": "place_structures",
+          "source_index": 0,
+          "source": {
+            "english": "better",
+            "class": "judgment",
+            "gismu": "xagmau",
+            "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+            "source_url": "https://jbovlaste.lojban.org/dict/xagmau",
+            "retrieved": "2026-11-17",
+            "structure_status": "OBSERVED",
+            "mapping_status": "PROPOSED",
+            "mapping_reason": "jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+            "alternatives": [
+              "xauzma",
+              "zanmau",
+              "xlame'a (better = less bad)"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "fixture": "numerical_rejection",
+      "step": {
+        "level": 1,
+        "codebook_sha256": "c8ae9837104097a1cce89798a451a9ed4c73ff38b8047d7b60c5b7df33c03eb5",
+        "nearest_index": 1,
+        "code_index": null,
+        "distance_squared": 155.54,
+        "threshold_squared": 0.09,
+        "numerical_status": "REJECTED",
+        "contribution": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reconstruction_before": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reconstruction_after": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "residual_before": [
+          8.0,
+          8.0,
+          8.0
+        ],
+        "residual_after": [
+          8.0,
+          8.0,
+          8.0
+        ],
+        "error_squared_before": 192.0,
+        "error_squared_after": 192.0,
+        "error_reduction": 0.0,
+        "semantic_status": "NOT_APPLICABLE",
+        "semantic_row_id": null,
+        "semantic_row": null
+      }
+    },
+    {
+      "fixture": "accepted_without_mapping",
+      "step": {
+        "level": 1,
+        "codebook_sha256": "c8ae9837104097a1cce89798a451a9ed4c73ff38b8047d7b60c5b7df33c03eb5",
+        "nearest_index": 0,
+        "code_index": 0,
+        "distance_squared": 0.0,
+        "threshold_squared": 0.09,
+        "numerical_status": "ACCEPTED",
+        "contribution": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "reconstruction_before": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reconstruction_after": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "residual_before": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "residual_after": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "error_squared_before": 0.14,
+        "error_squared_after": 0.0,
+        "error_reduction": 0.14,
+        "semantic_status": "UNMAPPED",
+        "semantic_row_id": null,
+        "semantic_row": null
+      }
+    },
+    {
+      "fixture": "accepted_with_declared_lexical_gap",
+      "step": {
+        "level": 1,
+        "codebook_sha256": "5552cc5aa701b59dc0fdb521a81f3a8f639a70b198590c4b39475019021e5a93",
+        "nearest_index": 0,
+        "code_index": 0,
+        "distance_squared": 0.0,
+        "threshold_squared": 0.0,
+        "numerical_status": "ACCEPTED",
+        "contribution": [
+          1.0
+        ],
+        "reconstruction_before": [
+          0.0
+        ],
+        "reconstruction_after": [
+          1.0
+        ],
+        "residual_before": [
+          1.0
+        ],
+        "residual_after": [
+          0.0
+        ],
+        "error_squared_before": 1.0,
+        "error_squared_after": 0.0,
+        "error_reduction": 1.0,
+        "semantic_status": "LEXICAL_VOID",
+        "semantic_row_id": "mapping:0a36480acd48199420e52a99ead66ce6287ac5b5c02d0995c1c7e70bd428f3e6:1",
+        "semantic_row": {
+          "row_id": "mapping:0a36480acd48199420e52a99ead66ce6287ac5b5c02d0995c1c7e70bd428f3e6:1",
+          "identifier": null,
+          "english": "efficient",
+          "role": "mapping",
+          "lexical_status": "LEXICAL_VOID",
+          "source_collection": "place_structures",
+          "source_index": 12,
+          "source": {
+            "english": "efficient",
+            "class": "comparative",
+            "gismu": null,
+            "place_structure_verbatim": null,
+            "source_url": "https://jbovlaste.lojban.org/dict/listing.html",
+            "retrieved": "2026-11-17",
+            "structure_status": "VOID",
+            "mapping_status": "VOID",
+            "mapping_reason": "No valsi is glossed or keyworded \"efficient\"/\"efficiency\": the jbovlaste English gloss index has no entry and the keyword lookup returns nothing for either term; no gismu expresses efficiency. tadji (method) and pilno (use) were considered and rejected — neither is an efficiency predicate.",
+            "alternatives": [
+              "tadji",
+              "pilno"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "raw_reference_unchanged": true,
+  "broken_routing_detected": true,
+  "broken_routing_errors": [
+    "step 1: threshold routing mismatch",
+    "step 1: accepted distance mismatch",
+    "step 1: actual routing mismatch"
+  ],
+  "wire_tamper_detected": true,
+  "python_roundtrip_exact": true,
+  "record_lengths": [
+    16460,
+    16460,
+    16460,
+    16460
+  ],
+  "cobol": {
+    "status": "PASS",
+    "compiler": "/usr/bin/cobc",
+    "record_count": 4,
+    "record_size": 16460,
+    "compile_status": "PASS",
+    "runtime_status": "PASS",
+    "exact_bytes_equal": true,
+    "compile": {
+      "command": [
+        "/usr/bin/cobc",
+        "-x",
+        "-free",
+        "-I",
+        "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm",
+        "-o",
+        "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip",
+        "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip.cob"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+    },
+    "runtime": {
+      "command": [
+        "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "artifacts": {
+      "copybook": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/envelope.cpy",
+      "source": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip.cob",
+      "input": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/input.dat",
+      "output": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/output.dat",
+      "executable": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip",
+      "report": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/result.json"
+    },
+    "run_dir": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm",
+    "input_bytes": 65840,
+    "output_bytes": 65840
+  }
+}

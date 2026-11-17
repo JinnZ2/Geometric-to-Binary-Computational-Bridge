@@ -29,3 +29,23 @@ No NCM inference, checkpoint-specific Lojban calibration, compatible COBOL round
 ## EBR_007 — Raw files and archive members are preserved — SUPPORTED
 
 Received hashes and extracted bytes match the manifest; three original Python fence bodies match their raw source. Evidence: [manifest](raw/manifest.json), `tests/test_experiment_bridge.py`. Refuter: any byte/hash mismatch or transformed original. This proves preservation relative to received files, not authentication of upstream authors or quotations.
+
+## Subsequent v1 findings — 2026-11-17
+
+These findings concern the separately implemented version, not the unchanged received scripts.
+
+## EBR_008 — Four decision states survive annotation and transport — SUPPORTED
+
+The four illustrative integration fixtures retain ACCEPTED/PRESENT, REJECTED/NOT_APPLICABLE, ACCEPTED/UNMAPPED and ACCEPTED/LEXICAL_VOID without changing numerical contributions or promoting the reference's PROPOSED mapping. Evidence: [v1 run](v1/runs/2026-11-17/summary.json) and `tests/test_experiment_bridge_v1.py`. Refuter: any fixture collapses those statuses, mutates numerical input or replaces the source status during the recorded round trip. This is software routing, not semantic validation.
+
+## EBR_009 — Actual COBOL stream round trip preserves bytes — SUPPORTED
+
+The v1 generated program compiled and ran with return codes zero, copying four fixed-size records: 65,840 input and output bytes, exactly equal. Evidence: [v1 summary](v1/runs/2026-11-17/summary.json), retained program/copybook and byte files under its run directory. Refuter: unequal input/output bytes or nonzero compiler/runtime result when repeating that exact configuration. The program transports opaque JSON envelopes; it does not validate semantics or perform exact-decimal arithmetic.
+
+## EBR_010 — Negative numerical and transport controls are detected — SUPPORTED
+
+The v1 validator rejects an over-threshold transition marked accepted, and the wire parser rejects changed payload bytes. With actual levels supplied, the numerical validator also rejects a self-consistent wrong-code trace; without them, it cannot establish actual codebook identity. Evidence: [v1 test log](v1/runs/2026-11-17/all_tests.log) and integration summary. Refuter: the deliberately broken fixtures pass the same checks. This states nothing about every possible adversarial payload.
+
+## EBR_011 — Source rows stay distinct in the normalized reference — SUPPORTED
+
+The supplied 41 rows normalize to independent mapping, recall and evidential records with source content/role/occurrence identity. Safe versus recall snura and both xagrai senses remain separately queryable. Evidence: `tests/test_experiment_bridge_semantics.py`. Refuter: identifier-only overwriting, omitted input source fields, or an assignment silently selecting a recall/evidential row as a mapping.

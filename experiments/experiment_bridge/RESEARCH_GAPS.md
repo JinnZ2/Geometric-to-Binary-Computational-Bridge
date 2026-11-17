@@ -65,3 +65,7 @@ These are requirements that would change the audit disposition, not a request to
 **Falsifier:** dimensional inconsistency or input/output power discrepancy outside a stated uncertainty bound. Squared-norm orthogonality alone is neither the criterion nor a remedy.
 
 **What it opens:** consideration for a physical registry only if the energetic and measurement contracts are established.
+
+## Subsequent progress — 2026-11-17
+
+At the user's request, [v1](v1/README.md) now supplies checked numerical routing, a role-aware source view, a strict byte contract, and an actual COBOL fixed-record round trip. These are bounded software progress on the representation gap, not a repair of the received copybook or a decimal-arithmetic ledger. Gated calibration is implemented and tested on illustrative finite fixtures; no empirical calibration study or real model experiment has been run. The semantic-assignment and physical-reading gaps above remain open.

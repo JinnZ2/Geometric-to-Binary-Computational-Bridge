@@ -1,0 +1,72 @@
+{
+  "date": "2026-11-17",
+  "scope": "ILLUSTRATIVE software integration, not model or semantic calibration",
+  "executable_omitted": "The platform-specific compiled binary is omitted; compiler and runtime diagnostics, COBOL source, copybook and byte input/output are retained. Paths inside the original reports identify the audit machine execution location.",
+  "files": [
+    {
+      "path": "accepted_proposed_mapping.json",
+      "bytes": 4247,
+      "sha256": "59d2d1f7763e3e1cfd29fc7c2700ab543a4378b6a05656e536bdc7bdeb5ce7cf"
+    },
+    {
+      "path": "accepted_with_declared_lexical_gap.json",
+      "bytes": 3858,
+      "sha256": "f9aa56d72f26cccfd05a9a4410752dae42280ad557113b3ce50dc2e2cf961790"
+    },
+    {
+      "path": "accepted_without_mapping.json",
+      "bytes": 2704,
+      "sha256": "17ac646238f3d08b5873b7c28682d4522244421821de8ac66784c9841918c379"
+    },
+    {
+      "path": "all_tests.log",
+      "bytes": 13989,
+      "sha256": "e6789279b5dc7120a05f05b74479246ff00c3e4af0f7207e7065a04904f0b816"
+    },
+    {
+      "path": "cobol/eb01-3suixocm/envelope.cpy",
+      "bytes": 143,
+      "sha256": "eecf381c207edf5af3aedbba84779cbfbd4648cc8e3a7b35ad3ad60639e09335"
+    },
+    {
+      "path": "cobol/eb01-3suixocm/input.dat",
+      "bytes": 65840,
+      "sha256": "b0b4c582a98f59738a986badae718d4ca2e87e268e74ae28ed71f02d493e3834"
+    },
+    {
+      "path": "cobol/eb01-3suixocm/output.dat",
+      "bytes": 65840,
+      "sha256": "b0b4c582a98f59738a986badae718d4ca2e87e268e74ae28ed71f02d493e3834"
+    },
+    {
+      "path": "cobol/eb01-3suixocm/result.json",
+      "bytes": 1642,
+      "sha256": "0228b1e6a99b3f502f3d12581ebcf0796b73bccecf827a3e0cc9bc7b9872d89c"
+    },
+    {
+      "path": "cobol/eb01-3suixocm/roundtrip.cob",
+      "bytes": 1738,
+      "sha256": "2395441566c4b7454345e87b0e39287560ed73e57164dddba3328b211b4fbc43"
+    },
+    {
+      "path": "demo.log",
+      "bytes": 1945,
+      "sha256": "8bc0c8892c3f3ba692b3926c5a81de4eabfc8d421c7c936f4bd0b0f3fabafa1d"
+    },
+    {
+      "path": "numerical_rejection.json",
+      "bytes": 2886,
+      "sha256": "bda12b644b0d5e5b4b5c9de3670fcf5f0516eecaf96b07d0a89f883100744292"
+    },
+    {
+      "path": "ruff.log",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 9252,
+      "sha256": "8e7988500959e8511dcadeff5df5af82cbe0040989935b882efcdab48971320b"
+    }
+  ]
+}

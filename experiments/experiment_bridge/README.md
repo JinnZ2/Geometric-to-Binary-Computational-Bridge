@@ -35,3 +35,7 @@ Passing an audit assertion means the finding reproduced, including defects. It d
 Read the [code audit](audit/code-audit.md), [NCM primary-source audit](audit/ncm-audit.md), and [semantic/physics audit](audit/semantic-physics-audit.md) for exact references and findings. `evidence/original_reproduction.json` holds the original-snippet cases; `evidence/kimi_reproduction.json` holds two replay comparisons, an independently recomputed census, and edge cases.
 
 This folder is deliberately not registered in `fabrication/substrate_ir.py`, `bridge_protocol.yaml`, or the root claim tables. Its local results must not be silently inherited by real neural models or physical bridges.
+
+## Subsequent expansion — checked v1
+
+Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate checked numerical kernel, lossless role-aware semantic reference view, strict JSON byte envelope, and actual COBOL transport demonstration. It has 95 passing experiment tests, including deliberate broken/corrupt controls. This is a bounded software implementation; the original specimens and findings remain unchanged. Neural semantic validity, exact-decimal metrology and physical power conjugacy are not claimed.

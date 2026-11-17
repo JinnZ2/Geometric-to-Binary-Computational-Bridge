@@ -29,3 +29,9 @@ GnuCOBOL 3.1.2.0 returns **97** for compilation of the unchanged original genera
 The audit used Python 3.12.3 on Linux. Incoming sources and generated replay records retain their environment details and hashes. Fixed-seed replication elsewhere may depend on Python's random and floating-point behavior; no universal cross-platform byte-identical claim is made.
 
 No model training/inference, complete linguistic audit, exact-inflation replay, database integration, corrected production adapter, full repository test sweep, or physical sensor measurement was performed. Main and the production claim registries are not altered by this experiment branch.
+
+## Subsequent v1 expansion — 2026-11-17
+
+The separately implemented [v1](v1/README.md) has **95 passing experiment tests, with none skipped**, covering preservation, numerical guards/trace checks, semantic reference roles, wire validation and integration. Its actual GnuCOBOL four-record demonstration compiled and ran successfully and preserved **65,840 bytes exactly**. Compiler warning and runtime diagnostics are retained. Repository Ruff passed; the existing claim-index suite passed 52 tests after staging. Prose guard remains byte-for-byte identical to the 47-hit baseline. Raw files, prior evidence, specialist audit files and CI workflows remain unchanged.
+
+The v1 test log includes explicitly labelled simulated compiler-failure output; it is a negative-control fixture, not the real integration result. The real integration snapshot reports PASS. Serialized `.dat` streams include intentional padding and no added line terminator, so v1 marks them binary in Git to preserve byte semantics. Authored code/documentation diff checks are separate from retained protocol bytes. No exact-decimal ledger, real NCM inference, semantic calibration or physical model is claimed.
