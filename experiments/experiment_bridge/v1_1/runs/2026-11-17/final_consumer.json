@@ -1,0 +1,51 @@
+{
+  "scope": "ILLUSTRATIVE software consumer probe, not authentication or semantics",
+  "input_sha256": "dc3f7749924e044b70c5ce1c3058575aa63adbabfe5494943ac4569424982774",
+  "input_bytes": 65840,
+  "reference_sha256": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285",
+  "honest_records": [
+    {
+      "fixture": "accepted_proposed_mapping",
+      "numerical_status": "ACCEPTED",
+      "semantic_status": "PRESENT",
+      "context_consistent": true
+    },
+    {
+      "fixture": "numerical_rejection",
+      "numerical_status": "REJECTED",
+      "semantic_status": "NOT_APPLICABLE",
+      "context_consistent": true
+    },
+    {
+      "fixture": "accepted_without_mapping",
+      "numerical_status": "ACCEPTED",
+      "semantic_status": "UNMAPPED",
+      "context_consistent": true
+    },
+    {
+      "fixture": "accepted_with_declared_lexical_gap",
+      "numerical_status": "ACCEPTED",
+      "semantic_status": "LEXICAL_VOID",
+      "context_consistent": true
+    }
+  ],
+  "rehashed_semantic_forgery": {
+    "wire_accepts": true,
+    "context_rejects": true,
+    "error": "Annotation validation failed: steps[0].semantic_row disagrees with trusted routing inputs"
+  },
+  "self_consistent_wrong_code": {
+    "wire_accepts": true,
+    "context_rejects": true,
+    "error": "Numerical validation failed: step 1: actual nearest/distance mismatch; step 1: actual contribution mismatch"
+  },
+  "outer_label_trust_limit": {
+    "accepted": true,
+    "meaning": "Trace consistency does not certify arbitrary outer labels"
+  },
+  "replaced_target_trust_limit": {
+    "accepted": true,
+    "meaning": "External codebooks and reference do not authenticate the original input measurement"
+  },
+  "reference_unchanged": true
+}

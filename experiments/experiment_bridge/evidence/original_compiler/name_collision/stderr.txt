@@ -1,0 +1,2 @@
+ledger.cpy:27: warning: redefinition of 'ENTRY-ABCDEFGHIJKLMNO' [-Wredefinition]
+ledger.cpy:17: note: 'ENTRY-ABCDEFGHIJKLMNO' previously defined here [-Wredefinition]

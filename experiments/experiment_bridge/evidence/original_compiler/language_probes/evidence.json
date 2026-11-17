@@ -1,0 +1,27 @@
+{
+  "source": "identification division.\nprogram-id. aperture-probe.\ndata division.\nworking-storage section.\n01 initial-value pic x(4) value 'VOID'.\n01 oversized-source pic x(6) value 'abcdef'.\n01 aperture pic x(3).\n01 decimal-aperture pic 9v99.\nprocedure division.\n    move 'PASS' to initial-value\n    move oversized-source to aperture\n    move 1.239 to decimal-aperture\n    display 'INITIAL=' initial-value\n    display 'APERTURE=' aperture\n    display 'DECIMAL=' decimal-aperture\n    goback.\n",
+  "compile": {
+    "command": [
+      "/usr/bin/cobc",
+      "-free",
+      "-Wall",
+      "-x",
+      "-o",
+      "probe",
+      "probe.cob"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes",
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "probe.cob:12: warning: value size exceeds data size [-Wtruncate]\nprobe.cob:12: note: value is 1239 [-Wtruncate]\nprobe.cob:8: note: 'decimal-aperture' defined here as PIC 9V99 [-Wtruncate]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+  },
+  "run": {
+    "command": [
+      "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes/probe"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes",
+    "returncode": 0,
+    "stdout": "INITIAL=PASS\nAPERTURE=abc\nDECIMAL=1.23\n",
+    "stderr": ""
+  }
+}

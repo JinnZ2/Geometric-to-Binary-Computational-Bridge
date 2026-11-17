@@ -1,0 +1,262 @@
+{
+  "candidate": {
+    "case_count": 16,
+    "cases": [
+      {
+        "case": "cyclic_source_extension",
+        "classification": "defect",
+        "elapsed_seconds": 0.000427,
+        "exception_type": "ValueError",
+        "message": "cyclic JSON content is not supported",
+        "outcome": "exception"
+      },
+      {
+        "case": "deep_source_extension",
+        "classification": "defect",
+        "elapsed_seconds": 0.000449,
+        "exception_type": "ValueError",
+        "message": "JSON node/depth limit exceeded",
+        "outcome": "exception"
+      },
+      {
+        "case": "oversize_source_string",
+        "classification": "bounded_policy",
+        "elapsed_seconds": 0.000402,
+        "exception_type": "ValueError",
+        "message": "JSON string limit exceeded",
+        "outcome": "exception"
+      },
+      {
+        "case": "oversize_source_nodes",
+        "classification": "bounded_policy",
+        "elapsed_seconds": 0.000403,
+        "exception_type": "ValueError",
+        "message": "JSON node limit exceeded",
+        "outcome": "exception"
+      },
+      {
+        "case": "giant_occurrence_suffix",
+        "classification": "defect",
+        "elapsed_seconds": 0.000772,
+        "exception_type": "ValueError",
+        "message": "row_id must identify its role/source and bounded positive occurrence",
+        "outcome": "exception"
+      },
+      {
+        "case": "duplicate_row_ids_in_find",
+        "classification": "defect",
+        "elapsed_seconds": 0.002039,
+        "exception_type": "ValueError",
+        "message": "row ids and source collection/index positions must be unique",
+        "outcome": "exception"
+      },
+      {
+        "case": "colliding_source_positions",
+        "classification": "defect",
+        "elapsed_seconds": 0.000746,
+        "exception_type": "ValueError",
+        "message": "row ids and source collection/index positions must be unique",
+        "outcome": "exception"
+      },
+      {
+        "case": "impossible_occurrence_at_position_zero",
+        "classification": "defect",
+        "elapsed_seconds": 0.000716,
+        "exception_type": "ValueError",
+        "message": "row occurrence is impossible for source_index",
+        "outcome": "exception"
+      },
+      {
+        "case": "reversed_duplicate_occurrence_metadata",
+        "classification": "defect",
+        "elapsed_seconds": 0.000732,
+        "exception_type": "ValueError",
+        "message": "row occurrence is impossible for source_index",
+        "outcome": "exception"
+      },
+      {
+        "case": "reordered_subset",
+        "classification": "compatibility",
+        "elapsed_seconds": 0.00093,
+        "outcome": "accepted"
+      },
+      {
+        "case": "unknown_fields_retained_and_identity_changes",
+        "classification": "intentional_trust_limit",
+        "elapsed_seconds": 0.00326,
+        "outcome": "accepted"
+      },
+      {
+        "case": "uncontradicted_source_index_not_authenticated",
+        "classification": "intentional_trust_limit",
+        "elapsed_seconds": 9.5e-05,
+        "outcome": "accepted"
+      },
+      {
+        "case": "minimal_trace",
+        "classification": "compatibility",
+        "elapsed_seconds": 0.003153,
+        "outcome": "accepted"
+      },
+      {
+        "case": "numerically_inconsistent_trace",
+        "classification": "intentional_boundary",
+        "elapsed_seconds": 0.003083,
+        "outcome": "accepted"
+      },
+      {
+        "case": "forged_transported_row_unchanged_reference_hash",
+        "classification": "consumer_validation_gap",
+        "detail": {
+          "checker_available": true,
+          "errors": [
+            "steps[0].semantic_row disagrees with trusted routing inputs"
+          ]
+        },
+        "elapsed_seconds": 0.003269,
+        "outcome": "accepted"
+      },
+      {
+        "case": "honest_annotation",
+        "classification": "compatibility",
+        "detail": {
+          "checker_available": true,
+          "errors": []
+        },
+        "elapsed_seconds": 0.003193,
+        "outcome": "accepted"
+      }
+    ],
+    "module": "experiments/experiment_bridge/v1_1/semantics.py",
+    "module_sha256": "13b403765d94e221aed24764bcface1c8f1f8bae03174fa8b000174f02452094",
+    "structured_mutations": {
+      "detected": 128,
+      "field_coverage": {
+        "evidential": 7,
+        "semantic_provenance": 13,
+        "semantic_row": 43,
+        "semantic_row_id": 38,
+        "semantic_status": 27
+      },
+      "generated": 128,
+      "honest_validation_errors": [],
+      "inputs_unmodified": 128,
+      "seed": 20261117
+    }
+  },
+  "fixture_type": "deterministic software mutation; not empirical data",
+  "legacy": {
+    "case_count": 16,
+    "cases": [
+      {
+        "case": "cyclic_source_extension",
+        "classification": "defect",
+        "elapsed_seconds": 0.001204,
+        "exception_type": "RecursionError",
+        "message": "maximum recursion depth exceeded",
+        "outcome": "exception"
+      },
+      {
+        "case": "deep_source_extension",
+        "classification": "defect",
+        "elapsed_seconds": 0.001933,
+        "exception_type": "RecursionError",
+        "message": "maximum recursion depth exceeded",
+        "outcome": "exception"
+      },
+      {
+        "case": "oversize_source_string",
+        "classification": "bounded_policy",
+        "elapsed_seconds": 0.001852,
+        "outcome": "accepted"
+      },
+      {
+        "case": "oversize_source_nodes",
+        "classification": "bounded_policy",
+        "elapsed_seconds": 0.053051,
+        "outcome": "accepted"
+      },
+      {
+        "case": "giant_occurrence_suffix",
+        "classification": "defect",
+        "elapsed_seconds": 0.00257,
+        "outcome": "accepted"
+      },
+      {
+        "case": "duplicate_row_ids_in_find",
+        "classification": "defect",
+        "elapsed_seconds": 0.001642,
+        "outcome": "accepted"
+      },
+      {
+        "case": "colliding_source_positions",
+        "classification": "defect",
+        "elapsed_seconds": 0.001679,
+        "outcome": "accepted"
+      },
+      {
+        "case": "impossible_occurrence_at_position_zero",
+        "classification": "defect",
+        "elapsed_seconds": 0.001612,
+        "outcome": "accepted"
+      },
+      {
+        "case": "reversed_duplicate_occurrence_metadata",
+        "classification": "defect",
+        "elapsed_seconds": 0.00162,
+        "outcome": "accepted"
+      },
+      {
+        "case": "reordered_subset",
+        "classification": "compatibility",
+        "elapsed_seconds": 0.000558,
+        "outcome": "accepted"
+      },
+      {
+        "case": "unknown_fields_retained_and_identity_changes",
+        "classification": "intentional_trust_limit",
+        "elapsed_seconds": 0.001718,
+        "outcome": "accepted"
+      },
+      {
+        "case": "uncontradicted_source_index_not_authenticated",
+        "classification": "intentional_trust_limit",
+        "elapsed_seconds": 5.6e-05,
+        "outcome": "accepted"
+      },
+      {
+        "case": "minimal_trace",
+        "classification": "compatibility",
+        "elapsed_seconds": 0.001602,
+        "outcome": "accepted"
+      },
+      {
+        "case": "numerically_inconsistent_trace",
+        "classification": "intentional_boundary",
+        "elapsed_seconds": 0.001562,
+        "outcome": "accepted"
+      },
+      {
+        "case": "forged_transported_row_unchanged_reference_hash",
+        "classification": "consumer_validation_gap",
+        "detail": {
+          "checker_available": false,
+          "reference_hash_unchanged": true
+        },
+        "elapsed_seconds": 7e-06,
+        "outcome": "accepted"
+      },
+      {
+        "case": "honest_annotation",
+        "classification": "compatibility",
+        "detail": {
+          "checker_available": false
+        },
+        "elapsed_seconds": 1e-06,
+        "outcome": "accepted"
+      }
+    ],
+    "module": "experiments/experiment_bridge/v1/semantics.py",
+    "module_sha256": "f3d892b2aa2dcaee77282e55b1358def46154c446999d125a6d35eb5e3b23c98"
+  }
+}

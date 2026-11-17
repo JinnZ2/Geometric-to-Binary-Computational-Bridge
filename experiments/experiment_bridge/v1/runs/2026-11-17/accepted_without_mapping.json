@@ -1,0 +1,93 @@
+{
+  "fixture": "accepted_without_mapping",
+  "scope": "ILLUSTRATIVE, not calibrated semantics",
+  "trace": {
+    "version": "experiment-bridge/v1",
+    "target": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "dimension": 3,
+    "steps": [
+      {
+        "level": 1,
+        "codebook_sha256": "c8ae9837104097a1cce89798a451a9ed4c73ff38b8047d7b60c5b7df33c03eb5",
+        "nearest_index": 0,
+        "code_index": 0,
+        "distance_squared": 0.0,
+        "threshold_squared": 0.09,
+        "numerical_status": "ACCEPTED",
+        "contribution": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "reconstruction_before": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "reconstruction_after": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "residual_before": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "residual_after": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "error_squared_before": 0.14,
+        "error_squared_after": 0.0,
+        "error_reduction": 0.14,
+        "semantic_status": "UNMAPPED",
+        "semantic_row_id": null,
+        "semantic_row": null
+      }
+    ],
+    "reconstruction": [
+      0.1,
+      0.2,
+      0.3
+    ],
+    "residual": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "evidential": {
+      "row_id": "evidential:48fa53adc34b3b936b7aa4d03ce51f13520406e6e2b01c2278b52831efcf3a7c:1",
+      "identifier": "ja'o",
+      "english": "I conclude",
+      "role": "evidential",
+      "lexical_status": "PRESENT",
+      "source_collection": "evidentials",
+      "source_index": 8,
+      "source": {
+        "english": "I conclude",
+        "class": "evidential",
+        "gismu": "ja'o",
+        "place_structure_verbatim": "\"[jalge] I conclude\" ; \"A bridi marked by ja'o is a conclusion by the speaker based on other (stated or unstated) information or ideas. Rough English equivalents of ja'o are “thus” and “therefore”.\"",
+        "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+        "retrieved": "2026-11-17",
+        "structure_status": "OBSERVED",
+        "mapping_status": "OBSERVED",
+        "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from jalge (result).",
+        "alternatives": [],
+        "in_user_list": true
+      }
+    },
+    "semantic_provenance": {
+      "version": "experiment-bridge/v1",
+      "reference_sha256": "55932ab9d81d38edaa860145d847251bf1062fc63c90d17516bf877fb15772ba",
+      "assignments": [],
+      "evidential_row_id": "evidential:48fa53adc34b3b936b7aa4d03ce51f13520406e6e2b01c2278b52831efcf3a7c:1"
+    }
+  }
+}

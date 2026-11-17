@@ -1,0 +1,50 @@
+{
+  "scope": "ILLUSTRATIVE integration fixtures",
+  "case_count": 4,
+  "broken_routing_detected": true,
+  "wire_tamper_detected": true,
+  "cobol": {
+    "status": "PASS",
+    "compiler": "/usr/bin/cobc",
+    "record_count": 4,
+    "record_size": 16460,
+    "compile_status": "PASS",
+    "runtime_status": "PASS",
+    "exact_bytes_equal": true,
+    "compile": {
+      "command": [
+        "/usr/bin/cobc",
+        "-x",
+        "-free",
+        "-I",
+        "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che",
+        "-o",
+        "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/roundtrip",
+        "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/roundtrip.cob"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+    },
+    "runtime": {
+      "command": [
+        "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/roundtrip"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "artifacts": {
+      "copybook": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/envelope.cpy",
+      "source": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/roundtrip.cob",
+      "input": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/input.dat",
+      "output": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/output.dat",
+      "executable": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/roundtrip",
+      "report": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che/result.json"
+    },
+    "run_dir": "/home/ubuntu/adversarial_work/integration_final/cobol/eb01-mgnn4che",
+    "input_bytes": 65840,
+    "output_bytes": 65840
+  }
+}
+summary -> /home/ubuntu/adversarial_work/integration_final/summary.json

@@ -1,0 +1,1001 @@
+{
+  "scope": "ILLUSTRATIVE deterministic software fixtures; no empirical, statistical, semantic, security, or physical claims.",
+  "python": "3.12.3",
+  "platform": "Linux-6.18.38+-aarch64-with-glibc2.39",
+  "hard_timeout_seconds_per_worker": 2.0,
+  "fixture_count": 39,
+  "worker_count": 78,
+  "expectations_met_count": 39,
+  "sources": {
+    "legacy": {
+      "path": "experiments/experiment_bridge/v1/core.py",
+      "sha256": "2381c6ea03ea6dc0b3fbad0255ff870dc1fa1b2a3bb6444e38b063bb68737b8c"
+    },
+    "candidate": {
+      "path": "experiments/experiment_bridge/v1_1/core.py",
+      "sha256": "921a6aa8e1bad20e70a4d9cdd33b22d948c4bb149be788515b1e3b64f4c1f8c5"
+    }
+  },
+  "cases": [
+    {
+      "case": "target_square_underflow",
+      "legacy_classification": "bug_on_binary64_underflow",
+      "expected_legacy_outcome": "ACCEPTED",
+      "legacy_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1e-200
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          1e-200
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          0.0
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "squared error underflow: nonzero component squared to zero"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "distance_square_underflow",
+      "legacy_classification": "bug_on_binary64_underflow",
+      "expected_legacy_outcome": "ACCEPTED",
+      "legacy_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1.0,
+          0.0
+        ],
+        "reconstruction": [
+          1.0,
+          1e-200
+        ],
+        "residual": [
+          0.0,
+          -1e-200
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          0.0
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "squared error underflow: nonzero component squared to zero"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "component_square_underflow",
+      "legacy_classification": "conservative_policy_on_binary64_underflow",
+      "expected_legacy_outcome": "ACCEPTED",
+      "legacy_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1.0,
+          1e-200
+        ],
+        "reconstruction": [
+          0.0,
+          0.0
+        ],
+        "residual": [
+          1.0,
+          1e-200
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          1.0
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "squared error underflow: nonzero component squared to zero"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "representable_subnormal_square",
+      "legacy_classification": "expected_numerical_rejection",
+      "expected_legacy_outcome": "REJECTED",
+      "legacy_observed": {
+        "outcome": "REJECTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1e-160
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          1e-160
+        ],
+        "statuses": [
+          "REJECTED"
+        ],
+        "distances": [
+          1e-320
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "REJECTED",
+      "candidate_observed": {
+        "outcome": "REJECTED",
+        "version": "experiment-bridge/v1.1",
+        "target": [
+          1e-160
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          1e-160
+        ],
+        "statuses": [
+          "REJECTED"
+        ],
+        "distances": [
+          1e-320
+        ],
+        "diagnostics": []
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "decimal_gate_roundoff",
+      "legacy_classification": "inherent_binary64_limitation",
+      "expected_legacy_outcome": "REJECTED",
+      "legacy_observed": {
+        "outcome": "REJECTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          0.1
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          0.1
+        ],
+        "statuses": [
+          "REJECTED"
+        ],
+        "distances": [
+          0.010000000000000002
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "REJECTED",
+      "candidate_observed": {
+        "outcome": "REJECTED",
+        "version": "experiment-bridge/v1.1",
+        "target": [
+          0.1
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          0.1
+        ],
+        "statuses": [
+          "REJECTED"
+        ],
+        "distances": [
+          0.010000000000000002
+        ],
+        "diagnostics": []
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "lossy_integer_target",
+      "legacy_classification": "silent_input_loss_hazard",
+      "expected_legacy_outcome": "ACCEPTED",
+      "legacy_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          9007199254740992.0
+        ],
+        "reconstruction": [
+          9007199254740992.0
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          0.0
+        ],
+        "diagnostics": [],
+        "original_integer": "9007199254740993",
+        "converted_integer": "9007199254740992"
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "integer cannot be represented exactly as binary64"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "lossy_huge_finite_integer_code",
+      "legacy_classification": "silent_input_loss_hazard",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "original_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069377",
+        "converted_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376",
+        "equal_to_input": false
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "integer cannot be represented exactly as binary64"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "exact_huge_integer_code",
+      "legacy_classification": "expected_supported_conversion",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "original_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376",
+        "converted_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376",
+        "equal_to_input": true
+      },
+      "expected_candidate_outcome": "RETURNED",
+      "candidate_observed": {
+        "outcome": "RETURNED",
+        "original_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376",
+        "converted_integer": "10715086071862673209484250490600018105614048117055336074437503883703510511249361224931983788156958581275946729175531468251871452856923140435984577574698574803934567774824230985421074605062371141877954182153046474983581941267398767559165543946077062914571196477686542167660429831652624386837205668069376",
+        "equal_to_input": true
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "integer_conversion_overflow",
+      "legacy_classification": "expected_input_rejection",
+      "expected_legacy_outcome": "ValueError",
+      "legacy_observed": {
+        "outcome": "ValueError",
+        "error": "number cannot be represented as finite binary64"
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "number cannot be represented as finite binary64"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "lossy_integer_threshold",
+      "legacy_classification": "silent_input_loss_hazard",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "original_integer": "9007199254740993",
+        "converted_integer": "9007199254740992",
+        "equal_to_input": false
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "integer cannot be represented exactly as binary64"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "lossy_integer_calibration",
+      "legacy_classification": "silent_input_loss_hazard",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "thresholds": [
+          0.0
+        ]
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "integer cannot be represented exactly as binary64"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "rounded_fraction_input",
+      "legacy_classification": "documented_noninteger_binary64_rounding",
+      "expected_legacy_outcome": "ACCEPTED",
+      "legacy_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1",
+        "target": [
+          0.1
+        ],
+        "reconstruction": [
+          0.1
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          0.0
+        ],
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "ACCEPTED",
+      "candidate_observed": {
+        "outcome": "ACCEPTED",
+        "version": "experiment-bridge/v1.1",
+        "target": [
+          0.1
+        ],
+        "reconstruction": [
+          0.1
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED"
+        ],
+        "distances": [
+          0.0
+        ],
+        "diagnostics": []
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "cancellation_outside_tolerance",
+      "legacy_classification": "producer_validator_contract_bug_on_binary64_limitation",
+      "expected_legacy_outcome": "SELF_INVALID",
+      "legacy_observed": {
+        "outcome": "SELF_INVALID",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1.0
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED",
+          "ACCEPTED"
+        ],
+        "distances": [
+          1e+32,
+          0.0
+        ],
+        "diagnostics": [
+          "step 2: additive identity mismatch"
+        ],
+        "final_additive_discrepancy": 1.0
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "additive identity outside binary64 trace tolerance"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "cancellation_inside_tolerance",
+      "legacy_classification": "documented_tolerance_not_exact_identity",
+      "expected_legacy_outcome": "SELF_VALID",
+      "legacy_observed": {
+        "outcome": "SELF_VALID",
+        "version": "experiment-bridge/v1",
+        "target": [
+          1e-13
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED",
+          "ACCEPTED"
+        ],
+        "distances": [
+          1e+32,
+          0.0
+        ],
+        "diagnostics": [],
+        "final_additive_discrepancy": 1e-13
+      },
+      "expected_candidate_outcome": "SELF_VALID",
+      "candidate_observed": {
+        "outcome": "SELF_VALID",
+        "version": "experiment-bridge/v1.1",
+        "target": [
+          1e-13
+        ],
+        "reconstruction": [
+          0.0
+        ],
+        "residual": [
+          0.0
+        ],
+        "statuses": [
+          "ACCEPTED",
+          "ACCEPTED"
+        ],
+        "distances": [
+          1e+32,
+          0.0
+        ],
+        "diagnostics": [],
+        "final_additive_discrepancy": 1e-13
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "tiny_final_mutation",
+      "legacy_classification": "documented_tolerance_not_exact_integrity",
+      "expected_legacy_outcome": "DIAGNOSTICS_EMPTY",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS_EMPTY",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "large_final_mutation",
+      "legacy_classification": "expected_validation_rejection",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "final reconstruction mismatch"
+        ],
+        "illustrative_mutation": 5e-11
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "final reconstruction mismatch"
+        ],
+        "illustrative_mutation": 5e-11
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "tiny_step_state_mutation",
+      "legacy_classification": "documented_tolerance_not_exact_integrity",
+      "expected_legacy_outcome": "DIAGNOSTICS_EMPTY",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS_EMPTY",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "tiny_distance_without_levels",
+      "legacy_classification": "documented_tolerance_not_exact_integrity",
+      "expected_legacy_outcome": "DIAGNOSTICS_EMPTY",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS_EMPTY",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": [],
+        "illustrative_mutation": 5e-13
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "tiny_distance_with_levels",
+      "legacy_classification": "expected_exact_codebook_check",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: actual nearest/distance mismatch"
+        ],
+        "illustrative_mutation": 5e-13
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: actual nearest/distance mismatch"
+        ],
+        "illustrative_mutation": 5e-13
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "missing_step_field",
+      "legacy_classification": "expected_malformed_trace_rejection",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: 'contribution'"
+        ]
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: 'contribution'"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "nested_malformed_vector",
+      "legacy_classification": "expected_malformed_trace_rejection",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: expected a real number, not bool"
+        ]
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: expected a real number, not bool"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "nonfinite_trace_field",
+      "legacy_classification": "expected_malformed_trace_rejection",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: nonfinite number or arithmetic overflow"
+        ]
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: nonfinite number or arithmetic overflow"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "malformed_target_iterator",
+      "legacy_classification": "diagnostics_contract_bug_for_ordinary_iterator",
+      "expected_legacy_outcome": "RuntimeError",
+      "legacy_observed": {
+        "outcome": "RuntimeError",
+        "error": "ILLUSTRATIVE ordinary iterator failure"
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "malformed trace or levels: cannot read ordered vector: ILLUSTRATIVE ordinary iterator failure"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "malformed_step_iterator",
+      "legacy_classification": "diagnostics_contract_bug_for_ordinary_iterator",
+      "expected_legacy_outcome": "RuntimeError",
+      "legacy_observed": {
+        "outcome": "RuntimeError",
+        "error": "ILLUSTRATIVE ordinary iterator failure"
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "step 1: malformed step: cannot read ordered vector: ILLUSTRATIVE ordinary iterator failure"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "finite_generator_steps",
+      "legacy_classification": "expected_shape_rejection_with_unnecessary_consumption",
+      "expected_legacy_outcome": "DIAGNOSTICS",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "malformed trace or levels: steps must be a list or tuple"
+        ],
+        "items_consumed": 1
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "malformed trace or levels: steps must be a list or tuple"
+        ],
+        "items_consumed": 0
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "infinite_generator_steps",
+      "legacy_classification": "unbounded_consumption_before_shape_rejection",
+      "expected_legacy_outcome": "TIMEOUT",
+      "legacy_observed": {
+        "outcome": "TIMEOUT",
+        "hard_timeout_seconds": 2.0
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "malformed trace or levels: steps must be a list or tuple"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "infinite_target",
+      "legacy_classification": "missing_resource_limit",
+      "expected_legacy_outcome": "TIMEOUT",
+      "legacy_observed": {
+        "outcome": "TIMEOUT",
+        "hard_timeout_seconds": 2.0
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "vector exceeds limit (4096 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "infinite_codes",
+      "legacy_classification": "missing_resource_limit",
+      "expected_legacy_outcome": "TIMEOUT",
+      "legacy_observed": {
+        "outcome": "TIMEOUT",
+        "hard_timeout_seconds": 2.0
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "codebook exceeds limit (4096 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "infinite_levels",
+      "legacy_classification": "missing_resource_limit",
+      "expected_legacy_outcome": "TIMEOUT",
+      "legacy_observed": {
+        "outcome": "TIMEOUT",
+        "hard_timeout_seconds": 2.0
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "levels exceeds limit (64 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "vector_at_limit",
+      "legacy_classification": "new_bound_boundary",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "dimension": 4096
+      },
+      "expected_candidate_outcome": "RETURNED",
+      "candidate_observed": {
+        "outcome": "RETURNED",
+        "dimension": 4096
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "vector_over_limit",
+      "legacy_classification": "new_policy_rejection_not_old_numerical_bug",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "dimension": 4097
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "vector exceeds limit (4096 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "codes_at_limit",
+      "legacy_classification": "new_bound_boundary",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "codes": 4096,
+        "nearest_index": 0
+      },
+      "expected_candidate_outcome": "RETURNED",
+      "candidate_observed": {
+        "outcome": "RETURNED",
+        "codes": 4096,
+        "nearest_index": 0
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "codes_over_limit",
+      "legacy_classification": "new_policy_rejection_not_old_numerical_bug",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "codes": 4097,
+        "nearest_index": 0
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "codebook exceeds limit (4096 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "levels_at_limit",
+      "legacy_classification": "new_bound_boundary",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "levels": 64
+      },
+      "expected_candidate_outcome": "RETURNED",
+      "candidate_observed": {
+        "outcome": "RETURNED",
+        "levels": 64
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "levels_over_limit",
+      "legacy_classification": "new_policy_rejection_not_old_numerical_bug",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "levels": 65
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "levels exceeds limit (64 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "samples_at_limit",
+      "legacy_classification": "new_bound_boundary",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "thresholds": [
+          0.0
+        ]
+      },
+      "expected_candidate_outcome": "RETURNED",
+      "candidate_observed": {
+        "outcome": "RETURNED",
+        "thresholds": [
+          0.0
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "samples_over_limit",
+      "legacy_classification": "new_policy_rejection_not_old_numerical_bug",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "thresholds": [
+          0.0
+        ]
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "samples exceeds limit (4096 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "calibration_books_over_limit",
+      "legacy_classification": "new_policy_rejection_not_old_numerical_bug",
+      "expected_legacy_outcome": "RETURNED",
+      "legacy_observed": {
+        "outcome": "RETURNED",
+        "thresholds": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "expected_candidate_outcome": "ValueError",
+      "candidate_observed": {
+        "outcome": "ValueError",
+        "error": "codebooks exceeds limit (64 items)"
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    },
+    {
+      "case": "trace_steps_over_limit",
+      "legacy_classification": "new_policy_diagnostic_not_old_numerical_bug",
+      "expected_legacy_outcome": "DIAGNOSTICS_EMPTY",
+      "legacy_observed": {
+        "outcome": "DIAGNOSTICS_EMPTY",
+        "diagnostics": []
+      },
+      "expected_candidate_outcome": "DIAGNOSTICS",
+      "candidate_observed": {
+        "outcome": "DIAGNOSTICS",
+        "diagnostics": [
+          "malformed trace or levels: steps exceeds limit (64 items)"
+        ]
+      },
+      "expectations_met": true,
+      "falsifier": "A fresh isolated replay produces a different outcome or value for this fixture."
+    }
+  ]
+}

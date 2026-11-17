@@ -1,0 +1,596 @@
+{
+  "place_structures": [
+    {
+      "english": "better",
+      "class": "judgment",
+      "gismu": "xagmau",
+      "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xagmau",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+      "alternatives": [
+        "xauzma",
+        "zanmau",
+        "xlame'a (better = less bad)"
+      ]
+    },
+    {
+      "english": "worse",
+      "class": "judgment",
+      "gismu": "xagme'a",
+      "place_structure_verbatim": "xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xagme'a",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+      "alternatives": [
+        "xlamau",
+        "mleca"
+      ]
+    },
+    {
+      "english": "best",
+      "class": "judgment",
+      "gismu": "xagrai",
+      "place_structure_verbatim": "t1=x1 is the best among set/range t4 for x2 by standard x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xagrai",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this entry \"best ; surpassing all others\" / \"superlative in goodness\"; it is the xamgu+traji (goodness-superlative) lujvo. The same entry carries a second definition glossed \"optimal\" (see \"optimal\").",
+      "alternatives": [
+        "traji",
+        "zanrai",
+        "mecyxlarai (best = least bad)"
+      ]
+    },
+    {
+      "english": "worst",
+      "class": "judgment",
+      "gismu": "xlarai",
+      "place_structure_verbatim": "t1=x1 is the worst among set/range t4 for x2 by standard x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xlarai",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"worst\" (xlali+traji, badness-superlative), mirror image of xagrai.",
+      "alternatives": [
+        "mecyxagrai (worst = least good; same wording)",
+        "xlamau"
+      ]
+    },
+    {
+      "english": "appropriate",
+      "class": "judgment",
+      "gismu": "mapti",
+      "place_structure_verbatim": "x1 fits/matches/suits/is compatible/appropriate/corresponds to/with x2 in property/aspect x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/mapti",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "No valsi is glossed \"appropriate\" in jbovlaste; mapti's definition itself contains \"appropriate\" and its fit/suit/match sense covers appropriateness of x1 for x2 in aspect x3.",
+      "alternatives": [
+        "drani",
+        "sarxe"
+      ]
+    },
+    {
+      "english": "superior",
+      "class": "judgment",
+      "gismu": "zmadu",
+      "place_structure_verbatim": "x1 exceeds/is more than x2 in property/quantity x3 (ka/ni) by amount/excess x4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/zmadu",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "In the judgment sense, \"x1 is superior to x2 in respect x3\" is the exceeds-relation; jbovlaste's \"superior\" gloss entries are anatomical only (claco'uklo, claco'umau), so zmadu is the fitting gismu.",
+      "alternatives": [
+        "xagmau (superior = better)",
+        "traji",
+        "banli"
+      ]
+    },
+    {
+      "english": "inferior",
+      "class": "judgment",
+      "gismu": "tolba'i",
+      "place_structure_verbatim": "b1 is low/inferior/abject in property b2 (ka) by standard b3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/tolba'i",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"inferior\" directly (to'e+banli, the opposite of great).",
+      "alternatives": [
+        "mleca",
+        "xagme'a"
+      ]
+    },
+    {
+      "english": "more",
+      "class": "comparative",
+      "gismu": "zmadu",
+      "place_structure_verbatim": "x1 exceeds/is more than x2 in property/quantity x3 (ka/ni) by amount/excess x4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/zmadu",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste keys the gloss \"more\" to zmadu; it is the base comparative gismu (more than x2 in property x3 by margin x4).",
+      "alternatives": [
+        "za'u (cmavo: digit/number 'greater than')",
+        "memymau (more in number)"
+      ]
+    },
+    {
+      "english": "less",
+      "class": "comparative",
+      "gismu": "mleca",
+      "place_structure_verbatim": "x1 is less than x2 in property/quantity x3 (ka/ni) by amount x4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/mleca",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste keys the gloss \"less\" to mleca; it is zmadu's direct antonym.",
+      "alternatives": [
+        "jdika (decreases)"
+      ]
+    },
+    {
+      "english": "greater",
+      "class": "comparative",
+      "gismu": "zmadu",
+      "place_structure_verbatim": "x1 exceeds/is more than x2 in property/quantity x3 (ka/ni) by amount/excess x4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/zmadu",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "No valsi is glossed \"greater\" in jbovlaste; \"greater than x2 in property x3\" is the zmadu relation (same wordslot as \"more\").",
+      "alternatives": [
+        "barda (big against norm x3)",
+        "banli (subjectively great)"
+      ]
+    },
+    {
+      "english": "smaller",
+      "class": "comparative",
+      "gismu": "cmamau",
+      "place_structure_verbatim": "z1 is smaller than z2 in dimension c2 by margin z4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/cmamau",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"smaller\" directly (cmalu+zmadu).",
+      "alternatives": [
+        "brame'a (smaller = less big)",
+        "mleca",
+        "cmalu"
+      ]
+    },
+    {
+      "english": "optimal",
+      "class": "comparative",
+      "gismu": "xagrai",
+      "place_structure_verbatim": "t1=x1 is optimal in property t2 of extremity t3 among range t4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xagrai",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste's second definition of xagrai is glossed \"best ; optimal\" and \"optimal\"; the xamgu+traji compound covers optimum-as-best directly.",
+      "alternatives": [
+        "vamrai (optimal = most valuable for purpose)",
+        "mansyrai (best satisfies)",
+        "traji"
+      ]
+    },
+    {
+      "english": "efficient",
+      "class": "comparative",
+      "gismu": null,
+      "place_structure_verbatim": null,
+      "source_url": "https://jbovlaste.lojban.org/dict/listing.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "VOID",
+      "mapping_status": "VOID",
+      "mapping_reason": "No valsi is glossed or keyworded \"efficient\"/\"efficiency\": the jbovlaste English gloss index has no entry and the keyword lookup returns nothing for either term; no gismu expresses efficiency. tadji (method) and pilno (use) were considered and rejected — neither is an efficiency predicate.",
+      "alternatives": [
+        "tadji",
+        "pilno"
+      ]
+    },
+    {
+      "english": "effective",
+      "class": "comparative",
+      "gismu": "bapli",
+      "place_structure_verbatim": "x1 [force] (ka) forces/compels event x2 to occur; x1 determines property x2 to manifest.",
+      "source_url": "https://jbovlaste.lojban.org/dict/bapli",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "bapli is the only valsi carrying the official gloss \"effective\". The sense is narrow — an effective/compelling force that makes x2 happen (notes: \"requires success\") — not general \"produces the intended result\". Reported as the best available, flagged as a sense mismatch.",
+      "alternatives": [
+        "snada (succeeds)",
+        "jalge (result)"
+      ]
+    },
+    {
+      "english": "warm",
+      "class": "emotive",
+      "gismu": "xendo",
+      "place_structure_verbatim": "x1 (person) is kind to x2 in actions/behavior x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xendo",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste's \"warm\" glosses are all temperature senses (mligla, kufygla, glare); no gismu is glossed \"warm\" in the emotive sense. xendo (kind in behavior) is the nearest interpersonal-warmth gismu.",
+      "alternatives": [
+        "pendo",
+        "dirba",
+        "mligla (temperature sense only)"
+      ]
+    },
+    {
+      "english": "cold",
+      "class": "emotive",
+      "gismu": null,
+      "place_structure_verbatim": null,
+      "source_url": "https://jbovlaste.lojban.org/dict/listing.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "VOID",
+      "mapping_status": "VOID",
+      "mapping_reason": "jbovlaste's \"cold\" glosses are temperature (lenku, tolkuflenku) or illness (zuKAM); nothing covers the emotive sense. A tolxendo (unkind) record exists but carries no English definition, so there is no quotable place structure. Not invented.",
+      "alternatives": [
+        "lenku (temperature sense only)"
+      ]
+    },
+    {
+      "english": "friendly",
+      "class": "emotive",
+      "gismu": "pendo",
+      "place_structure_verbatim": "x1 is/acts as a friend of/to x2 (experiencer); x2 befriends x1.",
+      "source_url": "https://jbovlaste.lojban.org/dict/pendo",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "No valsi is glossed \"friendly\"; pendo is the base friend predicate and its \"acts as a friend\" phrasing covers friendly behavior.",
+      "alternatives": [
+        "xendo",
+        "nelci"
+      ]
+    },
+    {
+      "english": "hostile",
+      "class": "emotive",
+      "gismu": "le'onmo",
+      "place_structure_verbatim": "x1 feels/is aggressive/hostile/antagonistic towards x2",
+      "source_url": "https://jbovlaste.lojban.org/dict/le'onmo",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses this lujvo \"aggressive/hostile/antagonistic\" — the hostile feeling itself, matching the emotive class.",
+      "alternatives": [
+        "xebni (hates)",
+        "fapro (opposes)",
+        "bradi (enemy)"
+      ]
+    },
+    {
+      "english": "aggressive",
+      "class": "emotive",
+      "gismu": "le'onmo",
+      "place_structure_verbatim": "x1 feels/is aggressive/hostile/antagonistic towards x2",
+      "source_url": "https://jbovlaste.lojban.org/dict/le'onmo",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "Same jbovlaste entry as \"hostile\"; its notes state it denotes feeling the emotions associated with attacking, unlike gunta which is the active attack — hence it fits the emotive class.",
+      "alternatives": [
+        "gunta (commits aggression; non-emotive)",
+        "le'o (attitudinal cmavo: aggressive)"
+      ]
+    },
+    {
+      "english": "compassionate",
+      "class": "emotive",
+      "gismu": "kecti",
+      "place_structure_verbatim": "x1 (person) pities/feels sorry for x2 (person) about x3 (abstraction).",
+      "source_url": "https://jbovlaste.lojban.org/dict/kecti",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "No valsi is glossed \"compassionate\"; kecti (pities/feels sorry for) is the compassion gismu.",
+      "alternatives": [
+        "xendo",
+        "cinmo"
+      ]
+    },
+    {
+      "english": "safe",
+      "class": "fear",
+      "gismu": "snura",
+      "place_structure_verbatim": "x1 is secure/safe from threat x2 (event).",
+      "source_url": "https://jbovlaste.lojban.org/dict/snura",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste glosses snura \"safe ; secure\"; the threat-from-which place (x2) matches the fear-class slot exactly.",
+      "alternatives": [
+        "bandu (defends x2 from threat x3)",
+        "marbi",
+        "kajde"
+      ]
+    },
+    {
+      "english": "dangerous",
+      "class": "fear",
+      "gismu": "ckape",
+      "place_structure_verbatim": "x1 is perilous/dangerous/potentially harmful to x2 under conditions x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/ckape",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "No valsi is glossed \"dangerous\"; ckape's definition itself contains \"dangerous\" (perilous/potentially harmful to x2), the exact sense.",
+      "alternatives": [
+        "kajde (warns of danger)",
+        "xalni"
+      ]
+    },
+    {
+      "english": "threat",
+      "class": "fear",
+      "gismu": "capnu'e",
+      "place_structure_verbatim": "x1 threatens x2 with x3 (danger, peril).",
+      "source_url": "https://jbovlaste.lojban.org/dict/capnu'e",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "Closest attested threat predicate in jbovlaste. It is agentive (\"threatens\"), not the threat itself; no gismu has the form \"x1 is a threat to x2\" — that role exists only as a place of other predicates (snura x2, bandu x3, ckape). Flagged as a role mismatch.",
+      "alternatives": [
+        "selnu'e (threat as commitment/promise)",
+        "ckape",
+        "snura"
+      ]
+    },
+    {
+      "english": "imminent",
+      "class": "fear",
+      "gismu": null,
+      "place_structure_verbatim": null,
+      "source_url": "https://jbovlaste.lojban.org/dict/listing.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "VOID",
+      "mapping_status": "VOID",
+      "mapping_reason": "No valsi is glossed or keyworded \"imminent\" in jbovlaste. A bavlami record exists but carries no English definition, so nothing quotable; balvi is bare temporal ordering (future of x2), not imminence. Not invented.",
+      "alternatives": [
+        "balvi"
+      ]
+    },
+    {
+      "english": "near",
+      "class": "other",
+      "gismu": "jibni",
+      "place_structure_verbatim": "x1 is near/close to/approximates x2 in property/quantity x3 (ka/ni).",
+      "source_url": "https://jbovlaste.lojban.org/dict/jibni",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "PROPOSED",
+      "mapping_reason": "jbovlaste keys the gloss \"near\" to jibni; the base gismu for proximity in property/quantity x3.",
+      "alternatives": [
+        "zvajbi (located nearby)",
+        "jbibi'o (approaches)",
+        "lamji"
+      ]
+    },
+    {
+      "english": "glare (recall check)",
+      "class": "recall_check",
+      "gismu": "glare",
+      "place_structure_verbatim": "x1 is hot/[warm] by standard x2.",
+      "source_url": "https://jbovlaste.lojban.org/dict/glare",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "DIFFERS",
+      "mapping_reason": "recalled: \"x1 hot by standard x2\" — source: \"x1 is hot/[warm] by standard x2.\" — same place count; recall drops \"is\" and the \"/[warm]\" variant (gismu list wording identical: \"x1 is hot/[warm] by standard x2\").",
+      "alternatives": [],
+      "recalled_form": "x1 hot by standard x2"
+    },
+    {
+      "english": "snura (recall check)",
+      "class": "recall_check",
+      "gismu": "snura",
+      "place_structure_verbatim": "x1 is secure/safe from threat x2 (event).",
+      "source_url": "https://jbovlaste.lojban.org/dict/snura",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "DIFFERS",
+      "mapping_reason": "recalled: \"x1 safe from threat x2\" — source: \"x1 is secure/safe from threat x2 (event).\" — same place count; recall drops \"is\", \"secure/\", and the \"(event)\" qualifier on x2.",
+      "alternatives": [],
+      "recalled_form": "x1 safe from threat x2"
+    },
+    {
+      "english": "jibni (recall check)",
+      "class": "recall_check",
+      "gismu": "jibni",
+      "place_structure_verbatim": "x1 is near/close to/approximates x2 in property/quantity x3 (ka/ni).",
+      "source_url": "https://jbovlaste.lojban.org/dict/jibni",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "DIFFERS",
+      "mapping_reason": "recalled: \"x1 near x2 in property x3\" — source: \"x1 is near/close to/approximates x2 in property/quantity x3 (ka/ni).\" — same place count; recall drops \"is\", \"/close to/approximates\", \"/quantity\", and \"(ka/ni)\".",
+      "alternatives": [],
+      "recalled_form": "x1 near x2 in property x3"
+    },
+    {
+      "english": "zmadu (recall check)",
+      "class": "recall_check",
+      "gismu": "zmadu",
+      "place_structure_verbatim": "x1 exceeds/is more than x2 in property/quantity x3 (ka/ni) by amount/excess x4.",
+      "source_url": "https://jbovlaste.lojban.org/dict/zmadu",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "DIFFERS",
+      "mapping_reason": "recalled: \"x1 exceeds x2 in property x3 by amount x4\" — source: \"x1 exceeds/is more than x2 in property/quantity x3 (ka/ni) by amount/excess x4.\" — same place count; recall drops \"/is more than\", \"/quantity\", \"(ka/ni)\", and \"/excess\".",
+      "alternatives": [],
+      "recalled_form": "x1 exceeds x2 in property x3 by amount x4"
+    },
+    {
+      "english": "xamgu (recall check)",
+      "class": "recall_check",
+      "gismu": "xamgu",
+      "place_structure_verbatim": "x1 (object/event) is good/beneficial/nice/[acceptable] for x2 by standard x3.",
+      "source_url": "https://jbovlaste.lojban.org/dict/xamgu",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "DIFFERS",
+      "mapping_reason": "recalled: \"x1 good for x2 by standard x3\" — source: \"x1 (object/event) is good/beneficial/nice/[acceptable] for x2 by standard x3.\" — same place count; recall drops \"(object/event)\", \"is\", and \"/beneficial/nice/[acceptable]\".",
+      "alternatives": [],
+      "recalled_form": "x1 good for x2 by standard x3"
+    }
+  ],
+  "evidentials": [
+    {
+      "english": "I observe",
+      "class": "evidential",
+      "gismu": "za'a",
+      "place_structure_verbatim": "\"[zgana] I observe\" ; \"A bridi marked by za'a is based on perception or direct observation by the speaker.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from zgana (observe).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I hear (hearsay)",
+      "class": "evidential",
+      "gismu": "ti'e",
+      "place_structure_verbatim": "\"[tirna] I hear (hearsay)\" ; \"A bridi marked by ti'e is relayed information from some source other than the speaker. There is no necessary implication that the information was relayed via the speaker's ears; what we read in a newspaper is an equally good example of ti'e, unless we have personal knowledge of the content.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from tirna (hear).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I state",
+      "class": "evidential",
+      "gismu": "ju'a",
+      "place_structure_verbatim": "\"[jufra] I state\" ; \"Finally, the evidential ju'a is used to avoid stating a specific basis for a statement. It can also be used when the basis for the speaker's statement is not covered by any other evidential.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from jufra (sentence).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I define",
+      "class": "evidential",
+      "gismu": "ca'e",
+      "place_structure_verbatim": "\"I define\" ; \"A bridi marked by ca'e is true because the speaker says so. In addition to definitions of words, ca'e is also appropriate in what are called performatives, where the very act of speaking the words makes them true.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; no rafsi source given in the CLL table.",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I opine",
+      "class": "evidential",
+      "gismu": "pe'i",
+      "place_structure_verbatim": "\"[pensi] I opine\" ; \"A bridi marked by pe'i is the opinion of the speaker.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from pensi (think).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I postulate",
+      "class": "evidential",
+      "gismu": "ru'a",
+      "place_structure_verbatim": "\"[sruma] I postulate\" ; \"A bridi marked by ru'a is an assumption made by the speaker.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from sruma (assume).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I know by cultural means",
+      "class": "evidential",
+      "gismu": "ka'u",
+      "place_structure_verbatim": "\"[kulnu] I know by cultural means\" ; \"A bridi marked by ka'u is one held to be true in the speaker's cultural context, as a matter of myth or custom, for example.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from kulnu (culture).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I know by internal experience",
+      "class": "evidential",
+      "gismu": "se'o",
+      "place_structure_verbatim": "\"[senva] I know by internal experience\" ; \"On the other hand, se'o marks a bridi whose truth is asserted by the speaker as a result of an internal experience not directly available to others, such as a dream, vision, or personal revelation.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from senva (dream).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I conclude",
+      "class": "evidential",
+      "gismu": "ja'o",
+      "place_structure_verbatim": "\"[jalge] I conclude\" ; \"A bridi marked by ja'o is a conclusion by the speaker based on other (stated or unstated) information or ideas. Rough English equivalents of ja'o are “thus” and “therefore”.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from jalge (result).",
+      "alternatives": [],
+      "in_user_list": true
+    },
+    {
+      "english": "I expect / I experience / I remember",
+      "class": "evidential",
+      "gismu": "ba'a",
+      "place_structure_verbatim": "\"[balvi] I expect / I experience / I remember\" ; \"The three scale positions of ba'a, when attached to a bridi, indicate that it is based on the speaker's view of the real world. Thus ba'a means that the statement represents a future event as anticipated by the speaker; ba'acu'i, a present event as experienced by the speaker; ba'anai, a past event as remembered by the speaker.\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); NOT in the requester's list — added per instruction 2. Gloss and defining sentence quoted verbatim; derived from balvi (future). Scalar: ba'a / ba'acu'i / ba'anai.",
+      "alternatives": [],
+      "in_user_list": false
+    },
+    {
+      "english": "I generalize / I particularize",
+      "class": "evidential",
+      "gismu": "su'a",
+      "place_structure_verbatim": "\"[sucta] I generalize / I particularize\" ; \"A bridi marked by su'a is a generalization by the speaker based on other (stated or unstated) information or ideas. The difference between su'a and ja'o is that ja'o suggests some sort of reasoning or deduction (not necessarily rigorous), whereas su'a suggests some sort of induction or pattern recognition from existing examples (not necessarily rigorous).\"",
+      "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+      "retrieved": "2026-11-17",
+      "structure_status": "OBSERVED",
+      "mapping_status": "OBSERVED",
+      "mapping_reason": "CLL §13.11 evidential (selma'o UI); NOT in the requester's list — added per instruction 2. Gloss and defining sentence quoted verbatim; derived from sucta (abstract). Scale opposite su'anai = abduction.",
+      "alternatives": [],
+      "in_user_list": false
+    }
+  ]
+}

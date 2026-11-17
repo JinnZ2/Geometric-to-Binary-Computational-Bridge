@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/cobc",
+    "-free",
+    "-Wall",
+    "-fsyntax-only",
+    "-I",
+    ".",
+    "wrapper.cob"
+  ],
+  "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_name_collision",
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "ledger.cpy:27: warning: redefinition of 'ENTRY-ABCDEFGHIJKLMNO' [-Wredefinition]\nledger.cpy:17: note: 'ENTRY-ABCDEFGHIJKLMNO' previously defined here [-Wredefinition]\n"
+}

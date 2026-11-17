@@ -1,0 +1,3 @@
+# EB01 .dat streams are fixed-size byte records, not line-oriented text.
+# Preserve exact transport bytes and avoid enormous padded textual diffs.
+runs/**/*.dat binary

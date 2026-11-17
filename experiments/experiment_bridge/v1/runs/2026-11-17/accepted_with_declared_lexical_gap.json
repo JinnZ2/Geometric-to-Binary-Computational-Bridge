@@ -1,0 +1,106 @@
+{
+  "fixture": "accepted_with_declared_lexical_gap",
+  "scope": "ILLUSTRATIVE, not calibrated semantics",
+  "trace": {
+    "version": "experiment-bridge/v1",
+    "target": [
+      1.0
+    ],
+    "dimension": 1,
+    "steps": [
+      {
+        "level": 1,
+        "codebook_sha256": "5552cc5aa701b59dc0fdb521a81f3a8f639a70b198590c4b39475019021e5a93",
+        "nearest_index": 0,
+        "code_index": 0,
+        "distance_squared": 0.0,
+        "threshold_squared": 0.0,
+        "numerical_status": "ACCEPTED",
+        "contribution": [
+          1.0
+        ],
+        "reconstruction_before": [
+          0.0
+        ],
+        "reconstruction_after": [
+          1.0
+        ],
+        "residual_before": [
+          1.0
+        ],
+        "residual_after": [
+          0.0
+        ],
+        "error_squared_before": 1.0,
+        "error_squared_after": 0.0,
+        "error_reduction": 1.0,
+        "semantic_status": "LEXICAL_VOID",
+        "semantic_row_id": "mapping:0a36480acd48199420e52a99ead66ce6287ac5b5c02d0995c1c7e70bd428f3e6:1",
+        "semantic_row": {
+          "row_id": "mapping:0a36480acd48199420e52a99ead66ce6287ac5b5c02d0995c1c7e70bd428f3e6:1",
+          "identifier": null,
+          "english": "efficient",
+          "role": "mapping",
+          "lexical_status": "LEXICAL_VOID",
+          "source_collection": "place_structures",
+          "source_index": 12,
+          "source": {
+            "english": "efficient",
+            "class": "comparative",
+            "gismu": null,
+            "place_structure_verbatim": null,
+            "source_url": "https://jbovlaste.lojban.org/dict/listing.html",
+            "retrieved": "2026-11-17",
+            "structure_status": "VOID",
+            "mapping_status": "VOID",
+            "mapping_reason": "No valsi is glossed or keyworded \"efficient\"/\"efficiency\": the jbovlaste English gloss index has no entry and the keyword lookup returns nothing for either term; no gismu expresses efficiency. tadji (method) and pilno (use) were considered and rejected — neither is an efficiency predicate.",
+            "alternatives": [
+              "tadji",
+              "pilno"
+            ]
+          }
+        }
+      }
+    ],
+    "reconstruction": [
+      1.0
+    ],
+    "residual": [
+      0.0
+    ],
+    "evidential": {
+      "row_id": "evidential:48fa53adc34b3b936b7aa4d03ce51f13520406e6e2b01c2278b52831efcf3a7c:1",
+      "identifier": "ja'o",
+      "english": "I conclude",
+      "role": "evidential",
+      "lexical_status": "PRESENT",
+      "source_collection": "evidentials",
+      "source_index": 8,
+      "source": {
+        "english": "I conclude",
+        "class": "evidential",
+        "gismu": "ja'o",
+        "place_structure_verbatim": "\"[jalge] I conclude\" ; \"A bridi marked by ja'o is a conclusion by the speaker based on other (stated or unstated) information or ideas. Rough English equivalents of ja'o are “thus” and “therefore”.\"",
+        "source_url": "https://lojban.org/publications/cll/cll_v1.1_xhtml-section-chunks/section-evidentials.html",
+        "retrieved": "2026-11-17",
+        "structure_status": "OBSERVED",
+        "mapping_status": "OBSERVED",
+        "mapping_reason": "CLL §13.11 evidential (selma'o UI); gloss and defining sentence quoted verbatim; derived from jalge (result).",
+        "alternatives": [],
+        "in_user_list": true
+      }
+    },
+    "semantic_provenance": {
+      "version": "experiment-bridge/v1",
+      "reference_sha256": "55932ab9d81d38edaa860145d847251bf1062fc63c90d17516bf877fb15772ba",
+      "assignments": [
+        {
+          "level": 1,
+          "code_index": 0,
+          "row_id": "mapping:0a36480acd48199420e52a99ead66ce6287ac5b5c02d0995c1c7e70bd428f3e6:1"
+        }
+      ],
+      "evidential_row_id": "evidential:48fa53adc34b3b936b7aa4d03ce51f13520406e6e2b01c2278b52831efcf3a7c:1"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "compiler": "/usr/bin/cobc",
+  "record_count": 4,
+  "record_size": 16460,
+  "compile_status": "PASS",
+  "runtime_status": "PASS",
+  "exact_bytes_equal": true,
+  "compile": {
+    "command": [
+      "/usr/bin/cobc",
+      "-x",
+      "-free",
+      "-I",
+      "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm",
+      "-o",
+      "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip",
+      "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip.cob"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+  },
+  "runtime": {
+    "command": [
+      "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "artifacts": {
+    "copybook": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/envelope.cpy",
+    "source": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip.cob",
+    "input": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/input.dat",
+    "output": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/output.dat",
+    "executable": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/roundtrip",
+    "report": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm/result.json"
+  },
+  "run_dir": "/home/ubuntu/expansion_work/integration_final/cobol/eb01-3suixocm",
+  "input_bytes": 65840,
+  "output_bytes": 65840
+}

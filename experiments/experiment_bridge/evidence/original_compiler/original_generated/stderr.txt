@@ -1,0 +1,132 @@
+ledger.cpy:31: error: syntax error, unexpected Identifier
+ledger.cpy:31: error: PROCEDURE DIVISION header missing
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected /
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected /
+ledger.cpy:31: error: unknown statement 'the'
+ledger.cpy:31: error: syntax error, unexpected Identifier, expecting Literal
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected /
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:31: error: syntax error, unexpected Literal
+ledger.cpy:33: error: unknown statement '01'
+ledger.cpy:34: error: unknown statement '05'
+ledger.cpy:35: error: unknown statement '05'
+ledger.cpy:36: error: unknown statement '05'
+ledger.cpy:37: error: unknown statement '05'
+ledger.cpy:38: error: unknown statement '05'
+ledger.cpy:39: error: unknown statement '05'
+ledger.cpy:40: error: unknown statement '05'
+ledger.cpy:41: error: unknown statement '05'
+ledger.cpy:41: error: syntax error, unexpected Literal
+ledger.cpy:42: error: unknown statement '05'
+ledger.cpy:43: error: unknown statement '05'
+ledger.cpy:44: error: unknown statement '05'
+ledger.cpy:45: error: unknown statement '05'
+ledger.cpy:45: error: syntax error, unexpected Literal
+ledger.cpy:45: error: syntax error, unexpected Literal
+ledger.cpy:45: error: syntax error, unexpected Literal
+ledger.cpy:45: error: syntax error, unexpected Literal
+ledger.cpy:47: error: unknown statement '01'
+ledger.cpy:48: error: unknown statement '05'
+ledger.cpy:49: error: unknown statement '05'
+ledger.cpy:50: error: unknown statement '05'
+ledger.cpy:51: error: unknown statement '05'
+ledger.cpy:52: error: unknown statement '05'
+ledger.cpy:53: error: unknown statement '05'
+ledger.cpy:54: error: unknown statement '05'
+ledger.cpy:55: error: unknown statement '05'
+ledger.cpy:57: error: unknown statement '01'
+ledger.cpy:58: error: unknown statement '05'
+ledger.cpy:59: error: unknown statement '05'
+ledger.cpy:60: error: unknown statement '05'
+ledger.cpy:61: error: unknown statement '05'
+ledger.cpy:62: error: unknown statement '05'
+ledger.cpy:63: error: unknown statement '05'
+ledger.cpy:64: error: unknown statement '05'
+ledger.cpy:65: error: unknown statement '05'
+ledger.cpy:67: error: unknown statement '01'
+ledger.cpy:68: error: unknown statement '05'
+ledger.cpy:69: error: unknown statement '05'
+ledger.cpy:70: error: unknown statement '05'
+ledger.cpy:71: error: unknown statement '05'
+ledger.cpy:72: error: unknown statement '05'
+ledger.cpy:73: error: unknown statement '05'
+ledger.cpy:74: error: unknown statement '05'
+ledger.cpy:75: error: unknown statement '05'
+ledger.cpy:75: error: syntax error, unexpected Literal
+ledger.cpy:75: error: syntax error, unexpected AND, expecting Literal
+ledger.cpy:75: error: unknown statement 'tadji'
+ledger.cpy:75: error: 'method' is a reserved word, but isn't supported
+ledger.cpy:75: error: syntax error, unexpected Literal
+ledger.cpy:75: error: invalid symbol '[' - skipping word
+ledger.cpy:75: error: syntax error, unexpected Literal
+ledger.cpy:75: error: unknown statement 'the'
+ledger.cpy:75: error: unknown statement 'Reported'
+ledger.cpy:75: error: syntax error, unexpected Literal
+ledger.cpy:75: error: syntax error, unexpected Literal
+ledger.cpy:77: error: unknown statement '01'
+ledger.cpy:78: error: unknown statement '05'
+ledger.cpy:79: error: unknown statement '05'
+ledger.cpy:80: error: unknown statement '05'
+ledger.cpy:81: error: unknown statement '05'
+ledger.cpy:82: error: unknown statement '05'
+ledger.cpy:83: error: unknown statement '05'
+ledger.cpy:84: error: unknown statement '05'
+ledger.cpy:85: error: unknown statement '05'
+ledger.cpy:85: error: unknown statement 'a'
+ledger.cpy:85: error: syntax error, unexpected NOT
+ledger.cpy:85: error: syntax error, unexpected Literal
+ledger.cpy:85: error: syntax error, unexpected Literal
+ledger.cpy:85: error: syntax error, unexpected Literal
+ledger.cpy:86: error: unknown statement '05'
+ledger.cpy:87: error: unknown statement '05'
+ledger.cpy:88: error: unknown statement '05'
+ledger.cpy:89: error: unknown statement '05'
+ledger.cpy:91: error: unknown statement '01'
+ledger.cpy:92: error: unknown statement '05'
+ledger.cpy:93: error: unknown statement '05'
+ledger.cpy:94: error: unknown statement '05'
+ledger.cpy:95: error: unknown statement '05'
+ledger.cpy:95: error: syntax error, unexpected AS, expecting Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:95: error: syntax error, unexpected Literal
+ledger.cpy:97: error: unknown statement '01'
+ledger.cpy:98: error: unknown statement '05'
+ledger.cpy:99: error: unknown statement '05'
+ledger.cpy:100: error: unknown statement '05'
+ledger.cpy:101: error: unknown statement '05'
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: unknown statement 'it'
+ledger.cpy:101: error: unknown statement 'flagged'
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: unknown statement 'a'
+ledger.cpy:101: error: syntax error, unexpected NOT
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: invalid symbol '[' - skipping word
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: invalid symbol '[' - skipping word
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:101: error: syntax error, unexpected Literal
+ledger.cpy:102: error: unknown statement '05'
+cobc: too many errors [-fmax-errors=128]
+
+cobc: aborting compile of ledger.cpy at line 102 (PROGRAM-ID: original-audit)

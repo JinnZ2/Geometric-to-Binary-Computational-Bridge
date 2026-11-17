@@ -370,3 +370,7 @@ sister repos most tightly coupled to this one:
 - [automation_scope_audit](https://github.com/JinnZ2/automation_scope_audit)
 
 See `ARCHITECTURE.md` for how this repo couples to each of them.
+
+## Experiment bridge notebook
+
+Note 2026-11-17: [experiments/experiment_bridge/](experiments/experiment_bridge/README.md) preserves incoming NCM/Lojban/COBOL working notes, the semantic reference, and Kimi's toy RVQ archive beside a reproducible audit. It is an experimental nonphysical bookkeeping bench, not a new registered substrate or a production semantic adapter. See its [audit and usable-core findings](experiments/experiment_bridge/AUDIT.md); originals and incorrect examples remain unchanged for comparison.

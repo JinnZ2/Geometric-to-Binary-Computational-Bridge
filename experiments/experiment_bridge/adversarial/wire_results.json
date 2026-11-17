@@ -1,0 +1,395 @@
+{
+  "baseline": "19c9a80",
+  "candidate_limits": {
+    "HEADER_SIZE": 76,
+    "JSON_CAPACITY": 16384,
+    "MAX_INTEGER_DIGITS": 16384,
+    "MAX_JSON_DEPTH": 64,
+    "MAX_JSON_NODES": 16384,
+    "MAX_JSON_STRING_LENGTH": 16384,
+    "MAX_RECORDS": 64,
+    "PROCESS_TIMEOUT_SECONDS": 30,
+    "PROTECTED_OUTPUT_PATHS": [
+      "raw",
+      "evidence",
+      "audit",
+      "v1",
+      "v1_1/runs",
+      "adversarial"
+    ],
+    "RECORD_SIZE": 16460
+  },
+  "cases": {
+    "compile_failure": {
+      "v1": {
+        "compile_status": "FAIL",
+        "outcome": "returned",
+        "report_error": null,
+        "status": "FAIL"
+      },
+      "v1_1": {
+        "compile_status": "FAIL",
+        "outcome": "returned",
+        "report_error": null,
+        "status": "FAIL"
+      }
+    },
+    "compiler_timeout": {
+      "v1": {
+        "command": [
+          "mock"
+        ],
+        "error": "process timeout after 30 seconds",
+        "outcome": "returned",
+        "returncode": null,
+        "stderr": "diagnostic",
+        "stdout": "partial",
+        "timeout_seconds": 30
+      },
+      "v1_1": {
+        "command": [
+          "mock"
+        ],
+        "error": "process timeout after 30 seconds",
+        "outcome": "returned",
+        "returncode": null,
+        "stderr": "diagnostic",
+        "stdout": "partial",
+        "timeout_seconds": 30
+      }
+    },
+    "cycle": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "cyclic JSON payload",
+        "outcome": "raised",
+        "serialization_calls": 0
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "cyclic JSON payload",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "deep_decode": {
+      "v1": {
+        "exception": "RecursionError",
+        "json_bytes": 2407,
+        "message": "maximum recursion depth exceeded",
+        "outcome": "raised"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "json_bytes": 2407,
+        "message": "JSON nesting depth exceeds 64",
+        "outcome": "raised"
+      }
+    },
+    "deep_encode": {
+      "v1": {
+        "exception": "RecursionError",
+        "message": "maximum recursion depth exceeded",
+        "outcome": "raised",
+        "serialization_calls": 0
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON nesting depth exceeds 64",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "demo_directory_swap": {
+      "v1": {
+        "case_count": 4,
+        "first_fixture_exists": true,
+        "mock_held_fixture_written": true,
+        "outcome": "returned",
+        "summary_exists": true,
+        "victim_unchanged": true
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "first_fixture_exists": false,
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "mock_held_fixture_written": false,
+        "outcome": "raised",
+        "summary_exists": false,
+        "victim_unchanged": true
+      }
+    },
+    "demo_file_symlink_race": {
+      "v1": {
+        "case_count": 4,
+        "first_fixture_exists": true,
+        "mock_held_fixture_written": false,
+        "outcome": "returned",
+        "summary_exists": true,
+        "victim_unchanged": false
+      },
+      "v1_1": {
+        "exception": "FileExistsError",
+        "first_fixture_exists": true,
+        "message": "[Errno 17] File exists: '/tmp/bridge-wire-probe-i17zlp4m/output/.accepted_proposed_mapping.json-d3xn0_sl' -> '/tmp/bridge-wire-probe-i17zlp4m/output/accepted_proposed_mapping.json'",
+        "mock_held_fixture_written": false,
+        "outcome": "raised",
+        "summary_exists": false,
+        "victim_unchanged": true
+      }
+    },
+    "demo_held_legacy_runs": {
+      "v1": {
+        "case_count": 4,
+        "first_fixture_exists": true,
+        "mock_held_fixture_written": false,
+        "outcome": "returned",
+        "summary_exists": true,
+        "victim_unchanged": true
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "first_fixture_exists": false,
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "mock_held_fixture_written": false,
+        "outcome": "raised",
+        "summary_exists": false,
+        "victim_unchanged": true
+      }
+    },
+    "demo_partial_failure": {
+      "v1": {
+        "exception": "OSError",
+        "first_fixture_exists": true,
+        "message": "mock partial failure",
+        "mock_held_fixture_written": false,
+        "outcome": "raised",
+        "summary_exists": false,
+        "victim_unchanged": true
+      },
+      "v1_1": {
+        "exception": "OSError",
+        "first_fixture_exists": true,
+        "message": "mock partial failure",
+        "mock_held_fixture_written": false,
+        "outcome": "raised",
+        "summary_exists": false,
+        "victim_unchanged": true
+      }
+    },
+    "exact_capacity": {
+      "v1": {
+        "equal": true,
+        "json_bytes": 16384,
+        "outcome": "returned"
+      },
+      "v1_1": {
+        "equal": true,
+        "json_bytes": 16384,
+        "outcome": "returned"
+      }
+    },
+    "held_adversarial": {
+      "v1": {
+        "outcome": "returned",
+        "status": "NOT_RUNNABLE"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "outcome": "raised"
+      }
+    },
+    "held_candidate_runs": {
+      "v1": {
+        "outcome": "returned",
+        "status": "NOT_RUNNABLE"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "outcome": "raised"
+      }
+    },
+    "held_legacy_runs": {
+      "v1": {
+        "outcome": "returned",
+        "status": "NOT_RUNNABLE"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "outcome": "raised"
+      }
+    },
+    "huge_integer": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 3
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON integer exceeds 16384 digits",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "huge_string": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 3
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON string length exceeds 16384",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "legal_integer": {
+      "v1": {
+        "equal": true,
+        "json_bytes": 16383,
+        "outcome": "returned"
+      },
+      "v1_1": {
+        "equal": true,
+        "json_bytes": 16383,
+        "outcome": "returned"
+      }
+    },
+    "noncanonical": {
+      "v1": {
+        "outcome": "returned",
+        "rejected": 9,
+        "total": 9
+      },
+      "v1_1": {
+        "outcome": "returned",
+        "rejected": 9,
+        "total": 9
+      }
+    },
+    "real_cobol": {
+      "v1": {
+        "compile_status": "PASS",
+        "exact_bytes_equal": true,
+        "outcome": "returned",
+        "runtime_status": "PASS",
+        "status": "PASS"
+      },
+      "v1_1": {
+        "compile_status": "PASS",
+        "exact_bytes_equal": true,
+        "outcome": "returned",
+        "runtime_status": "PASS",
+        "status": "PASS"
+      }
+    },
+    "rehashed_change": {
+      "v1": {
+        "accepted_change": true,
+        "outcome": "returned"
+      },
+      "v1_1": {
+        "accepted_change": true,
+        "outcome": "returned"
+      }
+    },
+    "report_failure": {
+      "v1": {
+        "exception": "OSError",
+        "message": "mock report write denied",
+        "outcome": "raised"
+      },
+      "v1_1": {
+        "compile_status": "FAIL",
+        "outcome": "returned",
+        "report_error": "mock report write denied",
+        "status": "FAIL"
+      }
+    },
+    "shared_expansion": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 16383
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "stream_count": {
+      "v1": {
+        "exception": "RuntimeError",
+        "items_consumed": 66,
+        "message": "probe stopped unbounded collection after 66 records",
+        "outcome": "raised"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "items_consumed": 65,
+        "message": "record count exceeds 64",
+        "outcome": "raised"
+      }
+    },
+    "symlink_held_parent": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "output directory must not be an audited specimen directory",
+        "outcome": "raised"
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "output directory must not be inside preserved specimen, legacy, or archived evidence paths",
+        "outcome": "raised"
+      }
+    },
+    "unicode_size": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 3
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    },
+    "wide_encode": {
+      "v1": {
+        "exception": "ValueError",
+        "message": "JSON payload exceeds 16384 ASCII bytes",
+        "outcome": "raised",
+        "serialization_calls": 16388
+      },
+      "v1_1": {
+        "exception": "ValueError",
+        "message": "JSON node count exceeds 16384",
+        "outcome": "raised",
+        "serialization_calls": 0
+      }
+    }
+  },
+  "counts": {
+    "bounded_timeouts": 0,
+    "cases": 25,
+    "child_errors": 0,
+    "executions": 50,
+    "versions": 2
+  },
+  "note_date": "2026-11-17",
+  "probe_timeout_seconds": 5,
+  "scope": "bounded software probes; all write adversaries use temporary mock benches"
+}

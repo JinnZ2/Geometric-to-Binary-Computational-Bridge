@@ -1,0 +1,29 @@
+{
+  "compile": {
+    "command": [
+      "/usr/bin/cobc",
+      "-free",
+      "-Wall",
+      "-x",
+      "-I",
+      ".",
+      "-o",
+      "runtime",
+      "runtime.cob"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status",
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "ledger.cpy:23: warning: value size exceeds data size [-Wothers]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+  },
+  "run": {
+    "command": [
+      "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status/runtime"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status",
+    "returncode": 0,
+    "stdout": "PLACE-STRUCTtest                judgment            mapti               OBSERVED  STATUS-TOOx1 fits x2.                                                                                         test reason                                                                                         \n",
+    "stderr": ""
+  },
+  "unicode_e_acute_count": 0
+}

@@ -1,0 +1,135 @@
+{
+  "instrument": "toy_rvq_void.py",
+  "seed": 0,
+  "params": {
+    "dims": 8,
+    "levels": 4,
+    "codes_per_level": 16,
+    "void_index": 16,
+    "n_train": 2000,
+    "n_test": 1000,
+    "void_rate_target": 0.01
+  },
+  "tau_per_level": [
+    9.990962254366492,
+    5.288310334118061,
+    3.443865664645253,
+    2.1631638746716177
+  ],
+  "train": {
+    "split": "train",
+    "n": 2000,
+    "signal_energy": 28565.305734169015,
+    "per_level_captured_energy": [
+      21987.287039604256,
+      2824.2007179419975,
+      1236.9042278989136,
+      742.5146877925897
+    ],
+    "per_level_void_rate": [
+      0.0095,
+      0.011,
+      0.012,
+      0.013
+    ],
+    "per_level_collision_rate": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "codepath_distinct": 1944,
+    "codepath_collision_rate": 0.028000000000000025,
+    "level1_only_residual_energy_frac": 0.24552140445772164,
+    "final_residual_energy_frac": 0.08265323287140179,
+    "energy_identity_defect_sum": 37.488010277925085,
+    "energy_identity_defect_worst_rel": 4.009105647331735
+  },
+  "held_out": {
+    "split": "held_out",
+    "n": 1000,
+    "signal_energy": 14016.982184959623,
+    "per_level_captured_energy": [
+      10794.423279897575,
+      1418.7799968083655,
+      623.2766261354785,
+      373.33126364065055
+    ],
+    "per_level_void_rate": [
+      0.007,
+      0.007,
+      0.009,
+      0.014
+    ],
+    "per_level_collision_rate": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "codepath_distinct": 985,
+    "codepath_collision_rate": 0.015000000000000013,
+    "level1_only_residual_energy_frac": 0.24838060886903807,
+    "final_residual_energy_frac": 0.07661369632660063,
+    "energy_identity_defect_sum": 56.48083455093925,
+    "energy_identity_defect_worst_rel": 1.5036325501281391
+  },
+  "claims": [
+    {
+      "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+      "rate_var": "dE_residual/dlevel",
+      "kind": "contextual",
+      "value": 0.24552140445772164,
+      "tol_frac": 0.25,
+      "measurement": "encode held-out split; decode with ONLY the level-1 index; residual energy / signal energy",
+      "failure": "- codebook overfit -> held-out worse than train (drift/fail)\n- source distribution shift -> level-1 codes no longer stand alone\n- VOID rate at level 1 >> target -> level 1 never stood alone",
+      "provenance": "toy_rvq_void.py",
+      "measured": 0.24838060886903807,
+      "verdict": "pass",
+      "ts": 1794928666.2079706
+    },
+    {
+      "scope": "fab::contextual::rvq::energy_identity_defect",
+      "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 1e-06,
+      "measurement": "per sample: |z|^2 - (|z_hat|^2 + |r|^2) == 2<z_hat,r>; identity holds only if the split is orthogonal; report worst relative magnitude over held-out split",
+      "failure": "- non-orthogonal codebook entries -> defect != 0: the\n  effort/flow energy reading of this substrate is VOID,\n  use bookkeeping reading only",
+      "provenance": "toy_rvq_void.py",
+      "measured": 1.5036325501281391,
+      "verdict": "fail",
+      "ts": 1794928666.2079706
+    },
+    {
+      "scope": "fab::contextual::rvq::void_escape_integrity",
+      "rate_var": "dN_silent_snap/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "count held-out residuals whose min distance exceeds tau_k that were nevertheless snapped to a code (must be zero)",
+      "failure": "- threshold not applied at some level -> silent snap returns\n- VOID index collides with a real code index -> misdecode",
+      "provenance": "toy_rvq_void.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794928666.2079706,
+      "note": "encode() routes every over-threshold residual to the reserved VOID index by construction; the measured value is a structural 0.0 and the claim is falsified by any code path that snaps past tau_k"
+    },
+    {
+      "scope": "fab::contextual::rvq::codepath_collision_rate",
+      "rate_var": "dN_shared_path/dn",
+      "kind": "contextual",
+      "value": 0.028000000000000025,
+      "tol_frac": 0.5,
+      "measurement": "full index-tuple census over held-out split: 1 - distinct_paths/n; two samples collide iff their entire code path (VOID positions included) is identical",
+      "failure": "- degenerate/discrete source -> collision rate >> train\n- per-level input census substituted for full-path census ->\n  degenerate 0.0 on continuous floats (false pass)",
+      "provenance": "toy_rvq_void.py",
+      "measured": 0.015000000000000013,
+      "verdict": "pass",
+      "ts": 1794928666.2079706,
+      "distinct_paths_train": 1944,
+      "distinct_paths_held_out": 985
+    }
+  ],
+  "runtime_s": 6.334677457809448
+}

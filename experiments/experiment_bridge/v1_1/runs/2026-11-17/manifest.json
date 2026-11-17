@@ -1,0 +1,76 @@
+{
+  "scope": "Finite adversarial software audit; retained execution, not security/semantic certification",
+  "binary_omitted": "Platform-specific executable omitted; generated source, copybook and exact byte streams retained. Original diagnostic paths identify the execution machine.",
+  "files": [
+    {
+      "path": "accepted_proposed_mapping.json",
+      "bytes": 4251,
+      "sha256": "0e5dbe07093893c78a22461778bc91b3b947073bb04e19a5c3becb1e5ab7b635"
+    },
+    {
+      "path": "accepted_with_declared_lexical_gap.json",
+      "bytes": 3862,
+      "sha256": "9850a9bcd65c8c4fd87ad40096bc51a7ff157dfdb1defd7e7d496ddecc69fd5a"
+    },
+    {
+      "path": "accepted_without_mapping.json",
+      "bytes": 2708,
+      "sha256": "f71f9183e4e552985cf334572f6c93c1922637449219d889da8e4db01f75ec2a"
+    },
+    {
+      "path": "cobol/eb01-mgnn4che/envelope.cpy",
+      "bytes": 143,
+      "sha256": "eecf381c207edf5af3aedbba84779cbfbd4648cc8e3a7b35ad3ad60639e09335"
+    },
+    {
+      "path": "cobol/eb01-mgnn4che/input.dat",
+      "bytes": 65840,
+      "sha256": "dc3f7749924e044b70c5ce1c3058575aa63adbabfe5494943ac4569424982774"
+    },
+    {
+      "path": "cobol/eb01-mgnn4che/output.dat",
+      "bytes": 65840,
+      "sha256": "dc3f7749924e044b70c5ce1c3058575aa63adbabfe5494943ac4569424982774"
+    },
+    {
+      "path": "cobol/eb01-mgnn4che/result.json",
+      "bytes": 1664,
+      "sha256": "1ce1d15ed228756a610f7ad6ccda6797a959cb6287d07ddf074f2facb0c59a26"
+    },
+    {
+      "path": "cobol/eb01-mgnn4che/roundtrip.cob",
+      "bytes": 1738,
+      "sha256": "2395441566c4b7454345e87b0e39287560ed73e57164dddba3328b211b4fbc43"
+    },
+    {
+      "path": "final_consumer.json",
+      "bytes": 1734,
+      "sha256": "a0883a7419f24799ac1c89ea1d4b04ca3b25afaf262ef2996354b643dbdc47d7"
+    },
+    {
+      "path": "final_demo.log",
+      "bytes": 1969,
+      "sha256": "8a48d3d93f15b04ef38667911c5ea5fc51c1f182341cb88ca0ea74415d24df68"
+    },
+    {
+      "path": "final_ruff.log",
+      "bytes": 19,
+      "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+    },
+    {
+      "path": "final_tests.log",
+      "bytes": 34658,
+      "sha256": "1c5e99d0bb24303be6e3b17100d1835fe7fb16e954bcc1f78dd233d588764b22"
+    },
+    {
+      "path": "numerical_rejection.json",
+      "bytes": 2890,
+      "sha256": "130bf47926010481271f25a1537f6210b9f15508b15a34db27622854b61f0e4a"
+    },
+    {
+      "path": "summary.json",
+      "bytes": 9361,
+      "sha256": "efee22713001699f424c65d4db10c32a3367324382cf5940e4c43aa12feb50c5"
+    }
+  ]
+}
