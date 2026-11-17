@@ -1,0 +1,271 @@
+{
+ "version": "experiment-bridge/printed-vs-executed-1",
+ "status": "OBSERVED",
+ "scope": "the two scripts in raw/working_notes.txt; nothing is repaired",
+ "notes_sha256": "e2edaf2b2fc8535bd40f0d89518e8059be0a6e147bf07c6c7f4aa4f9784a670a",
+ "speaker_label": {
+  "label": "DeepSeek",
+  "notes_line": 49,
+  "authenticated": false
+ },
+ "scripts": [
+  {
+   "script": "ncm_bridge_as_received.py",
+   "script_sha256": "0501cb9e78d7f43361c82cc12d15d8cb19e4ad452c71a5f714d4ff083a487ec9",
+   "source_in_notes": {
+    "found": true,
+    "notes_first_line": 364
+   },
+   "printed_block": {
+    "heading": "Output of the Script",
+    "notes_first_line": 491,
+    "lines": [
+     "--- TEST 1: Good Quantization (Hits 'better' vector) ---",
+     "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0608 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+     "--- TEST 2: The VOID Intercept (Residual doesn't fit) ---",
+     "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                  [ru'a] Dist: 0.6782 | VOID threshold exceeded. Distance: 0.6782 > 0.3"
+    ]
+   },
+   "execution": {
+    "returncode": 0,
+    "stderr": "",
+    "lines": [
+     "--- TEST 1: Good Quantization (Hits 'better' vector) ---",
+     "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+     "--- TEST 2: The VOID Intercept (Residual doesn't fit) ---",
+     "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3"
+    ]
+   },
+   "comparison": {
+    "lines_printed": 4,
+    "lines_executed": 4,
+    "lines_equal": 2,
+    "lines_differ": 2,
+    "verdict": "DIFFERS",
+    "differences": [
+     {
+      "line": 2,
+      "first_differing_column": 234,
+      "printed": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0608 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+      "executed": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+      "numbers_printed": [
+       "0.0608"
+      ],
+      "numbers_executed": [
+       "0.0574"
+      ],
+      "numbers_differ": [
+       {
+        "position": 0,
+        "printed": "0.0608",
+        "executed": "0.0574"
+       }
+      ],
+      "number_count_differs": false
+     },
+     {
+      "line": 4,
+      "first_differing_column": 214,
+      "printed": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                  [ru'a] Dist: 0.6782 | VOID threshold exceeded. Distance: 0.6782 > 0.3",
+      "executed": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+      "numbers_printed": [
+       "0.6782",
+       "0.6782",
+       "0.3"
+      ],
+      "numbers_executed": [
+       "0.7348",
+       "0.7348",
+       "0.3"
+      ],
+      "numbers_differ": [
+       {
+        "position": 0,
+        "printed": "0.6782",
+        "executed": "0.7348"
+       },
+       {
+        "position": 1,
+        "printed": "0.6782",
+        "executed": "0.7348"
+       }
+      ],
+      "number_count_differs": false
+     }
+    ]
+   }
+  },
+  {
+   "script": "ncm_level_walk_as_received.py",
+   "script_sha256": "38bd1d21653fa4abd0c536b0492e06d33870d62877b1b25cbf38f16a82418b5c",
+   "source_in_notes": {
+    "found": true,
+    "notes_first_line": 531
+   },
+   "printed_block": {
+    "heading": "Understanding the Output",
+    "notes_first_line": 688,
+    "lines": [
+     "INITIATING SEQUENTIAL LEVEL WALK...",
+     "Target Vector (z): [0.8, 0.9, 0.1]",
+     "----------------------------------------------------------------------------------------------------------------------------------",
+     "LVL-1 | Effort(Z_hat): 0001.00 | Flow(Res): 0001.00 | xamgu      | good                      | Lvl:1 Dist:0.3606 Rate:0001.2000 | jbovlaste glosses this entry \"good\"...",
+     "LVL-2 | Effort(Z_hat): 0001.80 | Flow(Res): 0000.10 | xagmau     | better                    | Lvl:2 Dist:0.2000 Rate:0000.5000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"...",
+     "LVL-3 | Effort(Z_hat): 0001.80 | Flow(Res): 0000.10 | VOID       | unresolved residual       | Lvl:3 Dist:0.1414 Rate:0000.0000 | Lvl:3 Dist:0.1414 Rate:0000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level."
+    ]
+   },
+   "execution": {
+    "returncode": 0,
+    "stderr": "",
+    "lines": [
+     "INITIATING SEQUENTIAL LEVEL WALK...",
+     "Target Vector (z): [0.8, 0.9, 0.1]",
+     "----------------------------------------------------------------------------------------------------------------------------------",
+     "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:1 Dist:0.5099 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+     "LVL-2 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:2 Dist:0.7071 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+     "LVL-3 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:3 Dist:1.1011 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level."
+    ]
+   },
+   "comparison": {
+    "lines_printed": 6,
+    "lines_executed": 6,
+    "lines_equal": 3,
+    "lines_differ": 3,
+    "verdict": "DIFFERS",
+    "differences": [
+     {
+      "line": 4,
+      "first_differing_column": 26,
+      "printed": "LVL-1 | Effort(Z_hat): 0001.00 | Flow(Res): 0001.00 | xamgu      | good                      | Lvl:1 Dist:0.3606 Rate:0001.2000 | jbovlaste glosses this entry \"good\"...",
+      "executed": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:1 Dist:0.5099 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+      "numbers_printed": [
+       "0001.00",
+       "0001.00",
+       "0.3606",
+       "0001.2000"
+      ],
+      "numbers_executed": [
+       "000.00",
+       "001.80",
+       "0.5099",
+       "000.0000"
+      ],
+      "numbers_differ": [
+       {
+        "position": 0,
+        "printed": "0001.00",
+        "executed": "000.00"
+       },
+       {
+        "position": 1,
+        "printed": "0001.00",
+        "executed": "001.80"
+       },
+       {
+        "position": 2,
+        "printed": "0.3606",
+        "executed": "0.5099"
+       },
+       {
+        "position": 3,
+        "printed": "0001.2000",
+        "executed": "000.0000"
+       }
+      ],
+      "number_count_differs": false
+     },
+     {
+      "line": 5,
+      "first_differing_column": 26,
+      "printed": "LVL-2 | Effort(Z_hat): 0001.80 | Flow(Res): 0000.10 | xagmau     | better                    | Lvl:2 Dist:0.2000 Rate:0000.5000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"...",
+      "executed": "LVL-2 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:2 Dist:0.7071 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+      "numbers_printed": [
+       "0001.80",
+       "0000.10",
+       "0.2000",
+       "0000.5000"
+      ],
+      "numbers_executed": [
+       "000.00",
+       "001.80",
+       "0.7071",
+       "000.0000"
+      ],
+      "numbers_differ": [
+       {
+        "position": 0,
+        "printed": "0001.80",
+        "executed": "000.00"
+       },
+       {
+        "position": 1,
+        "printed": "0000.10",
+        "executed": "001.80"
+       },
+       {
+        "position": 2,
+        "printed": "0.2000",
+        "executed": "0.7071"
+       },
+       {
+        "position": 3,
+        "printed": "0000.5000",
+        "executed": "000.0000"
+       }
+      ],
+      "number_count_differs": false
+     },
+     {
+      "line": 6,
+      "first_differing_column": 26,
+      "printed": "LVL-3 | Effort(Z_hat): 0001.80 | Flow(Res): 0000.10 | VOID       | unresolved residual       | Lvl:3 Dist:0.1414 Rate:0000.0000 | Lvl:3 Dist:0.1414 Rate:0000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+      "executed": "LVL-3 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:3 Dist:1.1011 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.",
+      "numbers_printed": [
+       "0001.80",
+       "0000.10",
+       "0.1414",
+       "0000.0000",
+       "0.1414",
+       "0000.0000"
+      ],
+      "numbers_executed": [
+       "000.00",
+       "001.80",
+       "1.1011",
+       "000.0000"
+      ],
+      "numbers_differ": [
+       {
+        "position": 0,
+        "printed": "0001.80",
+        "executed": "000.00"
+       },
+       {
+        "position": 1,
+        "printed": "0000.10",
+        "executed": "001.80"
+       },
+       {
+        "position": 2,
+        "printed": "0.1414",
+        "executed": "1.1011"
+       },
+       {
+        "position": 3,
+        "printed": "0000.0000",
+        "executed": "000.0000"
+       }
+      ],
+      "number_count_differs": true
+     }
+    ]
+   }
+  }
+ ],
+ "human_interest": null,
+ "ai_interest": null,
+ "summary": {
+  "ncm_bridge_as_received.py": "DIFFERS",
+  "ncm_level_walk_as_received.py": "DIFFERS"
+ }
+}

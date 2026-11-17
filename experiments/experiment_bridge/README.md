@@ -43,3 +43,33 @@ Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate c
 ## Subsequent adversarial pass
 
 Note 2026-11-17, after v1: [adversarial/README.md](adversarial/README.md) records reproduced numerical, semantic-validation, resource-ingestion and output-preservation breakages. [v1_1](v1_1/README.md) contains separate candidate fixes and externally context-checked decoding. The retained v1 modules, contract and runs remain unchanged. The final 213-case experiment execution passes, including legacy/inherited compatibility cases; it is not an exhaustive attack count or a security/semantic certification. Trust limits and unimplemented protections stay explicit.
+
+## Subsequent reusable checks
+
+Note 2026-11-17, after the audit: two harnesses under `evidence/` turn findings the audit already holds into checks that can be run again. Both run unchanged specimens on copies in a temporary directory and refuse to overwrite an existing output file.
+
+```sh
+python experiments/experiment_bridge/evidence/printed_vs_executed.py --check experiments/experiment_bridge/evidence/printed_vs_executed.json
+python tests/test_experiment_bridge_tools.py
+```
+
+`printed_vs_executed.py` (T1) reads the two blocks of output printed in `raw/working_notes.txt`, runs the two as-received scripts and diffs them. Snapshot: `evidence/printed_vs_executed.json`. Both differ: the bridge prints distances 0.0608 and 0.6782 where execution gives 0.0574 and 0.7348, and the level walk prints two accepted levels where execution gives three VOIDs. These are the numbers in the [code audit](audit/code-audit.md); the speaker label in the notes is as supplied and is not authenticated.
+
+`claim_tools.py` takes a received claim-emitting script and records three things: a two-run replay with claims compared by scope, every claim whose `measured` value is a literal in the source (flagged STRUCTURAL, with the probe that backs it when one is named), and the stated reason for each tolerance (UNSOURCED when the source gives none). Run on the round-1 Kimi toy, snapshot `evidence/kimi_round1_claim_tools.json`: 4 of 4 claims equal on both comparisons; `void_escape_integrity` is STRUCTURAL (measured is the literal `0.0`), backed by the independent census in `evidence/kimi_reproduction.json`; all four tolerances are UNSOURCED in the source.
+
+## Subsequent specimens — Kimi round 2
+
+Note 2026-11-17, after the reusable checks: `evidence/kimi_round2_as_received/` holds seven files as received (three scripts, their seed-0 records, the revised entry with its errata and addendum), with sha256 in `MANIFEST.json`. The manifest also accounts for the four archive members that are byte-identical to round 1 and for the files attached separately; the archive itself is not committed.
+
+```sh
+python experiments/experiment_bridge/evidence/reproduce_kimi_round2.py --output /tmp/experiment-bridge-kimi-round2.json
+```
+
+Snapshot: `evidence/kimi_round2_reproduction.json`.
+
+- **Replay.** 21 claims across the three scripts; 21 of 21 equal between the saved records and a replay, and 21 of 21 between two replays, with only `claims[].ts` left out. Verdicts as recorded: 17 pass, 3 fail, 1 void.
+- **STRUCTURAL.** `void_escape_integrity` reports `measured = 0.0` as a literal in both RVQ scripts (`toy_rvq_void_v2.py` line 458, `toy_rvq_orthogonal.py` line 351). The probe the v2 claim names, `seventeenth_real_code_roundtrips`, covers the index-collision failure only. What backs the count is the replay harness's own recount: 4,000 held-out levels per script, 0 accepted over threshold, 0 rejected within it, at seed 0 in the declared configuration.
+- **Tolerance provenance.** All 21 rows are in the snapshot. No tolerance has a reason in a source comment. Three have a reason in the claim's own text, read by hand and checked to be present (`projection_dominance`, both `adaptive_refresh_bound`). The other 18 are UNSOURCED; three of those state a band without saying why.
+- **Claim table.** The snapshot findings are EBR_016 to EBR_019 in [CLAIM_TABLE.md](CLAIM_TABLE.md).
+
+These are synthetic toys. The entry's addendum reads the orthogonal variant as pricing a power-conjugate reading; that interpretation is the entry's and is not adopted here (see [SCOPE_BOUNDARY.md](SCOPE_BOUNDARY.md)). The addendum is dated 2026-11-18 inside a file received on 2026-11-17; the date is kept as received.
