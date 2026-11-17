@@ -87,5 +87,58 @@
    "what": "A run with a 256-bit cap was added to exercise the modular and VOID branches. At the declared cap of 65536 bits the 40-step run stops at step 19 with full rank already, so the declared configuration never reaches the modular branch. The declaration expected denominators to double per step; measured growth is about 1.6 times per step. The declared cap and step counts are unchanged and still run.",
    "changes_a_declared_value": false
   }
- ]
+ ],
+ "round3": {
+  "declared": "2026-11-17",
+  "note": "written and committed before any round-3 code was run",
+  "time_shuffle_guard": {
+   "what": "a second guard, independent of R^2: the time order of the states is shuffled, derivatives (or the map target) are recomputed from the shuffled order, and the SAME selected structure is refitted",
+   "shuffles": 19,
+   "rule": "passes only if the residual sum of squares in the true order is below that of every shuffle (rank 1 of 20, level 0.05 on exchangeable data)",
+   "expected_on_pure_noise": "about 0.05 per dataset, so about 2 of 40 by chance; the bar stays 0 and the count is reported as measured",
+   "guards_reported": [
+    "r2_only",
+    "shuffle_only",
+    "both"
+   ],
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "null_trials_per_family": 40,
+   "power_check": "the planted F2, F3 (STLSQ) and F4 data must pass the shuffle guard"
+  },
+  "f4_rename": {
+   "linear_guard": "linear_comparison",
+   "reason": "round 2 measured the quadratic beating it on 398 of 400 pure-noise series, so it compares two fits and guards nothing",
+   "specimen": "the received file keeps its own names; the rename is in this folder's code and records"
+  },
+  "stlsq_sweep": {
+   "thresholds": [
+    "0.01",
+    "0.02",
+    "0.05",
+    "0.1",
+    "0.2",
+    "0.5",
+    "1.0"
+   ],
+   "systems": {
+    "lorenz": "as in round 2",
+    "lorenz_small_term": "Lorenz with + 0.05 * x added to dz/dt; planted z set {xy, z, x}; same start, step and length"
+   },
+   "logged": "per threshold and system: components recovered and the cause of each miss (OVER_SELECTION, UNDER_SELECTION when a planted term is missing and nothing extra is present, SWAP, OTHER); the lowest and highest threshold that recover 3 of 3"
+  },
+  "noisy_lorenz": {
+   "noise": "0.001 * N(0,1) added to every coordinate of the round-2 trajectory, seed 0",
+   "stlsq": "threshold 0.1, reported as it comes",
+   "exact_tier": {
+    "float_states": "must read NOT_ENGAGED",
+    "rationalised_states": "an exact Euler trajectory of 14 states with 0.001 * N(0,1) noise rounded to 9 decimals added as fractions: solved on the first 10 transitions, verified on all; must read FAIL, located",
+    "control": "the same 14 states with no noise must read PASS",
+    "bar": "a pass on noisy data is a defect of the tier"
+   }
+  }
+ }
 }
