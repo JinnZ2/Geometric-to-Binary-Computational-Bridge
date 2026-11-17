@@ -73,3 +73,8 @@ Snapshot: `evidence/kimi_round2_reproduction.json`.
 - **Claim table.** The snapshot findings are EBR_016 to EBR_019 in [CLAIM_TABLE.md](CLAIM_TABLE.md).
 
 These are synthetic toys. The entry's addendum reads the orthogonal variant as pricing a power-conjugate reading; that interpretation is the entry's and is not adopted here (see [SCOPE_BOUNDARY.md](SCOPE_BOUNDARY.md)). The addendum is dated 2026-11-18 inside a file received on 2026-11-17; the date is kept as received.
+
+## Subsequent specimen and additions — equation_search
+
+Note 2026-11-17, after Kimi round 2: `evidence/equation_search_as_received/` holds `equation_search.py` as received (pasted as text; cut from the session transcript by program, not retyped; no record came with it). [eqsearch/](eqsearch/README.md) adds, beside it and without editing it, a round 2 (two more F3 branches, nulls for F2, F3 and F4, an F4 noise sweep, a tolerance source per claim, seeds 0 to 9) and an exact tier that recovers the Lorenz Euler step map in rationals. Thresholds were committed in `eqsearch/DECLARED.json` before any run. Generated data only; nothing is promoted.
+
