@@ -1,0 +1,531 @@
+{
+  "instrument": "toy_rvq_void_v2.py",
+  "supersedes": "toy_rvq_void.py (kept as unrepaired specimen)",
+  "seed": 0,
+  "params": {
+    "dims": 8,
+    "levels": 4,
+    "codes_per_level": 16,
+    "void_index": null,
+    "n_train": 2000,
+    "n_test": 1000,
+    "void_rate_target": 0.01,
+    "calibration": "gated"
+  },
+  "tau_per_level": [
+    9.990962254366492,
+    5.768587315166311,
+    3.8954717210071323,
+    2.662165751723521
+  ],
+  "train": {
+    "split": "train",
+    "n": 2000,
+    "signal_energy": 28565.305734169015,
+    "per_level_captured_energy": [
+      21987.287039604256,
+      2829.8984196678175,
+      1240.4702222578678,
+      745.3512397237293
+    ],
+    "per_level_void_rate": [
+      0.0095,
+      0.0095,
+      0.0095,
+      0.0095
+    ],
+    "codepath_distinct": 1944,
+    "codepath_collision_rate": 0.028000000000000025,
+    "level1_only_residual_energy_frac": 0.24552140445772164,
+    "final_residual_energy_frac": 0.08172085931557156,
+    "energy_identity_defect_sum": 20.99877447378361,
+    "energy_identity_defect_worst_rel": 4.009105647331735
+  },
+  "held_out": {
+    "split": "held_out",
+    "n": 1000,
+    "signal_energy": 14016.982184959623,
+    "per_level_captured_energy": [
+      10794.423279897575,
+      1418.7799968083655,
+      624.4753823628402,
+      375.61233601728134
+    ],
+    "per_level_void_rate": [
+      0.007,
+      0.007,
+      0.007,
+      0.008
+    ],
+    "codepath_distinct": 985,
+    "codepath_collision_rate": 0.015000000000000013,
+    "level1_only_residual_energy_frac": 0.24838060886903807,
+    "final_residual_energy_frac": 0.07599630580025984,
+    "energy_identity_defect_sum": 47.95455336826146,
+    "energy_identity_defect_worst_rel": 1.5036325501281391
+  },
+  "ungated_control": {
+    "tau_per_level": [
+      9.990962254366492,
+      5.288310334118061,
+      3.443865664645253,
+      2.1631638746716177
+    ],
+    "train": {
+      "split": "train_ungated_control",
+      "n": 2000,
+      "signal_energy": 28565.305734169015,
+      "per_level_captured_energy": [
+        21987.287039604256,
+        2824.2007179419975,
+        1236.9042278989136,
+        742.5146877925897
+      ],
+      "per_level_void_rate": [
+        0.0095,
+        0.011,
+        0.012,
+        0.013
+      ],
+      "codepath_distinct": 1944,
+      "codepath_collision_rate": 0.028000000000000025,
+      "level1_only_residual_energy_frac": 0.24552140445772164,
+      "final_residual_energy_frac": 0.08265323287140179,
+      "energy_identity_defect_sum": 37.488010277925085,
+      "energy_identity_defect_worst_rel": 4.009105647331735
+    }
+  },
+  "probes": [
+    {
+      "probe": "over_threshold_rejects_and_preserves_residual",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "([None, 0], [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])"
+    },
+    {
+      "probe": "threshold_equality_accepts",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "([0], [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])"
+    },
+    {
+      "probe": "NaN_threshold_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: taus: must be finite and >= 0"
+    },
+    {
+      "probe": "NaN_input_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: encode input: non-finite or non-numeric component"
+    },
+    {
+      "probe": "extra_input_dimension_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: encode input: expected 8 dims, got 9"
+    },
+    {
+      "probe": "empty_input_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: encode input: expected 8 dims, got 0"
+    },
+    {
+      "probe": "missing_tau_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: taus: expected 1, got 0"
+    },
+    {
+      "probe": "extra_tau_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: taus: expected 1, got 2"
+    },
+    {
+      "probe": "empty_book_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "IndexError: list index out of range"
+    },
+    {
+      "probe": "decode_negative_index_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: decode: index -1 outside book 0"
+    },
+    {
+      "probe": "decode_invalid_index_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: decode: index 17 outside book 0"
+    },
+    {
+      "probe": "decode_short_book_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: decode book 0: expected 8 dims, got 1"
+    },
+    {
+      "probe": "seventeenth_real_code_roundtrips",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "([16], [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])"
+    },
+    {
+      "probe": "decode_length_mismatch_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: decode: 1 indices for 0 books"
+    },
+    {
+      "probe": "measure_empty_data_returns_nulls",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "{'split': 'empty', 'n': 0, 'signal_energy': None, 'per_level_captured_energy': None, 'per_level_void_rate': None, 'codep"
+    },
+    {
+      "probe": "measure_zero_energy_returns_nulls",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "{'split': 'zero', 'n': 1, 'signal_energy': 0.0, 'per_level_captured_energy': [0.0], 'per_level_void_rate': [0.0], 'codep"
+    },
+    {
+      "probe": "measure_zero_levels",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "{'split': 'none', 'n': 1, 'signal_energy': 1.0, 'per_level_captured_energy': [], 'per_level_void_rate': [], 'codepath_di"
+    },
+    {
+      "probe": "threshold_target_zero_keeps_everything",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "[1.0]"
+    },
+    {
+      "probe": "kmeans_more_codes_than_samples_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: kmeans: more codes than samples"
+    },
+    {
+      "probe": "ragged_kmeans_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: kmeans data: expected 1 dims, got 2"
+    },
+    {
+      "probe": "nearest_overflow_yields_inf_not_raise",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "(0, inf)"
+    },
+    {
+      "probe": "verdict_NaN_measured_fails",
+      "expected": "value",
+      "actual": "value",
+      "ok": true,
+      "detail": "'fail'"
+    },
+    {
+      "probe": "infinite_tau_rejected",
+      "expected": "reject",
+      "actual": "rejected",
+      "ok": true,
+      "detail": "ValueError: taus: must be finite and >= 0"
+    }
+  ],
+  "claims": [
+    {
+      "scope": "fab::contextual::rvq::v2::level1_residual_energy_frac",
+      "rate_var": "dE_residual/dlevel",
+      "kind": "contextual",
+      "value": 0.24552140445772164,
+      "tol_frac": 0.25,
+      "measurement": "encode held-out split; decode with ONLY the level-1 index; residual energy / signal energy",
+      "failure": "- codebook overfit -> held-out worse than train (drift/fail)\n- source distribution shift -> level-1 codes no longer stand alone",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 0.24838060886903807,
+      "verdict": "pass",
+      "ts": 1794933891.4112473
+    },
+    {
+      "scope": "fab::contextual::rvq::v2::energy_identity_defect",
+      "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 1e-06,
+      "measurement": "per sample: |z|^2 - (|z_hat|^2 + |r|^2) == 2<z_hat,r>; identity holds only if the split is orthogonal; report worst relative magnitude over held-out split",
+      "failure": "- non-orthogonal codebook entries -> defect != 0: the\n  effort/flow energy reading of this substrate is VOID,\n  use bookkeeping reading only\n- NOTE: expected to KEEP FAILING under v2; input hygiene\n  does not change clean-data numerics",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 1.5036325501281391,
+      "verdict": "fail",
+      "ts": 1794933891.4112473
+    },
+    {
+      "scope": "fab::contextual::rvq::v2::void_escape_integrity",
+      "rate_var": "dN_silent_snap/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "count held-out residuals whose min distance exceeds tau_k that were nevertheless snapped to a code (must be zero); VOID is now the null index, so no codebook size can collide with it (regression probe: seventeenth_real_code_roundtrips)",
+      "failure": "- threshold not applied at some level -> silent snap returns\n- any reintroduction of a sentinel index -> probe fails",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794933891.4112473
+    },
+    {
+      "scope": "fab::contextual::rvq::v2::codepath_collision_rate",
+      "rate_var": "dN_shared_path/dn",
+      "kind": "contextual",
+      "value": 0.028000000000000025,
+      "tol_frac": 0.5,
+      "measurement": "full index-tuple census over held-out split: 1 - distinct_paths/n; VOID positions (None) included",
+      "failure": "- degenerate/discrete source -> collision rate >> train",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 0.015000000000000013,
+      "verdict": "pass",
+      "ts": 1794933891.4112473,
+      "distinct_paths_train": 1944,
+      "distinct_paths_held_out": 985
+    },
+    {
+      "scope": "fab::contextual::rvq::v2::void_rate_calibration",
+      "rate_var": "dN_void/dn",
+      "kind": "contextual",
+      "value": 0.01,
+      "tol_frac": 0.5,
+      "measurement": "gated calibration: worst per-level encoded VOID rate on the held-out split, compared against the 0.010 target; gated tau fitting removes the trajectory mismatch documented in the received specimen (ungated control kept in this record)",
+      "failure": "- calibration on the wrong trajectory -> later levels drift\n  from target (specimen: train rates [0.0095,0.011,0.012,0.013])\n- undersized held-out split -> binomial noise exceeds band",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 0.008,
+      "verdict": "pass",
+      "ts": 1794933891.4112473,
+      "held_out_void_rates": [
+        0.007,
+        0.007,
+        0.007,
+        0.008
+      ],
+      "train_void_rates_gated": [
+        0.0095,
+        0.0095,
+        0.0095,
+        0.0095
+      ],
+      "ungated_control_train_void_rates": [
+        0.0095,
+        0.011,
+        0.012,
+        0.013
+      ],
+      "ungated_control_taus": [
+        9.990962254366492,
+        5.288310334118061,
+        3.443865664645253,
+        2.1631638746716177
+      ]
+    },
+    {
+      "scope": "fab::contextual::rvq::v2::adversarial_probe_suite",
+      "rate_var": "dN_fail_open/dprobe",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "run the 23-probe adversarial census ported from the received specimen's audit; every probe must land in its declared category (rejected, or correct declared value); count mismatches",
+      "failure": "- any probe returns silently where rejection was declared ->\n  fail-open channel is back\n- any probe raises where a declared value was expected ->\n  over-validation broke a documented behavior",
+      "provenance": "toy_rvq_void_v2.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794933891.4112473,
+      "probe_results": [
+        {
+          "probe": "over_threshold_rejects_and_preserves_residual",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "([None, 0], [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [10.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])"
+        },
+        {
+          "probe": "threshold_equality_accepts",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "([0], [[1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]])"
+        },
+        {
+          "probe": "NaN_threshold_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: taus: must be finite and >= 0"
+        },
+        {
+          "probe": "NaN_input_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: encode input: non-finite or non-numeric component"
+        },
+        {
+          "probe": "extra_input_dimension_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: encode input: expected 8 dims, got 9"
+        },
+        {
+          "probe": "empty_input_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: encode input: expected 8 dims, got 0"
+        },
+        {
+          "probe": "missing_tau_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: taus: expected 1, got 0"
+        },
+        {
+          "probe": "extra_tau_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: taus: expected 1, got 2"
+        },
+        {
+          "probe": "empty_book_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "IndexError: list index out of range"
+        },
+        {
+          "probe": "decode_negative_index_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: decode: index -1 outside book 0"
+        },
+        {
+          "probe": "decode_invalid_index_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: decode: index 17 outside book 0"
+        },
+        {
+          "probe": "decode_short_book_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: decode book 0: expected 8 dims, got 1"
+        },
+        {
+          "probe": "seventeenth_real_code_roundtrips",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "([16], [16.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])"
+        },
+        {
+          "probe": "decode_length_mismatch_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: decode: 1 indices for 0 books"
+        },
+        {
+          "probe": "measure_empty_data_returns_nulls",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "{'split': 'empty', 'n': 0, 'signal_energy': None, 'per_level_captured_energy': None, 'per_level_void_rate': None, 'codep"
+        },
+        {
+          "probe": "measure_zero_energy_returns_nulls",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "{'split': 'zero', 'n': 1, 'signal_energy': 0.0, 'per_level_captured_energy': [0.0], 'per_level_void_rate': [0.0], 'codep"
+        },
+        {
+          "probe": "measure_zero_levels",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "{'split': 'none', 'n': 1, 'signal_energy': 1.0, 'per_level_captured_energy': [], 'per_level_void_rate': [], 'codepath_di"
+        },
+        {
+          "probe": "threshold_target_zero_keeps_everything",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "[1.0]"
+        },
+        {
+          "probe": "kmeans_more_codes_than_samples_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: kmeans: more codes than samples"
+        },
+        {
+          "probe": "ragged_kmeans_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: kmeans data: expected 1 dims, got 2"
+        },
+        {
+          "probe": "nearest_overflow_yields_inf_not_raise",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "(0, inf)"
+        },
+        {
+          "probe": "verdict_NaN_measured_fails",
+          "expected": "value",
+          "actual": "value",
+          "ok": true,
+          "detail": "'fail'"
+        },
+        {
+          "probe": "infinite_tau_rejected",
+          "expected": "reject",
+          "actual": "rejected",
+          "ok": true,
+          "detail": "ValueError: taus: must be finite and >= 0"
+        }
+      ]
+    }
+  ],
+  "runtime_s": 7.324302434921265
+}

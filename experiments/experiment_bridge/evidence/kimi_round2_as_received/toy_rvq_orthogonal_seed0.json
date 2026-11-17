@@ -1,0 +1,144 @@
+{
+  "instrument": "toy_rvq_orthogonal.py",
+  "companions": [
+    "toy_rvq_void.py (specimen)",
+    "toy_rvq_void_v2.py"
+  ],
+  "seed": 0,
+  "params": {
+    "dims": 8,
+    "levels": 4,
+    "codes_per_level": 16,
+    "void_index": null,
+    "n_train": 2000,
+    "n_test": 1000,
+    "void_rate_target": 0.01,
+    "calibration": "gated",
+    "decode": [
+      "unit_gain (control)",
+      "projection (gains transmitted)"
+    ]
+  },
+  "tau_per_level": [
+    9.990962254366492,
+    5.768587315166311,
+    3.8954717210071323,
+    2.662165751723521
+  ],
+  "train": {
+    "split": "train",
+    "n": 2000,
+    "signal_energy": 28565.305734169015,
+    "unit_residual_energy_frac": 0.08172085931557156,
+    "proj_residual_energy_frac": 0.06591859327242362,
+    "residual_ratio_proj_over_unit": 0.8066311811268867,
+    "unit_energy_identity_defect_worst_rel": 4.009105647331735,
+    "proj_energy_identity_defect_worst_rel": 1.6434771281820481e-15,
+    "per_level_void_rate": [
+      0.0095,
+      0.0095,
+      0.0095,
+      0.0095
+    ],
+    "codepath_distinct": 1944,
+    "codepath_collision_rate": 0.028000000000000025,
+    "avg_gains_per_sample": 3.962,
+    "gain_abs_max": 4.658596361054994,
+    "projection_fallback_count": 0
+  },
+  "held_out": {
+    "split": "held_out",
+    "n": 1000,
+    "signal_energy": 14016.982184959623,
+    "unit_residual_energy_frac": 0.07599630580025984,
+    "proj_residual_energy_frac": 0.05707729757670132,
+    "residual_ratio_proj_over_unit": 0.751053580508464,
+    "unit_energy_identity_defect_worst_rel": 1.5036325501281391,
+    "proj_energy_identity_defect_worst_rel": 2.6162718253223797e-15,
+    "per_level_void_rate": [
+      0.007,
+      0.007,
+      0.007,
+      0.008
+    ],
+    "codepath_distinct": 985,
+    "codepath_collision_rate": 0.015000000000000013,
+    "avg_gains_per_sample": 3.971,
+    "gain_abs_max": 3.885141528130596,
+    "projection_fallback_count": 0
+  },
+  "claims": [
+    {
+      "scope": "fab::contextual::rvq::orth::projection_energy_identity",
+      "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 1e-09,
+      "measurement": "per sample, projection decode: worst |defect|/|z|^2 over the held-out split; identity holds iff z_hat is the orthogonal projection of z onto the accepted-code span",
+      "failure": "- gain solve skipped or approximated -> defect returns\n- singular Gram fallback engages -> sample reverts to unit gain",
+      "provenance": "toy_rvq_orthogonal.py",
+      "measured": 2.6162718253223797e-15,
+      "verdict": "pass",
+      "ts": 1794933974.115968
+    },
+    {
+      "scope": "fab::contextual::rvq::orth::unit_gain_control_identity",
+      "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 1e-09,
+      "measurement": "CONTROL: same index stream, unit-gain decode; worst relative defect over held-out split. EXPECTED TO FAIL -- reproduces the specimen's claim-2 result on this stream",
+      "failure": "- never refuted on any stream; if it passes, the pairing\n  with O1 is broken, not the physics",
+      "provenance": "toy_rvq_orthogonal.py",
+      "measured": 1.5036325501281391,
+      "verdict": "fail",
+      "ts": 1794933974.115968
+    },
+    {
+      "scope": "fab::contextual::rvq::orth::projection_dominance",
+      "rate_var": "dE_residual/ddecode",
+      "kind": "contextual",
+      "value": 1.0,
+      "tol_frac": 0.0,
+      "measurement": "ratio = proj_residual_frac / unit_residual_frac on held-out split; one-sided: pass iff ratio <= 1 + 1e-9 (projection is optimal in the span, so any ratio > 1 is an implementation bug); the SIZE below 1 is the measured content",
+      "failure": "- gains fitted against a different stream than decoded ->\n  ratio can exceed 1\n- fallback rate high -> ratio drifts toward 1",
+      "provenance": "toy_rvq_orthogonal.py",
+      "measured": 0.751053580508464,
+      "verdict": "pass",
+      "ts": 1794933974.115968,
+      "train_unit_frac": 0.08172085931557156,
+      "train_proj_frac": 0.06591859327242362,
+      "heldout_unit_frac": 0.07599630580025984,
+      "heldout_proj_frac": 0.05707729757670132,
+      "fallback_count_heldout": 0
+    },
+    {
+      "scope": "fab::contextual::rvq::orth::gain_channel_cost",
+      "rate_var": "dN_gain/dsample",
+      "kind": "contextual",
+      "value": 3.962,
+      "tol_frac": 0.1,
+      "measurement": "average number of transmitted gains per sample (accepted levels only; VOID transmits no gain); the continuous channel the power reading costs, measured -- it is NOT a symbol",
+      "failure": "- VOID rate shift -> gains/sample drifts from train",
+      "provenance": "toy_rvq_orthogonal.py",
+      "measured": 3.971,
+      "verdict": "pass",
+      "ts": 1794933974.115968,
+      "gain_abs_max_heldout": 3.885141528130596
+    },
+    {
+      "scope": "fab::contextual::rvq::orth::void_escape_integrity",
+      "rate_var": "dN_silent_snap/dn",
+      "kind": "contextual",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "count held-out residuals over threshold that were snapped to a code anyway (must be zero); VOID levels are excluded from the projection span and transmit no gain",
+      "failure": "- threshold not applied -> silent snap returns",
+      "provenance": "toy_rvq_orthogonal.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794933974.115968
+    }
+  ],
+  "runtime_s": 6.376230955123901
+}

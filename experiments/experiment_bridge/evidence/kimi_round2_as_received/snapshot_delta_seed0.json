@@ -1,0 +1,485 @@
+{
+  "instrument": "snapshot_delta.py",
+  "seed": 0,
+  "params": {
+    "fib_levels": 25,
+    "fib_snap_every": 5,
+    "sink": {
+      "lambda": -0.1,
+      "omega": 6.283185307179586,
+      "dt": 0.01,
+      "T": 50.0
+    },
+    "lorenz": {
+      "sigma": 10.0,
+      "rho": 28.0,
+      "beta": 2.6666666666666665,
+      "dt": 0.005,
+      "discard": 5.0,
+      "T": 55.0
+    },
+    "q_digits": 3,
+    "tau_sweep_sink": [
+      0.5,
+      0.1,
+      0.01
+    ],
+    "tau_sweep_lorenz": [
+      2.0,
+      0.5,
+      0.1
+    ],
+    "ra_snapshot_every": 100,
+    "ra_queries": 200
+  },
+  "system_a": {
+    "word_resume": {
+      "snapshot_levels": [
+        0,
+        5,
+        10,
+        15,
+        20,
+        25
+      ],
+      "levels_checked": 26,
+      "mismatched_levels": 0
+    },
+    "count_resume": {
+      "levels_checked": 26,
+      "mismatched_levels": 0
+    },
+    "count_vs_actual_letters_mismatch": 0,
+    "word_from_counts": {
+      "level": 25,
+      "letter_counts": [
+        121393,
+        75025
+      ],
+      "distinct_words_with_same_counts_log10": 56725.499832662616,
+      "small_case": {
+        "level": 8,
+        "counts": [
+          34,
+          21
+        ],
+        "distinct_words_exact": 841728816603675
+      },
+      "reading": "the count snapshot is a codebook of size 1 in log10 ~ 56725.5 / log2 of the language; decoding a word from counts is VOID"
+    },
+    "exact_random_access": {
+      "queries": 26,
+      "snapshot_every": 5,
+      "full_work_letters": 1346212,
+      "delta_work_letters": 870968,
+      "predicted_ratio_from_closed_form": 1.5456503568443387,
+      "measured_ratio": 1.5456503568443387,
+      "snapshot_storage_letters": 215884,
+      "full_storage_letters": 514227
+    },
+    "concatenation_view_mismatches": 0,
+    "word_sha256": {
+      "0": "72dfcfb0c470ac25",
+      "1": "e60e21bf756c08cf",
+      "2": "a99eb9d956f10a74",
+      "3": "771556240e0ce892",
+      "4": "5f598a98854624d7",
+      "5": "4992035b7aa49bea",
+      "6": "05ed711f711e1aeb",
+      "7": "dc49e019164b5650",
+      "8": "eb929f92dc5e997e",
+      "9": "38b3e5babe518366",
+      "10": "e8be0bfa1c1241b2",
+      "11": "8d49389b01285935",
+      "12": "69969d2fd17a56da",
+      "13": "9f6f114354d1bcca",
+      "14": "6f71db5fa860d5d1",
+      "15": "57506daa0bbe4ce4",
+      "16": "f0f19cd61d411635",
+      "17": "72c366d167f0c696",
+      "18": "c4a4b6693fc2ab35",
+      "19": "1d29a1f141e6b222",
+      "20": "d15a2b8b27af2dbd",
+      "21": "9a0324d744085b54",
+      "22": "c4e594ec428b14a6",
+      "23": "769f5c049ece4f18",
+      "24": "dc39b30432b42308",
+      "25": "3f3cd68b6d3dcab2"
+    },
+    "level_lengths": [
+      1,
+      2,
+      3,
+      5,
+      8,
+      13,
+      21,
+      34,
+      55,
+      89,
+      144,
+      233,
+      377,
+      610,
+      987,
+      1597,
+      2584,
+      4181,
+      6765,
+      10946,
+      17711,
+      28657,
+      46368,
+      75025,
+      121393,
+      196418
+    ]
+  },
+  "drift_sink": {
+    "case": "sink",
+    "dt": 0.01,
+    "steps": 5000,
+    "perturb_at_step": 2000,
+    "horizon_s": 30.0,
+    "bitwise_resume_mismatches": 0,
+    "injected_delta": 0.00033535068744395814,
+    "horizon_error": 1.669613873929745e-05,
+    "horizon_error_over_delta": 0.04978710157583205,
+    "log_error_slope_per_s": null,
+    "snapshots_kept": {
+      "exact_state": [
+        0.13533534339769818,
+        -2.2111511444686954e-06
+      ],
+      "quantized_state": [
+        0.135,
+        -0.0
+      ]
+    }
+  },
+  "drift_lorenz": {
+    "case": "lorenz",
+    "dt": 0.005,
+    "steps": 11000,
+    "perturb_at_step": 5000,
+    "horizon_s": 30.0,
+    "bitwise_resume_mismatches": 0,
+    "injected_delta": 0.0006198468327440138,
+    "horizon_error": 10.52524374573929,
+    "horizon_error_over_delta": 16980.39449382173,
+    "log_error_slope_per_s": 0.35296910832877687,
+    "snapshots_kept": {
+      "exact_state": [
+        -1.39433938209991,
+        -2.473360353550427,
+        11.86062693806812
+      ],
+      "quantized_state": [
+        -1.394,
+        -2.473,
+        11.861
+      ]
+    }
+  },
+  "adaptive_sink": {
+    "case": "sink",
+    "dt": 0.01,
+    "window_steps": 5000,
+    "runs": [
+      {
+        "tau": 0.5,
+        "refreshes": 6,
+        "refresh_frac": 0.0012,
+        "mean_steps_between_refreshes": 833.3333333333334,
+        "max_deviation": 0.50080394536297,
+        "channel_bytes_state3_float8": 96,
+        "full_channel_bytes": 80000
+      },
+      {
+        "tau": 0.1,
+        "refreshes": 21,
+        "refresh_frac": 0.0042,
+        "mean_steps_between_refreshes": 238.0952380952381,
+        "max_deviation": 0.10125757436799802,
+        "channel_bytes_state3_float8": 336,
+        "full_channel_bytes": 80000
+      },
+      {
+        "tau": 0.01,
+        "refreshes": 189,
+        "refresh_frac": 0.0378,
+        "mean_steps_between_refreshes": 26.455026455026456,
+        "max_deviation": 0.011840559127619747,
+        "channel_bytes_state3_float8": 3024,
+        "full_channel_bytes": 80000
+      }
+    ]
+  },
+  "adaptive_lorenz": {
+    "case": "lorenz",
+    "dt": 0.005,
+    "window_steps": 10000,
+    "runs": [
+      {
+        "tau": 2.0,
+        "refreshes": 73,
+        "refresh_frac": 0.0073,
+        "mean_steps_between_refreshes": 136.986301369863,
+        "max_deviation": 2.0896491838173628,
+        "channel_bytes_state3_float8": 1752,
+        "full_channel_bytes": 240000
+      },
+      {
+        "tau": 0.5,
+        "refreshes": 261,
+        "refresh_frac": 0.0261,
+        "mean_steps_between_refreshes": 38.31417624521073,
+        "max_deviation": 0.5774016895742096,
+        "channel_bytes_state3_float8": 6264,
+        "full_channel_bytes": 240000
+      },
+      {
+        "tau": 0.1,
+        "refreshes": 1092,
+        "refresh_frac": 0.1092,
+        "mean_steps_between_refreshes": 9.157509157509157,
+        "max_deviation": 0.1916488489865856,
+        "channel_bytes_state3_float8": 26208,
+        "full_channel_bytes": 240000
+      }
+    ]
+  },
+  "random_access": {
+    "queries": 200,
+    "snapshot_every": 100,
+    "full_restart_steps": 1193438,
+    "delta_resume_steps": 9338,
+    "speedup": 127.80445491539945,
+    "predicted_speedup_n_over_k": 110.0,
+    "snapshot_states_stored": 111,
+    "storage_frac_of_full_traj": 0.010089991818925552
+  },
+  "claims": [
+    {
+      "scope": "fab::snapshot::fib::word_resume_exact",
+      "rate_var": "dN_mismatch/dlevel",
+      "kind": "snapshot_delta",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "resume every level 0..25 from the nearest snapshot (every 5 levels) via the substitution stepper; count levels whose resumed word differs from full recompute (must be zero)",
+      "failure": "- stepper not Markov (hidden state) -> mismatches appear\n- snapshot stored lossily -> mismatch count > 0",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "note": "the substitution view needs depth-1 state; the concatenation view w_{n+1}=w_n.w_{n-1} needs depth-2. Same system: snapshot content depends on which equation you step."
+    },
+    {
+      "scope": "fab::snapshot::fib::count_resume_exact",
+      "rate_var": "dN_mismatch/dlevel",
+      "kind": "snapshot_delta",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "resume the letter-count chain (L,S)->(L+S,L) from count snapshots; count mismatches vs full chain (must be zero)",
+      "failure": "- count arithmetic not exact -> mismatch > 0",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "count_vs_actual_letters_mismatch": 0
+    },
+    {
+      "scope": "fab::snapshot::fib::word_from_counts",
+      "rate_var": "dN_decodings/dcount",
+      "kind": "snapshot_delta",
+      "value": null,
+      "tol_frac": 0.0,
+      "measurement": "VOID by construction: letter counts are a many-to-one summary. Measured: distinct words consistent with the level-25 count vector (log10), and the exact count for the level-8 small case",
+      "failure": "- never refuted: counts forget order (hidden state), the   decoder is underdetermined",
+      "provenance": "snapshot_delta.py",
+      "measured": null,
+      "verdict": "void",
+      "ts": 1794934724.6900768,
+      "level": 25,
+      "letter_counts": [
+        121393,
+        75025
+      ],
+      "distinct_words_with_same_counts_log10": 56725.499832662616,
+      "small_case": {
+        "level": 8,
+        "counts": [
+          34,
+          21
+        ],
+        "distinct_words_exact": 841728816603675
+      },
+      "reading": "the count snapshot is a codebook of size 1 in log10 ~ 56725.5 / log2 of the language; decoding a word from counts is VOID"
+    },
+    {
+      "scope": "fab::snapshot::float::bitwise_resume",
+      "rate_var": "dN_mismatch/dstep",
+      "kind": "snapshot_delta",
+      "value": 0.0,
+      "tol_frac": 0.0,
+      "measurement": "resume RK4 from an EXACT stored snapshot state and compare floats bitwise against uninterrupted integration over the remaining horizon, both systems; count mismatched states",
+      "failure": "- any reordering of float operations -> mismatch > 0\n- snapshot not full state -> mismatch > 0",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.0,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "sink": 0,
+      "lorenz": 0,
+      "note": "resume itself adds zero error; all drift below comes from what the snapshot FORGOT (quantization)"
+    },
+    {
+      "scope": "fab::snapshot::sink::lossy_snapshot_drift",
+      "rate_var": "d|err|/dt",
+      "kind": "snapshot_delta",
+      "value": 1.0,
+      "tol_frac": 2.0,
+      "measurement": "quantize the mid-trajectory snapshot to 3 decimals, resume with the same RK4; report horizon_error/injected_delta for the stable spiral (lambda=-0.1). Band: ratio within [0, 3]",
+      "failure": "- positive local exponents -> ratio exceeds band\n- declared refuter is measured, not assumed: see the   paired Lorenz claim",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.04978710157583205,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "injected_delta": 0.00033535068744395814,
+      "horizon_s": 30.0,
+      "log_error_slope_per_s": null
+    },
+    {
+      "scope": "fab::snapshot::lorenz::lossy_snapshot_drift",
+      "rate_var": "d|err|/dt",
+      "kind": "snapshot_delta",
+      "value": 1.0,
+      "tol_frac": 99.0,
+      "measurement": "same procedure on the Lorenz attractor. Band: ratio <= 100. EXPECTED TO FAIL: chaotic divergence saturates at attractor size, so lossy-snapshot continuation is VOID past the horizon -- refresh is mandatory, not optional",
+      "failure": "- Lyapunov growth e^(Lambda t) with Lambda ~ 0.9 /s:\n  delta = 5e-4 saturates the attractor in ~15 s\n- if this passes, the pairing with the sink claim is broken",
+      "provenance": "snapshot_delta.py",
+      "measured": 16980.39449382173,
+      "verdict": "fail",
+      "ts": 1794934724.6900768,
+      "injected_delta": 0.0006198468327440138,
+      "horizon_s": 30.0,
+      "horizon_error": 10.52524374573929,
+      "log_error_slope_per_s": 0.35296910832877687
+    },
+    {
+      "scope": "fab::snapshot::sink::adaptive_refresh_bound",
+      "rate_var": "dN_refresh/dstep",
+      "kind": "snapshot_delta",
+      "value": 0.1,
+      "tol_frac": 0.5,
+      "measurement": "dead-reckoning with a cheap Euler receiver; resync when |receiver - sender| > tau; report max deviation over the window (band: <= 1.5*tau, covering one-step overshoot); refresh count is the channel cost, kept per tau",
+      "failure": "- receiver model error unbounded between refreshes ->\n  max deviation exceeds band (chaotic case watches this)\n- refresh logic inverted -> deviation never bounded",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.10125757436799802,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "runs": [
+        {
+          "tau": 0.5,
+          "refreshes": 6,
+          "refresh_frac": 0.0012,
+          "mean_steps_between_refreshes": 833.3333333333334,
+          "max_deviation": 0.50080394536297,
+          "channel_bytes_state3_float8": 96,
+          "full_channel_bytes": 80000
+        },
+        {
+          "tau": 0.1,
+          "refreshes": 21,
+          "refresh_frac": 0.0042,
+          "mean_steps_between_refreshes": 238.0952380952381,
+          "max_deviation": 0.10125757436799802,
+          "channel_bytes_state3_float8": 336,
+          "full_channel_bytes": 80000
+        },
+        {
+          "tau": 0.01,
+          "refreshes": 189,
+          "refresh_frac": 0.0378,
+          "mean_steps_between_refreshes": 26.455026455026456,
+          "max_deviation": 0.011840559127619747,
+          "channel_bytes_state3_float8": 3024,
+          "full_channel_bytes": 80000
+        }
+      ]
+    },
+    {
+      "scope": "fab::snapshot::lorenz::adaptive_refresh_bound",
+      "rate_var": "dN_refresh/dstep",
+      "kind": "snapshot_delta",
+      "value": 0.5,
+      "tol_frac": 0.5,
+      "measurement": "dead-reckoning with a cheap Euler receiver; resync when |receiver - sender| > tau; report max deviation over the window (band: <= 1.5*tau, covering one-step overshoot); refresh count is the channel cost, kept per tau",
+      "failure": "- receiver model error unbounded between refreshes ->\n  max deviation exceeds band (chaotic case watches this)\n- refresh logic inverted -> deviation never bounded",
+      "provenance": "snapshot_delta.py",
+      "measured": 0.5774016895742096,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "runs": [
+        {
+          "tau": 2.0,
+          "refreshes": 73,
+          "refresh_frac": 0.0073,
+          "mean_steps_between_refreshes": 136.986301369863,
+          "max_deviation": 2.0896491838173628,
+          "channel_bytes_state3_float8": 1752,
+          "full_channel_bytes": 240000
+        },
+        {
+          "tau": 0.5,
+          "refreshes": 261,
+          "refresh_frac": 0.0261,
+          "mean_steps_between_refreshes": 38.31417624521073,
+          "max_deviation": 0.5774016895742096,
+          "channel_bytes_state3_float8": 6264,
+          "full_channel_bytes": 240000
+        },
+        {
+          "tau": 0.1,
+          "refreshes": 1092,
+          "refresh_frac": 0.1092,
+          "mean_steps_between_refreshes": 9.157509157509157,
+          "max_deviation": 0.1916488489865856,
+          "channel_bytes_state3_float8": 26208,
+          "full_channel_bytes": 240000
+        }
+      ]
+    },
+    {
+      "scope": "fab::snapshot::lorenz::random_access_speedup",
+      "rate_var": "dN_step/dquery",
+      "kind": "snapshot_delta",
+      "value": 110.0,
+      "tol_frac": 0.25,
+      "measurement": "200 random time queries over the on-attractor window: total integrator steps restarting from t0 vs resuming from snapshots every 100 steps; ratio measured vs the N/K prediction; snapshot storage paid is kept alongside",
+      "failure": "- queries cluster near t0 -> speedup collapses (measured\n  distribution would show it)\n- snapshot storage not accounted -> speedup is decoration",
+      "provenance": "snapshot_delta.py",
+      "measured": 127.80445491539945,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "full_restart_steps": 1193438,
+      "delta_resume_steps": 9338,
+      "storage_frac_of_full_traj": 0.010089991818925552
+    },
+    {
+      "scope": "fab::snapshot::fib::random_access_work_ratio",
+      "rate_var": "dN_letter/dquery",
+      "kind": "snapshot_delta",
+      "value": 1.5456503568443387,
+      "tol_frac": 0.01,
+      "measurement": "random access to all 26 levels: letter-visits from seed vs from snapshots every 5 levels; predicted ratio from the closed-form lengths F(i+2), measured ratio from the actual generated words",
+      "failure": "- word lengths drift from F(i+2) -> the two ratios part",
+      "provenance": "snapshot_delta.py",
+      "measured": 1.5456503568443387,
+      "verdict": "pass",
+      "ts": 1794934724.6900768,
+      "snapshot_storage_letters": 215884,
+      "full_storage_letters": 514227
+    }
+  ],
+  "runtime_s": 0.3570547103881836
+}

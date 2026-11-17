@@ -142,6 +142,112 @@ class TestReplay(unittest.TestCase):
         self.assertEqual((d["human_interest"], d["ai_interest"]), (None, None))
 
 
+ROUND2 = EVIDENCE / "kimi_round2_as_received"
+
+
+class TestRoundTwo(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.rec = json.loads((EVIDENCE / "kimi_round2_reproduction.json").read_text())
+        cls.rows = {r["scope"].split("::", 2)[2]: r for r in cls.rec["claims"]}
+
+    def test_manifest_matches_the_files(self):
+        manifest = json.loads((ROUND2 / "MANIFEST.json").read_text())
+        names = sorted(p.name for p in ROUND2.iterdir() if p.name != "MANIFEST.json")
+        self.assertEqual(names, sorted(f["path"] for f in manifest["files"]))
+        self.assertEqual(len(names), 7)
+        for f in manifest["files"]:
+            data = (ROUND2 / f["path"]).read_bytes()
+            self.assertEqual((len(data), hashlib.sha256(data).hexdigest()),
+                             (f["bytes"], f["sha256"]), f["path"])
+        for m in manifest["archive_members_not_copied"]:           # round 1 holds them
+            twin = EVIDENCE / "kimi_as_received" / m["archive_member"]
+            self.assertEqual(hashlib.sha256(twin.read_bytes()).hexdigest(), m["sha256"])
+        entry = (ROUND2 / "contextual_substrate_entry.md").read_text()
+        self.assertIn("## 6. Errata", entry)
+        self.assertTrue(self.rec["manifest"]["matches_manifest"])
+
+    def test_twenty_one_claims_replay_equal(self):
+        s = self.rec["summary"]
+        self.assertEqual((s["claims"], s["saved_vs_replay_equal"], s["replay_vs_replay_equal"]),
+                         (21, 21, 21))
+        self.assertEqual([x["claims"] for x in self.rec["scripts"]], [6, 5, 10])
+        self.assertTrue(self.rec["all_checks_passed"])
+        self.assertEqual(s["verdicts"], {"fail": 3, "pass": 17, "void": 1})
+        saved = sum(len(json.loads((ROUND2 / n).read_text())["claims"])
+                    for n in ("toy_rvq_void_v2_seed0.json", "toy_rvq_orthogonal_seed0.json",
+                              "snapshot_delta_seed0.json"))
+        self.assertEqual(saved, 21)
+
+    def test_v2_integrity_is_a_literal_at_line_458_and_has_a_backing_probe(self):
+        r = self.rows["rvq::v2::void_escape_integrity"]
+        self.assertEqual((r["flag"], r["measured_expression"], r["measured_line"]),
+                         ("STRUCTURAL", "0.0", 458))
+        line = (ROUND2 / "toy_rvq_void_v2.py").read_text().split("\n")[457]
+        self.assertEqual(line.strip(), "0.0)")
+        probe = r["backing_probe"]
+        self.assertEqual((probe["silent_over_threshold_snap_count"], probe["levels_checked"]),
+                         (0, 4000))
+        self.assertEqual(self.rec["summary"]["structural"],
+                         ["fab::contextual::rvq::v2::void_escape_integrity",
+                          "fab::contextual::rvq::orth::void_escape_integrity"])
+        self.assertEqual(self.rec["summary"]["structural_without_backing_probe"], [])
+        for c in self.rec["census"]:
+            self.assertEqual((c["silent_over_threshold_snap_count"],
+                              c["rejected_within_threshold_count"]), (0, 0))
+            self.assertGreater(c["void_levels"], 0)                 # the gate was exercised
+
+    def test_tolerance_provenance_has_all_twenty_one_rows(self):
+        rows = self.rec["claims"]
+        self.assertEqual(len(rows), 21)
+        self.assertTrue(all(r["tolerance_provenance"] in
+                            ("STATED_IN_SOURCE", "STATED_IN_CLAIM_TEXT", "UNSOURCED")
+                            for r in rows))
+        self.assertEqual(self.rec["summary"]["tolerance_provenance"],
+                         {"STATED_IN_SOURCE": 0, "STATED_IN_CLAIM_TEXT": 3, "UNSOURCED": 18})
+        for name in ("rvq::orth::projection_dominance", "sink::adaptive_refresh_bound",
+                     "lorenz::adaptive_refresh_bound"):
+            self.assertTrue(self.rows[name]["reason_is_a_reading"])
+            self.assertTrue(self.rows[name]["stated_reason"])
+        lossy = self.rows["lorenz::lossy_snapshot_drift"]            # a band, and no reason
+        self.assertEqual((lossy["tolerance_provenance"], lossy["band_text"]),
+                         ("UNSOURCED", ["Band: ratio <= 100."]))
+        both = [r for r in rows if r["call_makes_several_claims"]]   # one call in a loop
+        self.assertEqual(sorted(r["scope"].split("::")[2] for r in both), ["lorenz", "sink"])
+        self.assertEqual(len({r["call_line"] for r in both}), 1)
+
+    def test_a_reason_must_be_in_the_claim_text(self):
+        r2 = load("reproduce_kimi_round2")
+        old = dict(r2.REASONS_READ)
+        try:
+            r2.REASONS_READ["fib::word_resume_exact"] = "words that are not there"
+            with self.assertRaises(ValueError):
+                r2.claim_rows("snapshot_delta.py", "snapshot_delta_seed0.json")
+        finally:
+            r2.REASONS_READ.clear()
+            r2.REASONS_READ.update(old)
+
+    def test_claim_table_rows_quote_the_record(self):
+        table = (EVIDENCE.parent / "CLAIM_TABLE.md").read_text()
+        d = json.loads((ROUND2 / "snapshot_delta_seed0.json").read_text())
+        for n in (16, 17, 18, 19):
+            self.assertIn(f"## EBR_0{n} ", table)
+        a = d["system_a"]
+        self.assertEqual((a["word_resume"]["mismatched_levels"],
+                          a["count_resume"]["mismatched_levels"],
+                          d["drift_sink"]["bitwise_resume_mismatches"]
+                          + d["drift_lorenz"]["bitwise_resume_mismatches"]), (0, 0, 0))
+        self.assertEqual(round(d["drift_sink"]["horizon_error_over_delta"], 4), 0.0498)
+        self.assertEqual(round(d["drift_lorenz"]["horizon_error_over_delta"]), 16980)
+        run = next(x for x in d["adaptive_lorenz"]["runs"] if x["tau"] == 0.5)
+        self.assertEqual((round(run["max_deviation"], 3), run["refreshes"]), (0.577, 261))
+        self.assertEqual(a["word_from_counts"]["small_case"]["distinct_words_exact"],
+                         841728816603675)
+        self.assertIn("841,728,816,603,675", table)
+        void = next(c for c in d["claims"] if c["scope"].endswith("word_from_counts"))
+        self.assertEqual((void["value"], void["measured"], void["verdict"]), (None, None, "void"))
+
+
 class TestPrintedVsExecuted(unittest.TestCase):
     def test_compare(self):
         same = PVE.compare(["a 0.5   ", "", "b"], ["a 0.5", "b", ""])

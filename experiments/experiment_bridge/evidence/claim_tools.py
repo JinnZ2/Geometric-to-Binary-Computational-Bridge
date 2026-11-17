@@ -34,6 +34,7 @@ import ast
 import hashlib
 import io
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -58,6 +59,25 @@ def _const(node):
     return None
 
 
+def _scope_pattern(node):
+    """A regular expression for the scopes one call can produce: the literal
+    itself, or an f-string with its computed parts left open. Else None."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return re.escape(node.value)
+    if isinstance(node, ast.JoinedStr):
+        return "".join(re.escape(v.value) if isinstance(v, ast.Constant) else ".+"
+                       for v in node.values)
+    return None
+
+
+def call_for(scope, calls):
+    """The pack call that produced a recorded claim, or None."""
+    for call in calls:
+        if call["scope_pattern"] and re.fullmatch(call["scope_pattern"], scope or ""):
+            return call
+    return None
+
+
 def pack_calls(source):
     """Every call pack(...) in the source, with its arguments by name."""
     out = []
@@ -68,6 +88,7 @@ def pack_calls(source):
             args.update({k.arg: k.value for k in node.keywords if k.arg})
             scope = args.get("scope")
             out.append({"scope": scope.value if isinstance(scope, ast.Constant) else None,
+                        "scope_pattern": _scope_pattern(scope),
                         "line": node.lineno, "end_line": node.end_lineno, "args": args})
     return sorted(out, key=lambda c: c["line"])
 
@@ -78,7 +99,8 @@ def literal_measured(source):
     for call in pack_calls(source):
         node = call["args"].get("measured")
         value = _const(node) if node is not None else None
-        rows.append({"scope": call["scope"], "call_line": call["line"],
+        rows.append({"scope": call["scope"], "scope_pattern": call["scope_pattern"],
+                     "call_line": call["line"],
                      "measured_line": node.lineno if node is not None else None,
                      "measured_expression": ast.get_source_segment(source, node)
                      if node is not None else None,
@@ -108,7 +130,8 @@ def tolerance_provenance(source):
             above.insert(0, comments.get(n, ""))
             n -= 1
         reasons = [c for c in above + near if "tol" in c.lower()]
-        rows.append({"scope": call["scope"], "call_line": call["line"],
+        rows.append({"scope": call["scope"], "scope_pattern": call["scope_pattern"],
+                     "call_line": call["line"],
                      "tol_frac_expression": ast.get_source_segment(source, node)
                      if node is not None else None,
                      "tol_frac_is_literal": node is not None and _const(node) is not None,
@@ -220,7 +243,8 @@ def main(argv=None):
             print(f"   STRUCTURAL  {r['scope']}  measured = {r['measured_expression']} "
                   f"(line {r['measured_line']}); backing probe: {r['backing_probe']}")
     for r in record["tolerance_provenance"]:
-        print(f"   tol {r['tol_frac_expression']:>8}  {r['tolerance_provenance']:<16}  {r['scope']}")
+        print(f"   tol {r['tol_frac_expression']:>8}  {r['tolerance_provenance']:<16}  "
+              f"{r['scope'] or r['scope_pattern']}")
     ok = record["replay"]["saved_vs_replay"]["all_equal"] \
         and record["replay"]["replay_vs_replay"]["all_equal"]
     return 0 if ok else 1
