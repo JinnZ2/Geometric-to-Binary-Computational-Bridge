@@ -50,6 +50,8 @@ These are requirements that would change the audit disposition, not a request to
 
 **What it opens:** a bounded semantic adapter, not automatic truth certification by evidentials.
 
+Note 2026-11-17, after this entry was written: [sim/](sim/README.md) exercises the method named above (train-only assignment, permuted-label, majority-label and random-codebook comparisons, abstention states, a planted indistinguishable pair) on a declared synthetic generator. It uses no checkpoint and no independently judged meanings, so the knowledge state above stays NOT_STUDIED.
+
 ## Physical reading — METHODOLOGICAL
 
 **Gap / knowledge state:** UNDEFINED. Reconstruction/residual coordinates have no specified units, energy model, or physical port pairing.

@@ -43,3 +43,7 @@ Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate c
 ## Subsequent adversarial pass
 
 Note 2026-11-17, after v1: [adversarial/README.md](adversarial/README.md) records reproduced numerical, semantic-validation, resource-ingestion and output-preservation breakages. [v1_1](v1_1/README.md) contains separate candidate fixes and externally context-checked decoding. The retained v1 modules, contract and runs remain unchanged. The final 213-case experiment execution passes, including legacy/inherited compatibility cases; it is not an exhaustive attack count or a security/semantic certification. Trust limits and unimplemented protections stay explicit.
+
+## Subsequent simulation — planted semantics
+
+Note 2026-11-17, after v1.1: [sim/](sim/README.md) plants a synthetic truth, encodes it with the unchanged v1.1 kernel and tests majority assignment of code paths against permuted-label, majority-label and random-codebook comparisons, with a planted fault that must read as confused. It is synthetic only: no neural model was run and the "Semantic assignment" gap stays NOT_STUDIED. The retained specimens, v1 and v1.1 are unchanged.
