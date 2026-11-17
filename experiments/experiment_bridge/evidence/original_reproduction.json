@@ -1,0 +1,3100 @@
+{
+  "note": "2026-11-17: original snippets are correction specimens, not an implemented bridge.",
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "linux"
+  },
+  "original_sha256_before": {
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/generate_copybook_as_received.py": "366c79c59b5add0040804ef0f2add4ded6a4dc557e71a6456ca913f8622c7dd9",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/ncm_bridge_as_received.py": "0501cb9e78d7f43361c82cc12d15d8cb19e4ad452c71a5f714d4ff083a487ec9",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/ncm_level_walk_as_received.py": "38bd1d21653fa4abd0c536b0492e06d33870d62877b1b25cbf38f16a82418b5c",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/raw/lojban_wordslot_reference.json": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/raw/working_notes.txt": "e2edaf2b2fc8535bd40f0d89518e8059be0a6e147bf07c6c7f4aa4f9784a670a"
+  },
+  "bridge_cases": {
+    "original_example_1": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.15,
+          0.22,
+          0.28
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.05744562646538026,
+          1.0369667304209909,
+          0.38639358172723315
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "original_example_2": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.8,
+          0.1,
+          0.5
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.7348469228349536,
+          0.7348469228349535,
+          0.9486832980505139
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3                                                                                                                                                                                                                                                                                    ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: 0.7348 > 0.3"
+      }
+    },
+    "exact_better_code": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "exact_worse_code": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.9,
+          0.8,
+          0.7
+        ],
+        "threshold": 0.3,
+        "distances": [
+          1.077032961426901,
+          0.0,
+          1.392838827718412
+        ],
+        "record": "worse                     judgment       xagme'a   OBSERVED  PROPOSED  xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.                                                                                                                                                                                                ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "worse",
+          "class": "judgment",
+          "gismu": "xagme'a",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "worse",
+          "ENGLISH-CONCEPT": "              judgment       xagme'a",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=m1 is wo",
+          "MAPPING-STATUS": "rse than/n",
+          "PLACE-STRUCTURE": "ot as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "reserved_zero": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.37416573867739417,
+          1.392838827718412,
+          0.0
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.                                                                                                                                                                                                                                                                 ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "reserved_zero_neighborhood": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.01,
+          0.01,
+          0.01
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.35818989377144633,
+          1.3756089560627323,
+          0.017320508075688773
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0173 | Distance to nearest codebook vector exceeded nested-dropout bound.                                                                                                                                                                                                                                                                 ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0173 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0173 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "empty_residual": {
+      "ok": true,
+      "result": {
+        "residual": [],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "short_residual": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          0.8,
+          0.1
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "extra_dimension_ignored": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3,
+          1000000000.0
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "one_shot_iterator": {
+      "ok": true,
+      "result": {
+        "residual": "one-shot iterator",
+        "threshold": 0.3,
+        "distances": null,
+        "record": "worse                     judgment       xagme'a   OBSERVED  PROPOSED  xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.                                                                                                                                                                                                ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "worse",
+          "class": "judgment",
+          "gismu": "xagme'a",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.",
+          "audit_reason": "[za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "worse",
+          "ENGLISH-CONCEPT": "              judgment       xagme'a",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=m1 is wo",
+          "MAPPING-STATUS": "rse than/n",
+          "PLACE-STRUCTURE": "ot as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 0.0000 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "NaN_residual": {
+      "ok": true,
+      "result": {
+        "residual": [
+          "NaN",
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          "NaN",
+          "NaN",
+          "NaN"
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3                                                                                                                                                                                                                                                                                          ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: inf > 0.3"
+      }
+    },
+    "Infinity_residual": {
+      "ok": true,
+      "result": {
+        "residual": [
+          "Infinity",
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          "Infinity",
+          "Infinity",
+          "Infinity"
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3                                                                                                                                                                                                                                                                                          ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: inf > 0.3"
+      }
+    },
+    "overflow_residual": {
+      "ok": false,
+      "error_type": "OverflowError",
+      "error": "(34, 'Numerical result out of range')"
+    },
+    "NaN_threshold_accepts_far": {
+      "ok": true,
+      "result": {
+        "residual": [
+          8,
+          8,
+          8
+        ],
+        "threshold": "NaN",
+        "distances": [
+          13.510736471414132,
+          12.47156766409099,
+          13.856406460551018
+        ],
+        "record": "worse                     judgment       xagme'a   OBSERVED  PROPOSED  xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 12.4716 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.                                                                                                                                                                                               ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "worse",
+          "class": "judgment",
+          "gismu": "xagme'a",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=m1 is worse than/not as good as m2 for xa2 by standard xa3, by amount m4.",
+          "audit_reason": "[za'a] Dist: 12.4716 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "worse",
+          "ENGLISH-CONCEPT": "              judgment       xagme'a",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=m1 is wo",
+          "MAPPING-STATUS": "rse than/n",
+          "PLACE-STRUCTURE": "ot as good as m2 for xa2 by standard xa3, by amount m4.                                                                      [za'a] Dist: 12.4716 | jbovlaste glosses this lujvo \"worse ; by the standard of goodness\"; xamgu+mleca compound, the direct comparative antonym of xagmau.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "negative_threshold": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0,
+          0,
+          0
+        ],
+        "threshold": -1,
+        "distances": [
+          0.37416573867739417,
+          1.392838827718412,
+          0.0
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.0000 > -1                                                                                                                                                                                                                                                                                     ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.0000 > -1",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.0000 > -1",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: 0.0000 > -1"
+      }
+    },
+    "string_threshold": {
+      "ok": false,
+      "error_type": "TypeError",
+      "error": "'>' not supported between instances of 'float' and 'str'"
+    },
+    "nonnumeric_residual": {
+      "ok": false,
+      "error_type": "TypeError",
+      "error": "unsupported operand type(s) for -: 'str' and 'float'"
+    },
+    "empty_codebook": {
+      "ok": true,
+      "result": {
+        "residual": [
+          1,
+          1,
+          1
+        ],
+        "threshold": 0.3,
+        "distances": [],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3                                                                                                                                                                                                                                                                                          ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: inf | VOID threshold exceeded. Distance: inf > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: inf > 0.3"
+      }
+    },
+    "empty_codebook_infinite_threshold": {
+      "ok": true,
+      "result": {
+        "residual": [
+          1,
+          1,
+          1
+        ],
+        "threshold": "Infinity",
+        "distances": [],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: inf | Distance to nearest codebook vector exceeded nested-dropout bound.                                                                                                                                                                                                                                                                    ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: inf | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: inf | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "threshold_equality_accepted": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.15,
+          0.22,
+          0.28
+        ],
+        "threshold": 0.05744562646538026,
+        "distances": [
+          0.05744562646538026,
+          1.0369667304209909,
+          0.38639358172723315
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "just_below_threshold_rejected": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.15,
+          0.22,
+          0.28
+        ],
+        "threshold": 0.057445626465380255,
+        "distances": [
+          0.05744562646538026,
+          1.0369667304209909,
+          0.38639358172723315
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0574 | VOID threshold exceeded. Distance: 0.0574 > 0.057445626465380255                                                                                                                                                                                                                                                                   ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0574 | VOID threshold exceeded. Distance: 0.0574 > 0.057445626465380255",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0574 | VOID threshold exceeded. Distance: 0.0574 > 0.057445626465380255",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: 0.0574 > 0.057445626465380255"
+      }
+    },
+    "exact_tie_first_code_wins": {
+      "ok": true,
+      "result": {
+        "residual": [
+          1,
+          0,
+          0
+        ],
+        "threshold": 2,
+        "distances": [
+          1.0,
+          1.0
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 1.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a] Dist: 1.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 1.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "missing_index_map": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.                                                                                                                                                                                                                                                                 ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0000 | Distance to nearest codebook vector exceeded nested-dropout bound.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "unvalidated_evidential": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [not-a-cmavo] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                               ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[not-a-cmavo] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [not-a-cmavo] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "evidential_overwrites_audit_aperture": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "AUDIT-REASON": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "newline_in_evidential": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0,
+          1.077032961426901,
+          0.37416573867739417
+        ],
+        "record": "better                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a\nINJECTED] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                             ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "better",
+          "class": "judgment",
+          "gismu": "xagmau",
+          "structure_status": "OBSERVED",
+          "mapping_status": "PROPOSED",
+          "place_structure_verbatim": "xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.",
+          "audit_reason": "[za'a\nINJECTED] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "better",
+          "ENGLISH-CONCEPT": "              judgment       xagmau",
+          "SEMANTIC-CLASS": "   OBSERVED  PR",
+          "VALSI-IDENTIFIER": "OPOSED  xa",
+          "STRUCT-STATUS": "1=z1 is be",
+          "MAPPING-STATUS": "tter than",
+          "PLACE-STRUCTURE": "z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a\nINJECTED] Dist: 0.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    },
+    "mutation_first_far": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0.8,
+          0.1,
+          0.5
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.7348469228349536,
+          0.7348469228349535,
+          0.9486832980505139
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3                                                                                                                                                                                                                                                                                    ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: 0.7348 > 0.3"
+      }
+    },
+    "mutation_then_zero_stale_reason": {
+      "ok": true,
+      "result": {
+        "residual": [
+          0,
+          0,
+          0
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.37416573867739417,
+          1.392838827718412,
+          0.0
+        ],
+        "record": "unresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.7348 > 0.3                                                                                                                                                                                                                                                                                    ",
+        "characters": 563,
+        "utf8_bytes": 563,
+        "fields_using_bridge_layout": {
+          "english": "unresolved residual",
+          "class": "void",
+          "gismu": "VOID",
+          "structure_status": "VOID",
+          "mapping_status": "VOID",
+          "place_structure_verbatim": "NO DEFINITION",
+          "audit_reason": "[za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "unresolved r",
+          "ENGLISH-CONCEPT": "esidual       void           VOID",
+          "SEMANTIC-CLASS": "   VOID      VO",
+          "VALSI-IDENTIFIER": "ID      NO",
+          "STRUCT-STATUS": " DEFINITIO",
+          "MAPPING-STATUS": "N",
+          "PLACE-STRUCTURE": "                                                                                                                             [za'a] Dist: 0.0000 | VOID threshold exceeded. Distance: 0.7348 > 0.3",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "VOID threshold exceeded. Distance: 0.7348 > 0.3"
+      }
+    },
+    "raw_unicode_recall_check": {
+      "ok": true,
+      "result": {
+        "residual": [
+          1,
+          1,
+          1
+        ],
+        "threshold": 0.3,
+        "distances": [
+          0.0
+        ],
+        "record": "snura (recall check)      recall_check   snura     OBSERVED  DIFFERS   x1 is secure/safe from threat x2 (event).                                                                                                          [za'a] Dist: 0.0000 | recalled: \"x1 safe from threat x2\" — source: \"x1 is secure/safe from threat x2 (event).\" — same place count; recall drops \"is\", \"secure/\", and the \"(event)\" qualifier on x2.                                                                                                                                                      ",
+        "characters": 563,
+        "utf8_bytes": 567,
+        "fields_using_bridge_layout": {
+          "english": "snura (recall check)",
+          "class": "recall_check",
+          "gismu": "snura",
+          "structure_status": "OBSERVED",
+          "mapping_status": "DIFFERS",
+          "place_structure_verbatim": "x1 is secure/safe from threat x2 (event).",
+          "audit_reason": "[za'a] Dist: 0.0000 | recalled: \"x1 safe from threat x2\" — source: \"x1 is secure/safe from threat x2 (event).\" — same place count; recall drops \"is\", \"secure/\", and the \"(event)\" qualifier on x2.",
+          "unparsed_characters": 0
+        },
+        "fields_using_generated_layout": {
+          "RECORD-TYPE": "snura (recal",
+          "ENGLISH-CONCEPT": "l check)      recall_check   snura",
+          "SEMANTIC-CLASS": "   OBSERVED  DI",
+          "VALSI-IDENTIFIER": "FFERS   x1",
+          "STRUCT-STATUS": " is secure",
+          "MAPPING-STATUS": "/safe from",
+          "PLACE-STRUCTURE": " threat x2 (event).                                                                                                          [za'a] Dist: 0.0000 | recalled: \"x1 safe from threat x2\" — source: \"x1 is secure/safe from threat x2 (event).\" — same place count; recall drops \"is\", \"secure/\", and the \"(event)\" qualifier on x2.",
+          "AUDIT-REASON": "",
+          "unparsed_characters": -222
+        },
+        "void_reason_after_call": "Distance to nearest codebook vector exceeded nested-dropout bound."
+      }
+    }
+  },
+  "level_cases": {
+    "original_three_level_example": {
+      "ok": true,
+      "result": {
+        "target": [
+          0.8,
+          0.9,
+          0.1
+        ],
+        "levels": [
+          {
+            "threshold": 0.5,
+            "map": {
+              "0": "xamgu",
+              "1": "xlali"
+            },
+            "codebook": [
+              [
+                0.5,
+                0.5,
+                0
+              ],
+              [
+                -0.5,
+                -0.5,
+                0
+              ]
+            ]
+          },
+          {
+            "threshold": 0.3,
+            "map": {
+              "0": "xagmau",
+              "1": "mapti"
+            },
+            "codebook": [
+              [
+                0.3,
+                0.4,
+                0.1
+              ],
+              [
+                0,
+                0,
+                0.5
+              ]
+            ]
+          },
+          {
+            "threshold": 0.1,
+            "map": {
+              "0": "ckape",
+              "1": "snura"
+            },
+            "codebook": [
+              [
+                0.05,
+                0.1,
+                0
+              ],
+              [
+                0,
+                0.05,
+                0
+              ]
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "residual": [
+              0.8,
+              0.9,
+              0.1
+            ],
+            "gismu": "VOID",
+            "distance": 0.5099019513592785,
+            "L1_error": 1.8,
+            "L1_error_reduction": 0.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:1 Dist:0.5099 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     "
+          },
+          {
+            "level_idx": 2,
+            "z_hat": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "residual": [
+              0.8,
+              0.9,
+              0.1
+            ],
+            "gismu": "VOID",
+            "distance": 0.7071067811865476,
+            "L1_error": 1.8,
+            "L1_error_reduction": 0.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-2 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:2 Dist:0.7071 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     "
+          },
+          {
+            "level_idx": 3,
+            "z_hat": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "residual": [
+              0.8,
+              0.9,
+              0.1
+            ],
+            "gismu": "VOID",
+            "distance": 1.101135777277262,
+            "L1_error": 1.8,
+            "L1_error_reduction": 0.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-3 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:3 Dist:1.1011 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     "
+          }
+        ],
+        "record_count": 3
+      }
+    },
+    "fixture_only_first_bound_0_51": {
+      "ok": true,
+      "result": {
+        "target": [
+          0.8,
+          0.9,
+          0.1
+        ],
+        "levels": [
+          {
+            "threshold": 0.51,
+            "map": {
+              "0": "xamgu",
+              "1": "xlali"
+            },
+            "codebook": [
+              [
+                0.5,
+                0.5,
+                0
+              ],
+              [
+                -0.5,
+                -0.5,
+                0
+              ]
+            ]
+          },
+          {
+            "threshold": 0.3,
+            "map": {
+              "0": "xagmau",
+              "1": "mapti"
+            },
+            "codebook": [
+              [
+                0.3,
+                0.4,
+                0.1
+              ],
+              [
+                0,
+                0,
+                0.5
+              ]
+            ]
+          },
+          {
+            "threshold": 0.1,
+            "map": {
+              "0": "ckape",
+              "1": "snura"
+            },
+            "codebook": [
+              [
+                0.05,
+                0.1,
+                0
+              ],
+              [
+                0,
+                0.05,
+                0
+              ]
+            ]
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.5,
+              0.5,
+              0.0
+            ],
+            "residual": [
+              0.30000000000000004,
+              0.4,
+              0.1
+            ],
+            "gismu": "xamgu",
+            "distance": 0.5099019513592785,
+            "L1_error": 0.8,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 443,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.80 | xamgu      | xamgu (recall check)       | Lvl:1 Dist:0.5099 Rate:001.0000 | recalled: \"x1 good for x2 by standard x3\" — source: \"x1 (object/event) is good/beneficial/nice/[acceptable] for x2 by standard x3.\" — same place count; recall drops \"(object/event)\", \"is\", and \"/beneficial/nice/[acceptable]\".                                                                                      "
+          },
+          {
+            "level_idx": 2,
+            "z_hat": [
+              0.8,
+              0.9,
+              0.1
+            ],
+            "residual": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "gismu": "xagmau",
+            "distance": 5.551115123125783e-17,
+            "L1_error": 0.0,
+            "L1_error_reduction": 0.8,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-2 | Effort(Z_hat): 001.80 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:2 Dist:0.0000 Rate:000.8000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 2
+      }
+    },
+    "no_levels": {
+      "ok": true,
+      "result": {
+        "target": [
+          1,
+          2
+        ],
+        "levels": [],
+        "transitions": [],
+        "record_count": 0
+      }
+    },
+    "empty_target": {
+      "ok": true,
+      "result": {
+        "target": [],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1,
+                2
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [],
+            "residual": [],
+            "gismu": "xagmau",
+            "distance": 0.0,
+            "L1_error": 0,
+            "L1_error_reduction": 0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:000.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "short_code_drops_dimension_false_perfection": {
+      "ok": true,
+      "result": {
+        "target": [
+          1,
+          99
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xagmau"
+            }
+          },
+          {
+            "codebook": [
+              [
+                1,
+                1
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              0.0
+            ],
+            "gismu": "xagmau",
+            "distance": 0.0,
+            "L1_error": 0.0,
+            "L1_error_reduction": 100.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:100.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "empty_code_drops_all_dimensions": {
+      "ok": true,
+      "result": {
+        "target": [
+          1,
+          99
+        ],
+        "levels": [
+          {
+            "codebook": [
+              []
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [],
+            "residual": [],
+            "gismu": "xagmau",
+            "distance": 0.0,
+            "L1_error": 0,
+            "L1_error_reduction": 100,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:100.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "long_code_ignored_dimensions": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1,
+                99
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              0.0
+            ],
+            "gismu": "xagmau",
+            "distance": 0.0,
+            "L1_error": 0.0,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:001.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "empty_codebook": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [],
+            "threshold": 1,
+            "map": {}
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.0
+            ],
+            "residual": [
+              1.0
+            ],
+            "gismu": "VOID",
+            "distance": "Infinity",
+            "L1_error": 1.0,
+            "L1_error_reduction": 0.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.00 | VOID       | unresolved residual        | Lvl:1 Dist:inf Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                        "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "empty_codebook_infinite_bound": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [],
+            "threshold": "Infinity",
+            "map": {
+              "-1": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.0
+            ],
+            "residual": [
+              1.0
+            ],
+            "gismu": "xagmau",
+            "distance": "Infinity",
+            "L1_error": 1.0,
+            "L1_error_reduction": 0.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.00 | xagmau     | better                     | Lvl:1 Dist:inf Rate:000.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                             "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "NaN_target": {
+      "ok": true,
+      "result": {
+        "target": [
+          "NaN",
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                0,
+                0
+              ]
+            ],
+            "threshold": 1,
+            "map": {
+              "0": "xagmau"
+            }
+          },
+          {
+            "codebook": [
+              [
+                1,
+                1
+              ]
+            ],
+            "threshold": 1,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.0,
+              0.0
+            ],
+            "residual": [
+              "NaN",
+              1.0
+            ],
+            "gismu": "VOID",
+            "distance": "Infinity",
+            "L1_error": "NaN",
+            "L1_error_reduction": "NaN",
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000nan | VOID       | unresolved residual        | Lvl:1 Dist:inf Rate:00000nan | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                        "
+          },
+          {
+            "level_idx": 2,
+            "z_hat": [
+              0.0,
+              0.0
+            ],
+            "residual": [
+              "NaN",
+              1.0
+            ],
+            "gismu": "VOID",
+            "distance": "Infinity",
+            "L1_error": "NaN",
+            "L1_error_reduction": "NaN",
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-2 | Effort(Z_hat): 000.00 | Flow(Res): 000nan | VOID       | unresolved residual        | Lvl:2 Dist:inf Rate:00000nan | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                        "
+          }
+        ],
+        "record_count": 2
+      }
+    },
+    "Infinity_target": {
+      "ok": true,
+      "result": {
+        "target": [
+          "Infinity"
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                0
+              ]
+            ],
+            "threshold": 1,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.0
+            ],
+            "residual": [
+              "Infinity"
+            ],
+            "gismu": "VOID",
+            "distance": "Infinity",
+            "L1_error": "Infinity",
+            "L1_error_reduction": "NaN",
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000inf | VOID       | unresolved residual        | Lvl:1 Dist:inf Rate:00000nan | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                        "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "NaN_bound_accepts_far": {
+      "ok": true,
+      "result": {
+        "target": [
+          100
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1
+              ]
+            ],
+            "threshold": "NaN",
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              99.0
+            ],
+            "gismu": "xagmau",
+            "distance": 99.0,
+            "L1_error": 99.0,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 099.00 | xagmau     | better                     | Lvl:1 Dist:99.0000 Rate:001.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                         "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "missing_map_accepts_effort_as_VOID": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1
+              ]
+            ],
+            "threshold": 0,
+            "map": {}
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              0.0
+            ],
+            "gismu": "VOID",
+            "distance": 0.0,
+            "L1_error": 0.0,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.00 | VOID       | unresolved residual        | Lvl:1 Dist:0.0000 Rate:001.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "missing_semantic_row_xlali": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "xlali"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              0.0
+            ],
+            "gismu": "xlali",
+            "distance": 0.0,
+            "L1_error": 0.0,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.00 | xlali      | unresolved residual        | Lvl:1 Dist:0.0000 Rate:001.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "raw_snura_overwrite": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                1
+              ]
+            ],
+            "threshold": 0,
+            "map": {
+              "0": "snura"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              1.0
+            ],
+            "residual": [
+              0.0
+            ],
+            "gismu": "snura",
+            "distance": 0.0,
+            "L1_error": 0.0,
+            "L1_error_reduction": 1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 443,
+            "record": "LVL-1 | Effort(Z_hat): 001.00 | Flow(Res): 000.00 | snura      | snura (recall check)       | Lvl:1 Dist:0.0000 Rate:001.0000 | recalled: \"x1 safe from threat x2\" — source: \"x1 is secure/safe from threat x2 (event).\" — same place count; recall drops \"is\", \"secure/\", and the \"(event)\" qualifier on x2.                                                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "negative_error_reduction_accepted": {
+      "ok": true,
+      "result": {
+        "target": [
+          1
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                3
+              ]
+            ],
+            "threshold": 2,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              3.0
+            ],
+            "residual": [
+              -2.0
+            ],
+            "gismu": "xagmau",
+            "distance": 2.0,
+            "L1_error": 2.0,
+            "L1_error_reduction": -1.0,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 003.00 | Flow(Res): 0-2.00 | xagmau     | better                     | Lvl:1 Dist:2.0000 Rate:0-1.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "zero_target_not_checked_before_step": {
+      "ok": true,
+      "result": {
+        "target": [
+          0
+        ],
+        "levels": [
+          {
+            "codebook": [
+              [
+                0.5
+              ]
+            ],
+            "threshold": 1,
+            "map": {
+              "0": "xagmau"
+            }
+          }
+        ],
+        "transitions": [
+          {
+            "level_idx": 1,
+            "z_hat": [
+              0.5
+            ],
+            "residual": [
+              -0.5
+            ],
+            "gismu": "xagmau",
+            "distance": 0.5,
+            "L1_error": 0.5,
+            "L1_error_reduction": -0.5,
+            "record_characters": 439,
+            "record_utf8_bytes": 439,
+            "record": "LVL-1 | Effort(Z_hat): 000.50 | Flow(Res): 0-0.50 | xagmau     | better                     | Lvl:1 Dist:0.5000 Rate:0-0.5000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          "
+          }
+        ],
+        "record_count": 1
+      }
+    },
+    "missing_threshold_key": {
+      "ok": false,
+      "error_type": "KeyError",
+      "error": "'threshold'"
+    },
+    "overflow_target": {
+      "ok": false,
+      "error_type": "OverflowError",
+      "error": "(34, 'Numerical result out of range')"
+    },
+    "nonnumeric_target": {
+      "ok": false,
+      "error_type": "TypeError",
+      "error": "bad operand type for abs(): 'str'"
+    }
+  },
+  "generator_cases": {
+    "minimal_valid": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/minimal_valid.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_minimal_valid",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    },
+    "empty_arrays": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/empty_arrays.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_empty_arrays",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    },
+    "ascii_apostrophe": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "gismu": "xagme'a",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/ascii_apostrophe.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'xagme'a             '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_ascii_apostrophe",
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "ledger.cpy:21: error: syntax error, unexpected Identifier\nledger.cpy:21: error: PROCEDURE DIVISION header missing\nledger.cpy:21: error: syntax error, unexpected Literal\nledger.cpy:21: error: invalid literal: '. ...'\nledger.cpy:21: error: missing terminating ' character\n"
+        }
+      }
+    },
+    "unicode_char_byte_width": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/unicode_char_byte_width.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé'.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "ledger.cpy:25: warning: value size exceeds data size [-Wothers]\n"
+        },
+        "runtime": {
+          "compile": {
+            "command": [
+              "/usr/bin/cobc",
+              "-free",
+              "-Wall",
+              "-x",
+              "-I",
+              ".",
+              "-o",
+              "runtime",
+              "runtime.cob"
+            ],
+            "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width",
+            "returncode": 0,
+            "stdout": "",
+            "stderr": "ledger.cpy:25: warning: value size exceeds data size [-Wothers]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+          },
+          "run": {
+            "command": [
+              "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width/runtime"
+            ],
+            "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width",
+            "returncode": 0,
+            "stdout": "PLACE-STRUCTtest                judgment            mapti               OBSERVED  PROPOSED  x1 fits x2.                                                                                         éééééééééééééééééééééééééééééééééééééééééééééééééé\n",
+            "stderr": ""
+          },
+          "unicode_e_acute_count": 50
+        }
+      }
+    },
+    "overlong_status": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "STATUS-TOO-LONG",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/overlong_status.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'STATUS-TOO-LONG'.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "ledger.cpy:23: warning: value size exceeds data size [-Wothers]\n"
+        },
+        "runtime": {
+          "compile": {
+            "command": [
+              "/usr/bin/cobc",
+              "-free",
+              "-Wall",
+              "-x",
+              "-I",
+              ".",
+              "-o",
+              "runtime",
+              "runtime.cob"
+            ],
+            "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status",
+            "returncode": 0,
+            "stdout": "",
+            "stderr": "ledger.cpy:23: warning: value size exceeds data size [-Wothers]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+          },
+          "run": {
+            "command": [
+              "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status/runtime"
+            ],
+            "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_overlong_status",
+            "returncode": 0,
+            "stdout": "PLACE-STRUCTtest                judgment            mapti               OBSERVED  STATUS-TOOx1 fits x2.                                                                                         test reason                                                                                         \n",
+            "stderr": ""
+          },
+          "unicode_e_acute_count": 0
+        }
+      }
+    },
+    "name_parenthesis": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "glare (recall check)",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/name_parenthesis.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-GLARE-(RECALL-C.\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'glare (recall check)'.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_name_parenthesis",
+          "returncode": 1,
+          "stdout": "",
+          "stderr": "ledger.cpy:17: error: syntax error, unexpected -\n"
+        }
+      }
+    },
+    "name_collision": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "abcdefghijklmno FIRST",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            },
+            {
+              "english": "abcdefghijklmno SECOND",
+              "class": "judgment",
+              "gismu": "mapti",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/name_collision.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(22).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-ABCDEFGHIJKLMNO.\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(22) VALUE 'abcdefghijklmno FIRST '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n       01  ENTRY-ABCDEFGHIJKLMNO.\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(22) VALUE 'abcdefghijklmno SECOND'.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'mapti               '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_name_collision",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "ledger.cpy:27: warning: redefinition of 'ENTRY-ABCDEFGHIJKLMNO' [-Wredefinition]\nledger.cpy:17: note: 'ENTRY-ABCDEFGHIJKLMNO' previously defined here [-Wredefinition]\n"
+        }
+      }
+    },
+    "null_reason": {
+      "ok": false,
+      "error_type": "TypeError",
+      "error": "'NoneType' object is not subscriptable"
+    },
+    "null_struct_and_gismu": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "gismu": null,
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": null,
+              "mapping_reason": "test reason"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/null_struct_and_gismu.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'VOID                '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'NO DEFINITION                                                                                       '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_null_struct_and_gismu",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    },
+    "valsi_instead_of_gismu": {
+      "ok": true,
+      "result": {
+        "input": {
+          "place_structures": [
+            {
+              "english": "test",
+              "class": "judgment",
+              "structure_status": "OBSERVED",
+              "mapping_status": "PROPOSED",
+              "place_structure_verbatim": "x1 fits x2.",
+              "mapping_reason": "test reason",
+              "valsi": "mapti"
+            }
+          ],
+          "evidentials": []
+        },
+        "stdout": "Copybook successfully generated at /tmp/experiment-bridge-originals-pxnsv8rd/valsi_instead_of_gismu.cpy\n",
+        "copybook": "      *> =========================================================\n      *> LOJBAN METROLOGY COPYBOOK - AUTO-GENERATED\n      *> PURPOSE: Immutable ledger for NCM/COBOL semantic bridging\n      *> =========================================================\n\n       01  LOJBAN-LEDGER-RECORD.\n           05  RECORD-TYPE             PIC X(12).\n           05  ENGLISH-CONCEPT         PIC X(20).\n           05  SEMANTIC-CLASS          PIC X(20).\n           05  VALSI-IDENTIFIER        PIC X(20).\n           05  STRUCT-STATUS           PIC X(10).\n           05  MAPPING-STATUS          PIC X(10).\n           05  PLACE-STRUCTURE         PIC X(100).\n           05  AUDIT-REASON            PIC X(100).\n\n      *> Place Structures (Judgments, Comparatives, Emotive, Fear, Other)\n       01  ENTRY-TEST           .\n           05  FILLER                  PIC X(12) VALUE 'PLACE-STRUCT'.\n           05  FILLER                  PIC X(20) VALUE 'test                '.\n           05  FILLER                  PIC X(20) VALUE 'judgment            '.\n           05  FILLER                  PIC X(20) VALUE 'VOID                '.\n           05  FILLER                  PIC X(10) VALUE 'OBSERVED  '.\n           05  FILLER                  PIC X(10) VALUE 'PROPOSED  '.\n           05  FILLER                  PIC X(100) VALUE 'x1 fits x2.                                                                                         '.\n           05  FILLER                  PIC X(100) VALUE 'test reason                                                                                         '.\n\n      *> Evidentials (Epistemic Markers)\n",
+        "compiler": {
+          "command": [
+            "/usr/bin/cobc",
+            "-free",
+            "-Wall",
+            "-fsyntax-only",
+            "-I",
+            ".",
+            "wrapper.cob"
+          ],
+          "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_valsi_instead_of_gismu",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      }
+    }
+  },
+  "temporary_cwd": "/tmp/experiment-bridge-originals-pxnsv8rd",
+  "original_main_runs": {
+    "generate_copybook_as_received.py": {
+      "command": [
+        "/usr/bin/python3",
+        "generate_copybook_as_received.py"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd",
+      "returncode": 0,
+      "stdout": "Copybook successfully generated at lojban_ledger.cpy\n",
+      "stderr": ""
+    },
+    "ncm_bridge_as_received.py": {
+      "command": [
+        "/usr/bin/python3",
+        "ncm_bridge_as_received.py"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd",
+      "returncode": 0,
+      "stdout": "--- TEST 1: Good Quantization (Hits 'better' vector) ---\nbetter                    judgment       xagmau    OBSERVED  PROPOSED  xa1=z1 is better than z2 for xa2 by standard xa3, by amount z4.                                                                                    [za'a] Dist: 0.0574 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                                      \n\n\n--- TEST 2: The VOID Intercept (Residual doesn't fit) ---\nunresolved residual       void           VOID      VOID      VOID      NO DEFINITION                                                                                                                                      [ru'a] Dist: 0.7348 | VOID threshold exceeded. Distance: 0.7348 > 0.3                                                                                                                                                                                                                                                                                    \n\n\n",
+      "stderr": ""
+    },
+    "ncm_level_walk_as_received.py": {
+      "command": [
+        "/usr/bin/python3",
+        "ncm_level_walk_as_received.py"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd",
+      "returncode": 0,
+      "stdout": "INITIATING SEQUENTIAL LEVEL WALK...\nTarget Vector (z): [0.8, 0.9, 0.1]\n----------------------------------------------------------------------------------------------------------------------------------\nLVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:1 Dist:0.5099 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     \nLVL-2 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:2 Dist:0.7071 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     \nLVL-3 | Effort(Z_hat): 000.00 | Flow(Res): 001.80 | VOID       | unresolved residual        | Lvl:3 Dist:1.1011 Rate:000.0000 | Distance exceeded nested-dropout bound. Flow passed to next level.                                                                                                                                                                                                                                                     \n",
+      "stderr": ""
+    }
+  },
+  "generator_import_without_json": {
+    "command": [
+      "/usr/bin/python3",
+      "-c",
+      "import runpy; runpy.run_path('/tmp/experiment-bridge-originals-pxnsv8rd/generate_copybook_as_received.py')"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/empty_import_cwd",
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/tmp/experiment-bridge-originals-pxnsv8rd/generate_copybook_as_received.py\", line 80, in <module>\n    generate_cobol_copybook('lojban_wordslot_reference.json', 'lojban_ledger.cpy')\n  File \"/tmp/experiment-bridge-originals-pxnsv8rd/generate_copybook_as_received.py\", line 9, in generate_cobol_copybook\n    with open(json_file, 'r') as f:\n         ^^^^^^^^^^^^^^^^^^^^\nFileNotFoundError: [Errno 2] No such file or directory: 'lojban_wordslot_reference.json'\n"
+  },
+  "generator_output": {
+    "import_stdout": "Copybook successfully generated at lojban_ledger.cpy\n",
+    "copybook_widths": [
+      [
+        "RECORD-TYPE",
+        12
+      ],
+      [
+        "ENGLISH-CONCEPT",
+        36
+      ],
+      [
+        "SEMANTIC-CLASS",
+        15
+      ],
+      [
+        "VALSI-IDENTIFIER",
+        10
+      ],
+      [
+        "STRUCT-STATUS",
+        10
+      ],
+      [
+        "MAPPING-STATUS",
+        10
+      ],
+      [
+        "PLACE-STRUCTURE",
+        402
+      ],
+      [
+        "AUDIT-REASON",
+        290
+      ]
+    ],
+    "record_bytes_declared": 785,
+    "copybook_sha256": "d62507fe6f0a22f8d9e5a605317f1cc18e4d8c0ca12241ba126717c25c37d8ef",
+    "copybook_characters": 53859,
+    "copybook_utf8_bytes": 53914,
+    "max_source_line_chars": 461,
+    "all_numeric_PICs": [
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)",
+      "X(12)",
+      "X(36)",
+      "X(15)",
+      "X(10)",
+      "X(10)",
+      "X(10)",
+      "X(402)",
+      "X(290)"
+    ],
+    "entry_names": [
+      "ENTRY-BETTER         ",
+      "ENTRY-WORSE          ",
+      "ENTRY-BEST           ",
+      "ENTRY-WORST          ",
+      "ENTRY-APPROPRIATE    ",
+      "ENTRY-SUPERIOR       ",
+      "ENTRY-INFERIOR       ",
+      "ENTRY-MORE           ",
+      "ENTRY-LESS           ",
+      "ENTRY-GREATER        ",
+      "ENTRY-SMALLER        ",
+      "ENTRY-OPTIMAL        ",
+      "ENTRY-EFFICIENT      ",
+      "ENTRY-EFFECTIVE      ",
+      "ENTRY-WARM           ",
+      "ENTRY-COLD           ",
+      "ENTRY-FRIENDLY       ",
+      "ENTRY-HOSTILE        ",
+      "ENTRY-AGGRESSIVE     ",
+      "ENTRY-COMPASSIONATE  ",
+      "ENTRY-SAFE           ",
+      "ENTRY-DANGEROUS      ",
+      "ENTRY-THREAT         ",
+      "ENTRY-IMMINENT       ",
+      "ENTRY-NEAR           ",
+      "ENTRY-GLARE-(RECALL-C",
+      "ENTRY-SNURA-(RECALL-C",
+      "ENTRY-JIBNI-(RECALL-C",
+      "ENTRY-ZMADU-(RECALL-C",
+      "ENTRY-XAMGU-(RECALL-C",
+      "ENTRY-I-OBSERVE      ",
+      "ENTRY-I-HEAR-(HEARSAY",
+      "ENTRY-I-STATE        ",
+      "ENTRY-I-DEFINE       ",
+      "ENTRY-I-OPINE        ",
+      "ENTRY-I-POSTULATE    ",
+      "ENTRY-I-KNOW-BY-CULTU",
+      "ENTRY-I-KNOW-BY-INTER",
+      "ENTRY-I-CONCLUDE     ",
+      "ENTRY-I-EXPECT--I-EX ",
+      "ENTRY-I-GENERALIZE-- "
+    ]
+  },
+  "schema": {
+    "place_rows": 30,
+    "evidential_rows": 11,
+    "null_gismu_english": [
+      "efficient",
+      "cold",
+      "imminent"
+    ],
+    "ledger_unique_keys": 20,
+    "duplicate_overwrites": {
+      "xagrai": {
+        "row_english_in_order": [
+          "best",
+          "optimal"
+        ],
+        "winning_english": "optimal",
+        "winning_class": "comparative",
+        "winning_mapping_status": "PROPOSED"
+      },
+      "zmadu": {
+        "row_english_in_order": [
+          "superior",
+          "more",
+          "greater",
+          "zmadu (recall check)"
+        ],
+        "winning_english": "zmadu (recall check)",
+        "winning_class": "recall_check",
+        "winning_mapping_status": "DIFFERS"
+      },
+      "le'onmo": {
+        "row_english_in_order": [
+          "hostile",
+          "aggressive"
+        ],
+        "winning_english": "aggressive",
+        "winning_class": "emotive",
+        "winning_mapping_status": "PROPOSED"
+      },
+      "snura": {
+        "row_english_in_order": [
+          "safe",
+          "snura (recall check)"
+        ],
+        "winning_english": "snura (recall check)",
+        "winning_class": "recall_check",
+        "winning_mapping_status": "DIFFERS"
+      },
+      "jibni": {
+        "row_english_in_order": [
+          "near",
+          "jibni (recall check)"
+        ],
+        "winning_english": "jibni (recall check)",
+        "winning_class": "recall_check",
+        "winning_mapping_status": "DIFFERS"
+      }
+    },
+    "evidentials_absent_from_both_ledgers": true,
+    "ignored_codebook_path": {
+      "provided_path_exists": false,
+      "loaded_codebook": [
+        [
+          0.1,
+          0.2,
+          0.3
+        ],
+        [
+          0.9,
+          0.8,
+          0.7
+        ],
+        [
+          0.0,
+          0.0,
+          0.0
+        ]
+      ]
+    },
+    "ledger_aliases_loaded_json_row": true,
+    "valsi_key_bridge": {
+      "ok": false,
+      "error_type": "KeyError",
+      "error": "'gismu'"
+    },
+    "valsi_key_walker": {
+      "ok": false,
+      "error_type": "KeyError",
+      "error": "'gismu'"
+    }
+  },
+  "bridge_explicit_truncation": {
+    "input": {
+      "english": "EEEEEEEEEEEEEEEEEEEEEEEEEEEEEE",
+      "class": "CCCCCCCCCCCCCCCCCCCC",
+      "gismu": "GGGGGGGGGGGGGGG",
+      "structure_status": "SSSSSSSSSSSS",
+      "mapping_status": "MMMMMMMMMMMM",
+      "place_structure_verbatim": "éééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "mapping_reason": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"
+    },
+    "record": "EEEEEEEEEEEEEEEEEEEEEEEEEECCCCCCCCCCCCCCCGGGGGGGGGGSSSSSSSSSSMMMMMMMMMMééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé[za'a] Dist: 1.2346 | RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+    "characters": 563,
+    "utf8_bytes": 710,
+    "fields": {
+      "english": "EEEEEEEEEEEEEEEEEEEEEEEEEE",
+      "class": "CCCCCCCCCCCCCCC",
+      "gismu": "GGGGGGGGGG",
+      "structure_status": "SSSSSSSSSS",
+      "mapping_status": "MMMMMMMMMM",
+      "place_structure_verbatim": "ééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééééé",
+      "audit_reason": "[za'a] Dist: 1.2346 | RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+      "unparsed_characters": 0
+    }
+  },
+  "level_formatter_cases": [
+    {
+      "arguments": [
+        1,
+        [
+          1,
+          -1
+        ],
+        [
+          1,
+          -1
+        ],
+        "xagmau",
+        0,
+        0
+      ],
+      "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:000.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          ",
+      "characters": 439,
+      "utf8_bytes": 439,
+      "contains_verbatim_structure": false
+    },
+    {
+      "arguments": [
+        1,
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        "xagmau",
+        0,
+        0
+      ],
+      "record": "LVL-1 | Effort(Z_hat): 000.00 | Flow(Res): 000.00 | xagmau     | better                     | Lvl:1 Dist:0.0000 Rate:000.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          ",
+      "characters": 439,
+      "utf8_bytes": 439,
+      "contains_verbatim_structure": false
+    },
+    {
+      "arguments": [
+        1,
+        [
+          -1
+        ],
+        [
+          -2
+        ],
+        "xagmau",
+        1.234567,
+        -1
+      ],
+      "record": "LVL-1 | Effort(Z_hat): 0-1.00 | Flow(Res): 0-2.00 | xagmau     | better                     | Lvl:1 Dist:1.2346 Rate:0-1.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                          ",
+      "characters": 439,
+      "utf8_bytes": 439,
+      "contains_verbatim_structure": false
+    },
+    {
+      "arguments": [
+        123456,
+        [
+          12345678
+        ],
+        [
+          1
+        ],
+        "xagmau",
+        1,
+        0
+      ],
+      "record": "LVL-123456 | Effort(Z_hat): 12345678.00 | Flow(Res): 001.00 | xagmau     | better                     | Lvl:123456 Dist:1.0000 Rate:000.0000 | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                     ",
+      "characters": 449,
+      "utf8_bytes": 449,
+      "contains_verbatim_structure": false
+    },
+    {
+      "arguments": [
+        1,
+        [
+          "NaN"
+        ],
+        [
+          "Infinity"
+        ],
+        "xagmau",
+        "NaN",
+        "NaN"
+      ],
+      "record": "LVL-1 | Effort(Z_hat): 000nan | Flow(Res): 000inf | xagmau     | better                     | Lvl:1 Dist:nan Rate:00000nan | jbovlaste glosses this lujvo \"better ; by the standard of goodness\"; it is the xamgu+zmadu compound, i.e. the direct comparative of good. Notes mark xauzma as the canonical form, xagmau as the form in use.                                                                                                             ",
+      "characters": 439,
+      "utf8_bytes": 439,
+      "contains_verbatim_structure": false
+    }
+  ],
+  "level_same_sum_vector_collision": true,
+  "compiler": {
+    "available": true,
+    "skipped": false,
+    "version": {
+      "command": [
+        "/usr/bin/cobc",
+        "-V"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd",
+      "returncode": 0,
+      "stdout": "cobc (GnuCOBOL) 3.1.2.0\nCopyright (C) 2020 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\nThis is free software; see the source for copying conditions.  There is NO\nwarranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\nWritten by Keisuke Nishida, Roger While, Ron Norman, Simon Sobisch, Edward Hart\nBuilt     Apr 14 2024 07:59:15\nPackaged  Dec 23 2020 12:04:58 UTC\nC version \"13.2.0\"\n",
+      "stderr": ""
+    },
+    "original_generated_copybook": {
+      "command": [
+        "/usr/bin/cobc",
+        "-free",
+        "-Wall",
+        "-fsyntax-only",
+        "-I",
+        ".",
+        "wrapper.cob"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_original_generated",
+      "returncode": 97,
+      "stdout": "",
+      "stderr": "ledger.cpy:31: error: syntax error, unexpected Identifier\nledger.cpy:31: error: PROCEDURE DIVISION header missing\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: unknown statement 'the'\nledger.cpy:31: error: syntax error, unexpected Identifier, expecting Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:33: error: unknown statement '01'\nledger.cpy:34: error: unknown statement '05'\nledger.cpy:35: error: unknown statement '05'\nledger.cpy:36: error: unknown statement '05'\nledger.cpy:37: error: unknown statement '05'\nledger.cpy:38: error: unknown statement '05'\nledger.cpy:39: error: unknown statement '05'\nledger.cpy:40: error: unknown statement '05'\nledger.cpy:41: error: unknown statement '05'\nledger.cpy:41: error: syntax error, unexpected Literal\nledger.cpy:42: error: unknown statement '05'\nledger.cpy:43: error: unknown statement '05'\nledger.cpy:44: error: unknown statement '05'\nledger.cpy:45: error: unknown statement '05'\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:47: error: unknown statement '01'\nledger.cpy:48: error: unknown statement '05'\nledger.cpy:49: error: unknown statement '05'\nledger.cpy:50: error: unknown statement '05'\nledger.cpy:51: error: unknown statement '05'\nledger.cpy:52: error: unknown statement '05'\nledger.cpy:53: error: unknown statement '05'\nledger.cpy:54: error: unknown statement '05'\nledger.cpy:55: error: unknown statement '05'\nledger.cpy:57: error: unknown statement '01'\nledger.cpy:58: error: unknown statement '05'\nledger.cpy:59: error: unknown statement '05'\nledger.cpy:60: error: unknown statement '05'\nledger.cpy:61: error: unknown statement '05'\nledger.cpy:62: error: unknown statement '05'\nledger.cpy:63: error: unknown statement '05'\nledger.cpy:64: error: unknown statement '05'\nledger.cpy:65: error: unknown statement '05'\nledger.cpy:67: error: unknown statement '01'\nledger.cpy:68: error: unknown statement '05'\nledger.cpy:69: error: unknown statement '05'\nledger.cpy:70: error: unknown statement '05'\nledger.cpy:71: error: unknown statement '05'\nledger.cpy:72: error: unknown statement '05'\nledger.cpy:73: error: unknown statement '05'\nledger.cpy:74: error: unknown statement '05'\nledger.cpy:75: error: unknown statement '05'\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: syntax error, unexpected AND, expecting Literal\nledger.cpy:75: error: unknown statement 'tadji'\nledger.cpy:75: error: 'method' is a reserved word, but isn't supported\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: invalid symbol '[' - skipping word\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: unknown statement 'the'\nledger.cpy:75: error: unknown statement 'Reported'\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:77: error: unknown statement '01'\nledger.cpy:78: error: unknown statement '05'\nledger.cpy:79: error: unknown statement '05'\nledger.cpy:80: error: unknown statement '05'\nledger.cpy:81: error: unknown statement '05'\nledger.cpy:82: error: unknown statement '05'\nledger.cpy:83: error: unknown statement '05'\nledger.cpy:84: error: unknown statement '05'\nledger.cpy:85: error: unknown statement '05'\nledger.cpy:85: error: unknown statement 'a'\nledger.cpy:85: error: syntax error, unexpected NOT\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:86: error: unknown statement '05'\nledger.cpy:87: error: unknown statement '05'\nledger.cpy:88: error: unknown statement '05'\nledger.cpy:89: error: unknown statement '05'\nledger.cpy:91: error: unknown statement '01'\nledger.cpy:92: error: unknown statement '05'\nledger.cpy:93: error: unknown statement '05'\nledger.cpy:94: error: unknown statement '05'\nledger.cpy:95: error: unknown statement '05'\nledger.cpy:95: error: syntax error, unexpected AS, expecting Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:97: error: unknown statement '01'\nledger.cpy:98: error: unknown statement '05'\nledger.cpy:99: error: unknown statement '05'\nledger.cpy:100: error: unknown statement '05'\nledger.cpy:101: error: unknown statement '05'\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: unknown statement 'it'\nledger.cpy:101: error: unknown statement 'flagged'\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: unknown statement 'a'\nledger.cpy:101: error: syntax error, unexpected NOT\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: invalid symbol '[' - skipping word\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: invalid symbol '[' - skipping word\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:102: error: unknown statement '05'\ncobc: too many errors [-fmax-errors=128]\n\ncobc: aborting compile of ledger.cpy at line 102 (PROGRAM-ID: original-audit)\n"
+    },
+    "original_generated_copybook_full_compile": {
+      "command": [
+        "/usr/bin/cobc",
+        "-free",
+        "-Wall",
+        "-x",
+        "-I",
+        ".",
+        "-o",
+        "original-audit",
+        "wrapper.cob"
+      ],
+      "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_original_generated",
+      "returncode": 97,
+      "stdout": "",
+      "stderr": "ledger.cpy:31: error: syntax error, unexpected Identifier\nledger.cpy:31: error: PROCEDURE DIVISION header missing\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: unknown statement 'the'\nledger.cpy:31: error: syntax error, unexpected Identifier, expecting Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected /\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:31: error: syntax error, unexpected Literal\nledger.cpy:33: error: unknown statement '01'\nledger.cpy:34: error: unknown statement '05'\nledger.cpy:35: error: unknown statement '05'\nledger.cpy:36: error: unknown statement '05'\nledger.cpy:37: error: unknown statement '05'\nledger.cpy:38: error: unknown statement '05'\nledger.cpy:39: error: unknown statement '05'\nledger.cpy:40: error: unknown statement '05'\nledger.cpy:41: error: unknown statement '05'\nledger.cpy:41: error: syntax error, unexpected Literal\nledger.cpy:42: error: unknown statement '05'\nledger.cpy:43: error: unknown statement '05'\nledger.cpy:44: error: unknown statement '05'\nledger.cpy:45: error: unknown statement '05'\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:45: error: syntax error, unexpected Literal\nledger.cpy:47: error: unknown statement '01'\nledger.cpy:48: error: unknown statement '05'\nledger.cpy:49: error: unknown statement '05'\nledger.cpy:50: error: unknown statement '05'\nledger.cpy:51: error: unknown statement '05'\nledger.cpy:52: error: unknown statement '05'\nledger.cpy:53: error: unknown statement '05'\nledger.cpy:54: error: unknown statement '05'\nledger.cpy:55: error: unknown statement '05'\nledger.cpy:57: error: unknown statement '01'\nledger.cpy:58: error: unknown statement '05'\nledger.cpy:59: error: unknown statement '05'\nledger.cpy:60: error: unknown statement '05'\nledger.cpy:61: error: unknown statement '05'\nledger.cpy:62: error: unknown statement '05'\nledger.cpy:63: error: unknown statement '05'\nledger.cpy:64: error: unknown statement '05'\nledger.cpy:65: error: unknown statement '05'\nledger.cpy:67: error: unknown statement '01'\nledger.cpy:68: error: unknown statement '05'\nledger.cpy:69: error: unknown statement '05'\nledger.cpy:70: error: unknown statement '05'\nledger.cpy:71: error: unknown statement '05'\nledger.cpy:72: error: unknown statement '05'\nledger.cpy:73: error: unknown statement '05'\nledger.cpy:74: error: unknown statement '05'\nledger.cpy:75: error: unknown statement '05'\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: syntax error, unexpected AND, expecting Literal\nledger.cpy:75: error: unknown statement 'tadji'\nledger.cpy:75: error: 'method' is a reserved word, but isn't supported\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: invalid symbol '[' - skipping word\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: unknown statement 'the'\nledger.cpy:75: error: unknown statement 'Reported'\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:75: error: syntax error, unexpected Literal\nledger.cpy:77: error: unknown statement '01'\nledger.cpy:78: error: unknown statement '05'\nledger.cpy:79: error: unknown statement '05'\nledger.cpy:80: error: unknown statement '05'\nledger.cpy:81: error: unknown statement '05'\nledger.cpy:82: error: unknown statement '05'\nledger.cpy:83: error: unknown statement '05'\nledger.cpy:84: error: unknown statement '05'\nledger.cpy:85: error: unknown statement '05'\nledger.cpy:85: error: unknown statement 'a'\nledger.cpy:85: error: syntax error, unexpected NOT\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:85: error: syntax error, unexpected Literal\nledger.cpy:86: error: unknown statement '05'\nledger.cpy:87: error: unknown statement '05'\nledger.cpy:88: error: unknown statement '05'\nledger.cpy:89: error: unknown statement '05'\nledger.cpy:91: error: unknown statement '01'\nledger.cpy:92: error: unknown statement '05'\nledger.cpy:93: error: unknown statement '05'\nledger.cpy:94: error: unknown statement '05'\nledger.cpy:95: error: unknown statement '05'\nledger.cpy:95: error: syntax error, unexpected AS, expecting Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:95: error: syntax error, unexpected Literal\nledger.cpy:97: error: unknown statement '01'\nledger.cpy:98: error: unknown statement '05'\nledger.cpy:99: error: unknown statement '05'\nledger.cpy:100: error: unknown statement '05'\nledger.cpy:101: error: unknown statement '05'\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: unknown statement 'it'\nledger.cpy:101: error: unknown statement 'flagged'\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: unknown statement 'a'\nledger.cpy:101: error: syntax error, unexpected NOT\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: invalid symbol '[' - skipping word\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected TO, expecting WINDOW or Identifier\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: invalid symbol '[' - skipping word\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:101: error: syntax error, unexpected Literal\nledger.cpy:102: error: unknown statement '05'\ncobc: too many errors [-fmax-errors=128]\n\ncobc: aborting compile of ledger.cpy at line 102 (PROGRAM-ID: original-audit)\n"
+    },
+    "independent_language_probes": {
+      "source": "identification division.\nprogram-id. aperture-probe.\ndata division.\nworking-storage section.\n01 initial-value pic x(4) value 'VOID'.\n01 oversized-source pic x(6) value 'abcdef'.\n01 aperture pic x(3).\n01 decimal-aperture pic 9v99.\nprocedure division.\n    move 'PASS' to initial-value\n    move oversized-source to aperture\n    move 1.239 to decimal-aperture\n    display 'INITIAL=' initial-value\n    display 'APERTURE=' aperture\n    display 'DECIMAL=' decimal-aperture\n    goback.\n",
+      "compile": {
+        "command": [
+          "/usr/bin/cobc",
+          "-free",
+          "-Wall",
+          "-x",
+          "-o",
+          "probe",
+          "probe.cob"
+        ],
+        "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes",
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "probe.cob:12: warning: value size exceeds data size [-Wtruncate]\nprobe.cob:12: note: value is 1239 [-Wtruncate]\nprobe.cob:8: note: 'decimal-aperture' defined here as PIC 9V99 [-Wtruncate]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+      },
+      "run": {
+        "command": [
+          "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes/probe"
+        ],
+        "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/language_probes",
+        "returncode": 0,
+        "stdout": "INITIAL=PASS\nAPERTURE=abc\nDECIMAL=1.23\n",
+        "stderr": ""
+      }
+    }
+  },
+  "original_sha256_after": {
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/generate_copybook_as_received.py": "366c79c59b5add0040804ef0f2add4ded6a4dc557e71a6456ca913f8622c7dd9",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/ncm_bridge_as_received.py": "0501cb9e78d7f43361c82cc12d15d8cb19e4ad452c71a5f714d4ff083a487ec9",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/ncm_level_walk_as_received.py": "38bd1d21653fa4abd0c536b0492e06d33870d62877b1b25cbf38f16a82418b5c",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/raw/lojban_wordslot_reference.json": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/raw/working_notes.txt": "e2edaf2b2fc8535bd40f0d89518e8059be0a6e147bf07c6c7f4aa4f9784a670a"
+  },
+  "originals_unchanged": true,
+  "temporary_execution_directory_removed": true,
+  "checks": {
+    "originals_unchanged": true,
+    "execution_cwd_removed": true,
+    "dynamic_copybook_widths": true,
+    "bridge_example1_0_0574": true,
+    "bridge_example2_0_7348": true,
+    "empty_residual_false_better": true,
+    "one_shot_iterator_false_worse": true,
+    "reserved_zero_stale_reason": true,
+    "Unicode_bridge_not_byte_fixed": true,
+    "original_level_example_all_VOID": true,
+    "short_code_drops_dimension": true,
+    "same_sum_record_collision": true,
+    "valsi_schema_KeyError": true,
+    "original_full_compile_failed": true,
+    "Unicode_original_generator_truncates_bytes": true,
+    "VALUE_is_initialization_and_MOVE_truncates": true
+  },
+  "all_checks_passed": true
+}

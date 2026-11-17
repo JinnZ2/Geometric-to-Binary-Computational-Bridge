@@ -1,0 +1,60 @@
+{
+  "date": "2026-11-17",
+  "repository_base_commit": "cb17298bba94a5dbea1e201694dd6e84aff984de",
+  "status": "RAW_PRESERVED_WITH_SEPARATE_AUDIT",
+  "provenance_note": "User supplied text. Dialogue speaker labels and source quotations are as supplied, not independently authenticated. Hashes identify received bytes; they do not authenticate upstream sources.",
+  "files": [
+    {
+      "original_filename": "Pasted_content_74.txt",
+      "path": "raw/working_notes.txt",
+      "bytes": 49042,
+      "sha256": "e2edaf2b2fc8535bd40f0d89518e8059be0a6e147bf07c6c7f4aa4f9784a670a"
+    },
+    {
+      "original_filename": "Pasted_content_75.txt",
+      "path": "raw/lojban_wordslot_reference.json",
+      "bytes": 28358,
+      "sha256": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285"
+    },
+    {
+      "original_filename": "OKComputer_Lojban_Place_Structures_&_Evidentials.zip",
+      "path": "raw/kimi_notes.zip",
+      "bytes": 19395,
+      "sha256": "2dbb5b49aedba2158acc5d623146657e93ee5193232333cec6b57716d39dd6f6"
+    }
+  ],
+  "extraction_note": "Python fence bodies extracted without code changes into evidence/*_as_received.py; working_notes.txt remains the source authority.",
+  "kimi_archive_members": [
+    {
+      "archive_member": "contextual_substrate_entry.md",
+      "extracted_path": "evidence/kimi_as_received/contextual_substrate_entry.md",
+      "bytes": 9576,
+      "sha256": "04c7658bade839e90fdc362f9e78e245e92c2f8264c457093c967535f10fb483"
+    },
+    {
+      "archive_member": "expansion_curiosites.md",
+      "extracted_path": "evidence/kimi_as_received/expansion_curiosites.md",
+      "bytes": 7311,
+      "sha256": "261325311b680dcf1a5ecb2fbccfda774870bf2235381d8551a4422b49ec5b56"
+    },
+    {
+      "archive_member": "lojban_wordslot_reference.json",
+      "extracted_path": "evidence/kimi_as_received/lojban_wordslot_reference.json",
+      "bytes": 28357,
+      "sha256": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa"
+    },
+    {
+      "archive_member": "toy_rvq_void.py",
+      "extracted_path": "evidence/kimi_as_received/toy_rvq_void.py",
+      "bytes": 12075,
+      "sha256": "914c15cf847f479aaa3d7b8e1ab73ce0103272e2b50b44f7db51b8ccb32d0991"
+    },
+    {
+      "archive_member": "toy_rvq_void_seed0.json",
+      "extracted_path": "evidence/kimi_as_received/toy_rvq_void_seed0.json",
+      "bytes": 4762,
+      "sha256": "9c6d09ece123d4c4f5fdf12cfa4226189de84ad8c1e3dee1358fb2d7efbeb324"
+    }
+  ],
+  "audit_entry": "AUDIT.md"
+}

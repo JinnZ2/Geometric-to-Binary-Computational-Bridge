@@ -1,0 +1,15 @@
+{
+  "command": [
+    "/usr/bin/cobc",
+    "-free",
+    "-Wall",
+    "-fsyntax-only",
+    "-I",
+    ".",
+    "wrapper.cob"
+  ],
+  "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_name_parenthesis",
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "ledger.cpy:17: error: syntax error, unexpected -\n"
+}

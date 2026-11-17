@@ -1,0 +1,29 @@
+{
+  "compile": {
+    "command": [
+      "/usr/bin/cobc",
+      "-free",
+      "-Wall",
+      "-x",
+      "-I",
+      ".",
+      "-o",
+      "runtime",
+      "runtime.cob"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width",
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "ledger.cpy:25: warning: value size exceeds data size [-Wothers]\n<command-line>: warning: \"_FORTIFY_SOURCE\" redefined\n<command-line>: note: this is the location of the previous definition\n"
+  },
+  "run": {
+    "command": [
+      "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width/runtime"
+    ],
+    "cwd": "/tmp/experiment-bridge-originals-pxnsv8rd/compile_unicode_char_byte_width",
+    "returncode": 0,
+    "stdout": "PLACE-STRUCTtest                judgment            mapti               OBSERVED  PROPOSED  x1 fits x2.                                                                                         éééééééééééééééééééééééééééééééééééééééééééééééééé\n",
+    "stderr": ""
+  },
+  "unicode_e_acute_count": 50
+}

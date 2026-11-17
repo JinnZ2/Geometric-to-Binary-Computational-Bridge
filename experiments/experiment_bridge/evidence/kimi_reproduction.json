@@ -1,0 +1,733 @@
+{
+  "note": "2026-11-17: Kimi toy is audited as an unchanged specimen, not a real neural codec or semantic bridge.",
+  "environment": {
+    "python": "3.12.3 (main, Aug 31 2026, 10:18:26) [GCC 13.3.0]",
+    "platform": "linux"
+  },
+  "original_sha256_before": {
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/contextual_substrate_entry.md": "04c7658bade839e90fdc362f9e78e245e92c2f8264c457093c967535f10fb483",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/expansion_curiosites.md": "261325311b680dcf1a5ecb2fbccfda774870bf2235381d8551a4422b49ec5b56",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/lojban_wordslot_reference.json": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/toy_rvq_void.py": "914c15cf847f479aaa3d7b8e1ab73ce0103272e2b50b44f7db51b8ccb32d0991",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/toy_rvq_void_seed0.json": "9c6d09ece123d4c4f5fdf12cfa4226189de84ad8c1e3dee1358fb2d7efbeb324"
+  },
+  "edge_cases": {
+    "over_threshold_rejects_and_preserves_residual_to_next_level": {
+      "ok": true,
+      "result": [
+        [
+          16,
+          0
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            10,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "threshold_equality_accepts": {
+      "ok": true,
+      "result": [
+        [
+          0
+        ],
+        [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "NaN_threshold_accepts_arbitrary_distance": {
+      "ok": true,
+      "result": [
+        [
+          1
+        ],
+        [
+          [
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "NaN_input_snaps_first_code": {
+      "ok": true,
+      "result": [
+        [
+          0
+        ],
+        [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "extra_input_dimension_ignored": {
+      "ok": true,
+      "result": [
+        [
+          0
+        ],
+        [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "empty_input_accepts_first_code": {
+      "ok": true,
+      "result": [
+        [
+          0
+        ],
+        [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "missing_tau_silently_skips_level": {
+      "ok": true,
+      "result": [
+        [],
+        []
+      ]
+    },
+    "extra_tau_silently_ignored": {
+      "ok": true,
+      "result": [
+        [
+          0
+        ],
+        [
+          [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ]
+      ]
+    },
+    "empty_book": {
+      "ok": false,
+      "error_type": "ValueError",
+      "error": "min() iterable argument is empty"
+    },
+    "decode_negative_index_is_valid_Python_index": {
+      "ok": true,
+      "result": [
+        3.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "decode_invalid_index": {
+      "ok": false,
+      "error_type": "IndexError",
+      "error": "list index out of range"
+    },
+    "decode_short_book_changes_dimensions": {
+      "ok": true,
+      "result": [
+        1.0
+      ]
+    },
+    "CODES_global_reserved_index_collides_with_17th_real_code": {
+      "ok": true,
+      "result": {
+        "indices": [
+          16
+        ],
+        "parts": [
+          [
+            16,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "decode": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "decode_VOID_skips_missing_book": {
+      "ok": true,
+      "result": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "measure_empty_data": {
+      "ok": false,
+      "error_type": "ZeroDivisionError",
+      "error": "division by zero"
+    },
+    "measure_all_zero_energy": {
+      "ok": false,
+      "error_type": "ZeroDivisionError",
+      "error": "float division by zero"
+    },
+    "measure_no_levels": {
+      "ok": false,
+      "error_type": "IndexError",
+      "error": "list index out of range"
+    },
+    "threshold_target_zero": {
+      "ok": false,
+      "error_type": "IndexError",
+      "error": "list index out of range"
+    },
+    "kmeans_more_codes_than_samples": {
+      "ok": false,
+      "error_type": "ValueError",
+      "error": "Sample larger than population or is negative"
+    },
+    "ragged_kmeans": {
+      "ok": false,
+      "error_type": "IndexError",
+      "error": "list index out of range"
+    },
+    "nearest_overflow": {
+      "ok": false,
+      "error_type": "OverflowError",
+      "error": "(34, 'Numerical result out of range')"
+    },
+    "verdict_NaN_measured": {
+      "ok": true,
+      "result": "fail"
+    }
+  },
+  "main_runs": [
+    {
+      "command": [
+        "/usr/bin/python3",
+        "toy_rvq_void.py",
+        "0"
+      ],
+      "cwd": "/tmp/experiment-bridge-kimi-kstk79nr",
+      "returncode": 0,
+      "stdout": "{\n  \"level1_residual_energy_frac\": {\n    \"predicted\": 0.245521,\n    \"measured\": 0.248381,\n    \"verdict\": \"pass\"\n  },\n  \"energy_identity_defect\": {\n    \"predicted\": 0.0,\n    \"measured\": 1.503633,\n    \"verdict\": \"fail\"\n  },\n  \"void_escape_integrity\": {\n    \"predicted\": 0.0,\n    \"measured\": 0.0,\n    \"verdict\": \"pass\"\n  },\n  \"codepath_collision_rate\": {\n    \"predicted\": 0.028,\n    \"measured\": 0.015,\n    \"verdict\": \"pass\"\n  }\n}\nrecord -> toy_rvq_void_seed0.json\nheld_out VOID rates per level: [0.007, 0.007, 0.009, 0.014]\nheld_out collision rates per level: [0.0, 0.0, 0.0, 0.0]\nheld_out codepath census: distinct 985 of 1000 -> collision rate 0.015\nenergy-identity worst relative defect (held_out): 1.5036325501281391\n",
+      "stderr": "",
+      "record": {
+        "instrument": "toy_rvq_void.py",
+        "seed": 0,
+        "params": {
+          "dims": 8,
+          "levels": 4,
+          "codes_per_level": 16,
+          "void_index": 16,
+          "n_train": 2000,
+          "n_test": 1000,
+          "void_rate_target": 0.01
+        },
+        "tau_per_level": [
+          9.990962254366492,
+          5.288310334118061,
+          3.443865664645253,
+          2.1631638746716177
+        ],
+        "train": {
+          "split": "train",
+          "n": 2000,
+          "signal_energy": 28565.305734169015,
+          "per_level_captured_energy": [
+            21987.287039604256,
+            2824.2007179419975,
+            1236.9042278989136,
+            742.5146877925897
+          ],
+          "per_level_void_rate": [
+            0.0095,
+            0.011,
+            0.012,
+            0.013
+          ],
+          "per_level_collision_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "codepath_distinct": 1944,
+          "codepath_collision_rate": 0.028000000000000025,
+          "level1_only_residual_energy_frac": 0.24552140445772164,
+          "final_residual_energy_frac": 0.08265323287140179,
+          "energy_identity_defect_sum": 37.488010277925085,
+          "energy_identity_defect_worst_rel": 4.009105647331735
+        },
+        "held_out": {
+          "split": "held_out",
+          "n": 1000,
+          "signal_energy": 14016.982184959623,
+          "per_level_captured_energy": [
+            10794.423279897575,
+            1418.7799968083655,
+            623.2766261354785,
+            373.33126364065055
+          ],
+          "per_level_void_rate": [
+            0.007,
+            0.007,
+            0.009,
+            0.014
+          ],
+          "per_level_collision_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "codepath_distinct": 985,
+          "codepath_collision_rate": 0.015000000000000013,
+          "level1_only_residual_energy_frac": 0.24838060886903807,
+          "final_residual_energy_frac": 0.07661369632660063,
+          "energy_identity_defect_sum": 56.48083455093925,
+          "energy_identity_defect_worst_rel": 1.5036325501281391
+        },
+        "claims": [
+          {
+            "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+            "rate_var": "dE_residual/dlevel",
+            "kind": "contextual",
+            "value": 0.24552140445772164,
+            "tol_frac": 0.25,
+            "measurement": "encode held-out split; decode with ONLY the level-1 index; residual energy / signal energy",
+            "failure": "- codebook overfit -> held-out worse than train (drift/fail)\n- source distribution shift -> level-1 codes no longer stand alone\n- VOID rate at level 1 >> target -> level 1 never stood alone",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.24838060886903807,
+            "verdict": "pass",
+            "ts": 1794929830.8433604
+          },
+          {
+            "scope": "fab::contextual::rvq::energy_identity_defect",
+            "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+            "kind": "contextual",
+            "value": 0.0,
+            "tol_frac": 1e-06,
+            "measurement": "per sample: |z|^2 - (|z_hat|^2 + |r|^2) == 2<z_hat,r>; identity holds only if the split is orthogonal; report worst relative magnitude over held-out split",
+            "failure": "- non-orthogonal codebook entries -> defect != 0: the\n  effort/flow energy reading of this substrate is VOID,\n  use bookkeeping reading only",
+            "provenance": "toy_rvq_void.py",
+            "measured": 1.5036325501281391,
+            "verdict": "fail",
+            "ts": 1794929830.8433604
+          },
+          {
+            "scope": "fab::contextual::rvq::void_escape_integrity",
+            "rate_var": "dN_silent_snap/dn",
+            "kind": "contextual",
+            "value": 0.0,
+            "tol_frac": 0.0,
+            "measurement": "count held-out residuals whose min distance exceeds tau_k that were nevertheless snapped to a code (must be zero)",
+            "failure": "- threshold not applied at some level -> silent snap returns\n- VOID index collides with a real code index -> misdecode",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.0,
+            "verdict": "pass",
+            "ts": 1794929830.8433604,
+            "note": "encode() routes every over-threshold residual to the reserved VOID index by construction; the measured value is a structural 0.0 and the claim is falsified by any code path that snaps past tau_k"
+          },
+          {
+            "scope": "fab::contextual::rvq::codepath_collision_rate",
+            "rate_var": "dN_shared_path/dn",
+            "kind": "contextual",
+            "value": 0.028000000000000025,
+            "tol_frac": 0.5,
+            "measurement": "full index-tuple census over held-out split: 1 - distinct_paths/n; two samples collide iff their entire code path (VOID positions included) is identical",
+            "failure": "- degenerate/discrete source -> collision rate >> train\n- per-level input census substituted for full-path census ->\n  degenerate 0.0 on continuous floats (false pass)",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.015000000000000013,
+            "verdict": "pass",
+            "ts": 1794929830.8433604,
+            "distinct_paths_train": 1944,
+            "distinct_paths_held_out": 985
+          }
+        ],
+        "runtime_s": 11.411827564239502
+      }
+    },
+    {
+      "command": [
+        "/usr/bin/python3",
+        "toy_rvq_void.py",
+        "0"
+      ],
+      "cwd": "/tmp/experiment-bridge-kimi-kstk79nr",
+      "returncode": 0,
+      "stdout": "{\n  \"level1_residual_energy_frac\": {\n    \"predicted\": 0.245521,\n    \"measured\": 0.248381,\n    \"verdict\": \"pass\"\n  },\n  \"energy_identity_defect\": {\n    \"predicted\": 0.0,\n    \"measured\": 1.503633,\n    \"verdict\": \"fail\"\n  },\n  \"void_escape_integrity\": {\n    \"predicted\": 0.0,\n    \"measured\": 0.0,\n    \"verdict\": \"pass\"\n  },\n  \"codepath_collision_rate\": {\n    \"predicted\": 0.028,\n    \"measured\": 0.015,\n    \"verdict\": \"pass\"\n  }\n}\nrecord -> toy_rvq_void_seed0.json\nheld_out VOID rates per level: [0.007, 0.007, 0.009, 0.014]\nheld_out collision rates per level: [0.0, 0.0, 0.0, 0.0]\nheld_out codepath census: distinct 985 of 1000 -> collision rate 0.015\nenergy-identity worst relative defect (held_out): 1.5036325501281391\n",
+      "stderr": "",
+      "record": {
+        "instrument": "toy_rvq_void.py",
+        "seed": 0,
+        "params": {
+          "dims": 8,
+          "levels": 4,
+          "codes_per_level": 16,
+          "void_index": 16,
+          "n_train": 2000,
+          "n_test": 1000,
+          "void_rate_target": 0.01
+        },
+        "tau_per_level": [
+          9.990962254366492,
+          5.288310334118061,
+          3.443865664645253,
+          2.1631638746716177
+        ],
+        "train": {
+          "split": "train",
+          "n": 2000,
+          "signal_energy": 28565.305734169015,
+          "per_level_captured_energy": [
+            21987.287039604256,
+            2824.2007179419975,
+            1236.9042278989136,
+            742.5146877925897
+          ],
+          "per_level_void_rate": [
+            0.0095,
+            0.011,
+            0.012,
+            0.013
+          ],
+          "per_level_collision_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "codepath_distinct": 1944,
+          "codepath_collision_rate": 0.028000000000000025,
+          "level1_only_residual_energy_frac": 0.24552140445772164,
+          "final_residual_energy_frac": 0.08265323287140179,
+          "energy_identity_defect_sum": 37.488010277925085,
+          "energy_identity_defect_worst_rel": 4.009105647331735
+        },
+        "held_out": {
+          "split": "held_out",
+          "n": 1000,
+          "signal_energy": 14016.982184959623,
+          "per_level_captured_energy": [
+            10794.423279897575,
+            1418.7799968083655,
+            623.2766261354785,
+            373.33126364065055
+          ],
+          "per_level_void_rate": [
+            0.007,
+            0.007,
+            0.009,
+            0.014
+          ],
+          "per_level_collision_rate": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          "codepath_distinct": 985,
+          "codepath_collision_rate": 0.015000000000000013,
+          "level1_only_residual_energy_frac": 0.24838060886903807,
+          "final_residual_energy_frac": 0.07661369632660063,
+          "energy_identity_defect_sum": 56.48083455093925,
+          "energy_identity_defect_worst_rel": 1.5036325501281391
+        },
+        "claims": [
+          {
+            "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+            "rate_var": "dE_residual/dlevel",
+            "kind": "contextual",
+            "value": 0.24552140445772164,
+            "tol_frac": 0.25,
+            "measurement": "encode held-out split; decode with ONLY the level-1 index; residual energy / signal energy",
+            "failure": "- codebook overfit -> held-out worse than train (drift/fail)\n- source distribution shift -> level-1 codes no longer stand alone\n- VOID rate at level 1 >> target -> level 1 never stood alone",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.24838060886903807,
+            "verdict": "pass",
+            "ts": 1794929842.2878373
+          },
+          {
+            "scope": "fab::contextual::rvq::energy_identity_defect",
+            "rate_var": "d(|z|^2 - |z_hat|^2 - |r|^2)/dn",
+            "kind": "contextual",
+            "value": 0.0,
+            "tol_frac": 1e-06,
+            "measurement": "per sample: |z|^2 - (|z_hat|^2 + |r|^2) == 2<z_hat,r>; identity holds only if the split is orthogonal; report worst relative magnitude over held-out split",
+            "failure": "- non-orthogonal codebook entries -> defect != 0: the\n  effort/flow energy reading of this substrate is VOID,\n  use bookkeeping reading only",
+            "provenance": "toy_rvq_void.py",
+            "measured": 1.5036325501281391,
+            "verdict": "fail",
+            "ts": 1794929842.2878373
+          },
+          {
+            "scope": "fab::contextual::rvq::void_escape_integrity",
+            "rate_var": "dN_silent_snap/dn",
+            "kind": "contextual",
+            "value": 0.0,
+            "tol_frac": 0.0,
+            "measurement": "count held-out residuals whose min distance exceeds tau_k that were nevertheless snapped to a code (must be zero)",
+            "failure": "- threshold not applied at some level -> silent snap returns\n- VOID index collides with a real code index -> misdecode",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.0,
+            "verdict": "pass",
+            "ts": 1794929842.2878373,
+            "note": "encode() routes every over-threshold residual to the reserved VOID index by construction; the measured value is a structural 0.0 and the claim is falsified by any code path that snaps past tau_k"
+          },
+          {
+            "scope": "fab::contextual::rvq::codepath_collision_rate",
+            "rate_var": "dN_shared_path/dn",
+            "kind": "contextual",
+            "value": 0.028000000000000025,
+            "tol_frac": 0.5,
+            "measurement": "full index-tuple census over held-out split: 1 - distinct_paths/n; two samples collide iff their entire code path (VOID positions included) is identical",
+            "failure": "- degenerate/discrete source -> collision rate >> train\n- per-level input census substituted for full-path census ->\n  degenerate 0.0 on continuous floats (false pass)",
+            "provenance": "toy_rvq_void.py",
+            "measured": 0.015000000000000013,
+            "verdict": "pass",
+            "ts": 1794929842.2878373,
+            "distinct_paths_train": 1944,
+            "distinct_paths_held_out": 985
+          }
+        ],
+        "runtime_s": 11.561337947845459
+      }
+    }
+  ],
+  "temporary_cwd": "/tmp/experiment-bridge-kimi-kstk79nr",
+  "replay": {
+    "saved_vs_replay_stable_differences": [],
+    "replay1_vs_replay2_stable_differences": [],
+    "saved_vs_replay_full_differences": [
+      {
+        "path": "$.claims[0].ts",
+        "left": 1794928666.2079706,
+        "right": 1794929830.8433604
+      },
+      {
+        "path": "$.claims[1].ts",
+        "left": 1794928666.2079706,
+        "right": 1794929830.8433604
+      },
+      {
+        "path": "$.claims[2].ts",
+        "left": 1794928666.2079706,
+        "right": 1794929830.8433604
+      },
+      {
+        "path": "$.claims[3].ts",
+        "left": 1794928666.2079706,
+        "right": 1794929830.8433604
+      },
+      {
+        "path": "$.runtime_s",
+        "left": 6.334677457809448,
+        "right": 11.411827564239502
+      }
+    ],
+    "stable_saved_sha256": "abd2944bb6019e6c7adeb524a6d9bb02d1240f1ce12cd7ba95a21b7aaa38f6c4",
+    "stable_replay_sha256": "abd2944bb6019e6c7adeb524a6d9bb02d1240f1ce12cd7ba95a21b7aaa38f6c4",
+    "excluded_fields": [
+      "runtime_s",
+      "claims[].ts"
+    ]
+  },
+  "saved_provenance": {
+    "instrument": "toy_rvq_void.py",
+    "claims_provenance": [
+      "toy_rvq_void.py"
+    ],
+    "all_claim_timestamps_equal": true,
+    "timestamp_epoch": 1794928666.2079706,
+    "timestamp_utc": "2026-11-17T15:17:46.207971+00:00",
+    "saved_hash_or_digest_keys": [],
+    "source_hash_is_audit_added_not_supplied": true,
+    "saved_codebooks_or_source_arrays": false,
+    "saved_runtime_s": 6.334677457809448,
+    "replay_runtimes_s": [
+      11.411827564239502,
+      11.561337947845459
+    ],
+    "supplied_semantic_JSON_is_not_loaded_by_script": true
+  },
+  "verdict_recalculation": [
+    {
+      "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+      "recorded": "pass",
+      "recomputed": "pass",
+      "relative_difference": 0.011645438480736531
+    },
+    {
+      "scope": "fab::contextual::rvq::energy_identity_defect",
+      "recorded": "fail",
+      "recomputed": "fail",
+      "relative_difference": null
+    },
+    {
+      "scope": "fab::contextual::rvq::void_escape_integrity",
+      "recorded": "pass",
+      "recomputed": "pass",
+      "relative_difference": null
+    },
+    {
+      "scope": "fab::contextual::rvq::codepath_collision_rate",
+      "recorded": "pass",
+      "recomputed": "pass",
+      "relative_difference": 0.4642857142857143
+    }
+  ],
+  "correct_same_split_captured_energy_fractions": {
+    "train": [
+      0.7697199968458129,
+      0.09886821251710841,
+      0.04330092733505609,
+      0.025993584479805324
+    ],
+    "held_out": [
+      0.7700960975380358,
+      0.10121864878523797,
+      0.0444658213808862,
+      0.026634211181436697
+    ]
+  },
+  "narrative_heldout_fractions_use_wrong_train_denominator": [
+    0.3778857954594055,
+    0.04966794369406174,
+    0.021819357787931273,
+    0.013069394989673862
+  ],
+  "independent_census": {
+    "silent_over_threshold_snap_count": 0,
+    "max_z_equals_reconstruction_plus_residual_abs_error": 1.1102230246251565e-16,
+    "max_energy_defect_minus_two_dot_abs_error": 1.1546319456101628e-14,
+    "final_residual_energy_frac": 0.07661369632660063,
+    "heldout_distinct_paths": 985,
+    "heldout_redundant_sample_fraction": 0.015000000000000013,
+    "heldout_fraction_of_samples_in_non_singleton_paths": 0.025,
+    "heldout_non_singleton_path_multiplicities": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2,
+      7
+    ],
+    "unconditional_calibration_void_rates": [
+      0.0095,
+      0.0095,
+      0.0095,
+      0.0095
+    ],
+    "actual_train_encoded_void_rates": [
+      0.0095,
+      0.011,
+      0.012,
+      0.013
+    ]
+  },
+  "original_sha256_after": {
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/contextual_substrate_entry.md": "04c7658bade839e90fdc362f9e78e245e92c2f8264c457093c967535f10fb483",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/expansion_curiosites.md": "261325311b680dcf1a5ecb2fbccfda774870bf2235381d8551a4422b49ec5b56",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/lojban_wordslot_reference.json": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/toy_rvq_void.py": "914c15cf847f479aaa3d7b8e1ab73ce0103272e2b50b44f7db51b8ccb32d0991",
+    "/home/ubuntu/Geometric-to-Binary-Computational-Bridge/experiments/experiment_bridge/evidence/kimi_as_received/toy_rvq_void_seed0.json": "9c6d09ece123d4c4f5fdf12cfa4226189de84ad8c1e3dee1358fb2d7efbeb324"
+  },
+  "originals_unchanged": true,
+  "temporary_execution_directory_removed": true,
+  "checks": {
+    "originals_unchanged": true,
+    "stable_saved_replay_exact_match": true,
+    "stable_two_replays_exact_match": true,
+    "recorded_verdicts_match": true,
+    "finite_heldout_no_silent_snaps": true,
+    "independent_final_energy_matches": true,
+    "independent_path_census_matches": true
+  },
+  "all_checks_passed": true
+}

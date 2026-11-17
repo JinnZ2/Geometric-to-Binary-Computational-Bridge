@@ -1,0 +1,5 @@
+ledger.cpy:21: error: syntax error, unexpected Identifier
+ledger.cpy:21: error: PROCEDURE DIVISION header missing
+ledger.cpy:21: error: syntax error, unexpected Literal
+ledger.cpy:21: error: invalid literal: '. ...'
+ledger.cpy:21: error: missing terminating ' character
