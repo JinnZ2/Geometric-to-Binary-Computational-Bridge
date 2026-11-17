@@ -1,0 +1,84 @@
+{
+ "what": "Declarations for equation_search round 2 and the exact tier, written and committed BEFORE the specimen or any new code was run in this build. The commit that adds this file is the pre-run hash. A value that turns out badly is kept and the outcome reported; a later change is a new dated entry under 'amendments', never an edit.",
+ "declared": "2026-11-17",
+ "status": "PROPOSED",
+ "co_authored": true,
+ "round2": {
+  "f3_noise_floor": {
+   "derivative_error": "Richardson: central differences at dt and at 2*dt; error of the dt estimate = (d_2dt - d_dt) / 3",
+   "sigma2": "per component, mean of that squared error over the trajectory",
+   "score": "known-variance BIC: rss / sigma2 + k * ln(n); a term is added only if it lowers the score",
+   "max_terms": "the specimen's MAX_TERMS_F3 (3), unchanged"
+  },
+  "f3_stlsq": {
+   "threshold": "0.1",
+   "threshold_units": "coefficient of the unnormalised library term",
+   "max_iterations": 10,
+   "ridge": "the specimen's lstsq ridge, unchanged"
+  },
+  "f3_pass_rule": "planted Lorenz term sets recovered 3 of 3 on at least one branch; otherwise the failure is logged with cause OVER_SELECTION (a recovered set strictly contains the planted set), SWAP (same size, different terms) or OTHER",
+  "adequacy_gate": {
+   "rule": "a branch DISCOVERS a structure only if it selects at least one term AND one-step R^2 >= 0.5",
+   "r2": "1 - rss / tss; tss about zero for derivative targets (F2, F3), about the mean for the map target (F4)",
+   "r2_min": "0.5"
+  },
+  "nulls": {
+   "trials_per_family": 40,
+   "false_discovery_tolerance": 0,
+   "f2": "iid N(0,1) per coordinate, 500 steps, dt 0.01",
+   "f3": "iid N(0,1) per coordinate, 500 steps, dt 0.005; each F3 branch scored",
+   "f4": "iid uniform(0,1), 400 steps; discovery also needs the quadratic to beat the linear guard by BIC",
+   "reported": "selected_any_term (no gate) and discovery (with the gate), both"
+  },
+  "f4_noise_sweep": {
+   "noise_levels": [
+    "0",
+    "0.001",
+    "0.01"
+   ],
+   "noise": "x_n + level * N(0,1), observation noise on the series",
+   "band_noisy_rows": "0.02 relative on r (the specimen's band; its source is UNSOURCED)",
+   "noiseless_row": "relabelled SOLVER_CHECK; band 1e-6 relative on r"
+  },
+  "f1_identifiability": "the constant sequence: NON_UNIQUE when more than one exact hit; verdict void with the hit list; never pass",
+  "seeds": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9
+  ],
+  "tol_source_values": [
+   "DEFINITION",
+   "PHYSICS_BOUND",
+   "DECLARED_PRE_RUN",
+   "UNSOURCED"
+  ],
+  "unsourced_pass_wording": "pass (tol unsourced)"
+ },
+ "exact_tier": {
+  "trigger": "--exact, or auto when every coefficient and the step parse as rationals from text or integers; a float anywhere -> not engaged, logged",
+  "system": "Lorenz sigma 10, rho 28, beta 8/3; explicit Euler, dt 1/200; start (1, 1, 1)",
+  "library": "the specimen's ten terms",
+  "fit": "exact linear solve over Fraction for the step map, one component at a time; unique iff the system has full rank",
+  "verify": "every step by exact equality; first mismatch is located by step and component; no BIC",
+  "denominator_cap_bits": 65536,
+  "steps": {
+   "exact_run": 12,
+   "long_run": 40
+  },
+  "modular_branch": {
+   "primes": "the 4 largest primes below 2**61",
+   "reconstruction": "CRT then rational reconstruction",
+   "check": "reconstructed coefficients verified exactly on every step under the cap and modulo each prime on every step"
+  },
+  "cap_without_branch": "VOID; never a float fallback",
+  "null": "one recovered coefficient changed by 1/1000: the exact check must fail, located"
+ },
+ "amendments": []
+}
