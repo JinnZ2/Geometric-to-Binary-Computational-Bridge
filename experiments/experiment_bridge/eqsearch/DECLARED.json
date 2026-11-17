@@ -80,5 +80,12 @@
   "cap_without_branch": "VOID; never a float fallback",
   "null": "one recovered coefficient changed by 1/1000: the exact check must fail, located"
  },
- "amendments": []
+ "amendments": [
+  {
+   "date": "2026-11-17",
+   "after": "the first run of the exact tier",
+   "what": "A run with a 256-bit cap was added to exercise the modular and VOID branches. At the declared cap of 65536 bits the 40-step run stops at step 19 with full rank already, so the declared configuration never reaches the modular branch. The declaration expected denominators to double per step; measured growth is about 1.6 times per step. The declared cap and step counts are unchanged and still run.",
+   "changes_a_declared_value": false
+  }
+ ]
 }

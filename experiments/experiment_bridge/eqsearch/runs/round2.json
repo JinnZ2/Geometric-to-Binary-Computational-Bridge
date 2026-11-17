@@ -1,0 +1,2492 @@
+{
+ "version": "experiment-bridge/eqsearch-round2-1",
+ "status": "PROPOSED",
+ "scope": "generated data only; the received specimen is imported, not edited",
+ "declared_in": "eqsearch/DECLARED.json, committed before any run",
+ "specimen_replay": {
+  "runs": 2,
+  "claims_equal_between_runs": true,
+  "claims": [
+   {
+    "scope": "fab::eqsearch::f1::exact_recovery",
+    "measured": 0.0,
+    "value": 0.0,
+    "tol_frac": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DEFINITION",
+    "tol_note": "exact equality is the family's rule"
+   },
+   {
+    "scope": "fab::eqsearch::f1::null_abstention",
+    "measured": 0.0,
+    "value": 0.0,
+    "tol_frac": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the bar 0 of 40 is stated, not argued"
+   },
+   {
+    "scope": "fab::eqsearch::f2::parameter_recovery",
+    "measured": 0.0030643886080941596,
+    "value": 0.0,
+    "tol_frac": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "0.05; no reason is given"
+   },
+   {
+    "scope": "fab::eqsearch::f3::structure_recovery",
+    "measured": 1.0,
+    "value": 3.0,
+    "tol_frac": 0.0,
+    "verdict": "fail",
+    "verdict_with_source": "fail",
+    "tol_source": "DEFINITION",
+    "tol_note": "all three planted term sets"
+   },
+   {
+    "scope": "fab::eqsearch::f4::map_recovery",
+    "measured": 3.69999999997405,
+    "value": 3.7,
+    "tol_frac": 0.02,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "2%; no reason is given"
+   },
+   {
+    "scope": "fab::eqsearch::cross::outside_grammar_abstention",
+    "measured": 0.0,
+    "value": 0.0,
+    "tol_frac": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DEFINITION",
+    "tol_note": "any hit is an invented structure"
+   }
+  ],
+  "f3_chosen": [
+   [
+    "y",
+    "x",
+    "yz"
+   ],
+   [
+    "xz",
+    "x",
+    "y"
+   ],
+   [
+    "y2",
+    "1",
+    "xy"
+   ]
+  ],
+  "f1_constant_hits": [
+   [
+    -3,
+    4
+   ],
+   [
+    -2,
+    3
+   ],
+   [
+    -1,
+    2
+   ],
+   [
+    0,
+    1
+   ],
+   [
+    1,
+    0
+   ],
+   [
+    2,
+    -1
+   ],
+   [
+    3,
+    -2
+   ],
+   [
+    4,
+    -3
+   ]
+  ]
+ },
+ "f3_branches": {
+  "greedy_bic": {
+   "chosen": [
+    [
+     "y",
+     "x",
+     "yz"
+    ],
+    [
+     "xz",
+     "x",
+     "y"
+    ],
+    [
+     "y2",
+     "1",
+     "xy"
+    ]
+   ],
+   "betas": [
+    [
+     9.996774085676126,
+     -9.993146008935327,
+     -0.00013563988767870838
+    ],
+    [
+     -0.998667042641022,
+     27.953006753268667,
+     -0.9908952269557617
+    ],
+    [
+     0.40776492068042264,
+     -58.206089195154824,
+     0.4004541467632245
+    ]
+   ],
+   "components_recovered": 1,
+   "failure_causes": {
+    "x": "OVER_SELECTION",
+    "z": "OTHER"
+   },
+   "r2_per_component": [
+    0.9999996877776108,
+    0.9999992291094808,
+    0.9513220570819094
+   ]
+  },
+  "noise_floor": {
+   "chosen": [
+    [
+     "y",
+     "x",
+     "yz"
+    ],
+    [
+     "xz",
+     "x",
+     "y"
+    ],
+    [
+     "y2",
+     "1",
+     "xy"
+    ]
+   ],
+   "betas": [
+    [
+     9.996773819235388,
+     -9.993143710799234,
+     -0.00013570484277943112
+    ],
+    [
+     -0.9986670423490475,
+     27.953007283670228,
+     -0.9908959621762726
+    ],
+    [
+     0.40778908143920384,
+     -58.2015824783732,
+     0.4003923338683936
+    ]
+   ],
+   "components_recovered": 1,
+   "failure_causes": {
+    "x": "OVER_SELECTION",
+    "z": "OTHER"
+   },
+   "r2_per_component": [
+    0.9999996877776108,
+    0.9999992291094808,
+    0.9513220570819094
+   ],
+   "sigma2_per_component": [
+    0.001030361554383833,
+    0.006395932937750906,
+    0.0064775978110331684
+   ]
+  },
+  "stlsq": {
+   "chosen": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "y",
+     "xz"
+    ],
+    [
+     "z",
+     "xy"
+    ]
+   ],
+   "betas": [
+    [
+     -9.994423600016749,
+     9.994421888733962
+    ],
+    [
+     27.953007283670427,
+     -0.9908959621763341,
+     -0.9986670423490519
+    ],
+    [
+     -2.6647259669062953,
+     0.9992736276717112
+    ]
+   ],
+   "components_recovered": 3,
+   "failure_causes": {},
+   "r2_per_component": [
+    0.9999996480498771,
+    0.9999992291094808,
+    0.999999299034731
+   ]
+  }
+ },
+ "deterministic_claims": [
+  {
+   "scope": "fab::eqsearch::r2::f3::structure_recovery_any_branch",
+   "measured": 3,
+   "value": 3,
+   "verdict": "pass",
+   "verdict_with_source": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "recovery means all three planted term sets",
+   "branches_at_3_of_3": [
+    "stlsq"
+   ],
+   "per_branch": {
+    "greedy_bic": {
+     "components_recovered": 1,
+     "failure_causes": {
+      "x": "OVER_SELECTION",
+      "z": "OTHER"
+     }
+    },
+    "noise_floor": {
+     "components_recovered": 1,
+     "failure_causes": {
+      "x": "OVER_SELECTION",
+      "z": "OTHER"
+     }
+    },
+    "stlsq": {
+     "components_recovered": 3,
+     "failure_causes": {}
+    }
+   }
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::greedy_bic::structure_recovery",
+   "measured": 1,
+   "value": 3,
+   "verdict": "fail",
+   "verdict_with_source": "fail",
+   "tol_source": "DEFINITION",
+   "tol_note": "recovery means all three planted term sets",
+   "chosen": [
+    [
+     "y",
+     "x",
+     "yz"
+    ],
+    [
+     "xz",
+     "x",
+     "y"
+    ],
+    [
+     "y2",
+     "1",
+     "xy"
+    ]
+   ],
+   "failure_causes": {
+    "x": "OVER_SELECTION",
+    "z": "OTHER"
+   }
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::noise_floor::structure_recovery",
+   "measured": 1,
+   "value": 3,
+   "verdict": "fail",
+   "verdict_with_source": "fail",
+   "tol_source": "DEFINITION",
+   "tol_note": "recovery means all three planted term sets",
+   "chosen": [
+    [
+     "y",
+     "x",
+     "yz"
+    ],
+    [
+     "xz",
+     "x",
+     "y"
+    ],
+    [
+     "y2",
+     "1",
+     "xy"
+    ]
+   ],
+   "failure_causes": {
+    "x": "OVER_SELECTION",
+    "z": "OTHER"
+   }
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::stlsq::structure_recovery",
+   "measured": 3,
+   "value": 3,
+   "verdict": "pass",
+   "verdict_with_source": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "recovery means all three planted term sets",
+   "chosen": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "y",
+     "xz"
+    ],
+    [
+     "z",
+     "xy"
+    ]
+   ],
+   "failure_causes": {}
+  },
+  {
+   "scope": "fab::eqsearch::r2::f1::identifiability_constant",
+   "measured": null,
+   "value": null,
+   "verdict": "void",
+   "verdict_with_source": "void",
+   "tol_source": "DEFINITION",
+   "tol_note": "more than one exact hit is NON_UNIQUE by definition",
+   "state": "NON_UNIQUE",
+   "hit_count": 8,
+   "hits": [
+    [
+     -3,
+     4
+    ],
+    [
+     -2,
+     3
+    ],
+    [
+     -1,
+     2
+    ],
+    [
+     0,
+     1
+    ],
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     -1
+    ],
+    [
+     3,
+     -2
+    ],
+    [
+     4,
+     -3
+    ]
+   ]
+  }
+ ],
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+ ],
+ "claims_by_seed": {
+  "0": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.012899723246751482
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 39,
+    "trials": 40,
+    "r2_max": -0.3510327857218125
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 7,
+    "trials": 40,
+    "r2_max": 0.032123458433316654
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.03961838582656774
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.04648190370260008
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.002437658818905168,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09988523512816615,
+      "ome": 6.278976456209771,
+      "lam_err": 0.00011476487183385842,
+      "ome_rel_err": 0.0006698594365831471,
+      "r2": 0.9974391833010083
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.10022947627683998,
+      "ome": 6.2678690451047245,
+      "lam_err": 0.00022947627683997385,
+      "ome_rel_err": 0.002437658818905168,
+      "r2": 0.799916619801947
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.7004025524386153,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.7004025524386153,
+     "rel_err": 0.00010879795638245653,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.999884285115161
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.703102010454477,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.703102010454477,
+     "rel_err": 0.0008383812039127026,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.989808886027652
+    }
+   }
+  ],
+  "1": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.01123996015345019
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.4031009312679956
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 5,
+    "trials": 40,
+    "r2_max": 0.033142598267556944
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.039889139108808425
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.05655505429180696
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.002691239060995792,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09983453221566238,
+      "ome": 6.279029035782796,
+      "lam_err": 0.0001654677843376251,
+      "ome_rel_err": 0.0006614911376306522,
+      "r2": 0.9974596217962397
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.09899488711146562,
+      "ome": 6.26627575345343,
+      "lam_err": 0.0010051128885343874,
+      "ome_rel_err": 0.002691239060995792,
+      "r2": 0.7985557518964501
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.701248333894287,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.701248333894287,
+     "rel_err": 0.00033738753899643285,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.999872031881623
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.702301584341388,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.702301584341388,
+     "rel_err": 0.0006220498219967108,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9883492096631421
+    }
+   }
+  ],
+  "2": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.01713059626176039
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.26607404810658863
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 8,
+    "trials": 40,
+    "r2_max": 0.026385613797259566
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.03224999559139485
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.04207692289352427
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0025155326855813395,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.10007850509872826,
+      "ome": 6.278925473490036,
+      "lam_err": 7.850509872825429e-05,
+      "ome_rel_err": 0.0006779735884413513,
+      "r2": 0.99740355361663
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.10199861534337878,
+      "ome": 6.2673797491698116,
+      "lam_err": 0.001998615343378779,
+      "ome_rel_err": 0.0025155326855813395,
+      "r2": 0.7972120712720386
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.70115209912027,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.70115209912027,
+     "rel_err": 0.00031137814061352263,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998684802692255
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.7033981342831575,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.7033981342831575,
+     "rel_err": 0.0009184146711235871,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9883555001175547
+    }
+   }
+  ],
+  "3": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.007934451921853714
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.30724078887379713
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 10,
+    "trials": 40,
+    "r2_max": 0.018636266047701744
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.033719343583926475
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.048437159967861576
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.003269279475153696,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09978227439164003,
+      "ome": 6.279013718756784,
+      "lam_err": 0.00021772560835997545,
+      "ome_rel_err": 0.0006639289180339267,
+      "r2": 0.9974497607455796
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.09790360335683525,
+      "ome": 6.262643818416237,
+      "lam_err": 0.002096396643164758,
+      "ome_rel_err": 0.003269279475153696,
+      "r2": 0.7916003126192196
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.6999915870533076,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.6999915870533076,
+     "rel_err": 2.273769376385507e-06,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998867656687259
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.694691712768604,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.694691712768604,
+     "rel_err": 0.0014346722247017064,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9876822323617087
+    }
+   }
+  ],
+  "4": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.014976016849337803
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.36145638167888294
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 10,
+    "trials": 40,
+    "r2_max": 0.026333652916741612
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.03600519407891556
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.049378504012684954
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0015758961147551748,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09971638808524733,
+      "ome": 6.2788394443026165,
+      "lam_err": 0.00028361191475267944,
+      "ome_rel_err": 0.0006916655588692927,
+      "r2": 0.9974619835168587
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.10114906003328195,
+      "ome": 6.273283659865715,
+      "lam_err": 0.00114906003328194,
+      "ome_rel_err": 0.0015758961147551748,
+      "r2": 0.7955462671845375
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.6987792627609712,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.6987792627609712,
+     "rel_err": 0.00032992898352133377,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998815403602863
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.706292820157059,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.706292820157059,
+     "rel_err": 0.001700762204610513,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9865328204974286
+    }
+   }
+  ],
+  "5": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.012721021679412803
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.3694633100751934
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 1,
+    "trials": 40,
+    "r2_max": 0.013386758559066902
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.0309503636978965
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.03722922335445222
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0022507265632103666,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09970752385203721,
+      "ome": 6.278737808406968,
+      "lam_err": 0.00029247614796279464,
+      "ome_rel_err": 0.0007078414140573924,
+      "r2": 0.9974924699593285
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.09808445289273565,
+      "ome": 6.269043575107144,
+      "lam_err": 0.0019155471072643537,
+      "ome_rel_err": 0.0022507265632103666,
+      "r2": 0.794780062505046
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.7005283235629314,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.7005283235629314,
+     "rel_err": 0.00014279015214356726,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998933453635067
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.697724932069585,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.697724932069585,
+     "rel_err": 0.0006148832244365129,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9891370786081471
+    }
+   }
+  ],
+  "6": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.01572175298357814
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 39,
+    "trials": 40,
+    "r2_max": -0.37554723221597763
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 9,
+    "trials": 40,
+    "r2_max": 0.024820068268171624
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.035225961991350085
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.049102188440227845
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0027940855822796407,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09992868353033346,
+      "ome": 6.27869113388053,
+      "lam_err": 7.131646966654359e-05,
+      "ome_rel_err": 0.0007152698956564074,
+      "r2": 0.9974316589223927
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.09816227510794487,
+      "ome": 6.2656295497020045,
+      "lam_err": 0.001837724892055137,
+      "ome_rel_err": 0.0027940855822796407,
+      "r2": 0.7939804474755802
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.7000250205843286,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.7000250205843286,
+     "rel_err": 6.762320088758298e-06,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998841596421603
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.696640097088326,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.696640097088326,
+     "rel_err": 0.0009080818680199957,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9886534341967776
+    }
+   }
+  ],
+  "7": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.01669194099670157
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.3563200371149311
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 8,
+    "trials": 40,
+    "r2_max": 0.029202700507028667
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.038673573800118155
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.043348181465963975
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0027394147706548684,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.0995919908627674,
+      "ome": 6.278999832096691,
+      "lam_err": 0.0004080091372326011,
+      "ome_rel_err": 0.0006661390486307556,
+      "r2": 0.9973909134783017
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.10227995650506778,
+      "ome": 6.265973056542337,
+      "lam_err": 0.002279956505067779,
+      "ome_rel_err": 0.0027394147706548684,
+      "r2": 0.7959170029195702
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.700720928763234,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.700720928763234,
+     "rel_err": 0.00019484561168478593,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.999866979146651
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.696792160858697,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.696792160858697,
+     "rel_err": 0.0008669835517035925,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.990832229758896
+    }
+   }
+  ],
+  "8": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.010353385537203219
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.37186859147698237
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 5,
+    "trials": 40,
+    "r2_max": 0.031865787470108486
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.03885568560773045
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.045250934608285553
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0024301161291142154,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09991773291867845,
+      "ome": 6.2788787847255385,
+      "lam_err": 8.226708132155758e-05,
+      "ome_rel_err": 0.0006854043360979349,
+      "r2": 0.9973733334063632
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.10073315485338202,
+      "ome": 6.267916437222396,
+      "lam_err": 0.0007331548533820176,
+      "ome_rel_err": 0.0024301161291142154,
+      "r2": 0.7971267586747328
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.699232143750283,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.699232143750283,
+     "rel_err": 0.00020752871613975447,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998856716832571
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.6968003429326184,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.6968003429326184,
+     "rel_err": 0.0008647721803734565,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9886996495915091
+    }
+   }
+  ],
+  "9": [
+   {
+    "scope": "fab::eqsearch::r2::f2::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.012387712641181103
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": -0.387801007446821
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 5,
+    "trials": 40,
+    "r2_max": 0.029730167539317676
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.04036314911943362
+   },
+   {
+    "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+    "measured": 0,
+    "value": 0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "bar 0 of 40 and the R^2 >= 0.5 gate, in DECLARED.json",
+    "selected_any_term": 40,
+    "trials": 40,
+    "r2_max": 0.04570306720175343
+   },
+   {
+    "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+    "measured": 0.0028621005056036464,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 0.05; no reason is given for it",
+    "rows": [
+     {
+      "noise": 0.0,
+      "lam": -0.09980266733837234,
+      "ome": 6.2790542771496245,
+      "lam_err": 0.00019733266162766383,
+      "ome_rel_err": 0.0006574738493294707,
+      "r2": 1.0
+     },
+     {
+      "noise": 0.001,
+      "lam": -0.09992999912852593,
+      "ome": 6.278698995488565,
+      "lam_err": 7.000087147407408e-05,
+      "ome_rel_err": 0.00071401868187702,
+      "r2": 0.9974743626285063
+     },
+     {
+      "noise": 0.01,
+      "lam": -0.09859202757315397,
+      "ome": 6.265202199335106,
+      "lam_err": 0.001407972426846038,
+      "ome_rel_err": 0.0028621005056036464,
+      "r2": 0.7989383759238592
+     }
+    ]
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+    "measured": 7.013608912861732e-12,
+    "value": 0.0,
+    "verdict": "pass",
+    "verdict_with_source": "pass",
+    "tol_source": "DECLARED_PRE_RUN",
+    "tol_note": "1e-6 relative, in DECLARED.json; checks the arithmetic, not recovery",
+    "row": {
+     "noise": 0.0,
+     "label": "SOLVER_CHECK",
+     "r_hat": 3.69999999997405,
+     "rel_err": 7.013608912861732e-12,
+     "band": 1e-06,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 1.0
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+    "measured": 3.700544940570282,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.001,
+     "label": "RECOVERY",
+     "r_hat": 3.700544940570282,
+     "rel_err": 0.00014728123521128648,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9998883793760623
+    }
+   },
+   {
+    "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+    "measured": 3.6968617744901846,
+    "value": 3.7,
+    "verdict": "pass",
+    "verdict_with_source": "pass (tol unsourced)",
+    "tol_source": "UNSOURCED",
+    "tol_note": "the specimen's 2% band; no reason is given for it",
+    "row": {
+     "noise": 0.01,
+     "label": "RECOVERY",
+     "r_hat": 3.6968617744901846,
+     "rel_err": 0.0008481690567069116,
+     "band": 0.02,
+     "within_band": true,
+     "quadratic_beats_linear": true,
+     "r2": 0.9894656000892345
+    }
+   }
+  ]
+ },
+ "nulls_by_seed": {
+  "0": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.012899723246751482,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 39,
+    "false_discoveries": 0,
+    "r2_max": -0.3510327857218125
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 7,
+    "false_discoveries": 0,
+    "r2_max": 0.032123458433316654
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.03961838582656774
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.04648190370260008
+   }
+  },
+  "1": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.01123996015345019,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.4031009312679956
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 5,
+    "false_discoveries": 0,
+    "r2_max": 0.033142598267556944
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.039889139108808425
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.05655505429180696
+   }
+  },
+  "2": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.01713059626176039,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.26607404810658863
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 8,
+    "false_discoveries": 0,
+    "r2_max": 0.026385613797259566
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.03224999559139485
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.04207692289352427
+   }
+  },
+  "3": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.007934451921853714,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.30724078887379713
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 10,
+    "false_discoveries": 0,
+    "r2_max": 0.018636266047701744
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.033719343583926475
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.048437159967861576
+   }
+  },
+  "4": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.014976016849337803,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.36145638167888294
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 10,
+    "false_discoveries": 0,
+    "r2_max": 0.026333652916741612
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.03600519407891556
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.049378504012684954
+   }
+  },
+  "5": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.012721021679412803,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.3694633100751934
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 1,
+    "false_discoveries": 0,
+    "r2_max": 0.013386758559066902
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.0309503636978965
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.03722922335445222
+   }
+  },
+  "6": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.01572175298357814,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 39,
+    "false_discoveries": 0,
+    "r2_max": -0.37554723221597763
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 9,
+    "false_discoveries": 0,
+    "r2_max": 0.024820068268171624
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.035225961991350085
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.049102188440227845
+   }
+  },
+  "7": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.01669194099670157,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.3563200371149311
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 8,
+    "false_discoveries": 0,
+    "r2_max": 0.029202700507028667
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.038673573800118155
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.043348181465963975
+   }
+  },
+  "8": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.010353385537203219,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.37186859147698237
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 5,
+    "false_discoveries": 0,
+    "r2_max": 0.031865787470108486
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.03885568560773045
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.045250934608285553
+   }
+  },
+  "9": {
+   "f2": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.012387712641181103,
+    "note": "f2_fit always returns parameters; it has no abstention of its own"
+   },
+   "f4": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": -0.387801007446821
+   },
+   "f3::greedy_bic": {
+    "trials": 40,
+    "selected_any_term": 5,
+    "false_discoveries": 0,
+    "r2_max": 0.029730167539317676
+   },
+   "f3::noise_floor": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.04036314911943362
+   },
+   "f3::stlsq": {
+    "trials": 40,
+    "selected_any_term": 40,
+    "false_discoveries": 0,
+    "r2_max": 0.04570306720175343
+   }
+  }
+ },
+ "verdict_stability": [
+  {
+   "scope": "fab::eqsearch::r2::f2::null_abstention",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0,
+   "measured_max": 0
+  },
+  {
+   "scope": "fab::eqsearch::r2::f4::null_abstention",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0,
+   "measured_max": 0
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::greedy_bic::null_abstention",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0,
+   "measured_max": 0
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::noise_floor::null_abstention",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0,
+   "measured_max": 0
+  },
+  {
+   "scope": "fab::eqsearch::r2::f3::stlsq::null_abstention",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0,
+   "measured_max": 0
+  },
+  {
+   "scope": "fab::eqsearch::r2::f2::parameter_recovery",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 0.0015758961147551748,
+   "measured_max": 0.003269279475153696
+  },
+  {
+   "scope": "fab::eqsearch::r2::f4::solver_check_noiseless",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 7.013608912861732e-12,
+   "measured_max": 7.013608912861732e-12
+  },
+  {
+   "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.001",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 3.6987792627609712,
+   "measured_max": 3.701248333894287
+  },
+  {
+   "scope": "fab::eqsearch::r2::f4::map_recovery_noise_0.01",
+   "verdicts": [
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass",
+    "pass"
+   ],
+   "stable": true,
+   "pass_count": 10,
+   "measured_min": 3.694691712768604,
+   "measured_max": 3.706292820157059
+  }
+ ],
+ "tol_source_counts": {
+  "DEFINITION": 5,
+  "PHYSICS_BOUND": 0,
+  "DECLARED_PRE_RUN": 6,
+  "UNSOURCED": 3
+ },
+ "human_interest": null,
+ "ai_interest": null
+}
