@@ -1,0 +1,688 @@
+{
+ "version": "experiment-bridge/eqsearch-exact-1",
+ "status": "PROPOSED",
+ "scope": "the step map of a declared rational system from exact, noise-free states; nothing about measured data",
+ "declared_in": "eqsearch/DECLARED.json (committed before any run)",
+ "runs": {
+  "exact_12_steps": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": "10",
+     "rho": "28",
+     "beta": "8/3"
+    },
+    "dt": "1/200",
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": true,
+    "forced": false,
+    "state": "ENGAGED",
+    "reason": "auto: every coefficient, the step and the start are rational"
+   },
+   "steps_asked": 12,
+   "denominator_cap_bits": 65536,
+   "modular_allowed": true,
+   "branch": "EXACT",
+   "verdict": "PASS",
+   "void_reason": null,
+   "human_interest": null,
+   "ai_interest": null,
+   "growth": {
+    "denominator_bits_per_step": [
+     1,
+     7,
+     18,
+     39,
+     68,
+     114,
+     194,
+     316,
+     521,
+     846,
+     1378,
+     2232,
+     3622
+    ],
+    "cap_hit_at_step": null,
+    "exact_states": 13,
+    "exact_transitions": 12
+   },
+   "exact_solve": {
+    "rank": 10,
+    "unknowns_per_component": 10,
+    "unique": true
+   },
+   "recovered_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "planted_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "recovered_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "planted_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "components_equal_to_planted": 3,
+   "term_sets_equal": true,
+   "unique": true,
+   "ode_coefficients_read_back": [
+    {
+     "x": "-10",
+     "y": "10"
+    },
+    {
+     "x": "28",
+     "y": "-1",
+     "xz": "-1"
+    },
+    {
+     "z": "-8/3",
+     "xy": "1"
+    }
+   ],
+   "verification": {
+    "steps_checked_exactly": 12,
+    "mismatch": null,
+    "rule": "exact equality at every step; no tolerance, no BIC"
+   },
+   "located_error": null,
+   "null_perturbation": {
+    "perturbation": "1/1000",
+    "trials": 30,
+    "check_failed": 30,
+    "not_caught": [],
+    "first": {
+     "component": "x",
+     "term": "x",
+     "was_zero": false,
+     "check_fails": true,
+     "located_at": {
+      "step": 0,
+      "component": "x"
+     }
+    },
+    "all_caught": true
+   }
+  },
+  "long_40_steps_cap_65536": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": "10",
+     "rho": "28",
+     "beta": "8/3"
+    },
+    "dt": "1/200",
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": true,
+    "forced": false,
+    "state": "ENGAGED",
+    "reason": "auto: every coefficient, the step and the start are rational"
+   },
+   "steps_asked": 40,
+   "denominator_cap_bits": 65536,
+   "modular_allowed": true,
+   "branch": "EXACT",
+   "verdict": "PASS",
+   "void_reason": null,
+   "human_interest": null,
+   "ai_interest": null,
+   "growth": {
+    "denominator_bits_per_step": [
+     1,
+     7,
+     18,
+     39,
+     68,
+     114,
+     194,
+     316,
+     521,
+     846,
+     1378,
+     2232,
+     3622,
+     5863,
+     9496,
+     15368,
+     24876,
+     40253,
+     65140
+    ],
+    "cap_hit_at_step": 19,
+    "exact_states": 19,
+    "exact_transitions": 18,
+    "note": "the cap stopped generation at step 19; the 18 exact steps before it give full rank"
+   },
+   "exact_solve": {
+    "rank": 10,
+    "unknowns_per_component": 10,
+    "unique": true
+   },
+   "recovered_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "planted_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "recovered_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "planted_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "components_equal_to_planted": 3,
+   "term_sets_equal": true,
+   "unique": true,
+   "ode_coefficients_read_back": [
+    {
+     "x": "-10",
+     "y": "10"
+    },
+    {
+     "x": "28",
+     "y": "-1",
+     "xz": "-1"
+    },
+    {
+     "z": "-8/3",
+     "xy": "1"
+    }
+   ],
+   "verification": {
+    "steps_checked_exactly": 18,
+    "mismatch": null,
+    "rule": "exact equality at every step; no tolerance, no BIC"
+   },
+   "located_error": null,
+   "null_perturbation": {
+    "perturbation": "1/1000",
+    "trials": 30,
+    "check_failed": 30,
+    "not_caught": [],
+    "first": {
+     "component": "x",
+     "term": "x",
+     "was_zero": false,
+     "check_fails": true,
+     "located_at": {
+      "step": 0,
+      "component": "x"
+     }
+    },
+    "all_caught": true
+   }
+  },
+  "long_40_steps_cap_256_modular": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": "10",
+     "rho": "28",
+     "beta": "8/3"
+    },
+    "dt": "1/200",
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": true,
+    "forced": false,
+    "state": "ENGAGED",
+    "reason": "auto: every coefficient, the step and the start are rational"
+   },
+   "steps_asked": 40,
+   "denominator_cap_bits": 256,
+   "modular_allowed": true,
+   "branch": "MODULAR",
+   "verdict": "PASS",
+   "void_reason": null,
+   "human_interest": null,
+   "ai_interest": null,
+   "growth": {
+    "denominator_bits_per_step": [
+     1,
+     7,
+     18,
+     39,
+     68,
+     114,
+     194
+    ],
+    "cap_hit_at_step": 7,
+    "exact_states": 7,
+    "exact_transitions": 6
+   },
+   "exact_solve": {
+    "rank": 6,
+    "unknowns_per_component": 10,
+    "unique": false
+   },
+   "modular": {
+    "primes": [
+     {
+      "prime": 2305843009213693951,
+      "rank": 10,
+      "transitions": 40,
+      "all_transitions_consistent": true
+     },
+     {
+      "prime": 2305843009213693921,
+      "rank": 10,
+      "transitions": 40,
+      "all_transitions_consistent": true
+     },
+     {
+      "prime": 2305843009213693907,
+      "rank": 10,
+      "transitions": 40,
+      "all_transitions_consistent": true
+     },
+     {
+      "prime": 2305843009213693723,
+      "rank": 10,
+      "transitions": 40,
+      "all_transitions_consistent": true
+     }
+    ],
+    "checked_exactly": {
+     "steps": 6,
+     "mismatch": null
+    },
+    "checked_modulo_each_prime": {
+     "steps": 40,
+     "all_hold": true,
+     "note": "necessary, not sufficient"
+    }
+   },
+   "recovered_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "planted_step_map": [
+    {
+     "x": "19/20",
+     "y": "1/20"
+    },
+    {
+     "x": "7/50",
+     "y": "199/200",
+     "xz": "-1/200"
+    },
+    {
+     "z": "74/75",
+     "xy": "1/200"
+    }
+   ],
+   "recovered_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "planted_term_sets": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "xz",
+     "y"
+    ],
+    [
+     "xy",
+     "z"
+    ]
+   ],
+   "components_equal_to_planted": 3,
+   "term_sets_equal": true,
+   "unique": true,
+   "ode_coefficients_read_back": [
+    {
+     "x": "-10",
+     "y": "10"
+    },
+    {
+     "x": "28",
+     "y": "-1",
+     "xz": "-1"
+    },
+    {
+     "z": "-8/3",
+     "xy": "1"
+    }
+   ],
+   "verification": {
+    "steps_checked_exactly": 6,
+    "mismatch": null,
+    "rule": "exact equality at every step; no tolerance, no BIC"
+   },
+   "located_error": null,
+   "null_perturbation": {
+    "perturbation": "1/1000",
+    "trials": 30,
+    "check_failed": 30,
+    "not_caught": [],
+    "first": {
+     "component": "x",
+     "term": "x",
+     "was_zero": false,
+     "check_fails": true,
+     "located_at": {
+      "step": 0,
+      "component": "x"
+     }
+    },
+    "all_caught": true
+   }
+  },
+  "long_40_steps_cap_256_no_modular": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": "10",
+     "rho": "28",
+     "beta": "8/3"
+    },
+    "dt": "1/200",
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": true,
+    "forced": false,
+    "state": "ENGAGED",
+    "reason": "auto: every coefficient, the step and the start are rational"
+   },
+   "steps_asked": 40,
+   "denominator_cap_bits": 256,
+   "modular_allowed": false,
+   "branch": "VOID",
+   "verdict": "VOID",
+   "void_reason": "denominator cap (256 bits) reached at step 7 with rank 6 of 10 and no modular branch; no float fallback",
+   "human_interest": null,
+   "ai_interest": null,
+   "growth": {
+    "denominator_bits_per_step": [
+     1,
+     7,
+     18,
+     39,
+     68,
+     114,
+     194
+    ],
+    "cap_hit_at_step": 7,
+    "exact_states": 7,
+    "exact_transitions": 6
+   },
+   "exact_solve": {
+    "rank": 6,
+    "unknowns_per_component": 10,
+    "unique": false
+   }
+  },
+  "float_system": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": 10.0,
+     "rho": 28.0,
+     "beta": 2.6666666666666665
+    },
+    "dt": 0.005,
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": false,
+    "forced": false,
+    "state": "NOT_ENGAGED",
+    "reason": "coefficient sigma is a float (10.0): not a rational as given",
+    "note": "a float is not converted; the float path is unchanged"
+   },
+   "steps_asked": 12,
+   "denominator_cap_bits": 65536,
+   "modular_allowed": true,
+   "branch": "NOT_ENGAGED",
+   "verdict": null,
+   "void_reason": null,
+   "human_interest": null,
+   "ai_interest": null
+  },
+  "float_step_forced": {
+   "version": "experiment-bridge/eqsearch-exact-1",
+   "status": "PROPOSED",
+   "system": {
+    "name": "lorenz",
+    "scheme": "explicit Euler",
+    "coefficients": {
+     "sigma": "10",
+     "rho": "28",
+     "beta": "8/3"
+    },
+    "dt": 0.005,
+    "start": [
+     "1",
+     "1",
+     "1"
+    ]
+   },
+   "trigger": {
+    "engaged": false,
+    "forced": true,
+    "state": "NOT_ENGAGED",
+    "reason": "the step is a float (0.005): not a rational as given",
+    "note": "a float is not converted; the float path is unchanged"
+   },
+   "steps_asked": 12,
+   "denominator_cap_bits": 65536,
+   "modular_allowed": true,
+   "branch": "NOT_ENGAGED",
+   "verdict": null,
+   "void_reason": null,
+   "human_interest": null,
+   "ai_interest": null
+  }
+ },
+ "claims": [
+  {
+   "scope": "fab::eqsearch::exact::step_map_recovery",
+   "measured": 3,
+   "value": 3,
+   "unique": true,
+   "verdict": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "exact equality; there is no tolerance"
+  },
+  {
+   "scope": "fab::eqsearch::exact::null_perturbed_coefficient",
+   "measured": 30,
+   "value": 30,
+   "verdict": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "every perturbed map must fail"
+  },
+  {
+   "scope": "fab::eqsearch::exact::modular_branch_agrees",
+   "measured": true,
+   "value": true,
+   "verdict": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "the same map, coefficient for coefficient"
+  },
+  {
+   "scope": "fab::eqsearch::exact::cap_without_branch_is_void",
+   "measured": "VOID",
+   "value": "VOID",
+   "verdict": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "VOID, never a float fallback"
+  },
+  {
+   "scope": "fab::eqsearch::exact::float_system_not_engaged",
+   "measured": "NOT_ENGAGED",
+   "value": "NOT_ENGAGED",
+   "verdict": "pass",
+   "tol_source": "DEFINITION",
+   "tol_note": "a float is refused, also under --exact"
+  }
+ ],
+ "human_interest": null,
+ "ai_interest": null
+}

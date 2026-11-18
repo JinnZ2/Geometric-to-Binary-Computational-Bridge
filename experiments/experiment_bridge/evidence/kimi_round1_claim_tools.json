@@ -1,0 +1,172 @@
+{
+ "version": "experiment-bridge/claim-tools-1",
+ "status": "OBSERVED",
+ "directory": "kimi_as_received",
+ "environment": {
+  "python": "3.13.18",
+  "platform": "linux"
+ },
+ "replay": {
+  "script": "toy_rvq_void.py",
+  "saved": "toy_rvq_void_seed0.json",
+  "seed": 0,
+  "runs": [
+   {
+    "returncode": 0,
+    "stderr": ""
+   },
+   {
+    "returncode": 0,
+    "stderr": ""
+   }
+  ],
+  "excluded_fields": [
+   "claims[].ts"
+  ],
+  "saved_vs_replay": {
+   "claims": 4,
+   "equal": 4,
+   "all_equal": true,
+   "rows": [
+    {
+     "scope": "fab::contextual::rvq::codepath_collision_rate",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::energy_identity_defect",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::void_escape_integrity",
+     "equal": true,
+     "differences": []
+    }
+   ]
+  },
+  "replay_vs_replay": {
+   "claims": 4,
+   "equal": 4,
+   "all_equal": true,
+   "rows": [
+    {
+     "scope": "fab::contextual::rvq::codepath_collision_rate",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::energy_identity_defect",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+     "equal": true,
+     "differences": []
+    },
+    {
+     "scope": "fab::contextual::rvq::void_escape_integrity",
+     "equal": true,
+     "differences": []
+    }
+   ]
+  },
+  "specimen_sha256": {
+   "contextual_substrate_entry.md": "04c7658bade839e90fdc362f9e78e245e92c2f8264c457093c967535f10fb483",
+   "expansion_curiosites.md": "261325311b680dcf1a5ecb2fbccfda774870bf2235381d8551a4422b49ec5b56",
+   "lojban_wordslot_reference.json": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa",
+   "toy_rvq_void.py": "914c15cf847f479aaa3d7b8e1ab73ce0103272e2b50b44f7db51b8ccb32d0991",
+   "toy_rvq_void_seed0.json": "9c6d09ece123d4c4f5fdf12cfa4226189de84ad8c1e3dee1358fb2d7efbeb324"
+  },
+  "specimens_unchanged": true
+ },
+ "literal_measured": [
+  {
+   "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+   "call_line": 236,
+   "measured_line": 244,
+   "measured_expression": "te[\"level1_only_residual_energy_frac\"]",
+   "measured_is_literal": false,
+   "flag": null,
+   "backing_probe": null
+  },
+  {
+   "scope": "fab::contextual::rvq::energy_identity_defect",
+   "call_line": 246,
+   "measured_line": 255,
+   "measured_expression": "te[\"energy_identity_defect_worst_rel\"]",
+   "measured_is_literal": false,
+   "flag": null,
+   "backing_probe": null
+  },
+  {
+   "scope": "fab::contextual::rvq::void_escape_integrity",
+   "call_line": 257,
+   "measured_line": 264,
+   "measured_expression": "0.0",
+   "measured_is_literal": true,
+   "flag": "STRUCTURAL",
+   "backing_probe": "evidence/reproduce_kimi.py independent_census.silent_over_threshold_snap_count (recorded 0 in evidence/kimi_reproduction.json)"
+  },
+  {
+   "scope": "fab::contextual::rvq::codepath_collision_rate",
+   "call_line": 270,
+   "measured_line": 279,
+   "measured_expression": "te[\"codepath_collision_rate\"]",
+   "measured_is_literal": false,
+   "flag": null,
+   "backing_probe": null
+  }
+ ],
+ "tolerance_provenance": [
+  {
+   "scope": "fab::contextual::rvq::level1_residual_energy_frac",
+   "call_line": 236,
+   "tol_frac_expression": "0.25",
+   "tol_frac_is_literal": true,
+   "stated_reason": null,
+   "tolerance_provenance": "UNSOURCED"
+  },
+  {
+   "scope": "fab::contextual::rvq::energy_identity_defect",
+   "call_line": 246,
+   "tol_frac_expression": "1e-6",
+   "tol_frac_is_literal": true,
+   "stated_reason": null,
+   "tolerance_provenance": "UNSOURCED"
+  },
+  {
+   "scope": "fab::contextual::rvq::void_escape_integrity",
+   "call_line": 257,
+   "tol_frac_expression": "0.0",
+   "tol_frac_is_literal": true,
+   "stated_reason": null,
+   "tolerance_provenance": "UNSOURCED"
+  },
+  {
+   "scope": "fab::contextual::rvq::codepath_collision_rate",
+   "call_line": 270,
+   "tol_frac_expression": "0.5",
+   "tol_frac_is_literal": true,
+   "stated_reason": null,
+   "tolerance_provenance": "UNSOURCED"
+  }
+ ],
+ "summary": {
+  "claims": 4,
+  "saved_vs_replay_equal": 4,
+  "replay_vs_replay_equal": 4,
+  "structural": [
+   "fab::contextual::rvq::void_escape_integrity"
+  ],
+  "unsourced_tolerances": 4
+ },
+ "human_interest": null,
+ "ai_interest": null
+}

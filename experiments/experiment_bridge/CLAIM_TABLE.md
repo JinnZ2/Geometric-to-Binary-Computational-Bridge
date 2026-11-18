@@ -69,3 +69,24 @@ The actual-output consumer probe accepts four honest illustrative COBOL records,
 ## EBR_015 — Recorded output-preservation interleavings are mitigated — SUPPORTED
 
 Candidate held-path guards and exclusive publication reject the disposable leaf-symlink and held-directory-swap fixtures while preserving the temporary victim. Evidence: [wire/filesystem findings](adversarial/wire_findings.md) and paired replay. Refuter: either exact candidate fixture overwrites the victim or creates the claimed held output. This is not an OS-level TOCTOU, hostile-process isolation or crash-durability guarantee.
+
+## Kimi round 2 snapshot findings — 2026-11-17
+
+These rows record what the received `snapshot_delta.py` measures on its own two toy systems (an exact Fibonacci-word inflation and two float ODEs under RK4), replayed twice with every claim equal. Evidence for all four: [the specimen and its seed-0 record](evidence/kimi_round2_as_received/snapshot_delta_seed0.json) and [the round-2 replay](evidence/kimi_round2_reproduction.json). They are statements about that script's systems and step sizes, not about checkpointing in general, a neural codec or a physical process. The tolerances behind the verdicts are the script's own; the replay records which of them state a reason.
+
+## EBR_016 — Resume from an exact snapshot reproduces the uninterrupted run — SUPPORTED
+
+Resuming the Fibonacci word from snapshots every 5 levels gives 0 mismatched levels of 26; the letter-count chain gives 0 of 26; and RK4 resumed from an exactly stored float state matches the uninterrupted integration bitwise on both ODE systems (0 mismatched states). Refuter: one mismatched level or state when the same specimen is replayed. This holds for a stepper whose next state depends only on the stored state, in one process on one machine; it says nothing about a snapshot that crosses platforms or loses precision.
+
+## EBR_017 — A lossy snapshot stays bounded on the decaying system — SUPPORTED
+
+With the mid-trajectory state rounded to 3 decimals on the stable spiral (lambda = -0.1), the error 30 s later is 0.0498 times the injected error, inside the script's band of [0, 3]. Refuter: a ratio above 3 on that replay. The band is stated in the claim text without a reason, so the replay lists its tolerance as UNSOURCED; the number is one horizon on one system.
+
+## EBR_018 — On the Lorenz system a lossy snapshot needs refresh — SUPPORTED
+
+The same rounding on the Lorenz system gives an error ratio of 16980 at the 30 s horizon against the script's band of 100: the claim is a designed fail and it fails. With refresh (resync when the receiver is more than tau away), the largest deviation at tau 0.5 is 0.577, inside the stated bound of 1.5 tau, at 261 refreshes in 10,000 steps. Refuter: a ratio inside 100 without refresh, or a deviation above 0.75 with it, on that replay. The band of 100 states no reason (UNSOURCED); the refresh bound's reason, one-step overshoot, is the script's. How often refresh is needed is specific to this step size and receiver.
+
+## EBR_019 — A word cannot be resumed from its letter counts — SUPPORTED
+
+The letter counts resume exactly as counts, but they are a many-to-one summary of the word: at level 8 the counts (34, 21) fit 841,728,816,603,675 distinct words, and the script records the claim's value and measured fields as null with verdict `void`. Refuter: a decoder that returns the level-8 word from its two counts alone. The count of words is arithmetic (55 choose 21), not a measurement; the finding is that the specimen keeps this as a VOID and does not fill it.
+

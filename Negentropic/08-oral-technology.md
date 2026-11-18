@@ -404,6 +404,12 @@ all.
 | **T6** | Does the tradition aim **at the Bear**, or **past the pointers**? | *At the Bear* → the datum is a star, drifts with precession, needs re-aiming every few generations — and the re-aiming interval is itself a recoverable number. *Past the pointers* → the datum is the pole, precession-robust in concept, but pointer geometry still degrades and still needs periodic check |
 | **T7** | Does the record contain a **re-alignment practice**, and does it name a **specific configuration**? | Confirms branch (a) of the precession argument, and dates the tradition to ±100 yr |
 
+The same reconstruction is kept as a checked record in
+[oral-record/](oral-record/README.md) (case 01): the corrections as relayed,
+what each changed, and T5 as a bench test with its outcome slots VOID. That
+record keeps "moon better than sun" UNRESOLVED until the bench test is run,
+where the status table above marks it CLOSED; the two are not reconciled.
+
 T1, T2 and T4 are questions about physical objects. T3, T6 and T7 are
 questions for a knowledge holder. T5 is an afternoon with three components.
 

@@ -1,0 +1,112 @@
+{
+ "date": "2026-11-17",
+ "status": "RAW_PRESERVED_WITH_SEPARATE_AUDIT",
+ "provenance_note": "Files attached to the build session by the repository owner. Hashes identify received bytes; they do not authenticate the source, the model that wrote them, or the dates inside them (the entry's section 8 is dated 2026-11-18).",
+ "archive": {
+  "original_filename": "OKComputer_Lojban_Place_Structures_&_Evidentials.zip (as uploaded: OKComputer_Lojban_Place_Structures__Evidentials.zip)",
+  "bytes": 51498,
+  "sha256": "2a24053a7e7bffd54defc8d123195bb9e788bab39e1d59927e5bbb88dfd8395e",
+  "members": 11,
+  "kept_in_repository": false,
+  "note": "the archive itself is not committed; its eleven members are accounted for below"
+ },
+ "files": [
+  {
+   "path": "contextual_substrate_entry.md",
+   "bytes": 16019,
+   "sha256": "f2aa9229734e906cdef56d10d0c06388bc978906bf15fcf63d06858586e3e27e"
+  },
+  {
+   "path": "snapshot_delta.py",
+   "bytes": 23647,
+   "sha256": "346223286b1e5783b8b94339015475a8c00d63a2297c51e94f3f561ef09b390a"
+  },
+  {
+   "path": "snapshot_delta_seed0.json",
+   "bytes": 16114,
+   "sha256": "21446c49ccf4710ed600555736f04a0443b734b14e2f7ce1fbf50aeeacb87318"
+  },
+  {
+   "path": "toy_rvq_orthogonal.py",
+   "bytes": 14726,
+   "sha256": "e6784c0d8baa95fba8172210a8e356a8fe5017b90a51a7fba28afc3edcc03231"
+  },
+  {
+   "path": "toy_rvq_orthogonal_seed0.json",
+   "bytes": 5439,
+   "sha256": "8e0e7e7dd8d6c9a70d1fa9bfccd1d973bdc31567d638bc1597b9c3f035c49157"
+  },
+  {
+   "path": "toy_rvq_void_v2.py",
+   "bytes": 21961,
+   "sha256": "e1d41573f41090f0e39caa5a353634d33b1b2b604cd1b7295c479afd56783b21"
+  },
+  {
+   "path": "toy_rvq_void_v2_seed0.json",
+   "bytes": 17337,
+   "sha256": "de14ca41cee7b42adf43bc957893628f47191cf8710e13b946dcbe74e6912a47"
+  }
+ ],
+ "archive_members_not_copied": [
+  {
+   "archive_member": "toy_rvq_void.py",
+   "bytes": 12075,
+   "sha256": "914c15cf847f479aaa3d7b8e1ab73ce0103272e2b50b44f7db51b8ccb32d0991",
+   "identical_to": "evidence/kimi_as_received/toy_rvq_void.py",
+   "identical": true
+  },
+  {
+   "archive_member": "toy_rvq_void_seed0.json",
+   "bytes": 4762,
+   "sha256": "9c6d09ece123d4c4f5fdf12cfa4226189de84ad8c1e3dee1358fb2d7efbeb324",
+   "identical_to": "evidence/kimi_as_received/toy_rvq_void_seed0.json",
+   "identical": true
+  },
+  {
+   "archive_member": "expansion_curiosites.md",
+   "bytes": 7311,
+   "sha256": "261325311b680dcf1a5ecb2fbccfda774870bf2235381d8551a4422b49ec5b56",
+   "identical_to": "evidence/kimi_as_received/expansion_curiosites.md",
+   "identical": true
+  },
+  {
+   "archive_member": "lojban_wordslot_reference.json",
+   "bytes": 28357,
+   "sha256": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa",
+   "identical_to": "evidence/kimi_as_received/lojban_wordslot_reference.json",
+   "identical": true
+  }
+ ],
+ "attached_separately_not_copied": [
+  {
+   "original_filename": "contextual_substrate_entry.md",
+   "bytes": 12308,
+   "sha256": "08630115a4f157a3006284137b4b54120ea1557d17198b67d4a758b91cc33121",
+   "note": "an intermediate version: has the errata section 6, lacks the addendum section 8 of the archive member kept here; differs from the round-1 entry too"
+  },
+  {
+   "original_filename": "lojban_wordslot_reference.json",
+   "bytes": 28357,
+   "sha256": "524b80d6571221cd75dceef52a5dd4fc01c796e33723ae5982007cb059ab8daa",
+   "note": "byte-identical to the archive member and to evidence/kimi_as_received/lojban_wordslot_reference.json; one byte shorter than raw/lojban_wordslot_reference.json"
+  },
+  {
+   "original_filename": "Experiment bridge audit - 2026-11-17.md",
+   "bytes": 9311,
+   "sha256": "c2f7210dcd178e76d8bfdc8f86eb51e485bb03432b14b456d43a91a42bee8e6f",
+   "note": "an earlier state of AUDIT.md"
+  },
+  {
+   "original_filename": "experiment_bridge_audited.zip",
+   "bytes": 191056,
+   "sha256": "8e8dc6301bda4d563b69922a95903789708e3d69476a913b3ef9c8cea0308bf3",
+   "note": "an earlier delivery of this folder; not unpacked into the tree"
+  },
+  {
+   "original_filename": "experiment_bridge_v1_expanded.zip",
+   "bytes": 239957,
+   "sha256": "64d2aeed2a976a05a2893e67537bdf9906d40029249d3e24abdb165b80dd710a",
+   "note": "an earlier delivery of this folder; not unpacked into the tree"
+  }
+ ]
+}

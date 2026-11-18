@@ -1,0 +1,13 @@
+{
+ "date": "2026-11-17",
+ "status": "RAW_PRESERVED_WITH_SEPARATE_AUDIT",
+ "provenance_note": "Received as text pasted into the build session, not as a file. The body was cut out of the session transcript by program, from the opening docstring quotes to the last line of the __main__ guard, with one newline added at the end; it was not retyped. No original file exists in the session to byte-compare against, and no seed-0 record was received with it. The hash identifies these bytes; it does not authenticate who or what wrote them.",
+ "files": [
+  {
+   "path": "equation_search.py",
+   "bytes": 17944,
+   "sha256": "7115f05692a77f0347f440ee58caeb27ce073f48fb1f5d67a6ea516e0c75e50c"
+  }
+ ],
+ "received_record": null
+}
