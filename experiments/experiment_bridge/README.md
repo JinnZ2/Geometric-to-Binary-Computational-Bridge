@@ -82,3 +82,7 @@ These are synthetic toys. The entry's addendum reads the orthogonal variant as p
 
 Note 2026-11-17, after Kimi round 2: `evidence/equation_search_as_received/` holds `equation_search.py` as received (pasted as text; cut from the session transcript by program, not retyped; no record came with it). [eqsearch/](eqsearch/README.md) adds, beside it and without editing it, a round 2 (two more F3 branches, nulls for F2, F3 and F4, an F4 noise sweep, a tolerance source per claim, seeds 0 to 9) and an exact tier that recovers the Lorenz Euler step map in rationals. Thresholds were committed in `eqsearch/DECLARED.json` before any run. Generated data only; nothing is promoted.
 
+## Subsequent tool — snapshot classes (T4)
+
+Note 2026-11-17, after Kimi round 2 merged: [snapshot/](snapshot/README.md) sorts the ten received `snapshot_delta` claims into four classes (CONTEXT_FREE_EXACT, STABLE_LOSSY, CHAOTIC_REFRESH, SUMMARY_ONLY) and applies one resume rule per class: exact always, lossy with a stated bound, growing error only with refresh, a summary VOID. Built from EBR_016 to EBR_019; it reads the specimen record and edits nothing under `evidence/`. PROPOSED.
+

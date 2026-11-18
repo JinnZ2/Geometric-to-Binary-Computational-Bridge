@@ -1,0 +1,409 @@
+{
+ "version": "experiment-bridge/snapshot-class-1",
+ "status": "PROPOSED",
+ "scope": "sorts the ten received snapshot_delta claims; two toy systems, one seed",
+ "record": {
+  "path": "evidence/kimi_round2_as_received/snapshot_delta_seed0.json",
+  "sha256": "21446c49ccf4710ed600555736f04a0443b734b14e2f7ce1fbf50aeeacb87318"
+ },
+ "growth_limit": 1.0,
+ "classes": [
+  "CONTEXT_FREE_EXACT",
+  "STABLE_LOSSY",
+  "CHAOTIC_REFRESH",
+  "SUMMARY_ONLY"
+ ],
+ "reading": "content and fidelity per claim are read by hand; growth is looked up",
+ "claims": [
+  {
+   "scope": "fab::snapshot::fib::word_resume_exact",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "EXACT",
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "CONTEXT_FREE_EXACT",
+   "basis": "the full state, stored without loss",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::fib::count_resume_exact",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "EXACT",
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "CONTEXT_FREE_EXACT",
+   "basis": "the full state, stored without loss",
+   "void_reason": null,
+   "reading_note": "the snapshot is the count pair and the chain resumed is the count chain, so the counts ARE its full state",
+   "resume": {
+    "bare": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::fib::word_from_counts",
+   "claim_verdict": "void",
+   "snapshot": {
+    "content": "SUMMARY",
+    "fidelity": null,
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "SUMMARY_ONLY",
+   "basis": "a many-to-one reduction of the state",
+   "void_reason": null,
+   "reading_note": "the same counts, asked for the word: a summary of the word",
+   "resume": {
+    "bare": {
+     "decision": "VOID",
+     "class": "SUMMARY_ONLY",
+     "reason": "a summary does not determine the state it came from",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "VOID",
+     "class": "SUMMARY_ONLY",
+     "reason": "a summary does not determine the state it came from",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "VOID",
+     "class": "SUMMARY_ONLY",
+     "reason": "a summary does not determine the state it came from",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::float::bitwise_resume",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "EXACT",
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "CONTEXT_FREE_EXACT",
+   "basis": "the full state, stored without loss",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::sink::lossy_snapshot_drift",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "LOSSY",
+    "growth": 0.04978710157583205
+   },
+   "growth_from": "drift_sink/horizon_error_over_delta",
+   "class": "STABLE_LOSSY",
+   "basis": "injected error did not grow over the horizon (ratio 0.04979)",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "REFUSED",
+     "class": "STABLE_LOSSY",
+     "reason": "a lossy snapshot resumes only with a stated bound",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "STABLE_LOSSY",
+     "reason": "lossy, error not growing, bound stated",
+     "condition": {
+      "bound": 3.0
+     }
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "STABLE_LOSSY",
+     "reason": "lossy, error not growing; the refresh threshold is the stated bound",
+     "condition": {
+      "refresh_tau": 0.5
+     }
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::lorenz::lossy_snapshot_drift",
+   "claim_verdict": "fail",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "LOSSY",
+    "growth": 16980.39449382173
+   },
+   "growth_from": "drift_lorenz/horizon_error_over_delta",
+   "class": "CHAOTIC_REFRESH",
+   "basis": "injected error grew over the horizon (ratio 1.698e+04)",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "REFUSED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "error grows from a lossy snapshot: refresh is required",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "REFUSED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "error grows from a lossy snapshot: refresh is required; a bound alone does not hold",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "refresh declared",
+     "condition": {
+      "refresh_tau": 0.5,
+      "note": "resync when the deviation passes tau"
+     }
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::sink::adaptive_refresh_bound",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "LOSSY",
+    "growth": 0.04978710157583205
+   },
+   "growth_from": "drift_sink/horizon_error_over_delta",
+   "class": "STABLE_LOSSY",
+   "basis": "injected error did not grow over the horizon (ratio 0.04979)",
+   "void_reason": null,
+   "reading_note": "the receiver's state is an approximation of the sender's; growth is taken from the same system's lossy-drift measurement",
+   "resume": {
+    "bare": {
+     "decision": "REFUSED",
+     "class": "STABLE_LOSSY",
+     "reason": "a lossy snapshot resumes only with a stated bound",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "STABLE_LOSSY",
+     "reason": "lossy, error not growing, bound stated",
+     "condition": {
+      "bound": 3.0
+     }
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "STABLE_LOSSY",
+     "reason": "lossy, error not growing; the refresh threshold is the stated bound",
+     "condition": {
+      "refresh_tau": 0.1
+     }
+    }
+   },
+   "refresh_declared_by_the_claim": 0.1
+  },
+  {
+   "scope": "fab::snapshot::lorenz::adaptive_refresh_bound",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "LOSSY",
+    "growth": 16980.39449382173
+   },
+   "growth_from": "drift_lorenz/horizon_error_over_delta",
+   "class": "CHAOTIC_REFRESH",
+   "basis": "injected error grew over the horizon (ratio 1.698e+04)",
+   "void_reason": null,
+   "reading_note": "as the sink row; the claim itself supplies the refresh",
+   "resume": {
+    "bare": {
+     "decision": "REFUSED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "error grows from a lossy snapshot: refresh is required",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "REFUSED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "error grows from a lossy snapshot: refresh is required; a bound alone does not hold",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CHAOTIC_REFRESH",
+     "reason": "refresh declared",
+     "condition": {
+      "refresh_tau": 0.5,
+      "note": "resync when the deviation passes tau"
+     }
+    }
+   },
+   "refresh_declared_by_the_claim": 0.5
+  },
+  {
+   "scope": "fab::snapshot::lorenz::random_access_speedup",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "EXACT",
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "CONTEXT_FREE_EXACT",
+   "basis": "the full state, stored without loss",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  },
+  {
+   "scope": "fab::snapshot::fib::random_access_work_ratio",
+   "claim_verdict": "pass",
+   "snapshot": {
+    "content": "FULL_STATE",
+    "fidelity": "EXACT",
+    "growth": null
+   },
+   "growth_from": null,
+   "class": "CONTEXT_FREE_EXACT",
+   "basis": "the full state, stored without loss",
+   "void_reason": null,
+   "reading_note": null,
+   "resume": {
+    "bare": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_bound": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    },
+    "with_refresh": {
+     "decision": "ALLOWED",
+     "class": "CONTEXT_FREE_EXACT",
+     "reason": "exact snapshot of the full state: always",
+     "condition": null
+    }
+   },
+   "refresh_declared_by_the_claim": null
+  }
+ ],
+ "counts": {
+  "CONTEXT_FREE_EXACT": 5,
+  "STABLE_LOSSY": 2,
+  "CHAOTIC_REFRESH": 2,
+  "SUMMARY_ONLY": 1
+ },
+ "unclassified": [],
+ "ebr": {
+  "EBR_016": [
+   "fab::snapshot::fib::word_resume_exact",
+   "fab::snapshot::fib::count_resume_exact",
+   "fab::snapshot::float::bitwise_resume"
+  ],
+  "EBR_017": [
+   "fab::snapshot::sink::lossy_snapshot_drift"
+  ],
+  "EBR_018": [
+   "fab::snapshot::lorenz::lossy_snapshot_drift",
+   "fab::snapshot::lorenz::adaptive_refresh_bound"
+  ],
+  "EBR_019": [
+   "fab::snapshot::fib::word_from_counts"
+  ]
+ },
+ "human_interest": null,
+ "ai_interest": null
+}
