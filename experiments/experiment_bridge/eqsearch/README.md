@@ -105,6 +105,37 @@ Null: each of the 30 coefficients (zero ones included) moved by 1/1000 in
 turn. The exact check fails all 30, each located at step 0 (the start
 (1, 1, 1) makes every library term nonzero).
 
+## Round 3
+
+Declared in `DECLARED.json` under `round3` and committed (`ece54da`) before any round-3 code ran. Snapshot: `runs/round3.json`. Run: `python -m experiments.experiment_bridge.eqsearch.round3 --output NEW.json` (about 35 s).
+
+**a. Time-shuffle guard.** A second guard that does not use R²: shuffle the time order, recompute the derivatives, refit the same structure, and pass only if the true order beats all 19 shuffles. False discoveries on 120 pure-noise datasets per family (seeds 0 to 2):
+
+```text
+family / branch      selects   R^2 gate only   shuffle guard only   both
+f2                   120       0               8                    0
+f3 greedy_bic         18       0               4                    0
+f3 noise_floor       120       0               11                   0
+f3 stlsq             120       0               10                   0
+f4                   119       0               5                    0
+```
+
+The planted F2 (noise 1e-2), F3 (STLSQ) and F4 data all pass the shuffle guard at rank 1 of 20. Alone, the guard lets noise through at 4 to 9%, against the 5% its rule implies. The two selecting F3 branches sit highest, and that is consistent with a bias in how it is applied here: the structure is selected on the true order and only refitted on the shuffles, so the true order starts ahead. Re-running the selection on every shuffle would remove that; it was not done. With both guards, 0 of 600.
+
+**b. `linear_comparison`.** The specimen's `f4_null_guard` is used here under that name. On round 2's 400 pure-noise series the quadratic beats the linear fit **398 times**, so winning that comparison is not evidence of structure. The specimen keeps its own names.
+
+**c. STLSQ threshold sweep.**
+
+```text
+threshold            0.01  0.02  0.05  0.1   0.2   0.5   1.0
+Lorenz               3/3   3/3   3/3   3/3   3/3   3/3   1/3  UNDER_SELECTION (y, z): the unit coefficients go
+Lorenz + 0.05 x      3/3   3/3   2/3   2/3   2/3   2/3   1/3  UNDER_SELECTION (z): the planted term goes
+```
+
+The planted 0.05 term is estimated at 0.0499 and is dropped as soon as the threshold reaches 0.05. Recovery holds for thresholds below the smallest true coefficient and breaks at it; a threshold has to be chosen knowing that scale, which a search does not know in advance.
+
+**d. Noisy Lorenz, noise 1e-3.** STLSQ at 0.1 still recovers 3 of 3. The exact tier: float states read NOT_ENGAGED; an exact Euler trajectory with rational noise added reads **FAIL**, located at step 10, the first transition after the ten it was solved on; the same trajectory with no noise reads PASS. The tier never passes the noisy data.
+
 ## Limits
 
 - The exact tier recovers the step map of a known scheme from exact,
