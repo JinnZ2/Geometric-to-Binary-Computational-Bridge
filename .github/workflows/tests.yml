@@ -56,13 +56,14 @@ jobs:
       # live-tree test was one) from going red unseen on main.
       - name: Every suite under tests/
         run: |
-          failed=0
+          failed=""
           for t in tests/test_*.py; do
             echo "::group::$t"
-            PYTHONPATH=. python "$t" || { failed=1; echo "FAILED $t"; }
+            PYTHONPATH=. python "$t" || failed="$failed $t"
             echo "::endgroup::"
           done
-          exit $failed
+          for t in $failed; do echo "FAILED $t"; done
+          test -z "$failed"
 
   # ─────────────────────────────────────────────────────────────────
   # Pyflakes-only linting via ruff. Configured in pyproject.toml

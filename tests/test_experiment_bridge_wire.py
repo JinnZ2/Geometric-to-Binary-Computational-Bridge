@@ -19,7 +19,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from experiments.experiment_bridge.v1 import wire
 
-WORK = Path("/home/ubuntu/expansion_work/wire")
+# was a fixed path under another machine's home directory, which a CI runner
+# cannot create; the system temp directory serves the same purpose
+WORK = Path(tempfile.gettempdir()) / "expansion_work" / "wire"
 
 
 def envelope(data):

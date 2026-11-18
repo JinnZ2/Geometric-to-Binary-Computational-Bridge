@@ -29,6 +29,29 @@ def cell(sigma=0.1, fault=True, label_source=None):
     return _CACHE[key]
 
 
+def same_to_last_digits(a, b, rel=1e-9):
+    """Equal, with floats compared to a relative 1e-9.
+
+    The committed runs were written under Python 3.13. Python 3.12 changed
+    sum() of floats to compensated summation, so 3.11 (the CI interpreter)
+    differs from the committed numbers in the last digits. Everything that is
+    not a float (keys, counts, strings, list lengths) must match exactly.
+    """
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b
+    if isinstance(a, float) or isinstance(b, float):
+        if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+            return False
+        return abs(a - b) <= rel * max(abs(a), abs(b), 1e-300)
+    if isinstance(a, dict):
+        return isinstance(b, dict) and a.keys() == b.keys() and all(
+            same_to_last_digits(a[k], b[k], rel) for k in a)
+    if isinstance(a, list):
+        return isinstance(b, list) and len(a) == len(b) and all(
+            same_to_last_digits(x, y, rel) for x, y in zip(a, b))
+    return a == b
+
+
 class TestGroundTruth(unittest.TestCase):
     def test_predicates_come_from_the_received_reference(self):
         ref = P.read_reference()
@@ -197,7 +220,7 @@ class TestCommittedRun(unittest.TestCase):
         truth = json.loads((RUN / "truth_table.json").read_text())
         want = res["with_fault"]["cells"][0]
         got, _ = P.run_sigma(res["seed"], want["sigma"], truth["rows"], P.N_TRAIN, True)
-        self.assertEqual(json.loads(json.dumps(got)), want)
+        self.assertTrue(same_to_last_digits(json.loads(json.dumps(got)), want))
 
 
 
