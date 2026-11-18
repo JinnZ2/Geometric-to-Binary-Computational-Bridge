@@ -1,0 +1,670 @@
+{
+ "version": "experiment-bridge/eqsearch-round3-1",
+ "status": "PROPOSED",
+ "scope": "generated data only; the received specimen is imported, not edited",
+ "declared_in": "eqsearch/DECLARED.json round3, committed before any run",
+ "a_time_shuffle_guard": {
+  "shuffles": 19,
+  "seeds": [
+   0,
+   1,
+   2
+  ],
+  "nulls_by_seed": {
+   "0": {
+    "f2": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 4,
+      "both": 0
+     }
+    },
+    "f3::greedy_bic": {
+     "trials": 40,
+     "selected_any_term": 6,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 1,
+      "both": 0
+     }
+    },
+    "f3::noise_floor": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 4,
+      "both": 0
+     }
+    },
+    "f3::stlsq": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 2,
+      "both": 0
+     }
+    },
+    "f4": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 0,
+      "both": 0
+     }
+    }
+   },
+   "1": {
+    "f2": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 2,
+      "both": 0
+     }
+    },
+    "f3::greedy_bic": {
+     "trials": 40,
+     "selected_any_term": 8,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 3,
+      "both": 0
+     }
+    },
+    "f3::noise_floor": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 4,
+      "both": 0
+     }
+    },
+    "f3::stlsq": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 5,
+      "both": 0
+     }
+    },
+    "f4": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 1,
+      "both": 0
+     }
+    }
+   },
+   "2": {
+    "f2": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 2,
+      "both": 0
+     }
+    },
+    "f3::greedy_bic": {
+     "trials": 40,
+     "selected_any_term": 4,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 0,
+      "both": 0
+     }
+    },
+    "f3::noise_floor": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 3,
+      "both": 0
+     }
+    },
+    "f3::stlsq": {
+     "trials": 40,
+     "selected_any_term": 40,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 3,
+      "both": 0
+     }
+    },
+    "f4": {
+     "trials": 40,
+     "selected_any_term": 39,
+     "false_discoveries": {
+      "r2_only": 0,
+      "shuffle_only": 4,
+      "both": 0
+     }
+    }
+   }
+  },
+  "false_discoveries_total": {
+   "f2": {
+    "r2_only": 0,
+    "shuffle_only": 8,
+    "both": 0,
+    "datasets": 120,
+    "selected_any_term": 120
+   },
+   "f3::greedy_bic": {
+    "r2_only": 0,
+    "shuffle_only": 4,
+    "both": 0,
+    "datasets": 120,
+    "selected_any_term": 18
+   },
+   "f3::noise_floor": {
+    "r2_only": 0,
+    "shuffle_only": 11,
+    "both": 0,
+    "datasets": 120,
+    "selected_any_term": 120
+   },
+   "f3::stlsq": {
+    "r2_only": 0,
+    "shuffle_only": 10,
+    "both": 0,
+    "datasets": 120,
+    "selected_any_term": 120
+   },
+   "f4": {
+    "r2_only": 0,
+    "shuffle_only": 5,
+    "both": 0,
+    "datasets": 120,
+    "selected_any_term": 119
+   }
+  },
+  "power": {
+   "f2_planted_noise_0.01": {
+    "passes_shuffle_guard": true,
+    "r2": 0.7968068566828738,
+    "rank": 1,
+    "of": 20
+   },
+   "f3_planted_stlsq": {
+    "passes_shuffle_guard": true,
+    "r2": 0.9999996480498771,
+    "rank": 1,
+    "of": 20
+   },
+   "f4_planted": {
+    "passes_shuffle_guard": true,
+    "r2": 1.0,
+    "rank": 1,
+    "of": 20
+   }
+  }
+ },
+ "b_linear_comparison": {
+  "series": 400,
+  "quadratic_beats_linear": 398,
+  "name": "linear_comparison",
+  "was": "linear_guard",
+  "reading": "on pure noise the quadratic wins almost always, so winning it is not evidence of structure"
+ },
+ "c_stlsq_sweep": {
+  "lorenz": {
+   "rows": [
+    {
+     "threshold": 0.01,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 0.02,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 0.05,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 0.1,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 0.2,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 0.5,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.9908959621763341
+    },
+    {
+     "threshold": 1.0,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x"
+      ],
+      []
+     ],
+     "components_recovered": 1,
+     "failure_causes": {
+      "y": "UNDER_SELECTION",
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 2.4437435855573453
+    }
+   ],
+   "recovers_3_of_3_at": [
+    0.01,
+    0.02,
+    0.05,
+    0.1,
+    0.2,
+    0.5
+   ],
+   "lowest": 0.01,
+   "highest": 0.5,
+   "breaks_at": [
+    {
+     "threshold": 1.0,
+     "causes": {
+      "y": "UNDER_SELECTION",
+      "z": "UNDER_SELECTION"
+     }
+    }
+   ]
+  },
+  "lorenz_small_term": {
+   "rows": [
+    {
+     "threshold": 0.01,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "x",
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.04985964701190644
+    },
+    {
+     "threshold": 0.02,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "x",
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 3,
+     "failure_causes": {},
+     "smallest_kept_coefficient": 0.04985964701190644
+    },
+    {
+     "threshold": 0.05,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 2,
+     "failure_causes": {
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 0.9908574979161338
+    },
+    {
+     "threshold": 0.1,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 2,
+     "failure_causes": {
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 0.9908574979161338
+    },
+    {
+     "threshold": 0.2,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 2,
+     "failure_causes": {
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 0.9908574979161338
+    },
+    {
+     "threshold": 0.5,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x",
+       "y",
+       "xz"
+      ],
+      [
+       "z",
+       "xy"
+      ]
+     ],
+     "components_recovered": 2,
+     "failure_causes": {
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 0.9908574979161338
+    },
+    {
+     "threshold": 1.0,
+     "chosen": [
+      [
+       "x",
+       "y"
+      ],
+      [
+       "x"
+      ],
+      []
+     ],
+     "components_recovered": 1,
+     "failure_causes": {
+      "y": "UNDER_SELECTION",
+      "z": "UNDER_SELECTION"
+     },
+     "smallest_kept_coefficient": 2.482050508597358
+    }
+   ],
+   "recovers_3_of_3_at": [
+    0.01,
+    0.02
+   ],
+   "lowest": 0.01,
+   "highest": 0.02,
+   "breaks_at": [
+    {
+     "threshold": 0.05,
+     "causes": {
+      "z": "UNDER_SELECTION"
+     }
+    },
+    {
+     "threshold": 0.1,
+     "causes": {
+      "z": "UNDER_SELECTION"
+     }
+    },
+    {
+     "threshold": 0.2,
+     "causes": {
+      "z": "UNDER_SELECTION"
+     }
+    },
+    {
+     "threshold": 0.5,
+     "causes": {
+      "z": "UNDER_SELECTION"
+     }
+    },
+    {
+     "threshold": 1.0,
+     "causes": {
+      "y": "UNDER_SELECTION",
+      "z": "UNDER_SELECTION"
+     }
+    }
+   ],
+   "planted_small_coefficient": 0.05
+  }
+ },
+ "d_noisy_lorenz": {
+  "noise": 0.001,
+  "stlsq": {
+   "threshold": 0.1,
+   "chosen": [
+    [
+     "x",
+     "y"
+    ],
+    [
+     "x",
+     "y",
+     "xz"
+    ],
+    [
+     "z",
+     "xy"
+    ]
+   ],
+   "betas": [
+    [
+     -9.994366214038534,
+     9.994390453271818
+    ],
+    [
+     27.95305743635706,
+     -0.9909037445504835,
+     -0.9986680033733176
+    ],
+    [
+     -2.6647276754799947,
+     0.9992758136598493
+    ]
+   ],
+   "components_recovered": 3,
+   "failure_causes": {},
+   "r2_per_component": [
+    0.9999870050263393,
+    0.9999938123013331,
+    0.9999955312640271
+   ]
+  },
+  "exact_tier": {
+   "float_states": {
+    "branch": "NOT_ENGAGED",
+    "verdict": null,
+    "reason": "the states are floats: not rationals as given; not converted"
+   },
+   "rationalised_noisy_states": {
+    "branch": "EXACT",
+    "verdict": "FAIL",
+    "transitions": 13,
+    "steps_checked_before_mismatch": 10,
+    "located_error": {
+     "step": 10,
+     "component": "x",
+     "rule": "predicted next state is not equal to the generated one"
+    },
+    "equals_planted_map": false,
+    "note": "the first ten transitions are fitted exactly by construction; the verdict comes from the ones after them"
+   },
+   "control_no_noise": {
+    "branch": "EXACT",
+    "verdict": "PASS",
+    "transitions": 13,
+    "steps_checked_before_mismatch": 13,
+    "located_error": null,
+    "equals_planted_map": true,
+    "note": "the first ten transitions are fitted exactly by construction; the verdict comes from the ones after them"
+   }
+  }
+ },
+ "human_interest": null,
+ "ai_interest": null,
+ "checks": {
+  "planted_data_passes_the_shuffle_guard": true,
+  "no_false_discovery_with_both_guards": true,
+  "exact_tier_never_passes_noisy_data": true,
+  "exact_tier_control_passes": true
+ }
+}

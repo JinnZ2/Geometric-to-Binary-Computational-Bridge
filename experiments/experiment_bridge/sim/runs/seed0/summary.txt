@@ -1,0 +1,12 @@
+experiment-bridge/sim-planted-1  seed 0  SYNTHETIC ONLY: a planted generator, no neural model, no claim about an NCM checkpoint
+sigma   strict  covered coverage  null_max  majority  random_cb  beats  ACC  REJ  UNM  VOID
+0.1     0.890   0.899   0.990    0.353     0.097     0.643     yes   268    3    0   29
+0.25    0.870   0.897   0.970    0.403     0.097     0.530     yes   262    9    0   29
+0.5     0.887   0.899   0.987    0.410     0.097     0.517     yes   268    4    0   28
+1.0     0.777   0.812   0.957    0.353     0.097     0.443     yes   244   13    0   43
+2.0     0.460   0.483   0.953    0.243     0.097     0.233     yes   248   14    0   38
+4.0     0.183   0.193   0.950    0.193     0.097     0.140     NO    215   15    0   70
+8.0     0.143   0.152   0.940    0.170     0.097     0.097     NO    254   18    0   28
+falsifier: NOT_FALSIFIED_ON_THIS_GENERATOR; first sigma not beating the null: 4.0
+planted twin ['mleca', 'zmadu']: CONFUSED where planted, clean in the control
+written -> experiments/experiment_bridge/sim/runs/seed0

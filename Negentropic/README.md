@@ -48,6 +48,7 @@ NEG-8, `Φ = −Ṡ_exchange − σ` in W/K, which has no threshold to tune.
 | [06-connections.md](06-connections.md) | Hooks into the rest of the repository | **Grounded** |
 | [07-thermodynamics.md](07-thermodynamics.md) | TUR/KUR, finite-time Landauer, dissipative adaptation, p-bit hardware, Mpemba, MaxCal | **Grounded** — established results, with the speculative application flagged per axis |
 | [08-oral-technology.md](08-oral-technology.md) | Reconstruction of a pole-referenced field polarimeter from claims that read as mystical, with seven discriminating tests | **Split** — mechanisms documented, attribution inferred, T1–T7 not yet run |
+| [oral-record/](oral-record/README.md) | Case 01 of that reconstruction as a checked record: Stage A, the holder's corrections B1–B6, the rebuild, the delta, the bench test. Rendered from JSON by `case_check.py` | **PROPOSED** — origins and holder review VOID, bench test not run, one gap LOST and not filled |
 
 ---
 

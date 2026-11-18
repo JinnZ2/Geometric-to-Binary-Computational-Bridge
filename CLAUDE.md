@@ -386,6 +386,7 @@ Negentropic/                    Negentropic consciousness framework — theory +
 ├── NEG_CLAIMS.md                 Claim register: predictions, falsifiers, status
 ├── corrections.md                Correction ledger, severity-ordered
 ├── 01-framework.md … 08-oral-technology.md  Framework, audits, thermodynamic grounding, reconstruction
+├── oral-record/                  Case 01 of the 08 reconstruction as a record: JSON, rendered .md, case_check.py (--selftest)
 │
 │  stdlib tier — imports nothing outside the standard library
 ├── core.py                       DissipativeCore: corrected Kuramoto + Langevin; coupling kernels

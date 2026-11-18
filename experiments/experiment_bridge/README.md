@@ -44,6 +44,10 @@ Note 2026-11-17, after the original audit: [v1/](v1/README.md) adds a separate c
 
 Note 2026-11-17, after v1: [adversarial/README.md](adversarial/README.md) records reproduced numerical, semantic-validation, resource-ingestion and output-preservation breakages. [v1_1](v1_1/README.md) contains separate candidate fixes and externally context-checked decoding. The retained v1 modules, contract and runs remain unchanged. The final 213-case experiment execution passes, including legacy/inherited compatibility cases; it is not an exhaustive attack count or a security/semantic certification. Trust limits and unimplemented protections stay explicit.
 
+## Subsequent simulation — planted semantics
+
+Note 2026-11-17, after v1.1: [sim/](sim/README.md) plants a synthetic truth, encodes it with the unchanged v1.1 kernel and tests majority assignment of code paths against permuted-label, majority-label and random-codebook comparisons, with a planted fault that must read as confused. It is synthetic only: no neural model was run and the "Semantic assignment" gap stays NOT_STUDIED. The retained specimens, v1 and v1.1 are unchanged.
+
 ## Subsequent reusable checks
 
 Note 2026-11-17, after the audit: two harnesses under `evidence/` turn findings the audit already holds into checks that can be run again. Both run unchanged specimens on copies in a temporary directory and refuse to overwrite an existing output file.
@@ -73,6 +77,10 @@ Snapshot: `evidence/kimi_round2_reproduction.json`.
 - **Claim table.** The snapshot findings are EBR_016 to EBR_019 in [CLAIM_TABLE.md](CLAIM_TABLE.md).
 
 These are synthetic toys. The entry's addendum reads the orthogonal variant as pricing a power-conjugate reading; that interpretation is the entry's and is not adopted here (see [SCOPE_BOUNDARY.md](SCOPE_BOUNDARY.md)). The addendum is dated 2026-11-18 inside a file received on 2026-11-17; the date is kept as received.
+
+## Subsequent specimen and additions — equation_search
+
+Note 2026-11-17, after Kimi round 2: `evidence/equation_search_as_received/` holds `equation_search.py` as received (pasted as text; cut from the session transcript by program, not retyped; no record came with it). [eqsearch/](eqsearch/README.md) adds, beside it and without editing it, a round 2 (two more F3 branches, nulls for F2, F3 and F4, an F4 noise sweep, a tolerance source per claim, seeds 0 to 9) and an exact tier that recovers the Lorenz Euler step map in rationals. Thresholds were committed in `eqsearch/DECLARED.json` before any run. Generated data only; nothing is promoted.
 
 ## Subsequent tool — snapshot classes (T4)
 
