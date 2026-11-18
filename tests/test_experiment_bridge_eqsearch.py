@@ -23,6 +23,29 @@ ROUND2 = json.loads((RUNS / "round2.json").read_text())
 EXACT = json.loads((RUNS / "exact.json").read_text())
 
 
+def same_to_last_digits(a, b, rel=1e-9):
+    """Equal, with floats compared to a relative 1e-9.
+
+    The committed runs were written under Python 3.13. Python 3.12 changed
+    sum() of floats to compensated summation, so 3.11 (the CI interpreter)
+    differs from the committed numbers in the last digits. Everything that is
+    not a float (keys, counts, strings, list lengths) must match exactly.
+    """
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b
+    if isinstance(a, float) or isinstance(b, float):
+        if not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+            return False
+        return abs(a - b) <= rel * max(abs(a), abs(b), 1e-300)
+    if isinstance(a, dict):
+        return isinstance(b, dict) and a.keys() == b.keys() and all(
+            same_to_last_digits(a[k], b[k], rel) for k in a)
+    if isinstance(a, list):
+        return isinstance(b, list) and len(a) == len(b) and all(
+            same_to_last_digits(x, y, rel) for x, y in zip(a, b))
+    return a == b
+
+
 class TestSpecimen(unittest.TestCase):
     def test_kept_as_received_and_declared_first(self):
         m = json.loads((SPEC_DIR / "MANIFEST.json").read_text())
@@ -96,7 +119,7 @@ class TestRound2(unittest.TestCase):
 
     def test_nulls_abstain_only_through_the_gate(self):
         n = R.run_nulls(0)
-        self.assertEqual(n, ROUND2["nulls_by_seed"]["0"])
+        self.assertTrue(same_to_last_digits(json.loads(json.dumps(n)), ROUND2["nulls_by_seed"]["0"]))
         for name, row in n.items():
             self.assertEqual((row["trials"], row["false_discoveries"]), (40, 0), name)
             self.assertLess(row["r2_max"], R.R2_MIN)
