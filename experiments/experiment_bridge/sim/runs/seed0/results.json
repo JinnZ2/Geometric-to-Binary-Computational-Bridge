@@ -1,0 +1,4197 @@
+{
+ "version": "experiment-bridge/sim-planted-1",
+ "scope": "SYNTHETIC ONLY: a planted generator, no neural model, no claim about an NCM checkpoint",
+ "status": "PROPOSED",
+ "seed": 0,
+ "small": false,
+ "seeds_derived": "random.Random(f'{seed}|{purpose}|...'); purposes: signature, concepts, noise, kmeans, random-codebook, permuted-labels, mi-shuffles, broken-assigner",
+ "parameters": {
+  "predicates": [
+   "snura",
+   "jibni",
+   "zmadu",
+   "mleca",
+   "xamgu",
+   "glare",
+   "ckape",
+   "mapti"
+  ],
+  "void_label": "VOID:efficient",
+  "fault_twin": [
+   "zmadu",
+   "mleca"
+  ],
+  "dimension": 12,
+  "amplitudes": {
+   "predicate": 4.0,
+   "slot_x1": 1.5,
+   "slot_x2": 0.75
+  },
+  "levels": 4,
+  "codes": 16,
+  "kmeans_iters": 12,
+  "reject_fraction": 0.02,
+  "primary_depth": 1,
+  "confused_share": 0.25,
+  "n_permutations": 100,
+  "mi_shuffles": 20,
+  "sigmas": [
+   0.1,
+   0.25,
+   0.5,
+   1.0,
+   2.0,
+   4.0,
+   8.0
+  ],
+  "n_train": 600,
+  "n_held": 300
+ },
+ "reference": {
+  "path": "raw/lojban_wordslot_reference.json",
+  "sha256": "cc09cc643469c342072c58ace97215a88e322348d23a9f59f7a718c769364285",
+  "predicates": [
+   "snura",
+   "jibni",
+   "zmadu",
+   "mleca",
+   "xamgu",
+   "glare",
+   "ckape",
+   "mapti"
+  ],
+  "void_word": "efficient"
+ },
+ "truth_table_sha256": "0f8c194c1c8c58c1ede7c1c8d0408dbd543d03c54ad0af4d56040b89411df5fc",
+ "with_fault": {
+  "cells": [
+   {
+    "sigma": 0.1,
+    "fault": true,
+    "embeddings_sha256": "239d59eeaf41758b615dbb4151e393700d10ac1eedac415f348670839d5ae850",
+    "encode": {
+     "thresholds_squared": [
+      2.6379734206712864,
+      0.9330633193368393,
+      0.609195325708676,
+      0.29779827693350847
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "c5990ac7851b077457b8c1935020aa20766ed9e7369f2f54ce0001a1bc83e498",
+      "7643602696a5cee02850432e3688f5ca4de1101e25974514ca9138a28d9e3e1e",
+      "6e153be0591e0162eda8e2f38a53cfb8fa8ddad0e05da95a65b3fafd896bb299",
+      "1ac76f4e524a229d9d639a04dbcae337ebb3028d5198a658ba17b1448113c2ed"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.89,
+     "covered_accuracy": 0.898989898989899,
+     "coverage": 0.99,
+     "states": {
+      "ACCEPTED": 268,
+      "REJECTED": 3,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 29
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.89,
+      "covered_accuracy": 0.898989898989899,
+      "coverage": 0.99,
+      "states": {
+       "ACCEPTED": 268,
+       "REJECTED": 3,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.8833333333333333,
+      "covered_accuracy": 0.9044368600682594,
+      "coverage": 0.9766666666666667,
+      "states": {
+       "ACCEPTED": 265,
+       "REJECTED": 6,
+       "UNMAPPED": 1,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 75
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.6933333333333334,
+      "covered_accuracy": 0.9043478260869565,
+      "coverage": 0.7666666666666667,
+      "states": {
+       "ACCEPTED": 211,
+       "REJECTED": 6,
+       "UNMAPPED": 64,
+       "LEXICAL_VOID": 19
+      },
+      "keys_assigned": 258
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.22,
+      "covered_accuracy": 0.868421052631579,
+      "coverage": 0.25333333333333335,
+      "states": {
+       "ACCEPTED": 69,
+       "REJECTED": 6,
+       "UNMAPPED": 218,
+       "LEXICAL_VOID": 7
+      },
+      "keys_assigned": 497
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.11406666666666666,
+     "max": 0.35333333333333333,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.6433333333333333
+    },
+    "keys": {
+     "CLEAN": 11,
+     "CONFUSED": 5
+    },
+    "confused_pairs": [
+     {
+      "pair": [
+       "mleca",
+       "zmadu"
+      ],
+      "train_samples_on_confused_keys": 122,
+      "train_samples_of_pair": 122
+     }
+    ],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 1.0,
+      "read_as": {
+       "VOID:efficient": 29
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 1.0,
+      "read_as": {
+       "ckape": 57
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 1.0,
+      "read_as": {
+       "glare": 33
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.9722222222222222,
+      "read_as": {
+       "REJECTED": 1,
+       "jibni": 35
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "mapti": 26
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "snura": 27
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "xamgu": 30
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 2.9390320993962633,
+       "shuffled_mean_bits": 0.3516782889339658,
+       "shuffled_max_bits": 0.44309324079373424
+      },
+      "slot_x1": {
+       "mi_bits": 0.8421439307196622,
+       "shuffled_mean_bits": 0.08781078785776948,
+       "shuffled_max_bits": 0.11932018301294507
+      },
+      "slot_x2": {
+       "mi_bits": 0.15251999098964097,
+       "shuffled_mean_bits": 0.08000262684780908,
+       "shuffled_max_bits": 0.12519818497565344
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 1.1039274177560237,
+       "shuffled_mean_bits": 0.29896841270266716,
+       "shuffled_max_bits": 0.3509090830185185
+      },
+      "slot_x1": {
+       "mi_bits": 0.8069052290120591,
+       "shuffled_mean_bits": 0.08169893836245748,
+       "shuffled_max_bits": 0.1215401258769524
+      },
+      "slot_x2": {
+       "mi_bits": 1.1774870547051512,
+       "shuffled_mean_bits": 0.07815531068832118,
+       "shuffled_max_bits": 0.115269834224028
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.6738774513938601,
+       "shuffled_mean_bits": 0.35095733833131243,
+       "shuffled_max_bits": 0.40950891127954203
+      },
+      "slot_x1": {
+       "mi_bits": 0.3043885933271028,
+       "shuffled_mean_bits": 0.08407355996881846,
+       "shuffled_max_bits": 0.1432539839730503
+      },
+      "slot_x2": {
+       "mi_bits": 0.4347609880230981,
+       "shuffled_mean_bits": 0.08231074068669582,
+       "shuffled_max_bits": 0.11807826088071226
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.500155365451517,
+       "shuffled_mean_bits": 0.3577809504709234,
+       "shuffled_max_bits": 0.45497125407200917
+      },
+      "slot_x1": {
+       "mi_bits": 0.09810685327215464,
+       "shuffled_mean_bits": 0.08246940232396821,
+       "shuffled_max_bits": 0.13181458986903227
+      },
+      "slot_x2": {
+       "mi_bits": 0.10477923185932717,
+       "shuffled_mean_bits": 0.07400815120543312,
+       "shuffled_max_bits": 0.12469893422866637
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     }
+    ]
+   },
+   {
+    "sigma": 0.25,
+    "fault": true,
+    "embeddings_sha256": "599e815a15802b7277ef7e41517b45b8f32ddc48b7f63722152750216725c1b2",
+    "encode": {
+     "thresholds_squared": [
+      4.142698453668046,
+      1.6436527141850616,
+      1.144549670204785,
+      0.8730175948361939
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "9c752a6cce48f1de8f63dde6f32c19b18fc96c02087f142131e27b86c71eade7",
+      "7094aae1c75a22566d9bd4ba9a09f8b3fc0a43e5187ffdbfd99062bffe751567",
+      "a4c62875a08c8edda993f188baebba6a5e749815cec658897f603f57088e754d",
+      "0f46a389eaf5cdcd8e409075db1e970a8ce978258ab2ea83e6ad1fc7a071fab3"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.87,
+     "covered_accuracy": 0.8969072164948454,
+     "coverage": 0.97,
+     "states": {
+      "ACCEPTED": 262,
+      "REJECTED": 9,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 29
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.87,
+      "covered_accuracy": 0.8969072164948454,
+      "coverage": 0.97,
+      "states": {
+       "ACCEPTED": 262,
+       "REJECTED": 9,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.8466666666666667,
+      "covered_accuracy": 0.910394265232975,
+      "coverage": 0.93,
+      "states": {
+       "ACCEPTED": 251,
+       "REJECTED": 11,
+       "UNMAPPED": 10,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 123
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.2633333333333333,
+      "covered_accuracy": 0.8061224489795918,
+      "coverage": 0.32666666666666666,
+      "states": {
+       "ACCEPTED": 91,
+       "REJECTED": 15,
+       "UNMAPPED": 187,
+       "LEXICAL_VOID": 7
+      },
+      "keys_assigned": 501
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.016666666666666666,
+      "covered_accuracy": 0.8333333333333334,
+      "coverage": 0.02,
+      "states": {
+       "ACCEPTED": 6,
+       "REJECTED": 17,
+       "UNMAPPED": 277,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 582
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.11996666666666667,
+     "max": 0.4033333333333333,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.53
+    },
+    "keys": {
+     "CLEAN": 15,
+     "CONFUSED": 1
+    },
+    "confused_pairs": [
+     {
+      "pair": [
+       "mleca",
+       "zmadu"
+      ],
+      "train_samples_on_confused_keys": 120,
+      "train_samples_of_pair": 122
+     }
+    ],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 1.0,
+      "read_as": {
+       "VOID:efficient": 29
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 1.0,
+      "read_as": {
+       "ckape": 57
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.9090909090909091,
+      "read_as": {
+       "REJECTED": 3,
+       "glare": 30
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.9166666666666666,
+      "read_as": {
+       "REJECTED": 3,
+       "jibni": 33
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mapti": 27
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.8888888888888888,
+      "read_as": {
+       "REJECTED": 3,
+       "snura": 24
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 1.0,
+      "read_as": {
+       "xamgu": 31
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 2.878950041700334,
+       "shuffled_mean_bits": 0.35603609958876065,
+       "shuffled_max_bits": 0.41184585395900564
+      },
+      "slot_x1": {
+       "mi_bits": 0.6188628993469303,
+       "shuffled_mean_bits": 0.08808421858828545,
+       "shuffled_max_bits": 0.12329424566199865
+      },
+      "slot_x2": {
+       "mi_bits": 0.1249271655614724,
+       "shuffled_mean_bits": 0.08676442695820073,
+       "shuffled_max_bits": 0.12142426728502533
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 1.0580452452854634,
+       "shuffled_mean_bits": 0.3629084659693184,
+       "shuffled_max_bits": 0.4501477483698675
+      },
+      "slot_x1": {
+       "mi_bits": 0.9455520464579911,
+       "shuffled_mean_bits": 0.0818455845566693,
+       "shuffled_max_bits": 0.1295585226997635
+      },
+      "slot_x2": {
+       "mi_bits": 1.2084703651010757,
+       "shuffled_mean_bits": 0.07881890302237496,
+       "shuffled_max_bits": 0.1071946070940373
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.4368318817029611,
+       "shuffled_mean_bits": 0.36992863292467365,
+       "shuffled_max_bits": 0.4299718100691496
+      },
+      "slot_x1": {
+       "mi_bits": 0.0747541698317438,
+       "shuffled_mean_bits": 0.07993187768844354,
+       "shuffled_max_bits": 0.1154292778663681
+      },
+      "slot_x2": {
+       "mi_bits": 0.10676440077097088,
+       "shuffled_mean_bits": 0.08082655118561775,
+       "shuffled_max_bits": 0.12181673217516917
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.44564241596626775,
+       "shuffled_mean_bits": 0.35579049151290115,
+       "shuffled_max_bits": 0.447160603202959
+      },
+      "slot_x1": {
+       "mi_bits": 0.058392640814072534,
+       "shuffled_mean_bits": 0.07995577950775698,
+       "shuffled_max_bits": 0.10514541264394892
+      },
+      "slot_x2": {
+       "mi_bits": 0.10801957883477653,
+       "shuffled_mean_bits": 0.0814005432037431,
+       "shuffled_max_bits": 0.12679298332494393
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   },
+   {
+    "sigma": 0.5,
+    "fault": true,
+    "embeddings_sha256": "94af1625e02db7c615eaf71b1604cccbaf728ab1f2fc2d51e03bed8c41456e15",
+    "encode": {
+     "thresholds_squared": [
+      8.48721497547734,
+      5.773684630673891,
+      4.14630539299255,
+      3.0965583156802765
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "b082f02ac6a6412d5b95777b30487a1c25e1c552d4bc07f90eb6f8802cf7ae05",
+      "fa70f1d7f81aeaac00d5df9e540fd913facb819a433ca7700d45bee1ff02602e",
+      "cddaf4408a43bc8d939d0fbd2786742f650f3b17db37c7786b2686379c30d6a5",
+      "66b0004613c453cb5ed9b0247931083b4c54f36c8cd7fe4c2bc9c416e5d1b587"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.8866666666666667,
+     "covered_accuracy": 0.8986486486486487,
+     "coverage": 0.9866666666666667,
+     "states": {
+      "ACCEPTED": 268,
+      "REJECTED": 4,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 28
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.8866666666666667,
+      "covered_accuracy": 0.8986486486486487,
+      "coverage": 0.9866666666666667,
+      "states": {
+       "ACCEPTED": 268,
+       "REJECTED": 4,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.7566666666666667,
+      "covered_accuracy": 0.8730769230769231,
+      "coverage": 0.8666666666666667,
+      "states": {
+       "ACCEPTED": 235,
+       "REJECTED": 10,
+       "UNMAPPED": 30,
+       "LEXICAL_VOID": 25
+      },
+      "keys_assigned": 196
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.15,
+      "covered_accuracy": 0.8653846153846154,
+      "coverage": 0.17333333333333334,
+      "states": {
+       "ACCEPTED": 44,
+       "REJECTED": 11,
+       "UNMAPPED": 237,
+       "LEXICAL_VOID": 8
+      },
+      "keys_assigned": 529
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.02,
+      "covered_accuracy": 1.0,
+      "coverage": 0.02,
+      "states": {
+       "ACCEPTED": 6,
+       "REJECTED": 13,
+       "UNMAPPED": 281,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 585
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10526666666666668,
+     "max": 0.41,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.5166666666666667
+    },
+    "keys": {
+     "CLEAN": 14,
+     "CONFUSED": 2
+    },
+    "confused_pairs": [
+     {
+      "pair": [
+       "mleca",
+       "zmadu"
+      ],
+      "train_samples_on_confused_keys": 119,
+      "train_samples_of_pair": 122
+     }
+    ],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.9655172413793104,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 28
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.9649122807017544,
+      "read_as": {
+       "REJECTED": 2,
+       "ckape": 55
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 1.0,
+      "read_as": {
+       "glare": 33
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 1.0,
+      "read_as": {
+       "jibni": 36
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mapti": 27
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "snura": 27
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "xamgu": 30
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 2.919701179809857,
+       "shuffled_mean_bits": 0.3355680008992961,
+       "shuffled_max_bits": 0.41437940383583827
+      },
+      "slot_x1": {
+       "mi_bits": 0.621468554250455,
+       "shuffled_mean_bits": 0.07468747915647103,
+       "shuffled_max_bits": 0.12601980665116946
+      },
+      "slot_x2": {
+       "mi_bits": 0.07742970628829783,
+       "shuffled_mean_bits": 0.08205001501662239,
+       "shuffled_max_bits": 0.11381249184718198
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.5366117943731299,
+       "shuffled_mean_bits": 0.3473490838758415,
+       "shuffled_max_bits": 0.4348078899380773
+      },
+      "slot_x1": {
+       "mi_bits": 0.574582896969686,
+       "shuffled_mean_bits": 0.08215502222285609,
+       "shuffled_max_bits": 0.11744256476012326
+      },
+      "slot_x2": {
+       "mi_bits": 0.3088326418127144,
+       "shuffled_mean_bits": 0.08098645725473995,
+       "shuffled_max_bits": 0.12351162039755391
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.3530236380100266,
+       "shuffled_mean_bits": 0.35982000953190096,
+       "shuffled_max_bits": 0.471250074757895
+      },
+      "slot_x1": {
+       "mi_bits": 0.10069599525474407,
+       "shuffled_mean_bits": 0.0794301607952002,
+       "shuffled_max_bits": 0.10270098463382983
+      },
+      "slot_x2": {
+       "mi_bits": 0.13900546243069026,
+       "shuffled_mean_bits": 0.08825125988288993,
+       "shuffled_max_bits": 0.13404967951022587
+      },
+      "above_shuffle": [
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.4185387388814506,
+       "shuffled_mean_bits": 0.36264735502019424,
+       "shuffled_max_bits": 0.4556804157650106
+      },
+      "slot_x1": {
+       "mi_bits": 0.1359463173955035,
+       "shuffled_mean_bits": 0.08487831994942326,
+       "shuffled_max_bits": 0.11412444495030108
+      },
+      "slot_x2": {
+       "mi_bits": 0.14921952261841134,
+       "shuffled_mean_bits": 0.08002234612872448,
+       "shuffled_max_bits": 0.1280141903406179
+      },
+      "above_shuffle": [
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     }
+    ]
+   },
+   {
+    "sigma": 1.0,
+    "fault": true,
+    "embeddings_sha256": "8e445439c9e4f854c005c83ccfaa0f5dfd492a8388b656dfc564153f47bc1978",
+    "encode": {
+     "thresholds_squared": [
+      23.729603982292907,
+      17.936051045237775,
+      12.980693265143305,
+      9.323478066184554
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "14442ec7af2a60f2dd42dd6356d7e33650edf1ea438a1863e0c31fae52ff55a1",
+      "492ca4a588a36f6cae95741f681a1fd95a131ce95f8c23547f16b1c728776517",
+      "ab3074008c4101d31234164e0933c53f8a0de3d088218eb8efd6539a895e3e10",
+      "8c4f441c4068822ac4af02514bbc0caa450e08ed3ce1645b8826d6ff1240db24"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.7766666666666666,
+     "covered_accuracy": 0.8118466898954704,
+     "coverage": 0.9566666666666667,
+     "states": {
+      "ACCEPTED": 244,
+      "REJECTED": 13,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 43
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.7766666666666666,
+      "covered_accuracy": 0.8118466898954704,
+      "coverage": 0.9566666666666667,
+      "states": {
+       "ACCEPTED": 244,
+       "REJECTED": 13,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 43
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.69,
+      "covered_accuracy": 0.7961538461538461,
+      "coverage": 0.8666666666666667,
+      "states": {
+       "ACCEPTED": 231,
+       "REJECTED": 15,
+       "UNMAPPED": 25,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 224
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.15,
+      "covered_accuracy": 0.7894736842105263,
+      "coverage": 0.19,
+      "states": {
+       "ACCEPTED": 48,
+       "REJECTED": 22,
+       "UNMAPPED": 221,
+       "LEXICAL_VOID": 9
+      },
+      "keys_assigned": 551
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.006666666666666667,
+      "covered_accuracy": 0.6666666666666666,
+      "coverage": 0.01,
+      "states": {
+       "ACCEPTED": 3,
+       "REJECTED": 26,
+       "UNMAPPED": 271,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 584
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10310000000000001,
+     "max": 0.35333333333333333,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.44333333333333336
+    },
+    "keys": {
+     "CLEAN": 13,
+     "CONFUSED": 3
+    },
+    "confused_pairs": [
+     {
+      "pair": [
+       "mleca",
+       "zmadu"
+      ],
+      "train_samples_on_confused_keys": 82,
+      "train_samples_of_pair": 122
+     }
+    ],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.8275862068965517,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 24,
+       "glare": 2,
+       "zmadu": 1
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.7894736842105263,
+      "read_as": {
+       "REJECTED": 4,
+       "VOID:efficient": 3,
+       "ckape": 45,
+       "glare": 1,
+       "jibni": 1,
+       "snura": 2,
+       "zmadu": 1
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.8484848484848485,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 4,
+       "glare": 28
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.8611111111111112,
+      "read_as": {
+       "REJECTED": 2,
+       "jibni": 31,
+       "mapti": 1,
+       "zmadu": 2
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "mapti": 26
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.23333333333333334,
+      "read_as": {
+       "VOID:efficient": 7,
+       "mleca": 7,
+       "zmadu": 16
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "snura": 26
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "xamgu": 30
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.5333333333333333,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 5,
+       "jibni": 1,
+       "mleca": 7,
+       "zmadu": 16
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 2.4497067157784054,
+       "shuffled_mean_bits": 0.3549092815650742,
+       "shuffled_max_bits": 0.4233619895469365
+      },
+      "slot_x1": {
+       "mi_bits": 0.2180445531440536,
+       "shuffled_mean_bits": 0.07717992177258702,
+       "shuffled_max_bits": 0.12582762870756173
+      },
+      "slot_x2": {
+       "mi_bits": 0.10309710965951872,
+       "shuffled_mean_bits": 0.09170611328258009,
+       "shuffled_max_bits": 0.1386127192776327
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.38933851576478107,
+       "shuffled_mean_bits": 0.33704531335702437,
+       "shuffled_max_bits": 0.42766020421805473
+      },
+      "slot_x1": {
+       "mi_bits": 0.41874050132589774,
+       "shuffled_mean_bits": 0.07438616318533448,
+       "shuffled_max_bits": 0.09675600275766115
+      },
+      "slot_x2": {
+       "mi_bits": 0.1446737822851148,
+       "shuffled_mean_bits": 0.08073022844610175,
+       "shuffled_max_bits": 0.14572701055524725
+      },
+      "above_shuffle": [
+       "slot_x1"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.3399556516081004,
+       "shuffled_mean_bits": 0.3600459635637066,
+       "shuffled_max_bits": 0.42817029643046756
+      },
+      "slot_x1": {
+       "mi_bits": 0.1405514986647708,
+       "shuffled_mean_bits": 0.07774029694378262,
+       "shuffled_max_bits": 0.1273443084836755
+      },
+      "slot_x2": {
+       "mi_bits": 0.08855074466099942,
+       "shuffled_mean_bits": 0.07759426867150163,
+       "shuffled_max_bits": 0.12291982020793653
+      },
+      "above_shuffle": [
+       "slot_x1"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.28964158928964173,
+       "shuffled_mean_bits": 0.3455988666738833,
+       "shuffled_max_bits": 0.4210825238144358
+      },
+      "slot_x1": {
+       "mi_bits": 0.11100558756542642,
+       "shuffled_mean_bits": 0.06222803506544581,
+       "shuffled_max_bits": 0.08382740441663146
+      },
+      "slot_x2": {
+       "mi_bits": 0.08944857995065764,
+       "shuffled_mean_bits": 0.07169591371959794,
+       "shuffled_max_bits": 0.12138867878828284
+      },
+      "above_shuffle": [
+       "slot_x1"
+      ],
+      "holds_most": "slot_x1"
+     }
+    ]
+   },
+   {
+    "sigma": 2.0,
+    "fault": true,
+    "embeddings_sha256": "3d3c6d3c9eff1bc4b28f66bd453350d259a23a233d310cd1fe87964fc24a72d0",
+    "encode": {
+     "thresholds_squared": [
+      82.60446977926111,
+      57.601219990631755,
+      40.18302606150959,
+      29.64999996213103
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "18ac5ec8c580d43a93d2fd77b86b62e3b581af051e3dc46d737d217ae38900be",
+      "bd76334b123fd01b9cfb5d1a119c757e4b1c2dc625dfaeb6327677d74eb6fd9b",
+      "1f63c157f5c762285641ec24411293e0a4a214fdd12a5f4c4b654d9069da9bd0",
+      "340b8e079f87b7056768a80284d57bdb8d8b645327c756e164fb89766398b368"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.46,
+     "covered_accuracy": 0.4825174825174825,
+     "coverage": 0.9533333333333334,
+     "states": {
+      "ACCEPTED": 248,
+      "REJECTED": 14,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 38
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.46,
+      "covered_accuracy": 0.4825174825174825,
+      "coverage": 0.9533333333333334,
+      "states": {
+       "ACCEPTED": 248,
+       "REJECTED": 14,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 38
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.37333333333333335,
+      "covered_accuracy": 0.4163568773234201,
+      "coverage": 0.8966666666666666,
+      "states": {
+       "ACCEPTED": 217,
+       "REJECTED": 21,
+       "UNMAPPED": 10,
+       "LEXICAL_VOID": 52
+      },
+      "keys_assigned": 236
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.06666666666666667,
+      "covered_accuracy": 0.40816326530612246,
+      "coverage": 0.16333333333333333,
+      "states": {
+       "ACCEPTED": 44,
+       "REJECTED": 26,
+       "UNMAPPED": 225,
+       "LEXICAL_VOID": 5
+      },
+      "keys_assigned": 541
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0,
+      "covered_accuracy": null,
+      "coverage": 0.0,
+      "states": {
+       "ACCEPTED": 0,
+       "REJECTED": 31,
+       "UNMAPPED": 269,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 587
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10773333333333333,
+     "max": 0.24333333333333335,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.23333333333333334
+    },
+    "keys": {
+     "CLEAN": 12,
+     "CONFUSED": 4
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.3793103448275862,
+      "read_as": {
+       "VOID:efficient": 11,
+       "ckape": 5,
+       "glare": 4,
+       "jibni": 1,
+       "snura": 1,
+       "zmadu": 7
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.3508771929824561,
+      "read_as": {
+       "REJECTED": 4,
+       "VOID:efficient": 14,
+       "ckape": 20,
+       "glare": 3,
+       "jibni": 3,
+       "mapti": 2,
+       "snura": 2,
+       "xamgu": 3,
+       "zmadu": 6
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.6666666666666666,
+      "read_as": {
+       "VOID:efficient": 2,
+       "ckape": 2,
+       "glare": 22,
+       "jibni": 3,
+       "xamgu": 1,
+       "zmadu": 3
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.5,
+      "read_as": {
+       "VOID:efficient": 4,
+       "ckape": 4,
+       "glare": 2,
+       "jibni": 18,
+       "mapti": 2,
+       "xamgu": 1,
+       "zmadu": 5
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.6666666666666666,
+      "read_as": {
+       "REJECTED": 1,
+       "glare": 1,
+       "jibni": 4,
+       "mapti": 18,
+       "snura": 2,
+       "zmadu": 1
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 3,
+       "ckape": 1,
+       "glare": 5,
+       "jibni": 5,
+       "snura": 2,
+       "xamgu": 1,
+       "zmadu": 11
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.6296296296296297,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 1,
+       "ckape": 2,
+       "glare": 1,
+       "mapti": 3,
+       "snura": 17
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.6774193548387096,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 1,
+       "ckape": 3,
+       "glare": 4,
+       "jibni": 1,
+       "xamgu": 21
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.36666666666666664,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 2,
+       "ckape": 4,
+       "glare": 3,
+       "jibni": 4,
+       "mapti": 2,
+       "snura": 1,
+       "zmadu": 11
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 1.184912466186447,
+       "shuffled_mean_bits": 0.3461600234320038,
+       "shuffled_max_bits": 0.4373124513244917
+      },
+      "slot_x1": {
+       "mi_bits": 0.12968286418181066,
+       "shuffled_mean_bits": 0.08561072437646973,
+       "shuffled_max_bits": 0.14151358907832556
+      },
+      "slot_x2": {
+       "mi_bits": 0.12763146525368935,
+       "shuffled_mean_bits": 0.07968035499876389,
+       "shuffled_max_bits": 0.10830719801344202
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x2"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.5222363582792776,
+       "shuffled_mean_bits": 0.3808791939897458,
+       "shuffled_max_bits": 0.44664734737391926
+      },
+      "slot_x1": {
+       "mi_bits": 0.12152214657809379,
+       "shuffled_mean_bits": 0.07684415234292405,
+       "shuffled_max_bits": 0.11801265785024741
+      },
+      "slot_x2": {
+       "mi_bits": 0.10580167236024732,
+       "shuffled_mean_bits": 0.07932646878075614,
+       "shuffled_max_bits": 0.1139235445709176
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.5172360001027596,
+       "shuffled_mean_bits": 0.3564290987046997,
+       "shuffled_max_bits": 0.4133415513893233
+      },
+      "slot_x1": {
+       "mi_bits": 0.07321075458772293,
+       "shuffled_mean_bits": 0.07995444313641407,
+       "shuffled_max_bits": 0.17225358828889442
+      },
+      "slot_x2": {
+       "mi_bits": 0.12432755034168538,
+       "shuffled_mean_bits": 0.08876511042406544,
+       "shuffled_max_bits": 0.14393005356852684
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.4269172159833229,
+       "shuffled_mean_bits": 0.3600285964228175,
+       "shuffled_max_bits": 0.42591856128222416
+      },
+      "slot_x1": {
+       "mi_bits": 0.0697175789906796,
+       "shuffled_mean_bits": 0.08536582593903053,
+       "shuffled_max_bits": 0.13136278218189074
+      },
+      "slot_x2": {
+       "mi_bits": 0.08643154042236256,
+       "shuffled_mean_bits": 0.08423629766154526,
+       "shuffled_max_bits": 0.11516839414698614
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     }
+    ]
+   },
+   {
+    "sigma": 4.0,
+    "fault": true,
+    "embeddings_sha256": "d81890a40ba2dc45514ea9d91aaa2fd2da0d6a9d7bc3218df678e88710d71824",
+    "encode": {
+     "thresholds_squared": [
+      279.4847019913494,
+      196.11219146588334,
+      162.45233994580005,
+      107.54331454954708
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "c4bbd0e6ef180e410bcd2902622d96931cb2ed610f73348acc5ff830ef54e6d3",
+      "8a8205c890ae567a26143ad674559baab9a2182b21fe3aa30db3a66a70626fc6",
+      "dcd1366c0aff216e6e48b3d22267069ca5af61038e0b65f1d80e4cb330975c54",
+      "c29ebd023797b79068ef98b7453d237d5df137093176e9badca66f15f9ec2535"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.18333333333333332,
+     "covered_accuracy": 0.19298245614035087,
+     "coverage": 0.95,
+     "states": {
+      "ACCEPTED": 215,
+      "REJECTED": 15,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 70
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.18333333333333332,
+      "covered_accuracy": 0.19298245614035087,
+      "coverage": 0.95,
+      "states": {
+       "ACCEPTED": 215,
+       "REJECTED": 15,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 70
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.16666666666666666,
+      "covered_accuracy": 0.19011406844106463,
+      "coverage": 0.8766666666666667,
+      "states": {
+       "ACCEPTED": 201,
+       "REJECTED": 21,
+       "UNMAPPED": 16,
+       "LEXICAL_VOID": 62
+      },
+      "keys_assigned": 230
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.03,
+      "covered_accuracy": 0.1956521739130435,
+      "coverage": 0.15333333333333332,
+      "states": {
+       "ACCEPTED": 39,
+       "REJECTED": 21,
+       "UNMAPPED": 233,
+       "LEXICAL_VOID": 7
+      },
+      "keys_assigned": 550
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0,
+      "covered_accuracy": 0.0,
+      "coverage": 0.01,
+      "states": {
+       "ACCEPTED": 3,
+       "REJECTED": 27,
+       "UNMAPPED": 270,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 587
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.1075,
+     "max": 0.19333333333333333,
+     "p_value": 0.0297029702970297
+    },
+    "beats_permuted_null": false,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.14
+    },
+    "keys": {
+     "CLEAN": 15,
+     "CONFUSED": 1
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.3793103448275862,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 11,
+       "ckape": 2,
+       "glare": 2,
+       "jibni": 1,
+       "mapti": 5,
+       "xamgu": 2,
+       "zmadu": 5
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.2631578947368421,
+      "read_as": {
+       "REJECTED": 4,
+       "VOID:efficient": 18,
+       "ckape": 15,
+       "jibni": 8,
+       "mapti": 3,
+       "xamgu": 4,
+       "zmadu": 5
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.12121212121212122,
+      "read_as": {
+       "VOID:efficient": 8,
+       "ckape": 4,
+       "glare": 4,
+       "jibni": 6,
+       "mapti": 5,
+       "xamgu": 3,
+       "zmadu": 3
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.19444444444444445,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 8,
+       "ckape": 6,
+       "glare": 1,
+       "jibni": 7,
+       "mapti": 8,
+       "xamgu": 2,
+       "zmadu": 2
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.37037037037037035,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 3,
+       "glare": 2,
+       "jibni": 4,
+       "mapti": 10,
+       "xamgu": 5,
+       "zmadu": 1
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "VOID:efficient": 5,
+       "ckape": 3,
+       "glare": 3,
+       "jibni": 10,
+       "mapti": 5,
+       "xamgu": 2,
+       "zmadu": 2
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 8,
+       "ckape": 2,
+       "glare": 2,
+       "jibni": 2,
+       "mapti": 10,
+       "xamgu": 1,
+       "zmadu": 1
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.22580645161290322,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 2,
+       "ckape": 9,
+       "glare": 1,
+       "jibni": 3,
+       "mapti": 7,
+       "xamgu": 7
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.03333333333333333,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 7,
+       "ckape": 11,
+       "glare": 3,
+       "jibni": 2,
+       "mapti": 1,
+       "xamgu": 2,
+       "zmadu": 1
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 0.5547212935469512,
+       "shuffled_mean_bits": 0.36780067051736165,
+       "shuffled_max_bits": 0.4538206004158958
+      },
+      "slot_x1": {
+       "mi_bits": 0.07448771579151109,
+       "shuffled_mean_bits": 0.0790636711492682,
+       "shuffled_max_bits": 0.10753458997087503
+      },
+      "slot_x2": {
+       "mi_bits": 0.07941989624601786,
+       "shuffled_mean_bits": 0.07713272532162699,
+       "shuffled_max_bits": 0.138651758835746
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.4530783851170062,
+       "shuffled_mean_bits": 0.36172211358055956,
+       "shuffled_max_bits": 0.4526290538705092
+      },
+      "slot_x1": {
+       "mi_bits": 0.054326295618875635,
+       "shuffled_mean_bits": 0.08325327666242766,
+       "shuffled_max_bits": 0.11360390192191615
+      },
+      "slot_x2": {
+       "mi_bits": 0.11155843390774935,
+       "shuffled_mean_bits": 0.08344349278796306,
+       "shuffled_max_bits": 0.13262728989794362
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.40266226542593325,
+       "shuffled_mean_bits": 0.35583349777817214,
+       "shuffled_max_bits": 0.43316761682574756
+      },
+      "slot_x1": {
+       "mi_bits": 0.11227925475813576,
+       "shuffled_mean_bits": 0.0830255098974669,
+       "shuffled_max_bits": 0.1386595067711418
+      },
+      "slot_x2": {
+       "mi_bits": 0.07517010027665973,
+       "shuffled_mean_bits": 0.08527675394651117,
+       "shuffled_max_bits": 0.1793392696975621
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.35850570143888966,
+       "shuffled_mean_bits": 0.36011275805216203,
+       "shuffled_max_bits": 0.4365921079896249
+      },
+      "slot_x1": {
+       "mi_bits": 0.09933007306617989,
+       "shuffled_mean_bits": 0.07623251924362222,
+       "shuffled_max_bits": 0.15418320297301905
+      },
+      "slot_x2": {
+       "mi_bits": 0.05316985847169061,
+       "shuffled_mean_bits": 0.08031187458328014,
+       "shuffled_max_bits": 0.1209593171648096
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   },
+   {
+    "sigma": 8.0,
+    "fault": true,
+    "embeddings_sha256": "4e0f815ed6dd8d92909caffabdb093e9036ff6ccfbc0a07433906a76f65c9d88",
+    "encode": {
+     "thresholds_squared": [
+      1049.9994560968564,
+      757.4821259968036,
+      515.5139514814706,
+      361.05108896744986
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "75df52e2e054beaa640439a3d04e20963c3c7120e38e39969dbf2ea63211951e",
+      "d23993cab04fbdee69d2288ff92c65f07a5fd305afbe32fbe4ba50a19de32be1",
+      "1d89a6556c1c0f309ec6acfb2e31054e09858267de38d1d7d8897ef27bf5d2d2",
+      "072da11a9fcefc63d476c06b80ec50d46daa5b00da3de58cd5eb69b98abbb99e"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.14333333333333334,
+     "covered_accuracy": 0.1524822695035461,
+     "coverage": 0.94,
+     "states": {
+      "ACCEPTED": 254,
+      "REJECTED": 18,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 28
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.14333333333333334,
+      "covered_accuracy": 0.1524822695035461,
+      "coverage": 0.94,
+      "states": {
+       "ACCEPTED": 254,
+       "REJECTED": 18,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.12333333333333334,
+      "covered_accuracy": 0.1423076923076923,
+      "coverage": 0.8666666666666667,
+      "states": {
+       "ACCEPTED": 215,
+       "REJECTED": 23,
+       "UNMAPPED": 17,
+       "LEXICAL_VOID": 45
+      },
+      "keys_assigned": 234
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.016666666666666666,
+      "covered_accuracy": 0.1111111111111111,
+      "coverage": 0.15,
+      "states": {
+       "ACCEPTED": 39,
+       "REJECTED": 30,
+       "UNMAPPED": 225,
+       "LEXICAL_VOID": 6
+      },
+      "keys_assigned": 544
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0,
+      "covered_accuracy": 0.0,
+      "coverage": 0.006666666666666667,
+      "states": {
+       "ACCEPTED": 2,
+       "REJECTED": 36,
+       "UNMAPPED": 262,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 584
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10546666666666667,
+     "max": 0.17,
+     "p_value": 0.04950495049504951
+    },
+    "beats_permuted_null": false,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.09666666666666666
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.13793103448275862,
+      "read_as": {
+       "VOID:efficient": 4,
+       "ckape": 6,
+       "glare": 4,
+       "mapti": 7,
+       "snura": 4,
+       "xamgu": 1,
+       "zmadu": 3
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.21052631578947367,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 6,
+       "ckape": 12,
+       "glare": 9,
+       "mapti": 14,
+       "snura": 1,
+       "xamgu": 5,
+       "zmadu": 7
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.15151515151515152,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 1,
+       "ckape": 4,
+       "glare": 5,
+       "mapti": 7,
+       "snura": 6,
+       "xamgu": 1,
+       "zmadu": 7
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 2,
+       "ckape": 6,
+       "glare": 5,
+       "mapti": 10,
+       "snura": 2,
+       "xamgu": 3,
+       "zmadu": 7
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.25925925925925924,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 3,
+       "ckape": 4,
+       "glare": 4,
+       "mapti": 7,
+       "xamgu": 1,
+       "zmadu": 5
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "ckape": 6,
+       "glare": 3,
+       "mapti": 8,
+       "snura": 5,
+       "xamgu": 1,
+       "zmadu": 5
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.1111111111111111,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 8,
+       "ckape": 3,
+       "mapti": 3,
+       "snura": 3,
+       "xamgu": 2,
+       "zmadu": 5
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.22580645161290322,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 2,
+       "ckape": 7,
+       "mapti": 4,
+       "snura": 5,
+       "xamgu": 7,
+       "zmadu": 5
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.16666666666666666,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 2,
+       "ckape": 5,
+       "glare": 3,
+       "mapti": 8,
+       "snura": 2,
+       "xamgu": 2,
+       "zmadu": 5
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 0.4239088850726849,
+       "shuffled_mean_bits": 0.36592331790631244,
+       "shuffled_max_bits": 0.41228659367927595
+      },
+      "slot_x1": {
+       "mi_bits": 0.0766116660644325,
+       "shuffled_mean_bits": 0.09038020640913877,
+       "shuffled_max_bits": 0.1276985210481348
+      },
+      "slot_x2": {
+       "mi_bits": 0.06462488356791235,
+       "shuffled_mean_bits": 0.08039697771325803,
+       "shuffled_max_bits": 0.12419812906509203
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.3160606055446071,
+       "shuffled_mean_bits": 0.354964299477665,
+       "shuffled_max_bits": 0.41798569682848996
+      },
+      "slot_x1": {
+       "mi_bits": 0.08691981368682382,
+       "shuffled_mean_bits": 0.07061475376550544,
+       "shuffled_max_bits": 0.10094971484722469
+      },
+      "slot_x2": {
+       "mi_bits": 0.09183071708244196,
+       "shuffled_mean_bits": 0.07448111808906126,
+       "shuffled_max_bits": 0.1016686893447092
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.31947457110311284,
+       "shuffled_mean_bits": 0.3462258552111993,
+       "shuffled_max_bits": 0.41108771595432625
+      },
+      "slot_x1": {
+       "mi_bits": 0.106656417621239,
+       "shuffled_mean_bits": 0.09090169255022558,
+       "shuffled_max_bits": 0.13816781019907926
+      },
+      "slot_x2": {
+       "mi_bits": 0.06538300110207944,
+       "shuffled_mean_bits": 0.08164381395858564,
+       "shuffled_max_bits": 0.13600310709304678
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.3068816483499476,
+       "shuffled_mean_bits": 0.34129036965714643,
+       "shuffled_max_bits": 0.44109719003824893
+      },
+      "slot_x1": {
+       "mi_bits": 0.037005391165939275,
+       "shuffled_mean_bits": 0.08271137011030948,
+       "shuffled_max_bits": 0.13107842356339908
+      },
+      "slot_x2": {
+       "mi_bits": 0.11262532280971264,
+       "shuffled_mean_bits": 0.07829357624484076,
+       "shuffled_max_bits": 0.11493881468921958
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   }
+  ],
+  "falsifier": {
+   "falsifier": "strict accuracy at the lowest sigma is not above every permuted-label accuracy",
+   "lowest_sigma": 0.1,
+   "strict_accuracy": 0.89,
+   "permuted_null_max": 0.35333333333333333,
+   "verdict": "NOT_FALSIFIED_ON_THIS_GENERATOR",
+   "first_sigma_not_beating_null": 4.0,
+   "sigmas_not_beating_null": [
+    4.0,
+    8.0
+   ]
+  }
+ },
+ "control_without_fault": {
+  "cells": [
+   {
+    "sigma": 0.1,
+    "fault": false,
+    "embeddings_sha256": "c326e78687183f61f9f4bc81d9b3aab5318d834fc3c14960c5376ccb064be6b9",
+    "encode": {
+     "thresholds_squared": [
+      2.6379734206712864,
+      1.0929957393493752,
+      0.4707422508804817,
+      0.3124301300548541
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "27a7294f4e8aa240c8e293eb48be39eccc9b4513814309382c29559fd97eff39",
+      "eac5173889716d16c787faddf3813ea613d7cda818c3c4eda89cff843e5aa275",
+      "6cef1e50ba7b7299de10768428b5b28ad25da67806007ae79e97eb9d15ddab6f",
+      "c4ffa8e6bd55d8046eac814e68268268a2c855a3c3babdfcea08d18b7c629ded"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.99,
+     "covered_accuracy": 1.0,
+     "coverage": 0.99,
+     "states": {
+      "ACCEPTED": 268,
+      "REJECTED": 3,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 29
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.99,
+      "covered_accuracy": 1.0,
+      "coverage": 0.99,
+      "states": {
+       "ACCEPTED": 268,
+       "REJECTED": 3,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.9833333333333333,
+      "covered_accuracy": 1.0,
+      "coverage": 0.9833333333333333,
+      "states": {
+       "ACCEPTED": 267,
+       "REJECTED": 3,
+       "UNMAPPED": 2,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 75
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.8266666666666667,
+      "covered_accuracy": 1.0,
+      "coverage": 0.8266666666666667,
+      "states": {
+       "ACCEPTED": 228,
+       "REJECTED": 3,
+       "UNMAPPED": 49,
+       "LEXICAL_VOID": 20
+      },
+      "keys_assigned": 240
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.25333333333333335,
+      "covered_accuracy": 1.0,
+      "coverage": 0.25333333333333335,
+      "states": {
+       "ACCEPTED": 71,
+       "REJECTED": 3,
+       "UNMAPPED": 221,
+       "LEXICAL_VOID": 5
+      },
+      "keys_assigned": 511
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.11806666666666667,
+     "max": 0.4266666666666667,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.7266666666666667
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 1.0,
+      "read_as": {
+       "VOID:efficient": 29
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 1.0,
+      "read_as": {
+       "ckape": 57
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 1.0,
+      "read_as": {
+       "glare": 33
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.9722222222222222,
+      "read_as": {
+       "REJECTED": 1,
+       "jibni": 35
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "mapti": 26
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mleca": 30
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "snura": 27
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "xamgu": 30
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 3.1106492917147572,
+       "shuffled_mean_bits": 0.35625877136709,
+       "shuffled_max_bits": 0.4432809964220523
+      },
+      "slot_x1": {
+       "mi_bits": 0.7772416807629317,
+       "shuffled_mean_bits": 0.08792201770558132,
+       "shuffled_max_bits": 0.1118712318891245
+      },
+      "slot_x2": {
+       "mi_bits": 0.07812019087639034,
+       "shuffled_mean_bits": 0.0831830269631236,
+       "shuffled_max_bits": 0.11936158326844044
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 1.1297383522625266,
+       "shuffled_mean_bits": 0.2894764750390414,
+       "shuffled_max_bits": 0.33714220292591585
+      },
+      "slot_x1": {
+       "mi_bits": 0.9443741287916914,
+       "shuffled_mean_bits": 0.08411598631882747,
+       "shuffled_max_bits": 0.12435462843441045
+      },
+      "slot_x2": {
+       "mi_bits": 1.2855233697990454,
+       "shuffled_mean_bits": 0.07745916937336926,
+       "shuffled_max_bits": 0.11042236956455917
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.8711805090650686,
+       "shuffled_mean_bits": 0.35857182250943387,
+       "shuffled_max_bits": 0.41620504639845307
+      },
+      "slot_x1": {
+       "mi_bits": 0.42605888209363,
+       "shuffled_mean_bits": 0.08424970740058464,
+       "shuffled_max_bits": 0.14674253643802393
+      },
+      "slot_x2": {
+       "mi_bits": 0.4793674199038268,
+       "shuffled_mean_bits": 0.08393386920037241,
+       "shuffled_max_bits": 0.12463794233856132
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.3761636354459848,
+       "shuffled_mean_bits": 0.3346231983496588,
+       "shuffled_max_bits": 0.45096798831400453
+      },
+      "slot_x1": {
+       "mi_bits": 0.12647504400686313,
+       "shuffled_mean_bits": 0.07679676296304429,
+       "shuffled_max_bits": 0.11415139536349811
+      },
+      "slot_x2": {
+       "mi_bits": 0.08187732729504439,
+       "shuffled_mean_bits": 0.08295922298257159,
+       "shuffled_max_bits": 0.1410002180149914
+      },
+      "above_shuffle": [
+       "slot_x1"
+      ],
+      "holds_most": "slot_x1"
+     }
+    ]
+   },
+   {
+    "sigma": 0.25,
+    "fault": false,
+    "embeddings_sha256": "4e328c9af8c7893bddca139e47862f75f3ea4e3bd5ed4af0f445f2af195b0008",
+    "encode": {
+     "thresholds_squared": [
+      4.276959241322986,
+      1.9674505135657785,
+      1.3901760231554514,
+      1.0660788204750389
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "8b56c97829f1a1be912b5a4cf94f00ccbebe2f1b4a2db706f0f5259c131aabc2",
+      "ed54924799616914fb41433840f090e6fe4287264c77771c3e3a1e105c10345d",
+      "ec155da57bd4a51cb2f204e79e2c6e9d4553e25f2a8df03ba146e3ea93bb3fad",
+      "0dd1cc41334c31389fe33b721435fcad4ae2ab53fc9abbba2b1a9fca4114b954"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.9866666666666667,
+     "covered_accuracy": 1.0,
+     "coverage": 0.9866666666666667,
+     "states": {
+      "ACCEPTED": 267,
+      "REJECTED": 4,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 29
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.9866666666666667,
+      "covered_accuracy": 1.0,
+      "coverage": 0.9866666666666667,
+      "states": {
+       "ACCEPTED": 267,
+       "REJECTED": 4,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.9733333333333334,
+      "covered_accuracy": 1.0,
+      "coverage": 0.9733333333333334,
+      "states": {
+       "ACCEPTED": 263,
+       "REJECTED": 4,
+       "UNMAPPED": 4,
+       "LEXICAL_VOID": 29
+      },
+      "keys_assigned": 128
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.3333333333333333,
+      "covered_accuracy": 1.0,
+      "coverage": 0.3333333333333333,
+      "states": {
+       "ACCEPTED": 87,
+       "REJECTED": 6,
+       "UNMAPPED": 194,
+       "LEXICAL_VOID": 13
+      },
+      "keys_assigned": 492
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.013333333333333334,
+      "covered_accuracy": 1.0,
+      "coverage": 0.013333333333333334,
+      "states": {
+       "ACCEPTED": 4,
+       "REJECTED": 7,
+       "UNMAPPED": 289,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 585
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.1217,
+     "max": 0.33,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.53
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 1.0,
+      "read_as": {
+       "VOID:efficient": 29
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 1.0,
+      "read_as": {
+       "ckape": 57
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.9696969696969697,
+      "read_as": {
+       "REJECTED": 1,
+       "glare": 32
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.9444444444444444,
+      "read_as": {
+       "REJECTED": 2,
+       "jibni": 34
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mapti": 27
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mleca": 30
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "snura": 26
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 1.0,
+      "read_as": {
+       "xamgu": 31
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 3.1064989167219688,
+       "shuffled_mean_bits": 0.3514205706172727,
+       "shuffled_max_bits": 0.41097267848052316
+      },
+      "slot_x1": {
+       "mi_bits": 0.5984049070766285,
+       "shuffled_mean_bits": 0.08959270300848482,
+       "shuffled_max_bits": 0.12530664095382366
+      },
+      "slot_x2": {
+       "mi_bits": 0.13451316302024316,
+       "shuffled_mean_bits": 0.08969823616434865,
+       "shuffled_max_bits": 0.14016708624808025
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 1.0033724866931797,
+       "shuffled_mean_bits": 0.3343224690667289,
+       "shuffled_max_bits": 0.3972506832111773
+      },
+      "slot_x1": {
+       "mi_bits": 1.0222864840892556,
+       "shuffled_mean_bits": 0.08037078611504928,
+       "shuffled_max_bits": 0.12196597285056099
+      },
+      "slot_x2": {
+       "mi_bits": 1.263868536944792,
+       "shuffled_mean_bits": 0.07992202292723136,
+       "shuffled_max_bits": 0.122285987225938
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.40572725120359726,
+       "shuffled_mean_bits": 0.365737102189163,
+       "shuffled_max_bits": 0.4504408366958826
+      },
+      "slot_x1": {
+       "mi_bits": 0.08667280967971777,
+       "shuffled_mean_bits": 0.07316625279817726,
+       "shuffled_max_bits": 0.10677786746476343
+      },
+      "slot_x2": {
+       "mi_bits": 0.06699174673546232,
+       "shuffled_mean_bits": 0.08088366863660819,
+       "shuffled_max_bits": 0.1285981987360896
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.4924708072254157,
+       "shuffled_mean_bits": 0.3541208405578681,
+       "shuffled_max_bits": 0.40152343217493475
+      },
+      "slot_x1": {
+       "mi_bits": 0.05279228114450103,
+       "shuffled_mean_bits": 0.08367066588564857,
+       "shuffled_max_bits": 0.11460147634616495
+      },
+      "slot_x2": {
+       "mi_bits": 0.1132375041239909,
+       "shuffled_mean_bits": 0.08413611687468385,
+       "shuffled_max_bits": 0.11788548605837296
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     }
+    ]
+   },
+   {
+    "sigma": 0.5,
+    "fault": false,
+    "embeddings_sha256": "97a5a7b27fa797d4e9b9401a100c610f5ea7b9280d8b91eced6c880d2fd4cf48",
+    "encode": {
+     "thresholds_squared": [
+      8.440624438989579,
+      5.337417193391505,
+      4.241500783634396,
+      3.2158292711368066
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "77f9066cbf7a201b09ec2cd3ffb53d0a56426dccf1f64817598a6ebc7bce7dc1",
+      "943fa10817244fb068c93bcf9ad2337eb4aec6f958d4be894ac0c408c3ca5924",
+      "34d2f5e84b9a99166b0499341f68062ad44b5313ccc70400e7814713ae4c37c7",
+      "3e15a4f0156a31d17f33d198fc9cc9594a0edcf85c1cb55f3fbb82edbdb6a13d"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.98,
+     "covered_accuracy": 1.0,
+     "coverage": 0.98,
+     "states": {
+      "ACCEPTED": 266,
+      "REJECTED": 6,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 28
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.98,
+      "covered_accuracy": 1.0,
+      "coverage": 0.98,
+      "states": {
+       "ACCEPTED": 266,
+       "REJECTED": 6,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 28
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.8766666666666667,
+      "covered_accuracy": 1.0,
+      "coverage": 0.8766666666666667,
+      "states": {
+       "ACCEPTED": 237,
+       "REJECTED": 12,
+       "UNMAPPED": 25,
+       "LEXICAL_VOID": 26
+      },
+      "keys_assigned": 209
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.2,
+      "covered_accuracy": 0.9836065573770492,
+      "coverage": 0.20333333333333334,
+      "states": {
+       "ACCEPTED": 53,
+       "REJECTED": 13,
+       "UNMAPPED": 226,
+       "LEXICAL_VOID": 8
+      },
+      "keys_assigned": 531
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.016666666666666666,
+      "covered_accuracy": 0.8333333333333334,
+      "coverage": 0.02,
+      "states": {
+       "ACCEPTED": 6,
+       "REJECTED": 13,
+       "UNMAPPED": 281,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 582
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10400000000000001,
+     "max": 0.41,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.5433333333333333
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.9655172413793104,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 28
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.9649122807017544,
+      "read_as": {
+       "REJECTED": 2,
+       "ckape": 55
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 1.0,
+      "read_as": {
+       "glare": 33
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.9722222222222222,
+      "read_as": {
+       "REJECTED": 1,
+       "jibni": 35
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "mapti": 27
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.9666666666666667,
+      "read_as": {
+       "REJECTED": 1,
+       "mleca": 29
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 1.0,
+      "read_as": {
+       "snura": 27
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "xamgu": 30
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 1.0,
+      "read_as": {
+       "zmadu": 30
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 3.0814663333742125,
+       "shuffled_mean_bits": 0.36322379860309245,
+       "shuffled_max_bits": 0.43273686843873616
+      },
+      "slot_x1": {
+       "mi_bits": 0.5400304538093673,
+       "shuffled_mean_bits": 0.0775100521391257,
+       "shuffled_max_bits": 0.12262309087036628
+      },
+      "slot_x2": {
+       "mi_bits": 0.0691984126449129,
+       "shuffled_mean_bits": 0.08392794678817794,
+       "shuffled_max_bits": 0.12811597465376265
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.4310494069512118,
+       "shuffled_mean_bits": 0.3559238824545581,
+       "shuffled_max_bits": 0.457841858197901
+      },
+      "slot_x1": {
+       "mi_bits": 0.6685754937427141,
+       "shuffled_mean_bits": 0.0769910465345924,
+       "shuffled_max_bits": 0.11488457879621243
+      },
+      "slot_x2": {
+       "mi_bits": 0.414427130686784,
+       "shuffled_mean_bits": 0.07740876132312782,
+       "shuffled_max_bits": 0.12293216952767902
+      },
+      "above_shuffle": [
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.4170852292631748,
+       "shuffled_mean_bits": 0.3553441393060173,
+       "shuffled_max_bits": 0.4374950727845552
+      },
+      "slot_x1": {
+       "mi_bits": 0.12579081054855423,
+       "shuffled_mean_bits": 0.08176360408024017,
+       "shuffled_max_bits": 0.1518525814720267
+      },
+      "slot_x2": {
+       "mi_bits": 0.16571861962993553,
+       "shuffled_mean_bits": 0.07732200112815063,
+       "shuffled_max_bits": 0.11424679365830868
+      },
+      "above_shuffle": [
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.29392365242141283,
+       "shuffled_mean_bits": 0.3607491867153891,
+       "shuffled_max_bits": 0.47300871367324687
+      },
+      "slot_x1": {
+       "mi_bits": 0.1409578376857066,
+       "shuffled_mean_bits": 0.09237400912218578,
+       "shuffled_max_bits": 0.14425684685017082
+      },
+      "slot_x2": {
+       "mi_bits": 0.17708725517354684,
+       "shuffled_mean_bits": 0.08011587120101246,
+       "shuffled_max_bits": 0.10940875521852017
+      },
+      "above_shuffle": [
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     }
+    ]
+   },
+   {
+    "sigma": 1.0,
+    "fault": false,
+    "embeddings_sha256": "01e57d0c38d60f26254b707805c643d4faa262b2b838e297b91b0ecb9d726b7f",
+    "encode": {
+     "thresholds_squared": [
+      23.229671374698526,
+      17.84996321313162,
+      13.431054479065297,
+      9.837251947394602
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "62dd0095af09c2442131d90d23c87d6a1265fb945d3031dd03880fede5d86a68",
+      "0433ab297da36ea931fdcc994886cf5c16983b1a08c52cef4e65ebccb6618390",
+      "5ec0d635333a3cb6686e557ada6e3a90c177424f526bacb16efaa919837bebab",
+      "1fd51096efc87a9a849a3ac1d165818181bfed6d241f7c66db9cd3438a875f59"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.8466666666666667,
+     "covered_accuracy": 0.8788927335640139,
+     "coverage": 0.9633333333333334,
+     "states": {
+      "ACCEPTED": 265,
+      "REJECTED": 11,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 24
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.8466666666666667,
+      "covered_accuracy": 0.8788927335640139,
+      "coverage": 0.9633333333333334,
+      "states": {
+       "ACCEPTED": 265,
+       "REJECTED": 11,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 24
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.7633333333333333,
+      "covered_accuracy": 0.8513011152416357,
+      "coverage": 0.8966666666666666,
+      "states": {
+       "ACCEPTED": 229,
+       "REJECTED": 15,
+       "UNMAPPED": 16,
+       "LEXICAL_VOID": 40
+      },
+      "keys_assigned": 227
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.10333333333333333,
+      "covered_accuracy": 0.775,
+      "coverage": 0.13333333333333333,
+      "states": {
+       "ACCEPTED": 33,
+       "REJECTED": 16,
+       "UNMAPPED": 244,
+       "LEXICAL_VOID": 7
+      },
+      "keys_assigned": 541
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.013333333333333334,
+      "covered_accuracy": 1.0,
+      "coverage": 0.013333333333333334,
+      "states": {
+       "ACCEPTED": 4,
+       "REJECTED": 20,
+       "UNMAPPED": 276,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 585
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10876666666666666,
+     "max": 0.30333333333333334,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.44666666666666666
+    },
+    "keys": {
+     "CLEAN": 13,
+     "CONFUSED": 3
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.6206896551724138,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 18,
+       "glare": 2,
+       "zmadu": 8
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.7368421052631579,
+      "read_as": {
+       "REJECTED": 4,
+       "VOID:efficient": 3,
+       "ckape": 42,
+       "glare": 1,
+       "mleca": 2,
+       "snura": 2,
+       "zmadu": 3
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.9090909090909091,
+      "read_as": {
+       "REJECTED": 1,
+       "glare": 30,
+       "zmadu": 2
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.7777777777777778,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 1,
+       "jibni": 28,
+       "mapti": 3,
+       "zmadu": 3
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.9629629629629629,
+      "read_as": {
+       "REJECTED": 1,
+       "mapti": 26
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.9666666666666667,
+      "read_as": {
+       "glare": 1,
+       "mleca": 29
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.9259259259259259,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 1,
+       "snura": 25
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 1.0,
+      "read_as": {
+       "xamgu": 31
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.8333333333333334,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 1,
+       "glare": 1,
+       "mleca": 1,
+       "zmadu": 25
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 2.587105704109734,
+       "shuffled_mean_bits": 0.33882597751488625,
+       "shuffled_max_bits": 0.39043730114383896
+      },
+      "slot_x1": {
+       "mi_bits": 0.2269855131983182,
+       "shuffled_mean_bits": 0.0806414914292949,
+       "shuffled_max_bits": 0.1299180471532799
+      },
+      "slot_x2": {
+       "mi_bits": 0.08131642790462262,
+       "shuffled_mean_bits": 0.09218664385719469,
+       "shuffled_max_bits": 0.12764998243705966
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.40598620384786227,
+       "shuffled_mean_bits": 0.3534351179284255,
+       "shuffled_max_bits": 0.45256676535131923
+      },
+      "slot_x1": {
+       "mi_bits": 0.34335355268119055,
+       "shuffled_mean_bits": 0.0816437302182847,
+       "shuffled_max_bits": 0.11668197863130503
+      },
+      "slot_x2": {
+       "mi_bits": 0.151219216160178,
+       "shuffled_mean_bits": 0.07997747897746589,
+       "shuffled_max_bits": 0.12135420076139397
+      },
+      "above_shuffle": [
+       "slot_x1",
+       "slot_x2"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.3866462737922059,
+       "shuffled_mean_bits": 0.3823578794676105,
+       "shuffled_max_bits": 0.4560548172291819
+      },
+      "slot_x1": {
+       "mi_bits": 0.1715433881459531,
+       "shuffled_mean_bits": 0.07031716444534339,
+       "shuffled_max_bits": 0.11408338705223933
+      },
+      "slot_x2": {
+       "mi_bits": 0.08386934138988664,
+       "shuffled_mean_bits": 0.08225584520285759,
+       "shuffled_max_bits": 0.13297410510716248
+      },
+      "above_shuffle": [
+       "slot_x1"
+      ],
+      "holds_most": "slot_x1"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.3741839995246085,
+       "shuffled_mean_bits": 0.3491211604228036,
+       "shuffled_max_bits": 0.4305502175932238
+      },
+      "slot_x1": {
+       "mi_bits": 0.0860405591460696,
+       "shuffled_mean_bits": 0.07880058219203842,
+       "shuffled_max_bits": 0.1120496972551384
+      },
+      "slot_x2": {
+       "mi_bits": 0.0965211579020631,
+       "shuffled_mean_bits": 0.07161930714563366,
+       "shuffled_max_bits": 0.10566609508279869
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   },
+   {
+    "sigma": 2.0,
+    "fault": false,
+    "embeddings_sha256": "551d1db2270b12227fc50441328e87340796e3f97b01edbe90d2a46c31e6c991",
+    "encode": {
+     "thresholds_squared": [
+      85.44150840382616,
+      58.608245238369335,
+      47.17875698613479,
+      30.46277489513802
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "65e967e1b40b8b53a17d2b7765f4b7c71764f421c7ac4ee20be773219c1ab005",
+      "d0991c6f428501907c6f5ef0929bf44f350e67b66db2e9fea66f3b36623e0598",
+      "22fb6156ac8a072ad0c753d019416f4c7b90f3ad57a769f55032fa9460da8773",
+      "fe83d529a106ee6097d5bad0a17d444b10ee8dd539a97fe74fa8a39a325e1d9f"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.4633333333333333,
+     "covered_accuracy": 0.4809688581314879,
+     "coverage": 0.9633333333333334,
+     "states": {
+      "ACCEPTED": 238,
+      "REJECTED": 11,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 51
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.4633333333333333,
+      "covered_accuracy": 0.4809688581314879,
+      "coverage": 0.9633333333333334,
+      "states": {
+       "ACCEPTED": 238,
+       "REJECTED": 11,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 51
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.32666666666666666,
+      "covered_accuracy": 0.3798449612403101,
+      "coverage": 0.86,
+      "states": {
+       "ACCEPTED": 206,
+       "REJECTED": 20,
+       "UNMAPPED": 22,
+       "LEXICAL_VOID": 52
+      },
+      "keys_assigned": 233
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.05333333333333334,
+      "covered_accuracy": 0.42105263157894735,
+      "coverage": 0.12666666666666668,
+      "states": {
+       "ACCEPTED": 34,
+       "REJECTED": 20,
+       "UNMAPPED": 242,
+       "LEXICAL_VOID": 4
+      },
+      "keys_assigned": 553
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0,
+      "covered_accuracy": 0.0,
+      "coverage": 0.016666666666666666,
+      "states": {
+       "ACCEPTED": 5,
+       "REJECTED": 30,
+       "UNMAPPED": 265,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 587
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.11066666666666666,
+     "max": 0.24333333333333335,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.23666666666666666
+    },
+    "keys": {
+     "CLEAN": 8,
+     "CONFUSED": 8
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.4482758620689655,
+      "read_as": {
+       "VOID:efficient": 13,
+       "ckape": 8,
+       "glare": 2,
+       "jibni": 3,
+       "mleca": 1,
+       "snura": 2
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.3684210526315789,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 11,
+       "ckape": 21,
+       "glare": 4,
+       "jibni": 4,
+       "mleca": 5,
+       "snura": 5,
+       "xamgu": 6
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.7575757575757576,
+      "read_as": {
+       "VOID:efficient": 6,
+       "ckape": 2,
+       "glare": 25
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.4166666666666667,
+      "read_as": {
+       "VOID:efficient": 8,
+       "ckape": 2,
+       "glare": 2,
+       "jibni": 15,
+       "mapti": 2,
+       "mleca": 6,
+       "snura": 1
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.6666666666666666,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 1,
+       "jibni": 3,
+       "mapti": 18,
+       "mleca": 1,
+       "snura": 2
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.4,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 3,
+       "ckape": 3,
+       "glare": 1,
+       "jibni": 3,
+       "mapti": 2,
+       "mleca": 12,
+       "snura": 2,
+       "xamgu": 1
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.6296296296296297,
+      "read_as": {
+       "REJECTED": 2,
+       "ckape": 3,
+       "glare": 1,
+       "jibni": 1,
+       "mapti": 3,
+       "snura": 17
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.5806451612903226,
+      "read_as": {
+       "REJECTED": 1,
+       "ckape": 2,
+       "glare": 6,
+       "jibni": 1,
+       "mapti": 1,
+       "mleca": 2,
+       "xamgu": 18
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 9,
+       "ckape": 3,
+       "glare": 4,
+       "jibni": 4,
+       "mapti": 2,
+       "mleca": 4,
+       "snura": 2
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 1.221012130059913,
+       "shuffled_mean_bits": 0.3515793792543128,
+       "shuffled_max_bits": 0.41218670798948664
+      },
+      "slot_x1": {
+       "mi_bits": 0.17641124961958277,
+       "shuffled_mean_bits": 0.07949027899336543,
+       "shuffled_max_bits": 0.11227984902964841
+      },
+      "slot_x2": {
+       "mi_bits": 0.100172621639906,
+       "shuffled_mean_bits": 0.07983902095257842,
+       "shuffled_max_bits": 0.11197379622929687
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.4279867702833135,
+       "shuffled_mean_bits": 0.3579806135740178,
+       "shuffled_max_bits": 0.41679261549567603
+      },
+      "slot_x1": {
+       "mi_bits": 0.09897336134003272,
+       "shuffled_mean_bits": 0.08038076875869522,
+       "shuffled_max_bits": 0.10707891633228853
+      },
+      "slot_x2": {
+       "mi_bits": 0.09014513888528401,
+       "shuffled_mean_bits": 0.08884509273767935,
+       "shuffled_max_bits": 0.13465382157580633
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.4571505067832975,
+       "shuffled_mean_bits": 0.34472819818251066,
+       "shuffled_max_bits": 0.43672237017752596
+      },
+      "slot_x1": {
+       "mi_bits": 0.15823264363630504,
+       "shuffled_mean_bits": 0.08909071477342632,
+       "shuffled_max_bits": 0.1298204674984157
+      },
+      "slot_x2": {
+       "mi_bits": 0.032676778058164505,
+       "shuffled_mean_bits": 0.07737363427619723,
+       "shuffled_max_bits": 0.1337523124991806
+      },
+      "above_shuffle": [
+       "predicate",
+       "slot_x1"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.4159854175945669,
+       "shuffled_mean_bits": 0.38008664524545444,
+       "shuffled_max_bits": 0.47799716430557126
+      },
+      "slot_x1": {
+       "mi_bits": 0.07793524661263877,
+       "shuffled_mean_bits": 0.08338193693495567,
+       "shuffled_max_bits": 0.11032330001488505
+      },
+      "slot_x2": {
+       "mi_bits": 0.12195660409655071,
+       "shuffled_mean_bits": 0.08208625358473344,
+       "shuffled_max_bits": 0.11592819929373918
+      },
+      "above_shuffle": [
+       "slot_x2"
+      ],
+      "holds_most": "slot_x2"
+     }
+    ]
+   },
+   {
+    "sigma": 4.0,
+    "fault": false,
+    "embeddings_sha256": "450a59465921f62536846fd8276f2177a6187d4e0d9dd991541e8e54952f8a6c",
+    "encode": {
+     "thresholds_squared": [
+      291.74741384851893,
+      223.62631477865207,
+      162.60202636400226,
+      117.63729619756349
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "3927e5bafa3538a4027c37afb1a4a9aba3b645a41270b7fc3ec18f0a191a1466",
+      "a37c8c5607e8864e85f1bbd3df285776c251c5e27b9e0fd1663333ee83f5a00d",
+      "a5b63d7a5a55e1bad3f00ff8aa4987c5292d4b86552b82c5964298c47d912c7d",
+      "991b66bfd6953bb4bad6abfe0889772766c0b1fba103722e2b9caa20d9f20f67"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.21333333333333335,
+     "covered_accuracy": 0.2229965156794425,
+     "coverage": 0.9566666666666667,
+     "states": {
+      "ACCEPTED": 180,
+      "REJECTED": 13,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 107
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.21333333333333335,
+      "covered_accuracy": 0.2229965156794425,
+      "coverage": 0.9566666666666667,
+      "states": {
+       "ACCEPTED": 180,
+       "REJECTED": 13,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 107
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.14,
+      "covered_accuracy": 0.15730337078651685,
+      "coverage": 0.89,
+      "states": {
+       "ACCEPTED": 201,
+       "REJECTED": 16,
+       "UNMAPPED": 17,
+       "LEXICAL_VOID": 66
+      },
+      "keys_assigned": 240
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.02666666666666667,
+      "covered_accuracy": 0.17777777777777778,
+      "coverage": 0.15,
+      "states": {
+       "ACCEPTED": 38,
+       "REJECTED": 20,
+       "UNMAPPED": 235,
+       "LEXICAL_VOID": 7
+      },
+      "keys_assigned": 549
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0033333333333333335,
+      "covered_accuracy": 0.5,
+      "coverage": 0.006666666666666667,
+      "states": {
+       "ACCEPTED": 1,
+       "REJECTED": 26,
+       "UNMAPPED": 272,
+       "LEXICAL_VOID": 1
+      },
+      "keys_assigned": 586
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10343333333333334,
+     "max": 0.19333333333333333,
+     "p_value": 0.009900990099009901
+    },
+    "beats_permuted_null": true,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.16333333333333333
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.6206896551724138,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 18,
+       "ckape": 3,
+       "glare": 2,
+       "mapti": 2,
+       "xamgu": 2,
+       "zmadu": 1
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.2807017543859649,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 24,
+       "ckape": 16,
+       "glare": 1,
+       "mapti": 5,
+       "xamgu": 6,
+       "zmadu": 2
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.12121212121212122,
+      "read_as": {
+       "VOID:efficient": 12,
+       "ckape": 3,
+       "glare": 4,
+       "mapti": 4,
+       "xamgu": 4,
+       "zmadu": 6
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 12,
+       "ckape": 8,
+       "mapti": 9,
+       "xamgu": 4,
+       "zmadu": 1
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.4074074074074074,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 6,
+       "ckape": 5,
+       "glare": 1,
+       "mapti": 11,
+       "xamgu": 2,
+       "zmadu": 1
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "VOID:efficient": 10,
+       "ckape": 3,
+       "mapti": 3,
+       "xamgu": 9,
+       "zmadu": 5
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 10,
+       "ckape": 4,
+       "glare": 1,
+       "mapti": 9,
+       "xamgu": 1,
+       "zmadu": 1
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.3870967741935484,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 3,
+       "ckape": 5,
+       "glare": 1,
+       "mapti": 6,
+       "xamgu": 12,
+       "zmadu": 1
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.1,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 12,
+       "ckape": 5,
+       "glare": 1,
+       "mapti": 1,
+       "xamgu": 6,
+       "zmadu": 3
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 0.48988888327694174,
+       "shuffled_mean_bits": 0.37331103340398475,
+       "shuffled_max_bits": 0.44343681621814535
+      },
+      "slot_x1": {
+       "mi_bits": 0.08302674989807567,
+       "shuffled_mean_bits": 0.07804370530773616,
+       "shuffled_max_bits": 0.11675539956055112
+      },
+      "slot_x2": {
+       "mi_bits": 0.09963973040323464,
+       "shuffled_mean_bits": 0.08412235609476604,
+       "shuffled_max_bits": 0.12201045845729025
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.4122350285245356,
+       "shuffled_mean_bits": 0.3641343570706846,
+       "shuffled_max_bits": 0.48365476840860416
+      },
+      "slot_x1": {
+       "mi_bits": 0.08026550177529068,
+       "shuffled_mean_bits": 0.07482797567777066,
+       "shuffled_max_bits": 0.12555640061267623
+      },
+      "slot_x2": {
+       "mi_bits": 0.0984946365082596,
+       "shuffled_mean_bits": 0.07347570303937159,
+       "shuffled_max_bits": 0.11882344044337115
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.5199191044279501,
+       "shuffled_mean_bits": 0.36419651529199903,
+       "shuffled_max_bits": 0.4208104593251137
+      },
+      "slot_x1": {
+       "mi_bits": 0.05991335025076423,
+       "shuffled_mean_bits": 0.0759068870720684,
+       "shuffled_max_bits": 0.12053563377928862
+      },
+      "slot_x2": {
+       "mi_bits": 0.07938952129353477,
+       "shuffled_mean_bits": 0.08903489802057955,
+       "shuffled_max_bits": 0.15526187023581045
+      },
+      "above_shuffle": [
+       "predicate"
+      ],
+      "holds_most": "predicate"
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.34153726059753153,
+       "shuffled_mean_bits": 0.3334511139246263,
+       "shuffled_max_bits": 0.40208658405213327
+      },
+      "slot_x1": {
+       "mi_bits": 0.08674909014865942,
+       "shuffled_mean_bits": 0.0830196075993707,
+       "shuffled_max_bits": 0.12062707474418563
+      },
+      "slot_x2": {
+       "mi_bits": 0.07926934308799263,
+       "shuffled_mean_bits": 0.09128215606407107,
+       "shuffled_max_bits": 0.13135030396179037
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   },
+   {
+    "sigma": 8.0,
+    "fault": false,
+    "embeddings_sha256": "4cbaedc92261f728f511ff966efefb7c8e3590528b7207dc851329e9da9ce463",
+    "encode": {
+     "thresholds_squared": [
+      1036.0353490336092,
+      767.5485843201931,
+      649.2934518995822,
+      358.9335692193207
+     ],
+     "traces_validated": 10,
+     "codebook_sha256": [
+      "f201294deebae73e5d5428209d2226c509381a67bab85bcb96676a12fa659739",
+      "66c235fe83279fb93bfdd3c86ad0f2b6ade40e51966b4393619ad19b74688ef7",
+      "11f616ad6a6756c790dbe205e302fb0d099f94aa3edd613afc030f8140378bb6",
+      "c70fb7c2be0472c8ccf7677881ede88001043862821559f2c31757de4195151f"
+     ]
+    },
+    "primary_depth": 1,
+    "primary": {
+     "n": 300,
+     "strict_accuracy": 0.10666666666666667,
+     "covered_accuracy": 0.11428571428571428,
+     "coverage": 0.9333333333333333,
+     "states": {
+      "ACCEPTED": 198,
+      "REJECTED": 20,
+      "UNMAPPED": 0,
+      "LEXICAL_VOID": 82
+     }
+    },
+    "by_depth": {
+     "1": {
+      "n": 300,
+      "strict_accuracy": 0.10666666666666667,
+      "covered_accuracy": 0.11428571428571428,
+      "coverage": 0.9333333333333333,
+      "states": {
+       "ACCEPTED": 198,
+       "REJECTED": 20,
+       "UNMAPPED": 0,
+       "LEXICAL_VOID": 82
+      },
+      "keys_assigned": 16
+     },
+     "2": {
+      "n": 300,
+      "strict_accuracy": 0.10666666666666667,
+      "covered_accuracy": 0.125,
+      "coverage": 0.8533333333333334,
+      "states": {
+       "ACCEPTED": 196,
+       "REJECTED": 23,
+       "UNMAPPED": 21,
+       "LEXICAL_VOID": 60
+      },
+      "keys_assigned": 228
+     },
+     "3": {
+      "n": 300,
+      "strict_accuracy": 0.016666666666666666,
+      "covered_accuracy": 0.12195121951219512,
+      "coverage": 0.13666666666666666,
+      "states": {
+       "ACCEPTED": 37,
+       "REJECTED": 23,
+       "UNMAPPED": 236,
+       "LEXICAL_VOID": 4
+      },
+      "keys_assigned": 552
+     },
+     "4": {
+      "n": 300,
+      "strict_accuracy": 0.0,
+      "covered_accuracy": 0.0,
+      "coverage": 0.013333333333333334,
+      "states": {
+       "ACCEPTED": 4,
+       "REJECTED": 39,
+       "UNMAPPED": 257,
+       "LEXICAL_VOID": 0
+      },
+      "keys_assigned": 583
+     }
+    },
+    "permuted_null": {
+     "n": 100,
+     "mean": 0.10279999999999999,
+     "max": 0.15333333333333332,
+     "p_value": 0.36633663366336633
+    },
+    "beats_permuted_null": false,
+    "majority_label_baseline": {
+     "label": "VOID:efficient",
+     "strict_accuracy": 0.09666666666666666
+    },
+    "random_codebook_baseline": {
+     "strict_accuracy": 0.09666666666666666
+    },
+    "keys": {
+     "CLEAN": 16,
+     "CONFUSED": 0
+    },
+    "confused_pairs": [],
+    "per_label": {
+     "VOID:efficient": {
+      "n": 29,
+      "recall_strict": 0.3103448275862069,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 9,
+       "ckape": 4,
+       "mapti": 8,
+       "xamgu": 3,
+       "zmadu": 4
+      }
+     },
+     "ckape": {
+      "n": 57,
+      "recall_strict": 0.17543859649122806,
+      "read_as": {
+       "REJECTED": 5,
+       "VOID:efficient": 19,
+       "ckape": 10,
+       "mapti": 7,
+       "xamgu": 4,
+       "zmadu": 12
+      }
+     },
+     "glare": {
+      "n": 33,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 9,
+       "ckape": 4,
+       "mapti": 7,
+       "xamgu": 2,
+       "zmadu": 9
+      }
+     },
+     "jibni": {
+      "n": 36,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 11,
+       "ckape": 5,
+       "mapti": 7,
+       "xamgu": 4,
+       "zmadu": 8
+      }
+     },
+     "mapti": {
+      "n": 27,
+      "recall_strict": 0.14814814814814814,
+      "read_as": {
+       "REJECTED": 3,
+       "VOID:efficient": 6,
+       "ckape": 5,
+       "mapti": 4,
+       "xamgu": 1,
+       "zmadu": 8
+      }
+     },
+     "mleca": {
+      "n": 30,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 6,
+       "ckape": 6,
+       "mapti": 10,
+       "xamgu": 2,
+       "zmadu": 5
+      }
+     },
+     "snura": {
+      "n": 27,
+      "recall_strict": 0.0,
+      "read_as": {
+       "REJECTED": 2,
+       "VOID:efficient": 13,
+       "ckape": 5,
+       "mapti": 3,
+       "xamgu": 1,
+       "zmadu": 3
+      }
+     },
+     "xamgu": {
+      "n": 31,
+      "recall_strict": 0.0967741935483871,
+      "read_as": {
+       "REJECTED": 1,
+       "VOID:efficient": 5,
+       "ckape": 7,
+       "mapti": 10,
+       "xamgu": 3,
+       "zmadu": 5
+      }
+     },
+     "zmadu": {
+      "n": 30,
+      "recall_strict": 0.2,
+      "read_as": {
+       "REJECTED": 4,
+       "VOID:efficient": 4,
+       "ckape": 7,
+       "mapti": 8,
+       "xamgu": 1,
+       "zmadu": 6
+      }
+     }
+    },
+    "level_information": [
+     {
+      "level": 1,
+      "predicate": {
+       "mi_bits": 0.3713632055045701,
+       "shuffled_mean_bits": 0.35504917815650566,
+       "shuffled_max_bits": 0.41960088391402794
+      },
+      "slot_x1": {
+       "mi_bits": 0.05266574949799684,
+       "shuffled_mean_bits": 0.08996782701415486,
+       "shuffled_max_bits": 0.14551586407047706
+      },
+      "slot_x2": {
+       "mi_bits": 0.058254161140850844,
+       "shuffled_mean_bits": 0.07993027658529298,
+       "shuffled_max_bits": 0.12867174912045193
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 2,
+      "predicate": {
+       "mi_bits": 0.38658591644786217,
+       "shuffled_mean_bits": 0.3491034519252665,
+       "shuffled_max_bits": 0.43017782144385325
+      },
+      "slot_x1": {
+       "mi_bits": 0.09938445048873779,
+       "shuffled_mean_bits": 0.07993591534186173,
+       "shuffled_max_bits": 0.10721280214275282
+      },
+      "slot_x2": {
+       "mi_bits": 0.059393905805756896,
+       "shuffled_mean_bits": 0.08336600975703805,
+       "shuffled_max_bits": 0.14387421522238825
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 3,
+      "predicate": {
+       "mi_bits": 0.3419982011023772,
+       "shuffled_mean_bits": 0.3456992011638493,
+       "shuffled_max_bits": 0.4332784610532244
+      },
+      "slot_x1": {
+       "mi_bits": 0.07026976378821961,
+       "shuffled_mean_bits": 0.08140135218739807,
+       "shuffled_max_bits": 0.12412373765023722
+      },
+      "slot_x2": {
+       "mi_bits": 0.07219008726765058,
+       "shuffled_mean_bits": 0.07286749715076558,
+       "shuffled_max_bits": 0.12285827726201828
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     },
+     {
+      "level": 4,
+      "predicate": {
+       "mi_bits": 0.3478251756810345,
+       "shuffled_mean_bits": 0.3577230116164176,
+       "shuffled_max_bits": 0.4505745517388704
+      },
+      "slot_x1": {
+       "mi_bits": 0.04860422955501962,
+       "shuffled_mean_bits": 0.08193265905824383,
+       "shuffled_max_bits": 0.11974730889949099
+      },
+      "slot_x2": {
+       "mi_bits": 0.08092801777715156,
+       "shuffled_mean_bits": 0.08643374989645614,
+       "shuffled_max_bits": 0.17041242284438451
+      },
+      "above_shuffle": [],
+      "holds_most": null
+     }
+    ]
+   }
+  ],
+  "falsifier": {
+   "falsifier": "strict accuracy at the lowest sigma is not above every permuted-label accuracy",
+   "lowest_sigma": 0.1,
+   "strict_accuracy": 0.99,
+   "permuted_null_max": 0.4266666666666667,
+   "verdict": "NOT_FALSIFIED_ON_THIS_GENERATOR",
+   "first_sigma_not_beating_null": 8.0,
+   "sigmas_not_beating_null": [
+    8.0
+   ]
+  }
+ },
+ "fault_reading": {
+  "twin": [
+   "mleca",
+   "zmadu"
+  ],
+  "at_sigma": 0.1,
+  "with_fault_confused_pairs": [
+   [
+    "mleca",
+    "zmadu"
+   ]
+  ],
+  "control_confused_pairs": [],
+  "twin_recall_with_fault": {
+   "mleca": 0.0,
+   "zmadu": 1.0
+  },
+  "twin_recall_control": {
+   "mleca": 1.0,
+   "zmadu": 1.0
+  },
+  "reads_as_confused": true,
+  "reading": "CONFUSED where planted, clean in the control"
+ },
+ "human_interest": null,
+ "ai_interest": null
+}
