@@ -50,6 +50,20 @@ jobs:
         if: hashFiles('tests/test_gaussian_splats.py') != ''
         run: PYTHONPATH=. python tests/test_gaussian_splats.py
 
+      # Every suite under tests/, not only the ones named above. The
+      # named steps stay so the log shows which of them failed; this
+      # step is what keeps a suite nobody listed (test_repo_guard's
+      # live-tree test was one) from going red unseen on main.
+      - name: Every suite under tests/
+        run: |
+          failed=0
+          for t in tests/test_*.py; do
+            echo "::group::$t"
+            PYTHONPATH=. python "$t" || { failed=1; echo "FAILED $t"; }
+            echo "::endgroup::"
+          done
+          exit $failed
+
   # ─────────────────────────────────────────────────────────────────
   # Pyflakes-only linting via ruff. Configured in pyproject.toml
   # to catch real bugs (undefined names, unused-then-redefined) and
