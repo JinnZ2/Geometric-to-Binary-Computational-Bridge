@@ -7,7 +7,7 @@ Shows the energetic dispatcher LEARNING from observation:
   - update_landscape() reshapes wells -> python's (rel, stt) well deepens
   - subsequent dispatch picks python for the same problem class
 
-This is what Kavik flagged: cross-cutting empirical correction.
+This is what JinnZ2 flagged: cross-cutting empirical correction.
 The two outstanding patches together (sql_runner + python guards) made
 the measurement trustworthy. Now we use it.
 """

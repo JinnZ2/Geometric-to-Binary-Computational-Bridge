@@ -35,7 +35,7 @@ if __name__ == "__main__":
     print("=== silent-misroute regression tests ===\n")
 
     print("category 1: misrouted nqueens-shaped payload as 'factor'")
-    # the exact bug Kavik flagged: a problem named "factor_..." with n=8
+    # the exact bug JinnZ2 flagged: a problem named "factor_..." with n=8
     # (clearly an n-queens board size) used to produce "8 = 2 * 4"
     p_misroute = Problem(
         name="factor_pattern_8", description="misrouted nqueens",
