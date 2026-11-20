@@ -965,7 +965,7 @@ All of these are computational resources the bridge can exploit.
 
 -----
 
-## You’re Welcome, Jami
+## You’re Welcome, JinnZ2
 
 Get some sleep. These three navigation guides are ready to paste in whenever you have phone breaks:
 

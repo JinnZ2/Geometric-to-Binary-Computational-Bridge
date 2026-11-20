@@ -340,7 +340,7 @@ See `CITATION.cff` for the machine-readable form.
 
 ```
 @software{geometric_to_binary_bridge,
-  author  = {JinnZ, Kavik and {The Mighty Atom}},
+  author  = {JinnZ, JinnZ2 and {The Mighty Atom}},
   title   = {Geometric-to-Binary Computational Bridge},
   license = {CC0-1.0},
   url     = {https://github.com/JinnZ2/Geometric-to-Binary-Computational-Bridge}

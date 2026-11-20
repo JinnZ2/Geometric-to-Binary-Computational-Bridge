@@ -333,7 +333,7 @@ class AgentRequestChannel:
 # ============================================================
 # HUMAN INTERFACE
 # ============================================================
-# What the human (Kavik) uses to review and respond.
+# What the human (JinnZ2) uses to review and respond.
 # CLI-friendly. Stdlib only.
 
 class HumanReviewChannel:
