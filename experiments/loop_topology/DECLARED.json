@@ -396,5 +396,11 @@
   },
   "cuts": "the five T6 state cuts, and the five T6 time cuts (trajectory sampled every tau, transition matrix from counts)"
  },
- "amendments": []
+ "amendments": [
+  {
+   "date": "2026-11-24",
+   "after_commit": "1c17b214e087eacb6e56a7a8d423c629434fed8b",
+   "what": "POST-RUN NOTE, not a change to any declaration or verdict. T6.cut.hub was declared as a fraction of total sigma and reads 0.0745 (MISMATCH against 0.2646). The same estimator's value in sigma units is 0.2645 (affinity 0.2495 + waiting 0.0150). The recorded 0.2646 is therefore probably a sigma value, not a fraction. The verdict under the declared reading stays MISMATCH."
+  }
+ ]
 }
