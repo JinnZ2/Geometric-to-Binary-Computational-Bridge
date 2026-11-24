@@ -1,0 +1,71 @@
+id                                 recorded      rebuilt   abs diff  verdict
+T1.I.cut1                            0.6031     0.603052   4.76e-05  MATCH
+T1.I.cut2                            0.0196     0.019607   6.99e-06  MATCH
+T1.I.cut3                            0.5023     0.502282   1.78e-05  MATCH
+T1.D.full                            1.1249     1.124942   4.16e-05  MATCH
+T1.D.pairs                           1.1053     1.105335   3.46e-05  MATCH
+T1.D.magnetization                   0.7099     0.709885   1.51e-05  MATCH
+T1.D.sign                               0.0     0.000003   3.37e-06  MATCH
+T1.ring.sigma                        4.4794     4.479399   1.33e-06  MATCH
+T1.ring.KL.w2                           0.0     0.000000   0.00e+00  MATCH
+T1.ring.KL.w3                           0.0     0.000000   0.00e+00  MATCH
+T1.ring.KL.w4                           0.0     0.000000   6.07e-18  MATCH
+T1.ring.KL.w5                           0.0    -0.000000   4.58e-18  MATCH
+T1.ring.KL.w6                           0.0    -0.000000   1.71e-18  MATCH
+T2.joule.cut                              0     0.000000   0.00e+00  MATCH
+T2.joule.true                            36    36.000000   0.00e+00  MATCH
+T2.kinetic.cut                            0     0.000000   0.00e+00  MATCH
+T2.kinetic.true                          25    25.000000   0.00e+00  MATCH
+T2.futile.cut                             0     0.000000   0.00e+00  MATCH
+T2.migration.cut                          0     0.000000   0.00e+00  MATCH
+T2.migration.true                        20    20.000000   0.00e+00  MATCH
+T2.controls.ratio                       1.0     1.000000   0.00e+00  MATCH
+T3.sigma.c0.05                         0.01     0.010008   8.35e-06  MATCH
+T3.sigma.c0.2                        0.1622     0.162186   1.40e-05  MATCH
+T3.sigma.c0.5                        1.0986     1.098612   1.23e-05  MATCH
+T3.sigma.c0.9                           5.3     5.299990   9.84e-06  MATCH
+T3.I_xy                                   0     0.000000   1.67e-16  MATCH
+T3.obs_x                                  0     0.000000   3.31e-17  MATCH
+T3.obs_y                                  0     0.000000   1.65e-17  MATCH
+T3.obs_both_over_sigma                  0.8     0.809165   9.17e-03  MISMATCH (ROUNDING_ONLY)
+T4.TE.c0.05                           0.001     0.001017   1.67e-05  MATCH
+T4.TE.c0.2                           0.0164     0.016285   1.15e-04  MATCH
+T4.TE.c0.5                           0.1031     0.102489   6.11e-04  MATCH
+T4.TE.c0.9                           0.3436     0.340895   2.71e-03  MISMATCH
+T4.HE_flow                                0     0.000000   2.03e-16  MATCH
+T4.TE.tau0.02                        0.1255     0.124627   8.73e-04  MATCH
+T4.TE.tau0.05                        0.1166     0.115859   7.41e-04  MATCH
+T4.TE.tau0.1                         0.1031     0.102489   6.11e-04  MATCH
+T4.TE.tau0.3                         0.0617     0.061424   2.76e-04  MATCH
+T4.TE.tau1.0                         0.0065     0.006534   3.38e-05  MATCH
+T4.J.c0.5                              0.25     0.250000   0.00e+00  MATCH
+T4.sigma.c0.5                        1.0986     1.098612   1.23e-05  MATCH
+T5.unconditional_ratio                 1.75     1.750000   2.22e-16  MATCH
+T5.ring4.adjacent                       1.0     1.000000   2.22e-16  MATCH
+T5.ring3.merge                            0     0.000000   0.00e+00  MATCH
+T5.ring4.nonadjacent                      0     0.000000   2.16e-17  MATCH
+T5.ring4.nonadjacent.uneven          0.1138     0.288519   1.75e-01  PARAMS_NOT_RECORDED (MISMATCH)
+T5.two_pairs                              0     0.000000   0.00e+00  MATCH
+T6.sigma.fast                        3.2986     3.298647   4.66e-05  MATCH
+T6.sigma.slow                        0.2495     0.249533   3.30e-05  MATCH
+T6.sigma.total                       3.5482     3.548180   2.04e-05  MATCH
+T6.cut.none                             1.0     1.000000   2.22e-16  MATCH
+T6.cut.collapse_fast                   0.07     0.070327   3.27e-04  MATCH
+T6.cut.collapse_slow                   0.93     0.929673   3.27e-04  MATCH
+T6.cut.across                           1.0     1.000000   0.00e+00  MATCH
+T6.cut.hub                           0.2646     0.074545   1.90e-01  MISMATCH
+T6.cut.both                               0    -0.000000   3.91e-16  MATCH
+T6.time.tau0.01                        0.74     0.732607   7.39e-03  MISMATCH
+T6.time.tau0.05                        0.24     0.235708   4.29e-03  MISMATCH (ROUNDING_ONLY)
+T6.time.tau0.2                         0.06     0.057624   2.38e-03  MISMATCH (ROUNDING_ONLY)
+T6.time.tau1                           0.03     0.025896   4.10e-03  MISMATCH (ROUNDING_ONLY)
+T6.time.tau5                            0.0     0.000566   5.66e-04  MATCH
+T6.heat.bath                         3.5482     3.548180   2.04e-05  MATCH
+T6.heat.markov.across                3.5383     3.538285   1.52e-05  MATCH
+T6.heat.markov.hub                   0.2495     0.249533   3.30e-05  MATCH
+
+tolerance 0.002 abs; 64 numbers
+  MATCH                                    56
+  MISMATCH                                 3
+  MISMATCH (ROUNDING_ONLY)                 4
+  PARAMS_NOT_RECORDED (MISMATCH)           1
