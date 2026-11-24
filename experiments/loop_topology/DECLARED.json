@@ -1,0 +1,400 @@
+{
+ "what": "Declarations for the loop-topology rebuild, written and committed BEFORE any toy or pipeline code was run. The commit that adds this file is the pre-run hash. A mismatch is reported, never tuned; a later change is a dated entry under 'amendments', never an edit.",
+ "declared": "2026-11-24",
+ "status": "PROPOSED",
+ "co_authored": true,
+ "license": "CC0-1.0",
+ "source_of_numbers": "REPORTED: a prior session whose code is lost. Each number below is the work order's, copied by hand into this file. None was recomputed before this commit.",
+ "tolerance": {
+  "abs": "2e-3",
+  "rule": "|rebuilt - recorded| <= 2e-3 per number -> MATCH, else MISMATCH",
+  "second_column": "ROUNDING_ONLY is reported beside a MISMATCH when |rebuilt - recorded| <= half a unit of the recorded number's last digit. It is information, not a pass.",
+  "approx": "numbers the order marks with an approximate sign carry the same 2e-3 rule; nothing is widened"
+ },
+ "units": "entropy and information in nats; rates per unit time; sigma = entropy production rate",
+ "readings": {
+  "note": "where the order does not fix a definition, the definition used is declared here, before the run. A mismatch that traces to one of these is a mismatch of the reading and is reported as such.",
+  "T1": {
+   "energy": "E = -sum_i J_i s_i s_(i+1), open chain, P ~ exp(-E/T)",
+   "cut_k": "mutual information between spins 0..k-1 and spins k..3",
+   "D": "KL divergence between the distribution of an observable under P and under Q; Q = product of single-spin marginals",
+   "pairs": "observable (s0*s1, s2*s3)",
+   "magnetization": "observable sum of spins",
+   "sign": "observable sign of the sum, 0 kept as its own value",
+   "ring": "3 states, forward rate 3.0, backward 0.5; sigma = sum of flux times log ratio",
+   "observer": "states 1 and 2 read as one symbol; the chain sampled every dt; KL between the distribution of length-w windows and of their reversals, exact from the hidden-Markov forward sum, reported as the raw KL per window"
+  },
+  "T2": {
+   "cut": "net quantity through the cut, then the cost formula applied to the net",
+   "true": "cost formula applied per branch, then summed",
+   "joule": "two branches of R = 2 carrying +3 and -3",
+   "kinetic": "two unit-mass streams at +5 and -5",
+   "futile": "one cycle with flux J and affinity A, J*A = 50, net flux through the cut 0",
+   "migration": "10 in, 10 out; cost 1 per mover",
+   "controls": "the same four systems with the return branch removed; ratio = cut / true"
+  },
+  "T3": {
+   "states": "(x, y) bits; cycle 00 -> 01 -> 11 -> 10 -> 00 at rate 1 + c, reverse at 1 - c",
+   "obs": "the chain sampled every tau; KL of length-w windows against their reversals, divided by (w - 1) * tau; 'obs x' reads x only, 'obs y' reads y only, 'obs both' reads the state",
+   "obs_both": "ratio to sigma, reported at each of the four c values"
+  },
+  "T4": {
+   "TE": "transfer entropy rate at history length 1 on the tau-sampled chain: I(y_(t+tau); x_t | y_t) / tau; default tau 0.1",
+   "HE_flow": "Horowitz-Esposito information flow: rate of change of I(x;y) due to x jumps",
+   "schnakenberg": "A = 4 ln((1+c)/(1-c)), J = c/2, sigma = J * A"
+  },
+  "T5": {
+   "estimator": "second-order semi-Markov estimator on the merged process: affinity term sum R(ijk) ln[p(k | i,j) / p(i | k,j)] plus waiting-time term sum R(ijk) KL[psi(t | i,j,k) || psi(t | k,j,i)], R = rate of triples per unit time. Computed from the generator, not from a simulated path.",
+   "unconditional_error": "the affinity term with joint triple probabilities p(ijk) / p(kji) in place of the conditional ones",
+   "rates_NOT_RECORDED": "the order gives no ring rates for T5. Declared here: uniform rings, forward 3.0, backward 0.5 (the T1 ring's rates).",
+   "uneven_NOT_RECORDED": "the order gives 'uneven, drive 8' and no rates. Declared guess, labelled a guess: forward rates [8, 1, 1, 1], backward [1, 1, 1, 1], merge {0, 2}. Its row is reported with status PARAMS_NOT_RECORDED whatever it reads.",
+   "fraction": "estimator / true sigma",
+   "merges": "4-ring adjacent {0,1}; 3-ring {1,2}; 4-ring non-adjacent {0,2}; two pairs {0,1} and {2,3}"
+  },
+  "T6": {
+   "graph": "fast ring 0->1->2->0 at 10, reverse 4; slow ring 0->3->4->0 at 0.4, reverse 0.1",
+   "sigma_per_loop": "chord flux of the loop times the loop affinity",
+   "cut_fraction": "the T5 estimator on the merged process, divided by total sigma",
+   "cuts": "collapse fast = merge {1,2}; collapse slow = merge {3,4}; across = merge {1,3}; hub = merge {0,1}; both = merge {1,2} and {3,4}",
+   "time_cut": "chain sampled every tau, no states merged: (1/tau) * sum pi_i P_ij ln(P_ij / P_ji), divided by sigma",
+   "bath_heat": "total sigma (unit temperature)",
+   "markov_heat": "sigma of the Markov chain on the merged states with rates k_AB = sum_(a in A, b in B) pi_a w_ab / pi_A"
+  }
+ },
+ "numbers": [
+  {
+   "id": "T1.I.cut1",
+   "recorded": 0.6031,
+   "what": "I(left;right), cut 1"
+  },
+  {
+   "id": "T1.I.cut2",
+   "recorded": 0.0196,
+   "what": "cut 2"
+  },
+  {
+   "id": "T1.I.cut3",
+   "recorded": 0.5023,
+   "what": "cut 3"
+  },
+  {
+   "id": "T1.D.full",
+   "recorded": 1.1249,
+   "what": "D(P||Q), full state"
+  },
+  {
+   "id": "T1.D.pairs",
+   "recorded": 1.1053,
+   "what": "pairs"
+  },
+  {
+   "id": "T1.D.magnetization",
+   "recorded": 0.7099,
+   "what": "magnetization"
+  },
+  {
+   "id": "T1.D.sign",
+   "recorded": 0.0,
+   "what": "sign"
+  },
+  {
+   "id": "T1.ring.sigma",
+   "recorded": 4.4794,
+   "what": "3-ring sigma"
+  },
+  {
+   "id": "T1.ring.KL.w2",
+   "recorded": 0.0,
+   "what": "merged {1,2}, dt 0.05, window 2"
+  },
+  {
+   "id": "T1.ring.KL.w3",
+   "recorded": 0.0,
+   "what": "merged {1,2}, dt 0.05, window 3"
+  },
+  {
+   "id": "T1.ring.KL.w4",
+   "recorded": 0.0,
+   "what": "merged {1,2}, dt 0.05, window 4"
+  },
+  {
+   "id": "T1.ring.KL.w5",
+   "recorded": 0.0,
+   "what": "merged {1,2}, dt 0.05, window 5"
+  },
+  {
+   "id": "T1.ring.KL.w6",
+   "recorded": 0.0,
+   "what": "merged {1,2}, dt 0.05, window 6"
+  },
+  {
+   "id": "T2.joule.cut",
+   "recorded": 0,
+   "what": "Joule, cut"
+  },
+  {
+   "id": "T2.joule.true",
+   "recorded": 36,
+   "what": "Joule, true"
+  },
+  {
+   "id": "T2.kinetic.cut",
+   "recorded": 0,
+   "what": "streams, cut"
+  },
+  {
+   "id": "T2.kinetic.true",
+   "recorded": 25,
+   "what": "streams, true"
+  },
+  {
+   "id": "T2.futile.cut",
+   "recorded": 0,
+   "what": "futile cycle, cut"
+  },
+  {
+   "id": "T2.migration.cut",
+   "recorded": 0,
+   "what": "migration, cut"
+  },
+  {
+   "id": "T2.migration.true",
+   "recorded": 20,
+   "what": "migration, true"
+  },
+  {
+   "id": "T2.controls.ratio",
+   "recorded": 1.0,
+   "what": "controls, cut / true"
+  },
+  {
+   "id": "T3.sigma.c0.05",
+   "recorded": 0.01,
+   "what": "sigma at c = 0.05"
+  },
+  {
+   "id": "T3.sigma.c0.2",
+   "recorded": 0.1622,
+   "what": "sigma at c = 0.2"
+  },
+  {
+   "id": "T3.sigma.c0.5",
+   "recorded": 1.0986,
+   "what": "sigma at c = 0.5"
+  },
+  {
+   "id": "T3.sigma.c0.9",
+   "recorded": 5.3,
+   "what": "sigma at c = 0.9"
+  },
+  {
+   "id": "T3.I_xy",
+   "recorded": 0,
+   "what": "I(x;y)"
+  },
+  {
+   "id": "T3.obs_x",
+   "recorded": 0,
+   "what": "observer of x only"
+  },
+  {
+   "id": "T3.obs_y",
+   "recorded": 0,
+   "what": "observer of y only"
+  },
+  {
+   "id": "T3.obs_both_over_sigma",
+   "recorded": 0.8,
+   "what": "observer of both, tau 0.1, window 4, ratio to sigma; recorded as approximate"
+  },
+  {
+   "id": "T4.TE.c0.05",
+   "recorded": 0.001,
+   "what": "TE x->y and y->x at c = 0.05, tau 0.1"
+  },
+  {
+   "id": "T4.TE.c0.2",
+   "recorded": 0.0164,
+   "what": "TE x->y and y->x at c = 0.2, tau 0.1"
+  },
+  {
+   "id": "T4.TE.c0.5",
+   "recorded": 0.1031,
+   "what": "TE x->y and y->x at c = 0.5, tau 0.1"
+  },
+  {
+   "id": "T4.TE.c0.9",
+   "recorded": 0.3436,
+   "what": "TE x->y and y->x at c = 0.9, tau 0.1"
+  },
+  {
+   "id": "T4.HE_flow",
+   "recorded": 0,
+   "what": "Horowitz-Esposito flow"
+  },
+  {
+   "id": "T4.TE.tau0.02",
+   "recorded": 0.1255,
+   "what": "TE at c = 0.5, tau = 0.02"
+  },
+  {
+   "id": "T4.TE.tau0.05",
+   "recorded": 0.1166,
+   "what": "TE at c = 0.5, tau = 0.05"
+  },
+  {
+   "id": "T4.TE.tau0.1",
+   "recorded": 0.1031,
+   "what": "TE at c = 0.5, tau = 0.1"
+  },
+  {
+   "id": "T4.TE.tau0.3",
+   "recorded": 0.0617,
+   "what": "TE at c = 0.5, tau = 0.3"
+  },
+  {
+   "id": "T4.TE.tau1.0",
+   "recorded": 0.0065,
+   "what": "TE at c = 0.5, tau = 1.0"
+  },
+  {
+   "id": "T4.J.c0.5",
+   "recorded": 0.25,
+   "what": "cycle flux at c = 0.5"
+  },
+  {
+   "id": "T4.sigma.c0.5",
+   "recorded": 1.0986,
+   "what": "Schnakenberg sigma at c = 0.5"
+  },
+  {
+   "id": "T5.unconditional_ratio",
+   "recorded": 1.75,
+   "what": "unconditional estimator / conditional, 4-ring adjacent merge"
+  },
+  {
+   "id": "T5.ring4.adjacent",
+   "recorded": 1.0,
+   "what": "4-ring, adjacent merge, fraction"
+  },
+  {
+   "id": "T5.ring3.merge",
+   "recorded": 0,
+   "what": "3-ring merge"
+  },
+  {
+   "id": "T5.ring4.nonadjacent",
+   "recorded": 0,
+   "what": "4-ring non-adjacent merge"
+  },
+  {
+   "id": "T5.ring4.nonadjacent.uneven",
+   "recorded": 0.1138,
+   "what": "uneven, drive 8"
+  },
+  {
+   "id": "T5.two_pairs",
+   "recorded": 0,
+   "what": "two pairs"
+  },
+  {
+   "id": "T6.sigma.fast",
+   "recorded": 3.2986,
+   "what": "fast loop"
+  },
+  {
+   "id": "T6.sigma.slow",
+   "recorded": 0.2495,
+   "what": "slow loop"
+  },
+  {
+   "id": "T6.sigma.total",
+   "recorded": 3.5482,
+   "what": "total"
+  },
+  {
+   "id": "T6.cut.none",
+   "recorded": 1.0,
+   "what": "no cut"
+  },
+  {
+   "id": "T6.cut.collapse_fast",
+   "recorded": 0.07,
+   "what": "collapse fast"
+  },
+  {
+   "id": "T6.cut.collapse_slow",
+   "recorded": 0.93,
+   "what": "collapse slow"
+  },
+  {
+   "id": "T6.cut.across",
+   "recorded": 1.0,
+   "what": "across {1,3}"
+  },
+  {
+   "id": "T6.cut.hub",
+   "recorded": 0.2646,
+   "what": "hub {0,1}"
+  },
+  {
+   "id": "T6.cut.both",
+   "recorded": 0,
+   "what": "both"
+  },
+  {
+   "id": "T6.time.tau0.01",
+   "recorded": 0.74,
+   "what": "time cut tau = 0.01"
+  },
+  {
+   "id": "T6.time.tau0.05",
+   "recorded": 0.24,
+   "what": "time cut tau = 0.05"
+  },
+  {
+   "id": "T6.time.tau0.2",
+   "recorded": 0.06,
+   "what": "time cut tau = 0.2"
+  },
+  {
+   "id": "T6.time.tau1",
+   "recorded": 0.03,
+   "what": "time cut tau = 1"
+  },
+  {
+   "id": "T6.time.tau5",
+   "recorded": 0.0,
+   "what": "time cut tau = 5"
+  },
+  {
+   "id": "T6.heat.bath",
+   "recorded": 3.5482,
+   "what": "bath heat"
+  },
+  {
+   "id": "T6.heat.markov.across",
+   "recorded": 3.5383,
+   "what": "Markov heat, across"
+  },
+  {
+   "id": "T6.heat.markov.hub",
+   "recorded": 0.2495,
+   "what": "Markov heat, hub"
+  }
+ ],
+ "pipeline": {
+  "planted": "the T6 graph",
+  "simulation": "Gillespie jump trajectory, seed 20261124, total time 50000",
+  "recover": "rate i->j = count(i->j) / dwell(i)",
+  "cycles": "fundamental cycles of the recovered rate graph from a spanning tree; sigma per cycle = chord net flux * cycle affinity",
+  "gates": {
+   "rate": "each of the 12 recovered rates within 0.10 relative of the planted rate",
+   "sigma_per_cycle": "each recovered cycle sigma within 0.10 relative of the T6 value",
+   "null": "detailed-balance planted graph (fast ring 7 / 7, slow ring 0.25 / 0.25), same seed and length: recovered total sigma <= 0.01",
+   "flag": "under a cut, the pipeline is run on the merged trajectory as if it were Markov; a loop is FLAGGED when a recovered cycle carries sigma > 0.01 (the null gate)"
+  },
+  "cuts": "the five T6 state cuts, and the five T6 time cuts (trajectory sampled every tau, transition matrix from counts)"
+ },
+ "amendments": []
+}
